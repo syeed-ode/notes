@@ -1,9 +1,15 @@
 This information was gather from freading Java Security 2nd Edition by O'Reilly.  It is a listing of notes and information.  Not sure how immediately helpful, but as I went through this material it helped me out greatly in defining terms, relating different components and keeping track of relationships between objects.
-
+*
+*
+*
+*
 ****Chapter 7 - Introduction to Cryptology****
 author authentication - identity of the site
 data authentication - assure the class was not modified in transit over the network
-
+*
+*
+*
+*
 ****Chapter 8 - Security Providers****
 input data + key -> engine -> encrypted output data; // this is a '''cryptographic engine''' for encryption
 	where,
@@ -49,8 +55,10 @@ security providers
 Provider.class - A provider knows how to map particular algorithms to the actual class that implements the operation
 Security.class - The Security class maintains a list of the provider classes and consults each in turn to see which operations it supports
                  ******  These two classes together make up the idea of a security provider   ******
-
-
+*
+*
+*
+*
 ****Chapter 9 - Key's and Certificates****
 Listing of providers, their services, the algorithms associated with these services, and the provider keys.  This information is useful when determining which algorthim you would like your key to be generated with.
 --
@@ -1123,3 +1131,31 @@ Provider: SyeedOde version 1.0
 		KeyPairGenerator.SYEED_ODE
 
 Process finished with exit code 0
+*
+*
+*
+*
+****Chapter 10 - Key Management****
+Common Keytool Commands and options:
+
+certificate		Verifies the public key is from who it says it's from.  Certificate Authority signs the cert. Contains: 1) signed by verifier, 2) public key of person (to whome the cert has been issued), 3) DN of person
+key entry		Entry in keystore may be an asymmetric key pair, in which case it may store a chain of certificates: the first certificate always contains the public key of the entity. Or it may hold a secret key. 
+cert entry		Entry in keystore only a public key certificate.
+keypass 		Password for the entire keystore
+storepass		Password for the entry of the particular private key (should be different from keypass)
+distinguished Name	Full name of the keystore entry (could be a cert-store entry or key entry)
+JKS			Key store engine. JKS stores on private keys. 
+JCEKS			Key store engine. JCEKS stores secret keys (obviously) and private keys. 
+PKCS12			Key store engine. PCKS can be read and export keys -- but cannot write!! Algorithm does not supply a fully−functional keystore
+Certificate Signing
+Request (CSR)		Need to obtain a certificate from CA for a specific alias.  It contains: 1) DN, 2) public key and 3) ***SIGNED WITH PRIVATE KEY***
+
+
+
+
+
+
+
+
+
+
