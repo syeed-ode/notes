@@ -107,7 +107,7 @@ To go through the process of getting a valid cert
 						 [PKCS12 KEY STORE]
 			   (generate pkcs12 file)#: openssl pkcs12 -inkey key.pem -in certificate.pem -export -out pkcs12Cert.p12
 		 (validate new cert with openssl)#: openssl pkcs12 -in pkcs12Cert.p12 -noout -info
-		b) you can use the -changealias/-keyclone/-keypasswd options with sub options as demonstrated below
+		b) you can use the -changealias/-keyclone/-keypasswd/-storepasswd options with sub options as demonstrated below
 		c) import the PCKS12 file into the keystore
 	  		      (verify public key)#: keytool -importkeystore -srckeystore pkcs12Cert.p12 -srcstoretype PKCS12
 	  (change the alias name inside keystore)#: keytool -changealias -alias 1 -destalias syeedsselfsigned
