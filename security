@@ -122,7 +122,8 @@ To go through the process of getting a valid cert
 	-- Now I'm submitting the CSR to thawte for a CA signed cert...they won't let me do it for free...
 
 
-
+The Key Management API
+Princle.class 		- the notion of to whom the key belongs
 
 
 
