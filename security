@@ -1151,7 +1151,43 @@ Certificate Signing
 Request (CSR)		Need to obtain a certificate from CA for a specific alias.  It contains: 1) DN, 2) public key and 3) ***SIGNED WITH PRIVATE KEY***
 
 
-
+To go through the process of getting a valid cert
+1) Generate a private key
+2) Use key alias to generate a certificate signing request (CSR)
+	-- This is where I had problems.  When I went to the get a self-signed cert, the CA didn't like my CSR. Passing through state length requirements and comman name issues only to end up at a wrong formatting issue.  I skiped using the keytool to generate my private key and went to openssl.
+				  (third attempt)#: keytool -genkey -alias syeedsthirdkey -keyalg RSA
+				    (genrate csr)#: keytool -certreq -alias syeedsthirdkey  -file sboCSR.cer ## wrong format reported by CA (www.thawte.com, pronounced thought)
+	   I was able to use openssl to generate a private key and signing request (CSR).  But that private key wasn't in my keystore. 
+        			  (priv key &CSR)#: openssl req -new -newkey rsa:2048 -nodes -keyout syeedsfourth.key -out sboCSR.csr
+	   Now I'm attempting to get that private key (and signed certificate) in my keystore. To do that take the following steps:
+	   	a) convert the certificate and PCKS into a PCKS12 file (used for storing private keys with their certs)
+			  i) validate the certificate
+			                         #: keytool -list -v
+						 [CERTIFICATE FOR PRIVATE KEY]
+			  (validate with openssl)#: openssl x509 -in  certificate.pem
+	           (validate with openssl output)#: openssl x509 -text -noout -in certificate.pem
+		            (validate public key)#: openssl x509 -pubkey -noout -in certificate.pem | shasum5.16
+			 ii) validte the private key is ok (-text option can be removed)
+						 [PRIVATE KEY]
+			  (validate with openssl)#: openssl rsa -check -text -noout -modulus -in key.pem
+			      (verify public key)#: openssl rsa -pubout -in key.pem 2>&1| grep -v "writing RSA key" | shasum5.18
+			iii) (finally) import both the private key and certificate into the pkcs12 file
+						 [PKCS12 KEY STORE]
+			   (generate pkcs12 file)#: openssl pkcs12 -inkey key.pem -in certificate.pem -export -out pkcs12Cert.p12
+		 (validate new cert with openssl)#: openssl pkcs12 -in pkcs12Cert.p12 -noout -info
+		b) you can use the -changealias/-keyclone/-keypasswd options with sub options as demonstrated below
+		c) import the PCKS12 file into the keystore
+	  		      (verify public key)#: keytool -importkeystore -srckeystore pkcs12Cert.p12 -srcstoretype PKCS12
+	  (change the alias name inside keystore)#: keytool -changealias -alias 1 -destalias syeedsselfsigned
+3) New method to generate Certificate Signing Request (CSR)
+	-- I'm assuming the first CSR was due to an invalid key not being strong enough
+	-- So, this time I used RSA with strength of 2048.  (Basically, the command from up top)
+	-- I requested the keytool to issue me a CSR from the imported PKCS12 file
+				  (generate csr)#: keytool -certreq -alias syeedsselfsigned  -file selfsignedCsr.cer
+	-- I validated the CSR with openssl req
+						 [CSR - Certificate Signing Request]
+			     (validated teh csr)#: openssl req -text -in selfsignedCsr.cer
+	-- Now I'm submitting the CSR to thawte for a CA signed cert...they won't let me do it for free...
 
 
 
