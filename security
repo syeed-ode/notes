@@ -100,6 +100,8 @@ To go through the process of getting a valid cert
 	           (validate with openssl output)#: openssl x509 -text -noout -in certificate.pem
 		            (validate public key)#: openssl x509 -pubkey -noout -in certificate.pem | shasum5.16
 			 ii) validte the private key is ok (-text option can be removed)
+						 [IMPORT CERT DIRECTLY]
+	      (import cert directly with keytool)#: keytool -importcert -file applesCert.cer -alias "applescert"
 						 [PRIVATE KEY]
 			  (validate with openssl)#: openssl rsa -check -text -noout -modulus -in key.pem
 			      (verify public key)#: openssl rsa -pubout -in key.pem 2>&1| grep -v "writing RSA key" | shasum5.18
@@ -125,6 +127,20 @@ To go through the process of getting a valid cert
 The Key Management API
 Princle.class 		- the notion of to whom the key belongs
 
+*
+*
+*
+*
+****Chapter 14 - SSL and HTTPS****
+keystores 		- Provides credentials (usually for the server to give to the client) 
+			- should only hold one key entry (server's private key with certificate)
+trustore		- Verifies (server) credentials (usually for the client) 
+			- receives servers ca with a host of certificate chains
 
+To create a client truststore 1) export a private key entry into a certificate, 2) impor the certificate into a trust store
+						 [CERTIFICATE FROM KEYSTORE]
+	    (expoert key entry cert with keytool)#: keytool -export -alias syeedsthirdkey -file test.cer
+					    [TRUSTED CERTIFICATE TO TRUSTSTORE]
+       (import certificate entry into truststore)#: keytool -import -alias test -keystore $HOME/.truststore -file test.cer
 
 
