@@ -1,5 +1,8 @@
 This is how you find your external IP using the dig command
 
-                    						 [DIG COMMAND FOR FINDING EX IP]
-               (find external ip using idg)#: dig +short myip.opendns.com @resolver1.opendns.com
-	    (expoert key entry cert with keytool)#: dig +short myip.opendns.com @resolver1.opendns.com
+                    				[DIG COMMAND FOR FINDING EX IP]
+          	     (find external ip using idg)#: dig +short myip.opendns.com @resolver1.opendns.com
+						 [CERTIFICATE FROM KEYSTORE]
+	    (expoert key entry cert with keytool)#:  dig +short myip.opendns.com @resolver1.opendns.com
+						 [CERTIFICATE FROM KEYSTORE]
+	    (expoert key entry cert with keytool)#: keytool -export -alias syeedsthirdkey -file test.cer
