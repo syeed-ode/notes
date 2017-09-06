@@ -143,4 +143,6 @@ To create a client truststore 1) export a private key entry into a certificate, 
 					    [TRUSTED CERTIFICATE TO TRUSTSTORE]
        (import certificate entry into truststore)#: keytool -import -alias test -keystore $HOME/.truststore -file test.cer
 
+I ran into two problems. Once was on the server.  I ran into the UnreoverableKeyError.  I had to manually remove all of the entries from my keystore.
+The second issue was on the client side.  I couldn't specify the truststore location via the IntelliJ IDE vm arguments.  The app continued to complain.  So, I moved the $JAVA_HOME/jre/lib/security/cacerts to a backup and replaced it with my .truststore file. That got everything working.
 
