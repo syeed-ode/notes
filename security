@@ -95,6 +95,10 @@ To go through the process of getting a valid cert
 	   	a) convert the certificate and PCKS into a PCKS12 file (used for storing private keys with their certs)
 			  i) validate the certificate
 			                         #: keytool -list -v
+						 [CSR, PRIVAKE KEY, and CERT ALL MATCH]
+		      (validate csr with openssl)#: openssl pkey -in privateKey.key -pubout -outform pem | sha256sum
+		      (validate csr with openssl)#: openssl x509 -in certificate.crt -pubkey -noout -outform pem | sha256sum
+		      (validate csr with openssl)#: openssl req -in CSR.csr -pubkey -noout -outform pem | sha256sum
 						 [CERTIFICATE FOR PRIVATE KEY]
 			  (validate with openssl)#: openssl x509 -in  certificate.pem
 	           (validate with openssl output)#: openssl x509 -text -noout -in certificate.pem
