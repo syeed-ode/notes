@@ -6,3 +6,12 @@ This is how you find your external IP using the dig command
 	    (expoert key entry cert with keytool)#:  dig +short myip.opendns.com @resolver1.opendns.com
 						 [CERTIFICATE FROM KEYSTORE]
 	    (expoert key entry cert with keytool)#: keytool -export -alias syeedsthirdkey -file test.cer
+
+dig query types: (https://en.wikipedia.org/wiki/List_of_DNS_record_types , https://tools.ietf.org/html/rfc1035#page-12)
+A	- an Internet IP address
+TXT	- text protocols
+MX 	- mail exchanges
+NS 	- nameservers
+	therefore, dig a.root-servers.net A +noall +answer   #finds ip
+	           dig a.root-servers.net NS +noall +answer  #finds namw server
+		   dig a.root-servers.net ANY +noall +answer #finds all of the available types
