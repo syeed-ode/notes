@@ -150,3 +150,69 @@ To create a client truststore 1) export a private key entry into a certificate, 
 I ran into two problems. Once was on the server.  I ran into the UnreoverableKeyError.  I had to manually remove all of the entries from my keystore.
 The second issue was on the client side.  I couldn't specify the truststore location via the IntelliJ IDE vm arguments.  The app continued to complain.  So, I moved the $JAVA_HOME/jre/lib/security/cacerts to a backup and replaced it with my .truststore file. That got everything working.
 
+So, I added two client applications.  One to explicitly verify the truststore alias matches the server alias (SecurityExecutionMain.executeSSLClientVerifier). (It does this by grabbing the SSLSession which has the certificate chain.)  The other takes the verification for granted and grabs a client socket (socketFactory.createSocket) and communicates outright. They client threw this code:
+javax.net.ssl.SSLException: Connection has been shutdown: javax.net.ssl.SSLException: Received fatal alert: internal_error
+	at sun.security.ssl.SSLSocketImpl.checkEOF(SSLSocketImpl.java:1541)
+	at sun.security.ssl.AppInputStream.read(AppInputStream.java:95)
+	at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:284)
+	at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:326)
+	at sun.nio.cs.StreamDecoder.read(StreamDecoder.java:178)
+	at java.io.InputStreamReader.read(InputStreamReader.java:184)
+	at java.io.BufferedReader.fill(BufferedReader.java:161)
+	at java.io.BufferedReader.readLine(BufferedReader.java:324)
+	at java.io.BufferedReader.readLine(BufferedReader.java:389)
+	at com.syeedode.security.client.SSLClient.executeSSLClient(SSLClient.java:35)
+	at com.syeedode.security.main.SecurityExecutionMain.main(SecurityExecutionMain.java:16)
+Caused by: javax.net.ssl.SSLException: Received fatal alert: internal_error
+	at sun.security.ssl.Alerts.getSSLException(Alerts.java:208)
+	at sun.security.ssl.Alerts.getSSLException(Alerts.java:154)
+	at sun.security.ssl.SSLSocketImpl.recvAlert(SSLSocketImpl.java:2023)
+	at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:1125)
+	at sun.security.ssl.SSLSocketImpl.performInitialHandshake(SSLSocketImpl.java:1375)
+	at sun.security.ssl.SSLSocketImpl.writeRecord(SSLSocketImpl.java:747)
+	at sun.security.ssl.AppOutputStream.write(AppOutputStream.java:123)
+	at sun.nio.cs.StreamEncoder.writeBytes(StreamEncoder.java:221)
+	at sun.nio.cs.StreamEncoder.implFlushBuffer(StreamEncoder.java:291)
+	at sun.nio.cs.StreamEncoder.implFlush(StreamEncoder.java:295)
+	at sun.nio.cs.StreamEncoder.flush(StreamEncoder.java:141)
+	at java.io.OutputStreamWriter.flush(OutputStreamWriter.java:229)
+	at java.io.BufferedWriter.flush(BufferedWriter.java:254)
+	at java.io.PrintWriter.flush(PrintWriter.java:320)
+	at com.syeedode.security.client.SSLClient.executeSSLClient(SSLClient.java:34)
+	... 1 more
+
+I received this execption on the server side code that uses my personal KeyManager (SSLWithKeyManagerService.executeSSLServerWithKeyManager).  The server threw this error:
+Couldn't find the correct algorithm for the alias
+javax.net.ssl.SSLException: java.lang.NullPointerException
+	at sun.security.ssl.Alerts.getSSLException(Alerts.java:208)
+	at sun.security.ssl.SSLSocketImpl.fatal(SSLSocketImpl.java:1949)
+	at sun.security.ssl.SSLSocketImpl.fatal(SSLSocketImpl.java:1906)
+	at sun.security.ssl.SSLSocketImpl.handleException(SSLSocketImpl.java:1889)
+	at sun.security.ssl.SSLSocketImpl.handleException(SSLSocketImpl.java:1815)
+	at sun.security.ssl.AppInputStream.read(AppInputStream.java:116)
+	at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:284)
+	at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:326)
+	at sun.nio.cs.StreamDecoder.read(StreamDecoder.java:178)
+	at java.io.InputStreamReader.read(InputStreamReader.java:184)
+	at java.io.BufferedReader.fill(BufferedReader.java:161)
+	at java.io.BufferedReader.readLine(BufferedReader.java:324)
+	at java.io.BufferedReader.readLine(BufferedReader.java:389)
+	at com.syeedode.security.ssl.SSLServer.run(SSLServer.java:41)
+Caused by: java.lang.NullPointerException
+	at java.util.Arrays.stream(Arrays.java:5004)
+	at com.syeedode.security.keys.keymanager.SSLKeyManager.chooseClientAlias(SSLKeyManager.java:61)
+	at com.syeedode.security.keys.keymanager.SSLKeyManager.chooseServerAlias(SSLKeyManager.java:78)
+	at sun.security.ssl.AbstractKeyManagerWrapper.chooseServerAlias(SSLContextImpl.java:1230)
+	at sun.security.ssl.ServerHandshaker.setupPrivateKeyAndChain(ServerHandshaker.java:1451)
+	at sun.security.ssl.ServerHandshaker.trySetCipherSuite(ServerHandshaker.java:1210)
+	at sun.security.ssl.ServerHandshaker.chooseCipherSuite(ServerHandshaker.java:1026)
+	at sun.security.ssl.ServerHandshaker.clientHello(ServerHandshaker.java:741)
+	at sun.security.ssl.ServerHandshaker.processMessage(ServerHandshaker.java:224)
+	at sun.security.ssl.Handshaker.processLoop(Handshaker.java:1026)
+	at sun.security.ssl.Handshaker.process_record(Handshaker.java:961)
+	at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:1062)
+	at sun.security.ssl.SSLSocketImpl.performInitialHandshake(SSLSocketImpl.java:1375)
+	at sun.security.ssl.SSLSocketImpl.readDataRecord(SSLSocketImpl.java:928)
+	at sun.security.ssl.AppInputStream.read(AppInputStream.java:105)
+	... 8 more
+It received an "EC" as the algorithm type.  I have no idea why the client is sending that. Or where it got it from.  Without a Google search, I decided to move on. I spent two days or maybe 3 in this section lone.
