@@ -76,11 +76,11 @@ key entry								Entry in keystore may be an asymmetric key pair, in which case 
 cert entry								Entry in keystore only a public key certificate.
 keypass 								Password for the entire keystore
 storepass								Password for the entry of the particular private key (should be different from keypass)
-distinguished Name						Full name of the keystore entry (could be a cert-store entry or key entry)
-JKS										Key store engine. JKS stores on private keys. 
+distinguished Name							Full name of the keystore entry (could be a cert-store entry or key entry)
+JKS									Key store engine. JKS stores on private keys. 
 JCEKS									Key store engine. JCEKS stores secret keys (obviously) and private keys. 
 PKCS12									Key store engine. PCKS can be read and export keys -- but cannot write!! Algorithm does not supply a fully−functional keystore
-Certificate Signing Request (CSR)		Need to obtain a certificate from CA for a specific alias.  It contains: 1) DN, 2) public key and 3) ***SIGNED WITH PRIVATE KEY***
+Certificate Signing Request (CSR)					Need to obtain a certificate from CA for a specific alias.  It contains: 1) DN, 2) public key and 3) ***SIGNED WITH PRIVATE KEY***
 
 
 To go through the process of getting a valid cert
@@ -92,10 +92,10 @@ To go through the process of getting a valid cert
 				    (genrate csr)#: keytool -certreq -alias syeedsthirdkey  -file sboCSR.cer ## wrong format reported by CA (www.thawte.com, pronounced thought)
 	   I was able to use openssl to generate a private key and signing request (CSR).  But that private key wasn't in my keystore. 
         			  	  (priv key &CSR)#: openssl req -new -newkey rsa:2048 -nodes -keyout syeedsfourth.key -out sboCSR.csr
-        			  	  					-new 	- this option generates a new certificate request. If the -key option is not used it will generate a new RSA private key
-        			  	  					-newkey	- this option creates a new certificate request and a new private key. The argument takes one of two forms. rsa:nbits, where nbits is the number of bits, generates an RSA key nbits in size. dsa:filename generates a DSA key using the parameters in the file filename
-        			  	  					-keyout	- this gives the filename to write the newly created private key to
-        			  	  					-out 	- This specifies the output filename to write to or standard output by default
+							-new 	- this option generates a new certificate request. If the -key option is not used it will generate a new RSA private key
+        			  	  		-newkey	- this option creates a new certificate request and a new private key. The argument takes one of two forms. rsa:nbits, where nbits is the number of bits, generates an RSA key nbits in size. dsa:filename generates a DSA key using the parameters in the file filename
+        			  	  		-keyout	- this gives the filename to write the newly created private key to
+        			  	  		-out 	- This specifies the output filename to write to or standard output by default
 	   Now I'm attempting to get that private key (and signed certificate) in my keystore. To do that take the following steps:
 	   	a) convert the certificate and PCKS into a PCKS12 file (used for storing private keys with their certs)
 			  i) validate the certificate
@@ -129,34 +129,34 @@ To go through the process of getting a valid cert
 				  (generate csr)#: keytool -certreq -alias syeedsselfsigned  -file selfsignedCsr.cer
 	-- I validated the CSR with openssl req
 						 [CSR - Certificate Signing Request]
-			     (validated teh csr)#: openssl req -text -in selfsignedCsr.cer
+			     (validated the csr)#: openssl req -text -in selfsignedCsr.cer
 	-- Now I'm submitting the CSR to thawte for a CA signed cert...they won't let me do it for free...
 
 4) Starting from scracth to generate a self-signed cert this time with the correct hostname
 	-- copying over the current keystore and trust store to the junk location (*_incorrect_CN_for_DN)
 	-- remove current .keystore
 	-- create a self signed certificate with private key
- (create a SS cert with private key)#: openssl req -x509 -newkey rsa:2048 -nodes -keyout syeedsfourth.key -out syeedsfourthkeysSelfSignedCert.cer
-        			  	  					-x509 	- this option outputs a self signed certificate instead of a certificate request
-        			  	  					-newkey	- this option creates a new certificate request and a new private key. The argument takes one of two forms. rsa:nbits, where nbits is the number of bits, generates an RSA key nbits in size. dsa:filename generates a DSA key using the parameters in the file filename
-        			  	  					-nodes	- if this option is specified then if a private key is created it will not be encrypted
-        			  	  					-keyout	- this gives the filename to write the newly created private key to
-        			  	  					-out 	- This specifies the output filename to write to or standard output by default
+	    (create a SS cert with private key)#: openssl req -x509 -newkey rsa:2048 -nodes -keyout syeedsfourth.key -out syeedsfourthkeysSelfSignedCert.cer
+							-x509 	- this option outputs a self signed certificate instead of a certificate request
+        			  	  		-newkey	- this option creates a new certificate request and a new private key. The argument takes one of two forms. rsa:nbits, where nbits is the number of bits, generates an RSA key nbits in size. dsa:filename generates a DSA key using the parameters in the file filename
+        			  	  		-nodes	- if this option is specified then if a private key is created it will not be encrypted
+        			  	  		-keyout	- this gives the filename to write the newly created private key to
+        			  	  		-out 	- This specifies the output filename to write to or standard output by default
 	-- validate the cert matches the private key
-		      (validate cert matches private key with openssl)#: openssl x509 -in syeedsfourthkeysSelfSignedCert.cer -pubkey -noout -outform pem | shasum5.18
-		      (validate private key matches cert with openssl)#: openssl rsa -pubout -in syeedsfourth.key 2>&1| grep -v "writing RSA key" | shasum5.18
+(validate cert matches private key w/ openssl)#: openssl x509 -in syeedsfourthkeysSelfSignedCert.cer -pubkey -noout -outform pem | shasum5.18
+(validate private key matches cert w/ openssl)#: openssl rsa -pubout -in syeedsfourth.key 2>&1| grep -v "writing RSA key" | shasum5.18
 	-- convert the cert and private key into PKCS#12 key entry
-			  (validate private key matches cert with openssl)#: openssl pkcs12 -inkey syeedsfourth.key -in syeedsfourthkeysSelfSignedCert.cer -export -out pkcs12Cert.p12
+	    (convert cert & priv key into p12)#: openssl pkcs12 -inkey syeedsfourth.key -in syeedsfourthkeysSelfSignedCert.cer -export -out pkcs12Cert.p12
 	-- import the PKCS#12 key entry into the keystore
-	          				  (import .p12 file into keystore)#: keytool -importkeystore -srckeystore pkcs12Cert.p12 -srcstoretype PKCS12
+	      (import .p12 file into keystore)#: keytool -importkeystore -srckeystore pkcs12Cert.p12 -srcstoretype PKCS12
 	-- verify key entry in keystore
-	          					   (verify keystore key entry)#: keytool -list -v
+	      	   (verify keystore key entry)#: keytool -list -v
 	-- change alias name
-	          (change alias name)#: keytool -changealias -alias 1 -destalias syeedsfourthkey
+	          	   (change alias name)#: keytool -changealias -alias 1 -destalias syeedsfourthkey
 	-- import cert entry into truststore for client to use
-	          		 (import cert into trustore as cert entry)#: keytool -import -alias syeedsfourthkey -keystore $HOME/.truststore -file syeedsfourthkeysSelfSignedCert.cer
+     (import cert into trustore as cert entry)#: keytool -import -alias syeedsfourthkey -keystore $HOME/.truststore -file syeedsfourthkeysSelfSignedCert.cer
 	-- copy truststore into default cacerts location
-					 (import cert into trustore as cert entry)#: sudo cp /Users/syeedode/.truststore /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Home/jre/lib/security/cacerts
+     	     (copy over truststore to cacerts)#: sudo cp /Users/syeedode/.truststore /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Home/jre/lib/security/cacerts
 
 
 
