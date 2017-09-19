@@ -1,0 +1,11 @@
+Authorization Grant - 
+	1. Authorization code
+		-- client directs resource owner to authorization server
+		-- authorization server authenticates reource owner and provides authorization code
+		-- resource owner provides authorization code to client
+	2. Implicit
+		-- client doesn't get an authorization code it gets an access token directly
+	3. Resource owner password credentials
+		-- client gets resource owner's username/password (only if resource owner absolutely trust clients)
+	4. Client credentials
+		
