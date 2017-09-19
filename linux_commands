@@ -1,0 +1,2 @@
+***FILE LIST TOO LONG***
+find ~/java_projects/ -type f -name "*.java" | parallel --xargs grep -i csrf
