@@ -11,3 +11,5 @@ git push -u origin master
 git remote add origin https://github.com/syeed-ode/authentication-services.git
 git push -u origin master
 
+##Create java library with source and test directory
+gradle init --type java-library
