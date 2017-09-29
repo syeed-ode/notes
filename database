@@ -1,18 +1,18 @@
 
 
-								Dirty Reads:					Nonrepeatable (Fuzzy) Reads:			Phantom Reads:
-								TxA reads data that				TxA reads datq once. When it			TxA reads data once. When it
-								TxB put there but has			rereads the same data, TxB has			rereads the same data, TxB has
-								not yet commited.				removed the data or modified 			has commited more rows to the 
+				Dirty Reads:		Nonrepeatable (Fuzzy) Reads:	Phantom Reads:
+				TxA reads data that	TxA reads datq once. When it	TxA reads data once. When it
+				TxB put there but has	rereads the same data, TxB has	rereads the same data, TxB has
+				not yet commited.	removed the data or modified 	has commited more rows to the 
 																it (via commits).						data
 
-Read Uncommitted:				Possible						Possible								Possible
+Read Uncommitted:		Possible		Possible			Possible
 
-Read Committed:					Not possible 					Possible								Possible
+Read Committed:			Not possible 		Possible			Possible
 
-Repeatable Reads:				Not possible 					Not possible 							Possible
+Repeatable Reads:		Not possible 		Not possible 			Possible
 
-Seralizable:					Not possible 					Not possible 							Not possible
+Seralizable:			Not possible 		Not possible 			Not possible
 *
 *
 *
@@ -32,7 +32,9 @@ JPA - Java Persistence API
 
 17.2 Advantages of the Spring Framework’s transaction support model
 17.2.1 Global transactions
+	When transaction manager is handled by one framework/platform for all transactions, like EJB CMT.
 17.2.2 Local transactions
+	When transacton manager cannot work across multiple transaction resources 
 17.2.3 Spring Framework’s consistent programming model
 			Do you need an application server for transaction management?
 
@@ -54,12 +56,10 @@ JPA - Java Persistence API
 		void commit(TransactionStatus status) throws TransactionException;
 		void rollback(TransactionStatus status) throws TransactionException;
 	PlatformTransactionManager implementations normally require knowledge of the environment in 
-		which they work: JDBC, JTA, Hibernate, and so on. The following examples show how you 
-		can define a local PlatformTransactionManager implementation. (This example works with 
-		plain JDBC.)
-	PlatformTransactionManager implementers are (not exhaustive list: 
+		which they work: JDBC, JTA, Hibernate, and so on. 
+	PlatformTransactionManager implementers are (not exhaustive list): 
 		DataSourceTransactionManager, JtaTransactionManager, 	(depends on a dataSource object)
-		HibernateTransactionManager								(depends on a sessionFactory object)
+		HibernateTransactionManager				(depends on a sessionFactory object)
 
 
 
@@ -78,10 +78,10 @@ JPA - Java Persistence API
 		manage the creation of connections directly. This code assignes the connection to an
 		existing transcation.
 17.4.3 TransactionAwareDataSourceProxy (6)
-	Wraps an existing data source.  ONly use if truing to get existing code to use spring
-		managed transactions.  That's why this is a proxy it is making the existing 
-		datasource aware of Spring's transactions. see  Head First Design Patterns: Controlling 
-		Object Access Page 45 for more on proxies and their usages.
+	Wraps an existing data source.  Only use if trying to get existing code to use spring
+		managed transactions.  That's why this is a (virtual) proxy it is making the existing 
+		datasource aware of Spring's transactions, see, Head First Design Patterns: Controlling 
+		Object Access Page 45 for more on proxies types and their usages.
 
 
 
@@ -112,7 +112,7 @@ JPA - Java Persistence API
 				<tx:method name="*"/>
  			</tx:attributes>
  		</tx:advice>
-	3) Create an AOP config (advice/pointcut) 
+	3) Create an AOP aspect config (advice/pointcut) 
  		<!-- ensure that the above transactional advice runs for any execution of an -->
  		<!-- operation defined by the FooService interface -->
 		<aop:config>
@@ -179,8 +179,11 @@ JPA - Java Persistence API
 					
 	The proxy-target-class attribute controls what type of transactional proxies are created for 
 		classes annotated with the @Transactional annotation. If proxy-target-class is set to true, 
-		class-based proxies are created. If proxy-target-class is false or if the attribute is 
-		omitted, standard JDK interface-based proxies are created.
+		class-based proxies are created (i.e. it uses CGLIB to read the class not just the interface.
+		The differnce is only the interface methods are gathered with JDK. The class methods may not
+		be. If CGLIB (code geneartor library) is ued, all the class mehtods are proxied as well.). 
+		If proxy-target-class is false or if the attribute is omitted, standard JDK interface-based 
+		proxies are created.
 	@EnableTransactionManagement and <tx:annotation-driven/> only looks for @Transactional on beans 
 		in the same application context they are defined in.
 	The most derived location takes precedence when evaluating the transactional settings for a 
@@ -200,7 +203,7 @@ JPA - Java Persistence API
 			}
 
 					@Transactional settings (17)
-	value				Optional qualifier specifying the transaction manager to be used
+	value			Optional qualifier specifying the transaction manager to be used
 	read-only
 	rollback-for 		Specified Checked or Unchecked Exception
 	no-rollback-for 	Specified Checked or Unchecked Exception
@@ -212,32 +215,35 @@ JPA - Java Persistence API
 	Allows two different datasources.
 
 					Custom shortcut annotations (19)
+17.5.7 Transaction propagation (19 - 20)
 	Be aware of the difference between physical and logical transactions, and how the 
 	 	propagation setting applies to this difference.
+
+						Required (20)
 	PROPAGATION_REQUIRED
 		a logical transaction scope is created for each method upon which the setting is
 			applied, with an  outer transaction scope being logically independent from 
 			the inner transaction scope.
 		in standard behavior,  all these scopes will be mapped to the same physical 
 		 	transaction
-		a rollback-only marker set in the inner transaction scope does affect the outer 
+		a rollback-only marker set in the inner transaction scope DOES affect the outer 
 			transaction’s chance to actually commit (as you would expect it to).
+
+						RequiresNew (20)
 	PROPAGATION_REQUIRES_NEW
 		uses a completely independent transaction for each affected transaction scope. 
-		the underlying physical transactions are different and hence can commit or roll 
-		back independently, with an outer transaction not affected by an inner 
-		transaction’s rollback status.
-	PROPAGATION_NESTED
+			the underlying physical transactions are different and hence can commit or 
+			roll back independently, with an 
+		outer transaction NOT affected by an inner transaction’s rollback status.
+
+						Nested (20)
+	PROPAGATION_NESTED - JDBC ONLY
 		uses a single physical transaction with multiple savepoints that it can roll back 
 			to. Such partial rollbacks allow an inner transaction scope to trigger a 
 			rollback for its scope, with the outer transaction being able to continue the 
 			physical transaction despite some operations having been rolled back. This 
 			setting is typically mapped onto JDBC savepoints, so will only work with JDBC 
 			resource transactions. 
-17.5.7 Transaction propagation (19 - 20)
-			Required (20)
-			RequiresNew (20)
-			Nested (20)
 17.5.8 Advising transactional operations (21 - 23)
 17.5.9 Using @Transactional with AspectJ (23)
 
