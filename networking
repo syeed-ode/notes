@@ -2,10 +2,6 @@ This is how you find your external IP using the dig command
 
                     				[DIG COMMAND FOR FINDING EX IP]
           	     (find external ip using idg)#: dig +short myip.opendns.com @resolver1.opendns.com
-						 [CERTIFICATE FROM KEYSTORE]
-	    (expoert key entry cert with keytool)#:  dig +short myip.opendns.com @resolver1.opendns.com
-						 [CERTIFICATE FROM KEYSTORE]
-	    (expoert key entry cert with keytool)#: keytool -export -alias syeedsthirdkey -file test.cer
 
 dig query types: (https://en.wikipedia.org/wiki/List_of_DNS_record_types , https://tools.ietf.org/html/rfc1035#page-12)
 A	- an Internet IP address
@@ -15,3 +11,127 @@ NS 	- nameservers
 	therefore, dig a.root-servers.net A +noall +answer   #finds ip
 	           dig a.root-servers.net NS +noall +answer  #finds namw server
 		   dig a.root-servers.net ANY +noall +answer #finds all of the available types
+
+
+This information was gather from reading Unix and Linux System Administration Handbook, 4th Edition by O'Reilly, Chapter 17: DNS: The Domain Name System.  It a collection of notes, broken down by section.
+*
+*
+*
+*
+****    Section 17.4 - Name Severs    ****
+pg. 557
+[DNS servers also implement negative caching.  That is, they remember when a query fails and do not repeat that query until the negative caching TTL value has expired.  Negative caching saves answers of the following types:
+	* No host or domain matches the named queried.
+	* The type of data requested does not exist or this host.
+	* The server to ask is not responding.
+	* The server tis unreachable because of network problems.
+BIND caches the first two types of negative data: Unbound caches all four.  Each implementation allows the negative cache times to be configured.]
+
+Authoritative (root servers and TLD servers, i.e., nonrecursive) (an official representative of a zone) and nonauthoritative (recursive servers; caches data from previous queries) query answers describe a name servers source of data (and the completeness of the data handed out).  An authoritative answer from a name server is “guaranteed’ to be accurate.  Nonauthoritative data answers a query from a cache and doesn’t know if the data is still valid.  Answers from primary and secondary name servers are authoritative for their own zones, but not for information they may have cached. 
+
+Recursive server returns only real answers and error messages.  It follows referrals itself; relieving clients of this responsibility.
+
+For security reasons, an organization’s externally accessible name servers should always be nonrecursive. **Any local name server listed in a client’s *resolv.conf* file must be recursive.**
+*
+*
+*
+*
+****    Section 17.5 - The DNS Namespace    ****
+Name servers are associated with zones, not domains. If the artist.com domain were further subdivided into the subdomains engineering, marking, and booklet, then the domain atrust.com would contain four zones: the original atrust.com, plus engineering.atrust.com, marketing.atrust.com, and booklab.atrust.com. The atrust.com zone contains all the hosts in atrust.com except those in engineering, marketing and booklab. The difference between a subdomains and hosts is a subdomains have a name server (NS) records associated with them. 
+
+Parent domains should check to be sure that a child domain's name servers are up and running before permforming the delegation.  If the servers are not working a lame delegation results.
+*
+*
+*
+*
+****    Section 17.5 - Designing Your DNS Environment    ****
+	* Managing the namespace hierarchy: subdomains, multiple levels, etc.
+	* Serving the authoritative data about your site to the outside world
+	* Providing name lookups for your users
+
+Namespace management - Managing the namespace hierarchy: subdomains, multiple levels, etc.
+	1. Make sure your firewall doesn't block subdomains if they require the outside world to access them
+
+Authoritative servers - Serving the authoritative data about your site to the outside world
+	The DNS specification require at least two authoritative servers for eadh domain. Primary (an official representative of a zone) and secondary (copies data from primary) servers are authoritative: caching (caches data from previous queries; usually has no local zones) and stub (like a secondary but copies only name server data (not host data)) servers are not.
+
+	Authoritative servers keep their data synchronized by using zone transfers. Use TSIG (transaction signatures) keys to authenticate and control the zone transfers from your primary server to your secondary servers.
+
+	"Split-DNS" may be preferred. This is when an authoritative query response is different depending upon who is asking.  Queries from inside the network get more information the queires outside the network. This is called a view.  The bind configuration file configures the view. External folks see one view, internal folks see another.
+
+Caching servers - Providing name lookups for your users
+	Recursive caching servers answer local users questions about sites on the internet.  Each computer at your site should have ready access to a local caching server (configured in /etc/resolv.conf).
+
+	If the caching server dies, the network essentiall stops working for all the users that were primary clients of that server.  This is why it's good to have more than one name server listed in /etc/resolv.conf.
+
+
+Hardware requirements - Providing name lookups for your users
+	CPU is probably the least critical but it will become more critical as DNSSEC is fully deployed.
+
+	Recursive servers need enough memeory to cache all the answers your users demand.  It takes a week or two to converge on a stable size at which old cache records ar expiring at the rate at about the same rate that new ones are being inserted.
+
+	Authoritative servers need enough memory to store all the data for which they are authoritatve.  Most sites can handle this but servers for TLD and DNS hosting sites may need either huge memories or special software taht facilitaes storing part of the dat on disk. 
+
+
+DomainKeys Identify Mail (DKIM)
+	Each originating email server signs the email with a private key.
+Author Domain Signing Practice (ADSP)
+	Allows a site to say whether it signs all, part or none of the outgoing email for each DNS zone.
+Sender Policy Framework 
+DNSSEC
+	This standard adds authentication data to the DNS database and its servers. It uses public key cryptography to verify the source and integrety of DNS data and uses DNS to distribute data as well as host data.
+DNSSEC Lookaside Validation (DLV)
+
+Internet System Consortium (ISC)  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

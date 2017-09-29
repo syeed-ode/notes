@@ -1,0 +1,290 @@
+
+
+								Dirty Reads:					Nonrepeatable (Fuzzy) Reads:			Phantom Reads:
+								TxA reads data that				TxA reads datq once. When it			TxA reads data once. When it
+								TxB put there but has			rereads the same data, TxB has			rereads the same data, TxB has
+								not yet commited.				removed the data or modified 			has commited more rows to the 
+																it (via commits).						data
+
+Read Uncommitted:				Possible						Possible								Possible
+
+Read Committed:					Not possible 					Possible								Possible
+
+Repeatable Reads:				Not possible 					Not possible 							Possible
+
+Seralizable:					Not possible 					Not possible 							Not possible
+*
+*
+*
+*
+This information was gather from reading the Spring Framework Reference Documentation: Data access and transaction management section.  The focus of the notes is only on Transaction Management.  It a collection of notes, broken down by section.
+
+https://docs.spring.io/spring/docs/current/spring-framework-reference/data-access.html#spring-data-tier
+*
+*
+*
+*
+JDO - Java Data Objects
+JTA - Java Transaction API (depends on JNDI)
+JPA - Java Persistence API
+
+
+
+17.2 Advantages of the Spring Framework’s transaction support model
+17.2.1 Global transactions
+17.2.2 Local transactions
+17.2.3 Spring Framework’s consistent programming model
+			Do you need an application server for transaction management?
+
+
+
+
+17.3 Understanding the Spring Framework transaction abstraction (2 - 5)
+	class PlatformTransactionManager
+		TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
+			TransactionStatus  // defines type and state of transaction
+				boolean isNewTransaction();
+				boolean hasSavepoint();
+				void setRollbackOnly();
+				boolean isRollbackOnly();
+				void flush();
+				boolean isCompleted();
+			TransactionDefiniton 
+				Isolation:, Propagation, Timeout, Readonly
+		void commit(TransactionStatus status) throws TransactionException;
+		void rollback(TransactionStatus status) throws TransactionException;
+	PlatformTransactionManager implementations normally require knowledge of the environment in 
+		which they work: JDBC, JTA, Hibernate, and so on. The following examples show how you 
+		can define a local PlatformTransactionManager implementation. (This example works with 
+		plain JDBC.)
+	PlatformTransactionManager implementers are (not exhaustive list: 
+		DataSourceTransactionManager, JtaTransactionManager, 	(depends on a dataSource object)
+		HibernateTransactionManager								(depends on a sessionFactory object)
+
+
+
+
+17.4 Synchronizing resources with transactions (2) [2 - 6]
+	Discusses how application code creates, uses, reuses, and tears down a persistance api
+		such as Hibernate, JDBC, JDO, or JTA
+	Discusses how transaction synchronization is triggered (optionally) throught the relevant
+		PlatformTransactionManager
+17.4.1 High-level synchronization approach (2)
+	Use a "transaction aware" template (JdbcTemplate, for example) that does teardown, setup 
+		and transactioin synchronoization for you. 
+17.4.2 Low-level synchronization approach (2 - 5)
+	Use a  DataSourceUtils (for JDBC), EntityManagerFactoryUtils (for JPA), 
+		SessionFactoryUtils (for Hibernate), PersistenceManagerFactoryUtils (for JDO) to 
+		manage the creation of connections directly. This code assignes the connection to an
+		existing transcation.
+17.4.3 TransactionAwareDataSourceProxy (6)
+	Wraps an existing data source.  ONly use if truing to get existing code to use spring
+		managed transactions.  That's why this is a proxy it is making the existing 
+		datasource aware of Spring's transactions. see  Head First Design Patterns: Controlling 
+		Object Access Page 45 for more on proxies and their usages.
+
+
+
+
+17.5 Declarative transaction management (6 - 7) [6 - 23]
+	Unlike EJB CMT, which is tied to JTA, the Spring Framework’s declarative transaction 
+		management works in any environment. It can work with JTA transactions or local 
+		transactions using JDBC, JPA, Hibernate or JDO by simply adjusting the configuration 
+		files
+	The concept of rollback rules is important: they enable you to specify which exceptions 
+		(and throwables) should cause automatic rollback. You specify this declaratively, in 
+		configuration, not in Java code.
+17.5.1 Understanding the Spring Framework’s declarative transaction implementation (7)
+	Spring Framework’s declarative transaction support is enabled via AOP proxies.  An AOP proxy 
+		in conjunction with a PlatformTransactionManager implementation drive transactions 
+		around method invocations.
+17.5.2 Example of declarative transaction implementation (7 - 10)
+	1) Create a PlatformTransactionManager 
+		<bean id="txManager" class="DataSourceTransactionManager">
+			<property name="dataSource" ref="dataSource"/>
+		</bean>
+	2) Create an AOP advice 
+		<tx:advice id="txAdvice" transaction-manager="txManager">
+			<tx:attributes>
+			 	<!-- all methods starting with 'get' are read-only -->
+ 				<!-- other methods use the default transaction settings (see below) -->
+				<tx:method name="get*" read-only="true"/>
+				<tx:method name="*"/>
+ 			</tx:attributes>
+ 		</tx:advice>
+	3) Create an AOP config (advice/pointcut) 
+ 		<!-- ensure that the above transactional advice runs for any execution of an -->
+ 		<!-- operation defined by the FooService interface -->
+		<aop:config>
+			<aop:pointcut id="fooSerOp" expression="execution(* x.y.service.FooService.*(..))"/>
+			<aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceOperation"/>
+		</aop:config>
+	4) Run sample
+		public final class Boot {
+			public static void main(final String[] args) throws Exception {
+				ApplicationContext ctx = 
+					new ClassPathXmlApplicationContext("context.xml", Boot.class);
+				FooService fooService = (FooService) ctx.getBean("fooService");
+				fooService.insertFoo (new Foo());
+			}
+		}
+17.5.3 Rolling back a declarative transaction (10 - 11)
+	In its default configuration, the Spring Framework’s transaction only rollsback in the case
+		of runtime, unchecked exceptions; that is, when the thrown exception is an instance or 
+	 	subclass of RuntimeException.
+	 You can configure exactly which Exception types mark a transaction for rollback, including 
+	 	checked exceptions. You can also specify 'no rollback rules', if you do not want a 
+	 	transaction, even for uncheckec exceptions.
+		<tx:advice id="txAdvice" transaction-manager="txManager">
+			<tx:attributes>
+				<tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
+				<tx:method name="updateStock" no-rollback-for="InstrumentNotFoundException"/>
+				<tx:method name="*"/>
+			</tx:attributes>
+		</tx:advice>	 
+17.5.4 Configuring different transactional semantics for different beans (11 - 13)
+	You can configure an advice for no transaction support. Just add the advice to the <aop:config>
+		<aop:config>
+			<aop:pointcut id="defaultServiceOperation" 
+				expression="execution(* x.y.service.*Service.*(..))"/>
+			<aop:pointcut id="noTxServiceOperation" 
+				expression="execution(* x.y.service.ddl.DefaultDdlManager.*(..))"/>
+			<aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
+			<aop:advisor pointcut-ref="noTxServiceOperation" advice-ref="noTxAdvice"/>
+		</aop:config>	
+		<tx:advice id="noTxAdvice">
+			<tx:attributes>
+				<tx:method name="*" propagation="NEVER"/> <!-- specifies no tx -->
+			</tx:attributes>
+		</tx:advice>
+17.5.5 <tx:advice/> settings (13)
+	These attributes are for the <tx:method/> tag only
+		read-only
+		rollback-for="Specified Checked or Unchecked Exception"
+		no-rollback-for="Specified Checked or Unchecked Exception"
+		propagation
+		isolation
+		timeout
+17.5.6 Using @Transactional (14 - 17) [14 - 19]
+	Simply add the following line to the application-context.xml
+		<!-- enable the configuration of transactional behavior based on annotations -->
+		<!-- a PlatformTransactionManager is still required -->
+		<tx:annotation-driven transaction-manager="txManager"/>
+	The @EnableTransactionManagement annotation provides equivalent support if you are using Java 
+		based configuration. Simply add the annotation to a @Configuration class. See the javadocs 
+		for full details.
+	You can place the @Transactional annotation before an interface definition, a method on an 
+		interface, a class definition, or a public method on a class.
+	Spring recommends that you only annotate concrete classes (and methods of concrete classes).
+					
+	The proxy-target-class attribute controls what type of transactional proxies are created for 
+		classes annotated with the @Transactional annotation. If proxy-target-class is set to true, 
+		class-based proxies are created. If proxy-target-class is false or if the attribute is 
+		omitted, standard JDK interface-based proxies are created.
+	@EnableTransactionManagement and <tx:annotation-driven/> only looks for @Transactional on beans 
+		in the same application context they are defined in.
+	The most derived location takes precedence when evaluating the transactional settings for a 
+		method.  The @Transactional annotation on the updateFoo(Foo) method in the same class takes 
+		precedence.
+			@Transactional(readOnly = true)
+			public class DefaultFooService implements FooService {
+				public Foo getFoo(String fooName) {
+					// do something
+				}
+
+				// these settings have precedence for this method
+				@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+				public void updateFoo(Foo foo) {
+					// do something
+				}
+			}
+
+					@Transactional settings (17)
+	value				Optional qualifier specifying the transaction manager to be used
+	read-only
+	rollback-for 		Specified Checked or Unchecked Exception
+	no-rollback-for 	Specified Checked or Unchecked Exception
+	propagation
+	isolation
+	timeout
+
+					Multiple Transaction Managers with @Transactional (18)
+	Allows two different datasources.
+
+					Custom shortcut annotations (19)
+	Be aware of the difference between physical and logical transactions, and how the 
+	 	propagation setting applies to this difference.
+	PROPAGATION_REQUIRED
+		a logical transaction scope is created for each method upon which the setting is
+			applied, with an  outer transaction scope being logically independent from 
+			the inner transaction scope.
+		in standard behavior,  all these scopes will be mapped to the same physical 
+		 	transaction
+		a rollback-only marker set in the inner transaction scope does affect the outer 
+			transaction’s chance to actually commit (as you would expect it to).
+	PROPAGATION_REQUIRES_NEW
+		uses a completely independent transaction for each affected transaction scope. 
+		the underlying physical transactions are different and hence can commit or roll 
+		back independently, with an outer transaction not affected by an inner 
+		transaction’s rollback status.
+	PROPAGATION_NESTED
+		uses a single physical transaction with multiple savepoints that it can roll back 
+			to. Such partial rollbacks allow an inner transaction scope to trigger a 
+			rollback for its scope, with the outer transaction being able to continue the 
+			physical transaction despite some operations having been rolled back. This 
+			setting is typically mapped onto JDBC savepoints, so will only work with JDBC 
+			resource transactions. 
+17.5.7 Transaction propagation (19 - 20)
+			Required (20)
+			RequiresNew (20)
+			Nested (20)
+17.5.8 Advising transactional operations (21 - 23)
+17.5.9 Using @Transactional with AspectJ (23)
+
+
+
+
+17.6 Programmatic transaction management (24) [24 - 25]
+17.6.1 Using the TransactionTemplate (24 - 25)
+			Specifying transaction settings (25)
+17.6.2 Using the PlatformTransactionManager (25)
+
+
+
+
+17.7 Choosing between programmatic and declarative transaction management (26)
+
+
+
+
+
+17.8 Transaction bound event (26)
+
+
+
+
+
+
+17.9 Application server-specific integration (26 - 27)
+17.9.1 IBM WebSphere (27)
+17.9.2 Oracle WebLogic Server (27)
+
+
+
+
+
+
+17.10 Solutions to common problems (27)
+
+
+
+
+
+
+17.11 Further Resources (27)
+
+
+
+
+
+

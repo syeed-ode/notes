@@ -1,0 +1,27 @@
+1.  Explain the function of each of the following DNS Records: SOA, PTR, A, MX, CNAME.
+
+2.  What are glue records and why are they needed? Use *dig* or *drill* to find the glue records that connect your local zone to its parent.
+
+3.  What are the implications of negative caching? Why is it important?
+
+4.  Create SPF rcords for you site to help control spam.
+
+*5. What steps are needed to set up a second level domain? Include both technical and procedural factors.
+
+*6. What's the diffrence between an authoritative and nonauthoritative answer to a DNS query? How could you sensure that an answer was authoritative?
+
+*7. What machine is your local name server? What steps must it take to resolve the name www.admin.com, assuming that no information about that domain is cached anywhere in DNS?
+
+*8. Explain the significance for DNS of the 512-byt limit on UDP packets. What are the potential problems, are what are teh workarounds that address them?
+
+*9. Explain the 512-bit Russian GOST or 256-bit NIST P-256 ECDSA algorithm and their impact on the 512-byte UDP packet limit.  Do they help things fit? How big are the keys and the signatures?
+
+*10. Create SSHFP records for you site and upgrade your *ssh* to use them.
+
+*11. Use the ISC DNS OARC reply size server from various locations at your site to dtermine if there are any local configuration policies or practices that would inhibit DNSSEC deployment.  What sizes do you see? do they vary with your location? how about from home? Gather the same data with *SecSpider* or *dnsfunnel*. Are the numbers sonsistent? If not, which tool gives more accurate infomration?
+
+**12. use the DNSSEC tools or libraries to build a script that determines whether a secure site is in sync with its parent's DS record and whether its signatures have expired. Set it up to run daily from *cron*.
+
+**13. Create DKIM records for your domain and set up your mail servers and clients to user them.
+
+**14. Creat a subsomain at your site.  Add a real host with lots of names and addresses, then secure it with DNSSEC and connect it to the Interents's trust network by create a DLV record at ISC.  Turn on logging and watch the logs for a few days.  Document your procedures and problems.
