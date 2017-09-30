@@ -29,6 +29,10 @@ Name servers peform the following chores:
 	* It transfers data between your nameservers to keep them synchronized
 BIND caches the first two types of negative data: Unbound caches all four.  Each implementation 
 	allows the negative cache times to be configured.]
+A zone is a group of resource records located at the same place in the dns name space. The data 
+	for DNS domain usually usually includes two zones: 1) translating hostnames to IP 
+	address, called forwarding zones, the other for translating hostnames back to IP address 
+	call reverse zones.   
 Authoritative (root servers and TLD servers, i.e., nonrecursive) (an official representative of a zone) 
 	and nonauthoritative (recursive servers; caches data from previous queries) query answers 
 	describe a name servers source of data (and the completeness of the data handed out).  An 
@@ -130,7 +134,10 @@ Internet System Consortium (ISC)
 ****    Section 17.8 - The DNS Database    ****
 The zone's DNS database is a set of text files maintained on the zone's primary servers. The are sometimes refered to as zone files. They contain two types of entries: parser commands and resource records.
 
+A zone is a group of resource records located at the same place in the dns name space. The data for DNS domain usually usually includes two zones: 1) translating hostnames to IP address, called forwarding zones, the other for translating hostnames back to IP address call reverse zones.   
+
 Commands in the zone files
+	
 	Commands either influence the way the parser interprets seqbsequent records or they expand into records themselves. 
 	
 	Three commands are standard in DNS and teh fourth, $GENERATE, is only found in BIND. They are:
@@ -143,7 +150,7 @@ Commands in the zone files
 	Many sites use $INCLUDE to keey the cryptographic keys in a file with restricted permission.  This is also use to modulize the domain. If you use the <origin> option, it overwrites the current $ORIGIN directive. So you need to reset it, either at the bottom of the <filename> or after the $INCLUDE statement.
 	
 	The $TTL directive sets the ttl for the records that follow it. (So, it should be at the top.) It defaults to 1 day. 
-	
+
 Resource records
 	Resource records are text files for each host on your domain. The file includes the host name, the type of record, and some data values. The name field can be ommited if the value for name is the same as the line above it.
 	
@@ -187,9 +194,49 @@ Resource records
 	
 	The secondary servers' zone file (resource records) are not managed manually, but programatically.  Who knows what order you'll get when you look at them.
 
+SOA record (Start of Authority) - 
+	The <zone name> field or <name> field sometimes contains the @ smpbol. That name of the @ symbol is the <zonw> field of the 'name.conf' and is the domain name. It also can be the <name> filed of the 'nsd.conf' file.
+	Each zone has exactly one start of authority (SOA) record. The record includes:
+		<zone name> 	name of the zone
+		<primary NS> 	the primary name server for the zone
+		<ttl> 		ttl for NS
+		<email address>	technical contact, note this is really dns-admin@google.com. Just remove the first ",", replacing it with the @ symbol and remove the FQDN "." to send an email to the domain admin.
+		<serial number> The serial number of the zones configuration data.  The secondary servers use this number to determine when to get fresh data.
+		various timeout values
+			<rf>	refresh timeout value, used for the secondary sereers to know ehen to get an update. When it expires, the secondary checks the serial number of the primary. If the primary's serial number is larger, the secondary requests a zone transfer to update the data.
+			<rt> 	refresh value, specified how long a secondary should wait before checking the serial number of the primary
+			<exp> 	expire value, determines how long the secondary will serve as primary if the primary doesn't respond. It should be a week to a month (incase the primary is down for an exhorbantly long time).
+			<min> 	minimum value, is used for negative caching. This is how long a secondary will ignore a server that returned a failed query. BIND ignores values larger than 3 hours.
+			<updt> 
+	;; Example (semeicolons ';' are comments)
+	;; AUTHORITY SECTION:
+	google.com.		60	IN	SOA	 ns3.google.com. dns-admin.google.com. 170511421         900  900  1800  60
+	<zone name>             <ttl>	<tyep>  <class>  <primary NS>    <email address>       <serial number>   <rf> <rt> <exp> <min>
 
+NS (name server) records:
+	The name server records identify the servers that are authoriative (both primary and secondary) for a zone. These servers also delage to external organizations the subdomains within its zones.
+	
+	The name server record includes:
+		] $ dig NS
+		;; QUESTION SECTION:
+				IN	NS
 
+		;; ANSWER SECTION:
+.			415149	IN	NS	b.root-servers.net.
+.			415149	IN	NS	j.root-servers.net.
+.			415149	IN	NS	k.root-servers.net.
+.			415149	IN	NS	g.root-servers.net.
+.			415149	IN	NS	m.root-servers.net.
+.		any	415149	IN	NS	f.root-servers.net.
+.			415149	IN	NS	e.root-servers.net.
+.			415149	IN	NS	h.root-servers.net.
+.			415149	IN	NS	l.root-servers.net.
 
+	The first 5 lines represent the name server for the a.root-servers.net. domain, specified in the SOA (start of authority) record. The name sever (just an example) is any.[fenl].root-servers.net.. Note the "." makes the domain name absolute.
+	
+	The class (IN) didn't have to be listed either.  IN is the default.
+	
+	Node the any.[fenl].root-servers.net. 
 
 
 
