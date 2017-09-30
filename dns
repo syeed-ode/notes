@@ -25,3 +25,25 @@
 **13. Create DKIM records for your domain and set up your mail servers and clients to user them.
 
 **14. Creat a subsomain at your site.  Add a real host with lots of names and addresses, then secure it with DNSSEC and connect it to the Interents's trust network by create a DLV record at ISC.  Turn on logging and watch the logs for a few days.  Document your procedures and problems.
+
+
+
+17.   DNS: The Domain Naming Server
+17.1  Who needs DNS?
+17.2  How DNS works
+17.3  DNS for the Impatient
+17.4  Name Servers
+17.5  DNS Namespace
+17.6  Designing you DNS Environment
+17.7  What's New in DNS
+17.8  DNS Database                      (574)
+17.9  The BIND DNS Software             (597)
+17.10 Bind configuration Examples       (618)
+17.11 The NSD/Unbound Software
+17.12 Updating Zone Files               (638)
+17.13 Security Issues                   (642)
+17.14 Microsoft and DNS 
+17.15 Testing and debugging
+17.16 Vendor specifics
+17.17 Recommended reading
+17.18 Exercises
