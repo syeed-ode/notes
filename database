@@ -1,11 +1,57 @@
-
-
-				Dirty Reads:		Nonrepeatable (Fuzzy) Reads:	Phantom Reads:
+I was trying to get the MySql to start from "System Preferences" -> "mysql" -> 
+	"start MySql Server". I ran into this issue: Warning the 
+	/user/local/mysql/data directory is not owned by the mysql user. So, I 
+	found this resoution.
+		sudo chown -RL root:mysql /usr/local/mysql
+		sudo chown -RL mysql:mysql /usr/local/mysql/data
+		sudo /usr/local/mysql/support-files/mysql.server start
+	But that didn't work as epxected i got the error below.
+I saw: 'ERROR 2002 (HY000): Can't connect to local MySQL server through socket 
+	'/var/run/mysqld/mysqld.sock' (2)'. Stackoverflow said I should try the following 
+	below. See, https://serverfault.com/questions/751277/mysql-daemon-lock-issue from 
+	https://stackoverflow.com/questions/34954455/mysql-daemon-lock-issue
+At first i Add skip-external-locking to /usr/local/Cellar/mysql/5.7.18_1/.bottle/etc/my.cnf 
+	under the [mysqld] section:
+	https://stackoverflow.com/questions/34954455/mysql-daemon-lock-issue
+		skip-external-locking
+MySQL Help
+B.5.3.2.1 Resetting the Root Password: Windows Systems - 
+	https://dev.mysql.com/doc/refman/5.7/en/resetting-permissions.html. Use the following 
+	procedure to reset the password for the MySQL 'root'@'localhost' account. 
+Create a text file containing the password-assignment statement on a single line. Replace the 
+	password with the password that you want to use.
+		MySQL 5.7.6 and later:
+		ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPass';	
+	Save the file. This example assumes that you name the file 
+		/Users/syeedode/junk/mysql_rootPassword.txt
+	Start the MySQL server with the special --init-file option (notice that the backslash 
+		in the option value is doubled):
+			[20170930-12:34:52 syeedode:/usr/local/Cellar/mysql] $ mysqld 
+				--init-file=/Users/syeedode/junk/mysql_rootPassword.txt
+	You should now be able to connect to the MySQL server as root using the new password. Stop 
+		the MySQL server and restart it normally.
+	If the ALTER USER statement fails to reset the password, try repeating the procedure using 
+		the following statements to modify the user table directly:
+			UPDATE mysql.user
+				  SET authentication_string = PASSWORD('MyNewPass')
+				, password_expired = 'N'
+			WHERE User = 'root' AND Host = 'localhost';
+			FLUSH PRIVILEGES;			
+	To create a user and DB now: 
+			GRANT ALL ON vsearchlogDB.* 
+				TO 'vsearch' 
+			IDENTIFIED BY 'vsearchpasswd';
+	Finally, attempt to add another privilege user.  I'm trying to allow the `syeedode` user to 
+		kickoff my sql.  This, I'm hoping, will allow the 
+*
+*
+*
+*				Dirty Reads:		Nonrepeatable (Fuzzy) Reads:	Phantom Reads:
 				TxA reads data that	TxA reads datq once. When it	TxA reads data once. When it
 				TxB put there but has	rereads the same data, TxB has	rereads the same data, TxB has
 				not yet commited.	removed the data or modified 	has commited more rows to the 
-																it (via commits).						data
-
+							it (via commits).		data
+				---------------------	------------------------------	------------------------------
 Read Uncommitted:		Possible		Possible			Possible
 
 Read Committed:			Not possible 		Possible			Possible
@@ -27,9 +73,10 @@ https://docs.spring.io/spring/docs/current/spring-framework-reference/data-acces
 JDO - Java Data Objects
 JTA - Java Transaction API (depends on JNDI)
 JPA - Java Persistence API
-
-
-
+*
+*
+*
+*
 17.2 Advantages of the Spring Framework’s transaction support model
 17.2.1 Global transactions
 	When transaction manager is handled by one framework/platform for all transactions, like EJB CMT.
