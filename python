@@ -1,3 +1,112 @@
+This information was gathered from reading Effective Python
+*
+*
+*
+*
+****    Chapter 2 - Functions    ****
+Item 14: Prefer Exceptions to Returning None
+	Functions that return 'None' to indicate special meaning are error prone because 'None' and other values (e.g., zero, the empty string) all evaluate to 'False' in conditional expressions.
+
+	Raise exceptions to indicate special situations instead of returning 'None'. Expect the calling code to handle exceptions properly when they're documented.
+
+Item 13: Take advantage of Each Block in try/except/else/finally
+	There are four distinct times you may want to take action during exception handling in Python: 'try', 'except', 'else', and 'finally' blocks.  Each block serves a unique purpose.
+
+	'Finally' Blocks
+		Use the 'try/finally' when you want exeptions to propgate up, but you also want to run cleanup code even when exceptions occur. [ handle = open('random_data.txt') try: data = hanlde.read() finally: handle.close() ]. This code assures that if handle.read() throws an exception, handle.close() still runs. 
+
+		Note: open() runs prior to the try: block.  If open throws and exception, we do not want handle.close() to run at all.
+
+		
+		<Item 39: Use 'Lock' to Prevent Data Races in Threads>
+		Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' Behavior
+			The 'with' statement is used to indicate when code is running in a special context.  A good example is mutual exclusion blocks in with statements to indicate that the intented code only runs while the lock is held. [ lock = Lock(); with lock: print('Lock is held') ]. This example is equivalent to this 'try/finally' construction because the Lock class properly enables the 'with' statement. [ lock.acquire(); try: print('Lock is held'); finally: lock.release() ]
+
+			The 'with' statement version is better because it eliminates the need to write the repetitive code of the 'try/finally' block. It is easy to make you objects and function capable of use in 'with' statements by using the 'contextlib' built-in module. 
+
+			This module contains the 'contextmanger' decorator, which lets a simple function be used in 'with' statements.  Ths is much easier than dfining a new class with the special methods (__enter__, __init__, __exit__), the standard way.
+
+			
+
+	'Else' Blocks
+		Use 'try/except/else' to make it clear which exceptions will be handled by your code and which exceptions will propagate up.  When the try block doesn't raise an exception, the else block will run. The else block helps you minimize the amount of code in the try block and visually distinguish the success case from the try/except blocks. It improves readability (think, KeyManager code in java).
+
+	Everything Together
+		Use 'try/except/else/finally' when you want to do it in one compound statement.  Here, the 'try' block is used to read the file and process it. The 'except' block is used to handle exceptions from the try block that are excpected.  The 'else' block is used to update the file in place and to allow related exceptions to propagate up. The 'finally' block cleans up the file handle.
+
+Item 20: Use None and Docstrings to specify Dynamic Default Arguments
+
+			In[*]: from datetime import datetime
+			In[*]: from time import sleep
+			In[*]: def log(message, when=datetime.now()):
+			           print('%s: %s' % (when, message))
+			    
+			In[*]: log('Hi there')
+			2017-10-02 17:26:28.871033: Hi there
+			In[*]: sleep(.1)
+			In[*]: log('Hello there')
+			2017-10-02 17:26:28.871033: Hello there	
+	In the below code, when executed twice (as shown above), the timestamps would be the same because datetime.now is oncly executed once, when the functionis defined.  Defautl argumet values are evaluated only once per module load, which usually happens when ta program starts up.  After the module containing theis code is loaded, the datetime now default argument will never be evaluated again.
+
+	By default the keyword, when, to None, you preserve the keyword nature and allow the use to pass in a value or not.
+			def log(message, when=None): 
+				when = datetime.now() if when is None else when
+				print('%s: %s' % (when, message))
+
+	This is especially important when using mutable data (lists, dictionaries, sets). Remember in Python immutable data are pass by reference.  Immputable data (strings, tuples, integers) are pass by value.  So in the code below:
+			import json
+			def decoe(data, defuat={}):
+			    try:
+			        return json.loads(data)
+			    except ValueError:
+			        return default
+			    
+			def decoe(data, default={}):
+			    try:
+			        return json.loads(data)
+			    except ValueError:
+			        return default
+			    
+			In[*]: foo = decoe('bad data')
+			In[*]: print(foo)
+			{}
+			In[*]: foo['stuff'] = 5
+			In[*]: print (foo)
+			{'stuff': 5}
+			In[*]: bar = decoe('also bad')
+			In[*]: print(foo)
+			{'stuff': 5}
+			In[*]: print(bar)
+			{'stuff': 5}
+			In[*]: bar['meep'] = 1
+			In[*]: print(bar)
+			{'stuff': 5, 'meep': 1}
+			In[*]: jarr = decoe('really bad')
+			In[*]: print(jarr)
+			{'stuff': 5, 'meep': 1}
+	The because both foo and bar are initially assigned to default, they hold the same reference.  Modifying foo modifies anyone enters a bad json object, because doing so returns a refernce to default. Keep in mind, default only gets assigned once!!! So, assigning it to None first, documenting the operations in the docstring, then performing a check on default, all fix the issue.
+			def decode(data, default=None):
+				"""Demonstrates that 1) keyword args only get set once, when
+				   the function is pulled into memory.  Once set to something
+
+				Args:
+				data:       JSON data to decode
+				default:    Value to return if decoding fails.  Defaults
+				            to an empty dictionary.  However, because
+				            Keywords only get loaded once, modifing the
+				            dictionary after being called, permenently
+				            modifies the refernce.
+				"""
+				default = {} if default is None else default
+
+				try:
+					return json.loads(data)
+				except ValueError:
+					return default
+*
+*
+*
+*
 This information was gathered from reading Head First Python. 
 *
 *
@@ -10,9 +119,9 @@ However, when a web server is configure to execute your code your webapp's code 
 
 The web server runs your code as it sees fit.  The web server may load/unload parts of your code as needed.  That can lead to problems with storing your webapp state in variables.  Any values associated with global variables are likely lost, and are going to be reset to their starting value when your code is next imported. Storing your webapp's state in a global variable is a bad idea.
 
-We need two things: 1) a way to store variables withou using globals and 2) a way to keep one webapp user's data from interfeering with another.  By providing state, the session takes care of both of these tasks.
+We need two things: 1) a way to store variables withou using globals and 2) a way to keep one webapp user's data from interfeering with another.  By providing state, the 'session' dictionary takes care of both of these tasks.
 
-By importing sessioin [form flask import session] you give you webapp the ability to remmeber state. Additionally, any data stored in 'session' is keyed by a unique browser cookie, whic ensures your session data is kept away from that of every other user of your webapp. 
+By importing 'sessioin' [from flask import session] you give you webapp the ability to remmeber state. Additionally, any data stored in 'session' is keyed by a unique browser cookie, whic ensures your session data is kept away from that of every other user of your webapp. 
 
 To enable this, you need to seed Flask's cookie generation technology with a "secret key" [app.secret_key = "<gnerated value>"] which is used by Flask to encrypt your cookie.
 
@@ -20,6 +129,7 @@ The session dictionary maintains a browser-identifiable value by storing a cooki
 
 Remember when using a dictionary it's better to check in and use pop, than check value, if possible prefer: [f 'logged_in' in session: print('Found it')] over [if session['logged_in']: print('Found it')]. When clearing use: [ session.pop('logged_in') ]
 
+Decorators are Python syntax for allowing one function to modify another function at runtime.  
 To use a decorator you need to know four things: 1) How to create a function. 2) How to pass a function as an argument to a function. 3) How to return a function from a function. And, 4) how to process any number and type of function arguments.
 
 How to pass a function as a function:
@@ -29,6 +139,8 @@ How to pass a function as a function:
 
 How to return a function from a function.
 	Python allows nested (inner) functions, function that are created from within the suite of an existing function. This technique is helpful for a complex function with many lines of code.  
+
+	When you use a function object as an argument to a function, you can have the receiving function invoke the passed-in function object by appending parenthses.
 
 	A more common usage is for the enclosing function to return the nested function as its value.  This is what allows you to create a decorator. The example below illustrates:
 			def outer():
@@ -57,5 +169,85 @@ How to process any number and type of function arguments
 				if kwargs:
 					print()
 
-	When passing in the ** operater to tell the interpreter to treat the interpreter as a collection of keys and their associated value.
+	When passing in the ** operater it tells the interpreter to treat the interpreter as a collection of keys and their associated value.
+
+To create a decorator you nned to understand that: 1) a decorator is a function, 2) a decorator takes the decorated function as an argument 3) a decorator returns a new function 4) a decorator maintains the decorated functions signature
+
+When a decorator is applied to an xisting function any calls to the existing function are replaces by calls to the function the decorator returns.  In the example below this is the wrapper() function.
+		def check_status(func: 'function'):
+	    def wrapper():
+	        if 'logged_in' in session:
+	            return func
+	        return "Sorry your're not logged in"
+	    return wrapper
+    However, the *calling characteristics* need to be maintained too.  Using star-args and **kwargs does the trick.  It genericizes any function signature. 
+
+Using decorators can cause strange behavior in tools that do introspection, such as debuggers, help(), print(), id(), repr(), etc.
+
+Always decorate all decorators with the functools.wraps function. This decorator wil copy all of the important metadata about the inner function to the outer function.
+		def trace(func):
+			@wraps(func)
+			def wrapper(*args, **kwargs)
+				result = function(*args, **kwargs)
+			return wrapper
+
+		@trace
+		def check_status
+
+As with class decorators in Java, Python's function decorators allows you to augment an existing function with extra code, by changing the behavior of the existing function without changing its code.
+
+Decoraters are concerned with augmenting existing functions with additional functionality. Decorator code is under no obligation to do anything after it invokes the decorated function.  The decorator behavior is very different from teh protocol that context managers are epexted to adhere to. Context managers are more interested in ensuring your code executes wthin a specific context, arranging for code to run before a with statemetn as well as enursing that code *always* executes fter a with statement.
+*
+*
+*
+*
+****    Chapter 11 - Exception Handling: What to Do When Things Go Wrong    ****
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
