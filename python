@@ -13,26 +13,89 @@ Item 13: Take advantage of Each Block in try/except/else/finally
 	There are four distinct times you may want to take action during exception handling in Python: 'try', 'except', 'else', and 'finally' blocks.  Each block serves a unique purpose.
 
 	'Finally' Blocks
-		Use the 'try/finally' when you want exeptions to propgate up, but you also want to run cleanup code even when exceptions occur. [ handle = open('random_data.txt') try: data = hanlde.read() finally: handle.close() ]. This code assures that if handle.read() throws an exception, handle.close() still runs. 
+		Use the 'try/finally' when you want exeptions to propgate up, but you also want to run cleanup code even when exceptions occur. [ handle = open('random_data.txt') try: data = hanlde.read() finally: handle.close() ]. This code assures that if handle.read() throws an exception, handle.close() still runs.
 
 		Note: open() runs prior to the try: block.  If open throws and exception, we do not want handle.close() to run at all.
-
-		
-		<Item 39: Use 'Lock' to Prevent Data Races in Threads>
-		Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' Behavior
-			The 'with' statement is used to indicate when code is running in a special context.  A good example is mutual exclusion blocks in with statements to indicate that the intented code only runs while the lock is held. [ lock = Lock(); with lock: print('Lock is held') ]. This example is equivalent to this 'try/finally' construction because the Lock class properly enables the 'with' statement. [ lock.acquire(); try: print('Lock is held'); finally: lock.release() ]
-
-			The 'with' statement version is better because it eliminates the need to write the repetitive code of the 'try/finally' block. It is easy to make you objects and function capable of use in 'with' statements by using the 'contextlib' built-in module. 
-
-			This module contains the 'contextmanger' decorator, which lets a simple function be used in 'with' statements.  Ths is much easier than dfining a new class with the special methods (__enter__, __init__, __exit__), the standard way.
-
-			
 
 	'Else' Blocks
 		Use 'try/except/else' to make it clear which exceptions will be handled by your code and which exceptions will propagate up.  When the try block doesn't raise an exception, the else block will run. The else block helps you minimize the amount of code in the try block and visually distinguish the success case from the try/except blocks. It improves readability (think, KeyManager code in java).
 
 	Everything Together
 		Use 'try/except/else/finally' when you want to do it in one compound statement.  Here, the 'try' block is used to read the file and process it. The 'except' block is used to handle exceptions from the try block that are excpected.  The 'else' block is used to update the file in place and to allow related exceptions to propagate up. The 'finally' block cleans up the file handle.
+
+<Item 39: Use 'Lock' to Prevent Data Races in Threads>
+Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' Behavior
+	The 'with' statement is used to indicate when code is running in a special context.  A good example is mutual exclusion blocks in with statements to indicate that the intented code only runs while the lock is held. [ lock = Lock(); with lock: print('Lock is held') ]. This example is equivalent to this 'try/finally' construction because the Lock class properly enables the 'with' statement. [ lock.acquire(); try: print('Lock is held'); finally: lock.release() ]
+
+	The 'with' statement version is better because it eliminates the need to write the repetitive code of the 'try/finally' block. It is easy to make you objects and function capable of use in 'with' statements by using the 'contextlib' built-in module. 
+
+	This module contains the 'contextmanger' decorator, which lets a simple function be used in 'with' statements.  Ths is much easier than dfining a new class with the special methods (__enter__, __init__, __exit__), the standard way.
+
+	The default log level for my program is WARNING, so only the error message will print. (This wasn't the case for me. I got wierd results, need to investigate. So, I just copied directly from book.)
+				def my_function():
+					logging.debug('Some debug data')
+					logging.error('Error log here')
+					logging.debug('More debug data')
+
+				>>> my_function()
+				Error log here
+
+	The code below elevates the log level temporarily by defining a context manager.  The yield expression is the point at which the with block's contents will eecute.
+				@contextmanager
+				def debug_loggging(level):
+				    logger = logging.getLogger()
+				    old_level = logger.getEffectiveLevel()
+				    print(old_level)
+				    logger.setLevel(level=level)
+				    try:
+				        yield
+				    finally:
+				        logger.setLevel(old_level)
+	Now we can call the logging function again, but in the debug_logging context.  All of the debugging messages will print during the with block, but the same function running outside the with block won't print debug messages.
+				with debug_logging(logging.DEBUG):
+					print('Inside')
+					my_function()
+				print('After')
+				my_function
+				>>>
+				Inside: 
+				Some debug data
+				Error log here
+				More debug data
+				After:
+				Error log here
+
+	Using with Targets
+		The context_manager, passed to a with statement, may also return an object. This give the code running in the with block the ability to directly intereact with its context. [ with open('my_output.txt') as hanlde: handle.write() ]. handle is the target. This allows the __exit__ function, which always executes to handle cleanup.
+
+		<Item 40: Consider Coroutines to Run Many Functions Concurrently>
+		This can also be done by "yielding" a value from your context manager.  In that case you can use the finally statement (not the __exit__ magic method).
+				@contextmanager
+				def debug_loggging(level):
+				    logger = logging.getLogger()
+				    old_level = logger.getEffectiveLevel()
+				    print(old_level)
+				    logger.setLevel(level=level)
+				    try:
+				        yield
+				    finally:
+				        logger.setLevel(old_level)
+		Calling loggin gmthods like debug on the 'as' target will produce output because the severity level is set low enough in the 'with' block.  Bus using the 'logging' module directly won't print anyting; it's default is WARNING.
+				with log_level(logging.DEBUG, 'my-log') as logger:
+					logger.debug('This is my message')
+					logging.debug('This will not print')
+				>>>
+				This is my message
+		Calling debug logging methods on the 'Logger' named 'my-log' wil not print anyting because the default logging severity has be restored. Error log messages will always print.
+				logger = logging.getLogger('my-log')
+				logger.debug('Debug will not print')
+				logger.error('Error will print')
+				>>>
+				Error will print
+
+		The key here is the 'with' statement allows you to reuse logic from 'try/finally' blocks and reduce visual noise.  Also, the 'contextlib' module provides a 'contextmanager' decorator that makes it easy to use your won functions in 'with' statements.
+
+		Finally, the value yielded by context managers is supplied to the 'as' part of the 'with' statement.  It's useful for letting your code directly access the cause of the special context.
 
 Item 20: Use None and Docstrings to specify Dynamic Default Arguments
 
