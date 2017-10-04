@@ -227,17 +227,42 @@ NS (name server) records:
 .			415149	IN	NS	k.root-servers.net.
 .			415149	IN	NS	g.root-servers.net.
 .			415149	IN	NS	m.root-servers.net.
-.		any	415149	IN	NS	f.root-servers.net.
-.			415149	IN	NS	e.root-servers.net.
-.			415149	IN	NS	h.root-servers.net.
-.			415149	IN	NS	l.root-servers.net.
+.		any	415149	IN	NS	na1.any.root-servers.net.
+.			415149	IN	NS	ubuntu.root-servers.net.
 
 	The first 5 lines represent the name server for the a.root-servers.net. domain, specified in the SOA (start of authority) record. The name sever (just an example) is any.[fenl].root-servers.net.. Note the "." makes the domain name absolute.
 	
 	The class (IN) didn't have to be listed either.  IN is the default.
-	
-	Node the any.[fenl].root-servers.net. 
 
+
+	The 5th line delegates a subdomain to ns1.any and ubuntu.  The subdomain is called any.root-server.net.  Both, ns1.any and ubuntu are name servers.  These records are really part of the any.root-server.net subdomain, but they must appear in the parent zone, root-servers.net. in order for the delegation to work.  In a similar fashion root-server.net. must appear in .net.'s zone file to define the root-server.net's subdomain and identify its servers.
+
+	A list of the name servers in the parent's zone file should be kept up to date with those in the subdomain's zone's file. If nuone of the name servers in the parents exist in the child, the so-called lame delegation results. Extra servers in the child is ok, as long as there is at least one child server listed by the parent.
+
+A records:
+	A (address) records are the heart and soul of the DNS database. They provide the mapping from hostname to IP address the was previously provided by /etc/hosts.
+
+PTR records:
+	The PTR (pointer) record maps from IP address back to hostname (the reverse zone). The 189 subnet, for example, has a zone name of 189.173.63.in-addr.arpa. The pointer recordr for 189.173.63.in-addr.arpa is:
+				1		IN 		PTR 	any.root-server.com
+	Since the name 1 does not end in a dot, it is a relative.  But relative to what? Not any.root-server.com -- for this to be accurate, the default zone has to be 183.173.63.in-addr.arpa. .
+
+	Another way to do reverse matching is to put the records such as [ 1 89		IN  PTR. any.root-server.com. ] in the zone 173.63.in-addr.arpa. . Since root-server.com and 173.63.in-addr.arpa. are two different regions of the DNS namespace, they each have their own start of authority (SOA) and resource records. They represent two different zones.
+
+	It is important that A records match their corresponding PTR records. Mismatched PTR records can cause authentication errors that bring you network to a crawl.
+
+MX records:
+	The mail system uses mail exchanger [MX] record to rout mail more efficiently.  This system puts the flow of mail under the control of the system admin instead of senders. It's format is
+			<name>	[ttl]	[IN]	MX	<preference> <host>
+
+	The records below route mail addressed to user@somehost.atrust.com to the machine mailhost.atrust.com. If that machine is not available, the mail goes to mail-relay.atrust.com. If both machines faile, the mail is routed to the requested host: somehost.atrust.com.
+			somehost	IN 	MX 	10 mailhost.atrust.com.
+						IN 	MX 	20 mail-relay.atrust.com.
+
+	Every host the outside world knows about shoudl have an MX record. Host that can never or should never receive email (e.g. network printers) should also have a MX record. Avoid wildcard MX records. It sends every other domain to that MX subnet.
+
+CNAME records:
+	
 
 
 
