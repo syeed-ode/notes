@@ -27,7 +27,7 @@ Item 13: Take advantage of Each Block in try/except/else/finally
 Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' Behavior
 	The 'with' statement is used to indicate when code is running in a special context.  A good example is mutual exclusion blocks in with statements to indicate that the intented code only runs while the lock is held. [ lock = Lock(); with lock: print('Lock is held') ]. This example is equivalent to this 'try/finally' construction because the Lock class properly enables the 'with' statement. [ lock.acquire(); try: print('Lock is held'); finally: lock.release() ]
 
-	The 'with' statement version is better because it eliminates the need to write the repetitive code of the 'try/finally' block. It is easy to make you objects and function capable of use in 'with' statements by using the 'contextlib' built-in module. 
+	The 'with' statement version is better because it eliminates the need to write the repetitive code of the 'try/finally' block. It is easy to make you objects and function capable of use in 'with' statements by using the 'contextlib' built-in module.
 
 	This module contains the 'contextmanger' decorator, which lets a simple function be used in 'with' statements.  Ths is much easier than dfining a new class with the special methods (__enter__, __init__, __exit__), the standard way.
 
@@ -58,7 +58,7 @@ Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' 
 				print('After')
 				my_function
 				>>>
-				Inside: 
+				Inside:
 				Some debug data
 				Error log here
 				More debug data
@@ -265,19 +265,165 @@ Decoraters are concerned with augmenting existing functions with additional func
 *
 *
 ****    Chapter 11 - Exception Handling: What to Do When Things Go Wrong    ****
+Context managers have three menthods to their protocol: __enter__, __init__, and __exit__. If an exception occurs during __enter__, the 'with' statement terminates and any call to __exit__ is cancelled. If __enter__ runs into trouble, __exit__ can no longer assume the context is initialized and configured correctly, so it's prudent not to run the __exit__ code.
 
+Creating a new exception is as simple as extending the 'Exception' class. [ class CustomError(Exception): pass ]
 
+When an exception is raised within 'with''s suite and *not* caught, the 'with' statement arranges to pass details of teh uncaught eception into your context manager's __exit__ method, where you have the option of doing something about it. It's best to put the error checking after any clean up code, guatanteeing the code will run.
+*
+*
+*
+*
+****    Chapter 11.75 - A Little Bit of Threading: Dealing with Waiting    ****
+The decorator, 'copy_current_request_context', ensures that the HTTP request that is active when a functon is called *remains* active even when the function is subsequently executed in a thread.  There is a caveat, the function being decorated haas to be defined ****within*** the function that calls it!! THE DECORATED FUNCTION MUST BE NESTED INSIDE ITS CALLER (as an inner function).
+*
+*
+*
+*
+*  		This section includes both Head First Python and Effective Python.  The Effective Python sections span the following items.  Each Effective Python bullet point is designated by page number. If no page number exists, then the bullet point is from Head Frist Python.
+*
+* Item 7: Use List Comprehension Instead of 'map' and 'filter'
+* Item 9: Consider Generator Expressions for Large comprehensions
+****    Chapter 12 - Advanced Iteration: Looping Like Crazy    ****
+Comprehensions are a compact syntax providing way to derive one one list from another. [15]
 
+he function read() prints the whole file: [ with open('file.txt') as raw_data: raw_data.read() ]. Python provides a csv reader: [ import csv; with open('file.csv') as data: for line in csv.reader(data): print(line)]. Line is a list of string elements: ['colum1', 'column2']
 
+'csv' also provides a DictReader function.  It returns the header into the keys for each dictionary line.
+				In[*]: filename = '/Users/syeedode/generic_projects/python_code/head_first_python_source/ch12/buzzers.csv'
+				In[*]: import csv
+				In[*]: with open(filename) as data: 
+							for line in csv.DictReader(data):
+								print(line)
+				In[*]: 
+				OrderedDict([('TIME', '09:35'), ('DESTINATION', 'FREEPORT')])
+				OrderedDict([('TIME', '17:00'), ('DESTINATION', 'FREEPORT')])
+				OrderedDict([('TIME', '09:55'), ('DESTINATION', 'WEST END')])
+				OrderedDict([('TIME', '19:00'), ('DESTINATION', 'WEST END')])
+				OrderedDict([('TIME', '10:45'), ('DESTINATION', 'TREASURE CAY')])
+				OrderedDict([('TIME', '12:00'), ('DESTINATION', 'TREASURE CAY')])
+				OrderedDict([('TIME', '11:45'), ('DESTINATION', 'ROCK SOUND')])
+				OrderedDict([('TIME', '17:55'), ('DESTINATION', 'ROCK SOUND')])
 
+A comprehension is more of a design pattern than an operation.
+				[<append this <iterated element> to the new list [operations on this field are optional]> for <iterated element>  in <iterable list>]
+	List allow you to easily skip items in a data structure using if. [16 For example say you want to find the squares of each number in a list. [15]
+				In[*]: a = [1, 2, 3, 4, 5, 6, 7, 8]
+				In[*]: squares = [x**2 for x in a]
+				In[*]:
+	Unlike 'map' list comprehensions let you easily filter items from the input list, removing corresponding outputs from the result. [15]
+				In[*]: even_squares = [x**2 for x in a if x % 2 == 0]
+	The 'filter' BIF can be used along with 'map' to acheive the same thing. However, it is much more visually noisier and harder to read. [16]
+				In[*]: alt = map(lamda x: x**, filter(lamda x: x % 2 == 0, a))
 
+Comprehensions provide two benefits.  First, Python is optimized to run comprehensions as quickly as possible.  Second, the comprehensions are performed in place, which has added benefits.
 
+Dictionaires and sets have thier own comprehensions as well.  They make it easier to create deriviative data structures.  Note that the dictionary comprehension ends in braces '{}'  not in brakcets '[]'
+				{ <append this <<key>:<value>> to the end of the dictionry>  for <key>,<value> in <iterable key, value entry set> }
+Using the above
+				from datetime import datetime
+				def convert2ampm(time24: str) -> 'str':
+					return datetime.strptime(time24, '%H:%M').strftime('%I:%M%p')
 
+				flights = [data for data in open(filename) ]
+				flights
+				Out[86]:
+				['TIME,DESTINATION\n',
+				 '09:35,FREEPORT\n',
+				 '17:00,FREEPORT\n',
+				 '09:55,WEST END\n',
+				 '19:00,WEST END\n',
+				 '10:45,TREASURE CAY\n',
+				 '12:00,TREASURE CAY\n',
+				 '11:45,ROCK SOUND\n',
+				 '17:55,ROCK SOUND\n']
 
+				with open(filename) as data:
+				    data.readline()
+				    print(data)
+				    flights = {}
+				    for line in data:
+				        print(line)
+				        k,v = line.strip().split(',')
+				        flights[k] = v
+				    print(flights)
 
+				flights
+				Out[88]:
+				{'09:35': 'FREEPORT',
+				 '09:55': 'WEST END',
+				 '10:45': 'TREASURE CAY',
+				 '11:45': 'ROCK SOUND',
+				 '12:00': 'TREASURE CAY',
+				 '17:00': 'FREEPORT',
+				 '17:55': 'ROCK SOUND',
+				 '19:00': 'WEST END'}
 
+				flights2 = {convert2ampm(k):v.title() for k,v in flights.items() }
+				flights2
+				Out[92]:
+				{'05:00PM': 'Freeport',
+				 '05:55PM': 'Rock Sound',
+				 '07:00PM': 'West End',
+				 '09:35AM': 'Freeport',
+				 '09:55AM': 'West End',
+				 '10:45AM': 'Treasure Cay',
+				 '11:45AM': 'Rock Sound',
+				 '12:00PM': 'Treasure Cay'}
 
+Dictcomps can be filtered as well [ freeports_flights = {convert2ampm(k):v.title() for k,v in flights.items() if v == 'FREEPORT'} ]
+				freeports_flights
+				Out[94]: {'05:00PM': 'Freeport', '09:35AM': 'Freeport'}
 
+				west_end_flights = [time for time,dest in flights2.items() if dest == 'West End']
+				west_end_flights
+					Out[109]: ['09:55AM', '07:00PM']
+				for dest in set(flights2.values()):
+					print(dest, '->', [time for time,location in flights2.items() if location == dest])
+				Treasure Cay -> ['10:45AM', '12:00PM']
+				Freeport -> ['09:35AM', '05:00PM']
+				West End -> ['09:55AM', '07:00PM']
+				Rock Sound -> ['11:45AM', '05:55PM']
+
+				for dest in set(flights2.values()):
+				    when[dest] = [time for time,location in flights2.items() if location == dest]
+				when
+				Out[117]:
+				{'Freeport': ['09:35AM', '05:00PM'],
+				 'Rock Sound': ['11:45AM', '05:55PM'],
+				 'Treasure Cay': ['10:45AM', '12:00PM'],
+				 'West End': ['09:55AM', '07:00PM']}
+
+				flight_times_by_group = { dest:[time for time,location in flights2.items() if location == dest] for dest in set(flights2.values()) }
+				flight_times_by_group
+				Out[122]:
+				{'Freeport': ['09:35AM', '05:00PM'],
+				 'Rock Sound': ['11:45AM', '05:55PM'],
+				 'Treasure Cay': ['10:45AM', '12:00PM'],
+				 'West End': ['09:55AM', '07:00PM']}
+
+When you come across something that looks like a listcomp but is surrounded by parenthesis, your are looking at a generator. The generator and the listcomp produce the same data. However they do not execute the same way.
+
+When a listcomp executes, it produces *all* of the data before doing any other processing.  This means that if a listcomp is processing a lot of data, delays any other processing from unit, it the data is produced.
+
+A generator releases the data a soon as the data is produced by the generator's code.  Any data items produced by the generator executes immediately.  There is no waiting.
+				for resp in [requests.get(url) for url in urls ]:
+					print(len(resp.content), '->', resp.status_code, '->', resp.url)
+				31590 -> 200 -> http://www.headfirstlabs.com/
+				37419 -> 200 -> https://www.oreilly.com/
+				326180 -> 200 -> https://twitter.com/
+				for resp in (requests.get(url) for url in urls ):
+					print(len(resp.content), '->', resp.status_code, '->', resp.url)
+				31590 -> 200 -> http://www.headfirstlabs.com/
+				37419 -> 200 -> https://www.oreilly.com/
+				325078 -> 200 -> https://twitter.com/
+There was a noticiable delay in the listcomp code.  The generator code, however, returned one at a time. There was a noticible difference.  Putting that code in a function which returns a tuple(<con>, <staus>, <url>) would be problematic with a gnerator.
+
+When a function executes a return statment, the function terminates.  When returning the results of the for loop the uses a generator, use 'yield' instead.  The 'yield' keyword was added to support the creation of *generator functions*. 
+
+You can use yield anywhere a return is used. When you do, you function morphs into a generator function that can be called from any iterator.
+
+When used as an interater, the generator function's 'yield' communicates directly witht the calling for loop as soon as the data is available.  The generator function then blocks, until the calling for loop completes with the data. 
 
 
 
