@@ -20,6 +20,17 @@ This information was gather from reading Unix and Linux System Administration Ha
 *
 *
 *
+****    Section 17.2 - How DNS Works    ****
+Delegation
+	Each domain can delegate authority for its subdomains to other servers.
+	
+	All name servers read the identities of the root servers from a local config file or have them built into the code.  
+	
+	The root servers know the name servers for com, net, edut, fi, de and other TLD.  Farther down the chain, edu knows about colorado.edu, berkeley.edu, and so.
+*
+*
+*
+*
 ****    Section 17.4 - Name Severs    ****
 pg. 557
 Name servers peform the following chores:
@@ -27,20 +38,18 @@ Name servers peform the following chores:
 	* It asks about local and remote hosts for your users
 	* It caches answers to these queries so it can answer faster next time
 	* It transfers data between your nameservers to keep them synchronized
-BIND caches the first two types of negative data: Unbound caches all four.  Each implementation 
-	allows the negative cache times to be configured.]
-A zone is a group of resource records located at the same place in the dns name space. The data 
-	for DNS domain usually usually includes two zones: 1) translating hostnames to IP 
-	address, called forwarding zones, the other for translating hostnames back to IP address 
-	call reverse zones.   
-Authoritative (root servers and TLD servers, i.e., nonrecursive) (an official representative of a zone) 
-	and nonauthoritative (recursive servers; caches data from previous queries) query answers 
-	describe a name servers source of data (and the completeness of the data handed out).  An 
-	authoritative answer from a name server is “guaranteed’ to be accurate.  Nonauthoritative data 
-	answers a query from a cache and doesn’t know if the data is still valid.  Answers from primary 
-	and secondary name servers are authoritative for their own zones, but not for information they 
-	may have cached. 
-Recursive server returns only real answers and error messages.  It follows referrals itself; relieving 
+A zone is a group of resource records located at the same place in the dns name space (i.e. domain 
+	or subdoman). The data for DNS domain usually usually includes two zones: 1) translating 
+	hostnames to IP address, called forwarding zones, the other for translating IP addresses back 
+	to hostnames call reverse zones.   
+Authoritative (root servers and TLD servers, i.e., nonrecursive) (are official representatives of a 
+	zone) and nonauthoritative (recursive servers, which caches data from previous queries) query 
+	answers describe a name servers source of data (and the completeness of the data handed out).  
+	An authoritative answer from a name server is “guaranteed’ to be accurate.  Nonauthoritative 
+	data answers may come from a cache and may not know if the data is still valid.  Answers from 
+	primary and secondary name servers are authoritative for their own zones, but not for information 
+	they may have cached. 
+Recursive server returns only real answers and error messages.  It follows referrals itself, relieving 
 	clients of this responsibility.
 For security reasons, an organization’s externally accessible name servers should always be 
 	nonrecursive. **Any local name server listed in a client’s *resolv.conf* file must be 
@@ -48,10 +57,12 @@ For security reasons, an organization’s externally accessible name servers sho
 [DNS servers also implement negative caching.  That is, they remember when a query fails and do not 
 	repeat that query until the negative caching TTL value has expired.  Negative caching saves 
 	answers of the following types:
-	* No host or domain matches the named queried.
-	* The type of data requested does not exist for this host.
-	* The server to ask is not responding.
-	* The server to ask is unreachable because of network problems.
+		* No host or domain matches the named queried.
+		* The type of data requested does not exist for this host.
+		* The server to ask is not responding.
+		* The server to ask is unreachable because of network problems.
+	BIND caches the first two types of negative data; Unbound caches all four.  Each implementation 
+		allows the negative cache times to be configured.]
 *
 *
 *
@@ -66,6 +77,13 @@ The difference between a subdomains and hosts is a
 	subdomains have a name server (NS) records associated with them. 
 Parent domains should check to be sure that a child domain's name servers are up and running before 
 	permforming the delegation.  If the servers are not working a lame delegation results.
+There are two types of top-level domains (TLDs): country code domains (ccTLDs) and generic top level domains (gTLDs). 
+Registering a second-level domain name
+	To obtain a second-level domain, you must apply to a registrar for the appropriate TLD. You must 1) choose a name that has not been taken, 2) have (technical/admin) contact people, and 3) have two hosts that will be names servers.
+	
+	Creating a subdomain is similar creating a second-level domain, except the central authority is now local (within your organization). The steps are 1) choose a unique name in the local context, 2) have two name servers, 3) coordinate with the administrator for the parent domain.
+	
+	Parent domains sould check to be sure that a child domain's name servers are up and running before performing the delegation. Delegation is where the child reads the authority of the root servers.
 *
 *
 *
@@ -82,15 +100,15 @@ Authoritative servers - Serving the authoritative data about your site to the ou
 	The DNS specification require at least two authoritative servers for eadh domain. Primary (an 
 		official representative of a zone) and secondary (copies data from primary) servers 
 		are authoritative. 
-	Caching (caches data from previous queries; usually has no local zones) 
-		and stub (like a secondary but copies only name server data (not host data)) servers are 
-		not authortative.
-	Authoritative servers keep their data synchronized by using zone transfers. Use TSIG (transaction 
-		signatures) keys to authenticate and control the zone transfers from your primary server 
-		to your secondary servers.
+	Caching and stub servers are not authortative. Caching servers caches data from previous queries; 
+		usually have no local zones. Stub servers are like a secondary but copies only name 
+		server data (not host data).
+	Authoritative servers keep their data synchronized by using zone transfers. You can usese TSIG 
+		(transaction signatures) keys to authenticate and control the zone transfers from your 
+		primary server to your secondary servers.
 	"Split-DNS" may be preferred. This is when an authoritative query response is different depending 
 		upon who is asking.  Queries from inside the network get more information than the queires 
-		outside the network. This is called a view.  The bind configuration file configures the 
+		outside the network. This is called a view.  The Bind configuration file configures the 
 		view. External folks see one view, internal folks see another.
 
 Caching servers - Providing name lookups for your users
@@ -132,81 +150,108 @@ Internet System Consortium (ISC)
 *
 *
 ****    Section 17.8 - The DNS Database    ****
-The zone's DNS database is a set of text files maintained on the zone's primary servers. The are sometimes refered to as zone files. They contain two types of entries: parser commands and resource records.
-
-A zone is a group of resource records located at the same place in the dns name space. The data for DNS domain usually usually includes two zones: 1) translating hostnames to IP address, called forwarding zones, the other for translating hostnames back to IP address call reverse zones.   
+The zone's DNS database is a set of text files maintained on the zone's primary servers. They are 
+	sometimes refered to as zone files. They contain two types of entries: parser commands and 
+	resource records.
+A zone is a group of resource records located at the same place in the dns name space. The data for DNS 
+	domain usually usually includes two zones: 1) translating hostnames to IP address, called 
+	forwarding zones, the other for translating IP addresses back to hostnames call reverse zones.   
 
 Commands in the zone files
-	
-	Commands either influence the way the parser interprets seqbsequent records or they expand into records themselves. 
-	
-	Three commands are standard in DNS and teh fourth, $GENERATE, is only found in BIND. They are:
+	Commands either influence the way the parser interprets seqbsequent records or they expand into 
+		records themselves. 
+	Three commands are standard in DNS and the fourth, $GENERATE, is only found in BIND. They are:
 		$ORIGIN <domain name>
 		$INCLUE <filename> <origin>
 		$TTL <default-ttl>
-	
-	Ths origin defaults to the domain name specired in the name servers configuration faile. However you can set or change it using the $ORIGIN directive. Using the relative names instad of the FQDN saves a lot of time.
-	
-	Many sites use $INCLUDE to keey the cryptographic keys in a file with restricted permission.  This is also use to modulize the domain. If you use the <origin> option, it overwrites the current $ORIGIN directive. So you need to reset it, either at the bottom of the <filename> or after the $INCLUDE statement.
-	
-	The $TTL directive sets the ttl for the records that follow it. (So, it should be at the top.) It defaults to 1 day. 
+	Ths origin defaults to the domain name specired in the name servers configuration file. 
+		However you can set or change it using the $ORIGIN directive. Using the relative names 
+		instad of the FQDN saves a lot of time.
+	Many sites use $INCLUDE to keey the cryptographic keys in a file with restricted permission.  
+		This is also use to modulize the domain. If you use the <origin> option, it overwrites 
+		the current $ORIGIN directive. So you need to reset it, either at the bottom of the 
+		<filename> or after the $INCLUDE statement.
+	The $TTL directive sets the ttl for the records that follow it. (So, it should be at the top.) 
+		It defaults to 1 day. 
 
 Resource records
-	Resource records are text files for each host on your domain. The file includes the host name, the type of record, and some data values. The name field can be ommited if the value for name is the same as the line above it.
-	
-	Resource records are the lingua franca of DNS and are independent of configuration files that control DNS operations.  This is teh information the nonauthoritative caching servers cache about a domain or host.
-	
-	Each site maintians one or more pieces of the distrubuted database that make up the DNS system. Your piece of the database consist of text files that contains records for each of your hosts. These are known as "resource records". 
-	
+	Resource records are text files for **each host** on your domain. The file includes the host 
+		name, the type of record, and some data values. The name field can be ommited if the 
+		value for name is the same as the line above it.
+	Resource records are the lingua franca of DNS and are independent of configuration files that 
+		control DNS operations.  This is the information the nonauthoritative caching servers 
+		cache about a domain or host.
+	Each site maintians one or more pieces of the distrubuted database that make up the DNS system. 
+		Your piece of the database consist of text files that contains records for each of your 
+		hosts. These are known as "resource records". 
 	Each zone has a set of resource records associated with it.  
-		[<name>] [<ttl>] [<class>] <taype> data
-	<name> identifies the entity that the entry describes (usually a host or domain). A name can be relative or absolute. Absolute name have a "." at the end of them.
+		[<name>] [<ttl>] [<class>] <type> data
+	<name> 	identifies the entity that the entry describes (usually a host or domain). A name can be 
+		relative or absolute. Absolute name have a "." at the end of them.
+	<ttl> 	speciries the time to live for the reords that follow. The default is 1 day. Modifying the 
+		ttl can aid in the maintenance process if necessary.
+	<class> IN, for internet; CH, for ChaosNet (obsolete) used internally for name servers to 
+		identify themselves; HS, for Hesiod, a directory serveice used locally by some sites.
+			Administrators and hackers use the name sever version number to identify 
+				servers in need of an upgrade. 
+	<type> 	This determines the contents of the data field.  There are four groups of resource 
+		records:
+
+	Zone records:		identify domains and name servers
+		SOA	Start of authority	
+		NS	Identifies ervers, delegates subdomains
+	Baseic records:		map between name and addresses and map mail
+		A	Name to IP address translation (IPv4)
+		AAAA	Name to IP address translation (IPv6)
+		MX	Mail exchange, controles email routing
+		PTR	Pointer record, address to name server translation
+	Security records:	add authenticatoin and signatures to zone files. Security resource records 
+				require cryptographic processing and so much be managed with software tools.
+		DS	Delegation signer, a hash of child zone's key signing key
+		DNSKEY	Public key for a DNS name
+		NSEC
+		NSEC3	Next secure (version 3), used with DNSSEC for negative answer 
+		RRSIG	Signature; signed, authenticated resource record set
+		DLV	Lookaside, non root trust anchor for DNS
+		SSHFP	SSH Fingerprint, SSH host key allows verification of DNS
+		SPF	Sender policy framework, identifies mail server inhibits forgery
+		DKIM	DomainKey Identificaton Mail, verify email sender and message integrity
+	Optional records:	proivde information about host or domains
+		CNAME	Canonical name, alias or nickname for a site
+		SRV	Services, gives location of well known services
+		TXT	Text, commets or untyped information
 	
-	<ttl> speciries the time to live for the reords that follow. The default is 1 day. Modifying the ttl can aid in the maintenance process if necessary.
-	
-	<class> IN, for internet; CH, for ChaosNet (obsolete) used internally for name servers to identify themselves; HS, for Hesiod, a directory serveice used locally by some sites.
-		Administrators and hackers use the name sever version number to identify servers in need of an upgrade. 
-	
-	<type> This determines the contents of the data field.  There are four groups of resource records:
-		Zone records:		identify domains and name servers
-			SOA	Start of authority	
-			NS	Identifies ervers, delegates subdomains
-		Baseic records:		map between name and addresses and map mail
-			A	Name to IP address translation (IPv4)
-			AAAA	Name to IP address translation (IPv6)
-			MX	Mail exchange, controles email routing
-			PTR	Pointer record, address to name server translation
-		Security records:	add authenticatoin and signatures to zone files. Security resource records require cryptographic processing and so much be managed with software tools.
-			DS	Delegation signer, a hash of child zone's key signing key
-			DNSKEY	Public key for a DNS name
-			NSEC
-			NSEC3	Next secure (version 3), used with DNSSEC for negative answer 
-			RRSIG	Signature; signed, authenticated resource record set
-			DLV	Lookaside, non root trust anchor for DNS
-			SSHFP	SSH Fingerprint, SSH host key allows verification of DNS
-			SPF	Sender policy framework, identifies mail server inhibits forgery
-			DKIM	DomainKey Identificaton Mail, verify email sender and message integrity
-		Optional records:	proivde information about host or domains
-			CNAME	Canonical name, alias or nickname for a site
-			SRV	Services, gives location of well known services
-			TXT	Text, commets or untyped information
-	The order of a resource record is arbitrary. But, it's good practice to put SOA first, then NS next. Then sort by name.
-	
-	The secondary servers' zone file (resource records) are not managed manually, but programatically.  Who knows what order you'll get when you look at them.
+	The order of a resource record is arbitrary. But, it's good practice to put SOA first, then NS 
+		next. Then sort by name.
+	The secondary servers' zone file (resource records) are not managed manually, but 
+		programatically.  Who knows what order you'll get when you look at them.
 
 SOA record (Start of Authority) - 
-	The <zone name> field or <name> field sometimes contains the @ smpbol. That name of the @ symbol is the <zonw> field of the 'name.conf' and is the domain name. It also can be the <name> filed of the 'nsd.conf' file.
+	The <zone name> field or <name> field sometimes contains the @ smpbol. That name of the @ 
+		symbol is the <zonw> field of the 'name.conf' and is the domain name. It also can be 
+		the <name> filed of the 'nsd.conf' file.
 	Each zone has exactly one start of authority (SOA) record. The record includes:
 		<zone name> 	name of the zone
 		<primary NS> 	the primary name server for the zone
 		<ttl> 		ttl for NS
-		<email address>	technical contact, note this is really dns-admin@google.com. Just remove the first ",", replacing it with the @ symbol and remove the FQDN "." to send an email to the domain admin.
-		<serial number> The serial number of the zones configuration data.  The secondary servers use this number to determine when to get fresh data.
+		<email address>	technical contact, note this is really dns-admin@google.com. Just 
+				remove the first ",", replacing it with the @ symbol and remove the 
+				FQDN "." to send an email to the domain admin.
+		<serial number> The serial number of the zones configuration data.  The secondary 
+				servers use this number to determine when to get fresh data.
 		various timeout values
-			<rf>	refresh timeout value, used for the secondary sereers to know ehen to get an update. When it expires, the secondary checks the serial number of the primary. If the primary's serial number is larger, the secondary requests a zone transfer to update the data.
-			<rt> 	refresh value, specified how long a secondary should wait before checking the serial number of the primary
-			<exp> 	expire value, determines how long the secondary will serve as primary if the primary doesn't respond. It should be a week to a month (incase the primary is down for an exhorbantly long time).
-			<min> 	minimum value, is used for negative caching. This is how long a secondary will ignore a server that returned a failed query. BIND ignores values larger than 3 hours.
+			<rf>	refresh timeout value, used for the secondary servers to know when to 
+				get an update. When it expires, the secondary checks the serial number 
+				of the primary. If the primary's serial number is larger, the secondary 
+				requests a zone transfer to update the data.
+			<rt> 	retry value, specified how long a secondary should wait before checking 
+				the serial number of the primary
+			<exp> 	expiration value, determines how long the secondary will serve as 
+				primary if the primary doesn't respond. It should be a week to a month 
+				(incase the primary is down for an exhorbantly long time).
+			<min> 	minimum value, is used for negative caching. This is how long a 
+				secondary will ignore a server that returned a failed query. BIND 
+				ignores values larger than 3 hours.
 			<updt> 
 	;; Example (semeicolons ';' are comments)
 	;; AUTHORITY SECTION:
@@ -214,8 +259,9 @@ SOA record (Start of Authority) -
 	<zone name>             <ttl>	<tyep>  <class>  <primary NS>    <email address>       <serial number>   <rf> <rt> <exp> <min>
 
 NS (name server) records:
-	The name server records identify the servers that are authoriative (both primary and secondary) for a zone. These servers also delage to external organizations the subdomains within its zones.
-	
+	The name server records identify the servers that are authoriative (both primary and secondary) 
+		for a zone. These servers also delagated to external organizations the subdomains 
+		within its zones.
 	The name server record includes:
 		] $ dig NS
 		;; QUESTION SECTION:
@@ -227,42 +273,89 @@ NS (name server) records:
 .			415149	IN	NS	k.root-servers.net.
 .			415149	IN	NS	g.root-servers.net.
 .			415149	IN	NS	m.root-servers.net.
-.		any	415149	IN	NS	na1.any.root-servers.net.
+.		any	415149	IN	NS	ns1.any.root-servers.net.
 .			415149	IN	NS	ubuntu.root-servers.net.
-
-	The first 5 lines represent the name server for the a.root-servers.net. domain, specified in the SOA (start of authority) record. The name sever (just an example) is any.[fenl].root-servers.net.. Note the "." makes the domain name absolute.
-	
-	The class (IN) didn't have to be listed either.  IN is the default.
-
-
-	The 5th line delegates a subdomain to ns1.any and ubuntu.  The subdomain is called any.root-server.net.  Both, ns1.any and ubuntu are name servers.  These records are really part of the any.root-server.net subdomain, but they must appear in the parent zone, root-servers.net. in order for the delegation to work.  In a similar fashion root-server.net. must appear in .net.'s zone file to define the root-server.net's subdomain and identify its servers.
-
-	A list of the name servers in the parent's zone file should be kept up to date with those in the subdomain's zone's file. If nuone of the name servers in the parents exist in the child, the so-called lame delegation results. Extra servers in the child is ok, as long as there is at least one child server listed by the parent.
+	The first 5 lines represent the name server for the a.root-servers.net. domain, specified in 
+		the SOA (start of authority) record. The name sever (just an example) is 
+		any.[fenl].root-servers.net.. Note the "." makes the domain name absolute. The class 
+		(IN) didn't have to be listed either.  IN is the default.
+	The 5th line delegates a subdomain to ns1.any and ubuntu.  The subdomain is called 
+		any.root-server.net.  Both, ns1.any and ubuntu are name servers.  These records are 
+		really part of the any.root-server.net subdomain, but they must appear in the parent 
+		zone, root-servers.net. in order for the delegation to work.  In a similar fashion 
+		root-server.net. must appear in .net.'s zone file to define the root-server.net's 
+		subdomain and identify its servers.
+	A list of the name servers in the parent's zone file should be kept up to date with those in 
+		the subdomain's zone's file. If none of the name servers in the parents exist in the 
+		child, the so-called lame delegation results. Extra servers in the child is ok, as long 
+		as there is at least one child server listed by the parent.
 
 A records:
-	A (address) records are the heart and soul of the DNS database. They provide the mapping from hostname to IP address the was previously provided by /etc/hosts.
+	A (address) records are the heart and soul of the DNS database. They map hostnames to IP 
+		addresses, being named forwarding zones. This was previously provided by /etc/hosts.
 
 PTR records:
-	The PTR (pointer) record maps from IP address back to hostname (the reverse zone). The 189 subnet, for example, has a zone name of 189.173.63.in-addr.arpa. The pointer recordr for 189.173.63.in-addr.arpa is:
+	The PTR (pointer) record maps from IP address back to hostname (the reverse zone). The 189 
+		subnet, for example, has a zone name of 189.173.63.in-addr.arpa. The pointer record 
+		for 189.173.63.in-addr.arpa is:
 				1		IN 		PTR 	any.root-server.com
-	Since the name 1 does not end in a dot, it is a relative.  But relative to what? Not any.root-server.com -- for this to be accurate, the default zone has to be 183.173.63.in-addr.arpa. .
-
-	Another way to do reverse matching is to put the records such as [ 1 89		IN  PTR. any.root-server.com. ] in the zone 173.63.in-addr.arpa. . Since root-server.com and 173.63.in-addr.arpa. are two different regions of the DNS namespace, they each have their own start of authority (SOA) and resource records. They represent two different zones.
-
-	It is important that A records match their corresponding PTR records. Mismatched PTR records can cause authentication errors that bring you network to a crawl.
+	Since the name 1 does not end in a dot, it is a relative.  But relative to what? Not 
+		any.root-server.com -- for this to be accurate, the default zone has to be 
+		183.173.63.in-addr.arpa. .
+	Another way to do reverse matching is to put the records such as 
+		[ 1 89		IN  PTR. any.root-server.com. ] in the zone 
+		173.63.in-addr.arpa.. Since root-server.com and 173.63.in-addr.arpa. are two different 
+		regions of the DNS namespace, they each have their own start of authority (SOA) and 
+		resource records. They represent two different zones.
+	It is important that A records match their corresponding PTR records. Mismatched PTR records 
+		can cause authentication errors that bring you network to a crawl.
 
 MX records:
-	The mail system uses mail exchanger [MX] record to rout mail more efficiently.  This system puts the flow of mail under the control of the system admin instead of senders. It's format is
+	The mail system uses mail exchanger [MX] record to route mail more efficiently.  This system 
+		puts the flow of mail under the control of the system admin instead of senders. It's 
+		format is
 			<name>	[ttl]	[IN]	MX	<preference> <host>
 
-	The records below route mail addressed to user@somehost.atrust.com to the machine mailhost.atrust.com. If that machine is not available, the mail goes to mail-relay.atrust.com. If both machines faile, the mail is routed to the requested host: somehost.atrust.com.
+	The records below route mail addressed to user@somehost.atrust.com to the machine 
+		mailhost.atrust.com. If that machine is not available, the mail goes to 
+		mail-relay.atrust.com. If both machines faile, the mail is routed to the requested 
+		host: somehost.atrust.com.
 			somehost	IN 	MX 	10 mailhost.atrust.com.
-						IN 	MX 	20 mail-relay.atrust.com.
-
-	Every host the outside world knows about shoudl have an MX record. Host that can never or should never receive email (e.g. network printers) should also have a MX record. Avoid wildcard MX records. It sends every other domain to that MX subnet.
+					IN 	MX 	20 mail-relay.atrust.com.
+	Every host the outside world knows about should have an MX record. Host that can never or 
+		should never receive email (e.g. network printers) should also have a MX record. Avoid 
+		wildcard MX records. It sends every other domain to that MX subnet.
 
 CNAME records:
 	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
