@@ -4,8 +4,8 @@ This information was gather from reading Learning Angular JS: A Guide to Angular
 *
 *
 ****    Chapter 1 - Introduction to AngularJS    ****
-Single-page application (SPA) s are applications that have one entry point HTML page; all the application content is dynamically added to and removed from that one page.
-
+Single-page applications (SPAs) are applications that have one entry point HTML page; all the application content 
+	is dynamically added to and removed from that one page.
 The tag <div ngview></div> is where all dynamic content is inserted into index.html.
 			<!-- chapter1/index.html -->
 			<!DOCTYPE html>
@@ -28,10 +28,12 @@ The tag <div ngview></div> is where all dynamic content is inserted into index.h
 					<div ng-view></div>
 				</body>
 			</html>
-
-As the user clicks on links in the application, existing content attached to the tag is removed and new dynamic content is then attached to the same tag. Rather than the user waiting for a new page to load, new content is dynamically displayed in a fraction of the time that it would take to load a new HTML web page.
-
-Bootstrapping AngularJS is the process of loading AngularJS when an application first starts. 'app.js' is where the AngularJS application helloWorldApp is defined as an AngularJS module, and this is the entry point into the application. 
+As the user clicks on links in the application, existing content attached to the tag is removed and new dynamic 
+	content is then attached to the same tag. Rather than the user waiting for a new page to load, new content 
+	is dynamically displayed in a fraction of the time that it would take to load a new HTML web page.
+Bootstrapping AngularJS is the process of loading AngularJS when an application first starts. 'app.js' is where the 
+	AngularJS application helloWorldApp is defined as an AngularJS module, and this is the entry point into the 
+	application. 
 			/* chapter1/app.js excerpt */
 			'use strict';
 			/* App Module */
@@ -39,12 +41,14 @@ Bootstrapping AngularJS is the process of loading AngularJS when an application 
 				'ngRoute',
 				'helloWorldControllers'
 			]);
-
-Dependency injection (DI) is a design pattern where dependencies are defined in an application as part of the configuration. Two dependencies (a route and controller) are defined as needed by the helloWorldApp application at startup. The dependencies are defined in an array in the module definition.
-
-Dependency injection also helps to make an application more testable. That is one of the main advantages of using AngularJS to build JavaScript applications. AngularJS applications are much easier to test than applications written with most JavaScript frameworks.
-
-AngularJS routes are defined through the '$routeProvider' API. Two routes are defined — the first is '/' and the second is '/show'. The two defined routes map directly to URLs defined in the application. 
+Dependency injection (DI) is a design pattern where dependencies are defined in an application as part of the 
+	configuration. Two dependencies (a route and controller) are defined as needed by the helloWorldApp 
+	application at startup. The dependencies are defined in an array in the module definition.
+Dependency injection also helps to make an application more testable. That is one of the main advantages of 
+	using AngularJS to build JavaScript applications. AngularJS applications are much easier to test than 
+	applications written with most JavaScript frameworks.
+AngularJS routes are defined through the '$routeProvider' API. Two routes are defined — the first is '/' and 
+	the second is '/show'. The two defined routes map directly to URLs defined in the application. 
 			/* chapter1/app.js complete file */
 			'use strict';
 
@@ -65,36 +69,52 @@ AngularJS routes are defined through the '$routeProvider' API. Two routes are de
 						});
 			$locationProvider.html5Mode(false).hashPrefix('!');
 			}]);
-
-The last line in app.js '($locationProvider.html5Mode(false).hashPrefix('!');)' uses the locationProvider service. This line of code turns off the HTML5 mode and turns on the hashbang mode of AngularJS. If you were to turn on HTML5 mode instead by passing true, the application would use the HTML5 History API. HTML5 mode also gives the application pretty URLs like /someAppName/blogPost/5 instead of the standard AngularJS URLs like /someAppName/#!/blogPost/5 that use the #!, known as the hashbang.
-
-HTML5 mode does require configuration changes on the web server in most cases. HTML5 mode also handles URL by using the HTML History API for navigation. 
-
-Hashbang mode is used to support conventional search engines that don’t have the ability to execute JavaScript on Ajax sites like those built with AngularJS. Conventional search engines expect the server to have HTML snapshots, which are merely copies of the HTML rendered version of the website or application.
-
-Fortunately, modern search engines have the ability to execute JavaScript. Hashbang mode also allows AngularJS applications to store Ajax requested pages in the browser’s history. That process often simplifies browser bookmarks.
-
-
-Templates are code sections that contain HTML code that are bound to the <div ng-view></div></div> tag shown in the index.html file. The app.js file, you can see that different 'templateUrl' values are defined for each route.
-
-AngularJS’s built-in template language can display dynamic data in templates.
-
-As the user clicks on the different links, the value assigned to <div ng-view> is replaced with the content of the associated template files. The value ofvcontroller defined for each route references the controller component (of the MVC pattern) that is defined for each particular route.
-
-Unlike most JavaScript client-side frameworks, AngularJS provides the model, view, and controller components for use in all applications. 
-
-Many JavaScript client-side frameworks require you to actually define the view classes in JavaScript. Such is not the case with AngularJS. AngularJS pulls in all the templates defined for an application and builds the views in the document object model (DOM) for you. Therefore, the only work you need to do to build the views is to create the templates.
-
-Many JavaScript client-side frameworks also require you to create JavaScript model
-classes. AngularJS has a $scope object that is used to store the application model. Scopes are attached to the DOM. The way to access the model is by using data properties assigned to the $scope object.
-
-AngularJS controllers are the tape that holds the models and views together. The controller is where you should place all business logic specific to a particular view when it’s not possible to place the logic inside a REST service. Business logic should almost always be
-placed in backend REST services whenever possible; this helps to simplify AngularJS
-applications.
-
-When business logic placed inside an application is used by multiple controllers, it should be placed in AngularJS non-REST services instead. Those services can then be injected into any controller that needs access to the logic.
-
-The following code shows the contents of the controllers.js file. At the start of the file we define the helloWorldController module. We then define two new controllers, MainCtrl and ShowCtrl, and attach them to the helloWorldController module. Business logic specific to the MainCtrl controller is defined inside that controller. Likewise, business logic specific to the ShowCtrl controller is defined inside the ShowCtrl controller. The $scope that is injected into each controller is specific to that controller and not visible to other controllers.
+The last line in app.js '($locationProvider.html5Mode(false).hashPrefix('!');)' uses the locationProvider 
+	service. This line of code turns off the HTML5 mode and turns on the hashbang mode of AngularJS. If 
+	you were to turn on HTML5 mode instead by passing true, the application would use the HTML5 History 
+	API. HTML5 mode also gives the application pretty URLs like /someAppName/blogPost/5 instead of the 
+	standard AngularJS URLs like /someAppName/#!/blogPost/5 that use the #!, known as the hashbang.
+HTML5 mode does require configuration changes on the web server in most cases. HTML5 mode also handles URL by 
+	using the HTML History API for navigation. 
+Hashbang mode is used to support conventional search engines that don’t have the ability to execute JavaScript on 
+	Ajax sites like those built with AngularJS. Conventional search engines expect the server to have HTML 
+	snapshots, which are merely copies of the HTML rendered version of the website or application.
+Fortunately, modern search engines have the ability to execute JavaScript. Hashbang mode also allows AngularJS 
+	applications to store Ajax requested pages in the browser’s history. That process often simplifies 
+	browser bookmarks.
+AngularJS Templates (Templates are the views):
+	Templates are code sections that contain HTML code that are bound to the <div ng-view></div> tag shown 
+		in the index.html file. In the app.js file, you can see that different 'templateUrl' values 
+		are defined for each route. AngularJS’s built-in template language can display dynamic data in 
+		templates.
+	As the user clicks on the different links, the value assigned to <div ng-view> is replaced with the 
+		content of the associated template files. The value of the controller defined for each route 
+		references the controller component (of the MVC pattern) that is defined for each particular 
+		route.
+	Unlike most JavaScript client-side frameworks, AngularJS provides the model, view, and controller 
+		components for use in all applications.
+	Many JavaScript client-side frameworks require you to actually define the view classes in JavaScript. 
+		Such is not the case with AngularJS. AngularJS pulls in all the templates defined for an 
+		application and builds the views in the document object model (DOM) for you. Therefore, the 
+		only work you need to do to build the views is to create the templates.
+AngularJS Models (MVC) ($scope is the model):
+	Many JavaScript client-side frameworks also require you to create JavaScript model classes. AngularJS 
+		has a $scope object that is used to store the application model. Scopes are attached to the DOM. 
+		The way to access the model is by using data properties assigned to the $scope object.
+AngularJS Controllers (MVC):
+	AngularJS controllers are the tape that holds the models and views together. The controller is where you 
+		should place all business logic specific to a particular view when it’s not possible to place the 
+		logic inside a REST service. Business logic should almost always be placed in backend REST 
+		services whenever possible; this helps to simplify AngularJS applications.
+	When business logic placed inside an application is used by multiple controllers, it should be placed in 
+		AngularJS non-REST services instead. Those services can then be injected into any controller that 
+		needs access to the logic.
+	The following code shows the contents of the controllers.js file. At the start of the file we define the 
+		helloWorldController module. We then define two new controllers, 'MainCtrl' and 'ShowCtrl', and 
+		attach them to the helloWorldController module. Business logic specific to the 'MainCtrl' 
+		controller is defined inside that controller. Likewise, business logic specific to the 
+		'ShowCtrl' controller is defined inside the ShowCtrl controller. The $scope that is injected 
+		into each controller is specific to that controller and not visible to other controllers.
 			/* chapter1/controllers.js */
 			'use strict';
 			/* Controllers */
@@ -110,11 +130,14 @@ The following code shows the contents of the controllers.js file. At the start o
 				function ShowCtrl($scope) {
 					$scope.message = "Show The World";
 			}]);
-As you can see, we are now using the model to populate the messages that get displayed in the templates. The following code shows the modified templates that use the newly created model values. The line $scope.message = "Hello World" in the MainCtrl controller is used to create a property named message that is added to the scope (which holds the model attributes).
+As you can see, we are now using the model to populate the messages that get displayed in the templates. The 
+	following code shows the modified templates that use the newly created model values. The line 
+	$scope.message = "Hello World" in the 'MainCtrl' controller is used to create a property named message 
+	that is added to the scope (which holds the model attributes).
 			<!-- chapter1/main.html -->
-			<div>{{message}}</div>
+			<div>{{ message }}</div>
 			<!-- chapter1/show.html -->
-			<div>{{message}}</div>
+			<div>{{ message }}</div>
 Using double curly braces is AngularJS’s way of displaying scope properties in the view. 
 
 
