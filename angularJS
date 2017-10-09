@@ -139,29 +139,487 @@ As you can see, we are now using the model to populate the messages that get dis
 			<!-- chapter1/show.html -->
 			<div>{{ message }}</div>
 Using double curly braces is AngularJS’s way of displaying scope properties in the view. 
+*************************************************************
+*															*
+*															*
+*															*
+****    Chapter 2 - The IDE and AngularJS Projects    *******
+Testing AngularJS Applications in the IDE
+	To enable the chrome bar for debugging go to 'chrome://flags/#silent-debugger-extension-api'.
+
+	There are two types of tests that are used for testing AngularJS applications. The first type of test is the unit test. The second type of test is end-to-end (E2E) testing. E2E testing helps to identify software defects by testing how components connect and interact together as a whole.
+
+	NetBeans can easily work with both JsTestDriver and Karma for unit testing AngularJS applications. Protractor is the most popular test framework for E2E testing of AngularJS applications. NetBeans currently has no support for Protractor. 
+
+	Both Karma and Protractor run on Node.js. Node.js is an open source cross-platform framework built on the Google V8 JavaScript engine. Installing Karma and Protractor is a relatively easy process that uses the Node.js package manager (npm) for the installation process.
+
+	Node.js-based projects use a JSON file named package.json as the project configuration file. The following is a standard package.json file used in a NetBeans project. If you look at the dependencies section of the file, you will see that we actually define Karma as a dependency of the application. That is because Karma is usually installed locally at the project level for each individual project: 
+			{"chapter": 2, "name": "package.json"},
+
+			{
+			    "name": "UlboraCmsMean",
+			    "version": "2.0.0",
+			    "description": "UlboraCms",
+			    "keywords": [
+			        "Ulbora CMS",
+			        "Node.js",
+			        "Ken",
+			        "Williamson",
+			        "micbutton.com"
+			    ],
+			    "author": {
+			        "name": "Ken Williamson",
+			        "email": "sales@drivensolutions.com",
+			        "url": "http://www.drivensolutions.com/"
+			    },
+			    "homepage": "http://www.ulboracms.org",
+			    "repository": {
+			        "type": "git",
+			        "url": "https://github.com/Ulbora/ulboracms"
+			    },
+			    "engines": {
+			        "node": ">= 0.6.0",
+			        "npm": ">= 1.0.0"
+			    },
+			    "dependencies": {
+			        "express": "~3.4.4",
+			        "mongoose": "*",
+			        "atob": "*",
+			        "btoa": "*",
+			        "node-rest-client": "*",
+			        "consolidate": "*",
+			        "ejs": "*",
+			        "handlebars": "*",
+			        "nodemailer": "*",
+			        "karma": "*"
+			    },
+			    "bundleDependencies": [],
+			    "private": true,
+			    "main": "./server.js",
+			    "bugs": {
+			        "url": "null"
+			    }
+			}
+	A file similar to this one will be used later in the book when we build the MEAN stack blog application. NetBeans, using a Node.js plugin, can generate the package.json file for you. The generated file will need to be modified to include the specifics of your particular project.
+
+	You can also use 'npm init' to generate the package.json file. After typing 'npm init' at the command prompt, you will be presented with a few questions. Your responses will then be used to create a default 'package.json' file.
+
+	NetBeans has built-in support for JsTestRunner. The JsTestRunner configuration file can be generated and requires few changes to get unit testing running on your local environment. Unlike Karma, JsTestRunner is not based on Node.js.
+
+JsTestRunner
+	The following is a standard JsTestRunner configuration file created by NetBeans for an AngularJS project. Notice in the first line that the test server URL and port are specified:
+			/* chapter2/jsTestDriver.conf */
+			server: http://localhost:42442
+			load:
+			- test/lib/jasmine/jasmine.js
+			- test/lib/jasmine-jstd-adapter/JasmineAdapter.js
+			- public_html/js/libs/angular.min.js
+			- public_html/js/libs/angular-mocks.js
+			- public_html/js/libs/angular-cookies.min.js
+			- public_html/js/libs/angular-resource.min.js
+			- public_html/js/libs/angular-route.min.js
+			- public_html/js/*.js
+			- test/unit/*.js
+			exclude:
+
+The locations of the test library files are specified under load. We also specify the locations of each unit test script that should be run by JsTestDriver. Test filenames usually end with “Spec.” 
+			/* chapter2/controllerSpec.js */
+			/* Jasmine specs for controllers go here */
+
+Karma Test Runner
+	The Karma team recommends installing Karma locally at the project level. So, we will add Karma in the 'package.json' file of each of our projects, then use the following command to pull down and install Karma on a per-project basis:
+				npm install
+	When you run this command, 'npm' reads the 'package.json' file and installs the packages defined in the dependencies section of the file. After you run the command, Karma will be located under the node_modules folder within your project folder. Any other Node.js dependencies defined in the package.json file will also be located under the node_modules folder.
+
+	Karma requires a configuration file named 'karma.conf.js' that specifies how it should run unit tests. 
+				./node_modules/body-parser/node_modules/debug/karma.conf.js
+				./node_modules/finalhandler/node_modules/debug/karma.conf.js
+				./node_modules/follow-redirects/node_modules/debug/karma.conf.js
+				./node_modules/fsevents/node_modules/debug/karma.conf.js
+				./node_modules/karma/node_modules/debug/karma.conf.js
+				./node_modules/mquery/node_modules/debug/karma.conf.js
+	You can use NetBeans to generate the 'karma.conf.js' file. The following code shows a Karma configuration file generated by NetBeans. You can see there are sections of the file to specify the locations of library files, test scripts, and browser plugins:
+				/* chapter2/karma.conf.js */
+				/*
+				* To change this license header, choose License Headers in
+				* Project Properties.
+				* To change this template file, choose Tools -> Templates
+				* and open the template in the editor.
+				*/
+				module.exports = function (config) {
+					config.set({
+						basePath: '../',
+						files: [
+						],
+						exclude: [
+						],
+						autoWatch: true,
+						frameworks: [
+						],
+						browsers: [
+						],
+						plugins: [
+						]
+					});
+				};
+Protractor
+	Protractor is a Node.js-based framework, just like Karma. Protractor is built on top of WebDriverJS. The Protractor team recommends installing Protractor globally on your system. To install Protractor on your development machine, issue the following command. Notice the -g flag in the command line — that tells npm to install Protractor globally for all projects and applications to use:
+			[20171007-13:52:43 syeedode:~/angular_projects/angular-js-scratchwork/AngularJsProject master*] $ npm install -g protractor
+					/usr/local/bin/protractor -> /usr/local/lib/node_modules/protractor/bin/protractor
+					/usr/local/bin/webdriver-manager -> /usr/local/lib/node_modules/protractor/bin/webdriver-manager
+			+ protractor@5.1.2
+			added 126 packages in 7.673s
+	Since Protractor is built on WebDriverJS, we must also configure WebDriverJS for our test environment. Run this command to update WebDriverJS with all the latest binaries:
+			[20171007-13:53:03 syeedode:~/angular_projects/angular-js-scratchwork/AngularJsProject master*] $ webdriver-manager update
+				[14:25:26] I/file_manager - creating folder /usr/local/lib/node_modules/protractor/node_modules/webdriver-manager/selenium
+				[14:25:27] I/update - chromedriver: unzipping chromedriver_2.33.zip
+				[14:25:27] I/update - chromedriver: setting permissions to 0755 for /usr/local/lib/node_modules/protractor/node_modules/webdriver-manager/selenium/chromedriver_2.33
+				[14:25:27] I/update - geckodriver: unzipping geckodriver-v0.19.0.tar.gz
+				[14:25:27] I/update - geckodriver: setting permissions to 0755 for /usr/local/lib/node_modules/protractor/node_modules/webdriver-manager/selenium/geckodriver-v0.19.0
+	Once that command executes successfully, run the following command to start the Selenium Server that WebDriverJS uses to run Protractor test scripts:
+				webdriver-manager start
+	Protractor needs a configuration file that tells it how to run test scripts. Here are the contents of the 'conf.js' file used to configure Protractor:
+				/* chapter2/conf.js Protractor configuration file */
+				exports.config = {
+					seleniumAddress: 'http://localhost:4444/wd/hub',
+					specs: ['blog-spec.js']
+				};
+	Once Protractor is installed and configured on your system, all that is left is to create the test scripts (test specifications) and run the scripts. Here’s a sample script for a Protractor test:
+				/* chapter2/blog-spec.js */
+				describe('MEAN Blog', function() {
+					it('test the MEAN Blog', function() {
+						browser.get('http://localhost:8080');
+						
+						element(by.model('blogList'))
+							.sendKeys('this is a blog post');
+
+						element(by.css('[value="add"]')).click();
+						
+						var blogList = element.all(by.repeater('blog in blogs'));
+						
+						expect(blogList.count()).toEqual(3);
+						
+						expect(blogList.get(2)
+							.getText())
+							.toEqual('this is a blog post');
+					});
+				});
+To run Protractor, issue the following command. Once you run the command, the browser window should open and display the test results:
+				protractor conf.js
+*************************************************************
+*															*
+*															*
+*															*
+****    Chapter 3 - MVC and AngularJS   *********************
+There are two advantages for using angular: 1) Support for mobile devices and 2) quicker development time adn quicker testing time because of the use of JavaScript. The second benefit has an addtional benefit of faster CI time.
+
+AngularJS presents a new and powerful way to develop web applications and websites — it has the power and functionality of conventional web frameworks, but with many advantages. AngularJS provides a way to build web apps and sites without the overhead normally associated with web frameworks.
+
+Conventional web frameworks often tolerate server-side page scripting using PHP, Active Server Pages (ASP), and Java Server Pages (JSP). Conventional web frameworks tend to run slower and be sluggish on mobile devices. And mobile users have a much lower tolerance for system delays and slow page loads than desktop users.
+
+The Old Way
+	Web MVC frameworks such as Apache Struts, Ruby on Rails, CakePHP, Spring MVC, and the Zend Frameworkvdominated the web development framework space for more than 15 years. Web MVC frameworks reside entirely on the server. All functions such as database access, business logic, display logic, and UI activities happen on the server, using server memory and resources. Web MVC frameworks often use various page scripting techniques such as ASP, JSP, and PHP to control presentation logic, and in some cases business logic is also placed inside the pages.
+
+	The application or website runs on the backend server, and only the web browser runs on the user’s hardware. Although the design is old technology, it is still in heavy use today.
+
+	Although the design works well in many situations, it does have several flaws. One such design flaw is related to mobile applications and mobile websites. The application or site developer has very little control over the mobile device’s web browser.
+
+	A user must find the site or application and enter its URL into the browser’s address bar in order to view the web page or to run the application. Mobile users, however, often find that process too time-consuming..
+
+	A mobile developers need to build custom device applications and have those applications distributed via the various online stores. As the number of mobile devices in use increases, the demand for custom mobile applications will also increase. A user with a small smartphone should have the same user experience as a user with a 10-inch tablet..
+
+	An application developer or architect attempting a mobile design has two choices to consider..
+
+	Choice One
+		The first option is to build a custom mobile application as a “wrapper” around the conventional site. This option has an Android application designed as a wrapper application. The Android application consists solely of an Android 'WebView' component that is configured to point to the web application URL. 
+
+						Android Mobile Application
+	---------------------------------------------------------------
+	-						Native Android Code					  - 
+	-	--------------------------------------------------------- -
+	-	-					wrapper 							- -	w
+	-	-	-------------------------------------------------	- -	e
+	-	-	-												-	- -	b
+	-	-	-			Android WebView			<----->		=	- -	a
+	-	-	-												-	- -	p
+	-	-	-------------------------------------------------	- -	p
+	-	--------------------------------------------------------- -
+	-															  -
+	---------------------------------------------------------------
+		The WebView component serves as a browser control inside the Android application. The developer can custom-configure the WebView component for the needs of the particular mobile application. All application operations still, however, run on the backend server (the web server), and the speed and responsiveness of the Android application are still highly dependent on that server and the quality of the user’s Internet connection.
+
+		The following code shows a segment of an Android main Activity. A new Android 'WebView' object is first instantiated. JavaScript is then enabled for the new instance. Finally, the URL of the website is loaded into the new instance with the loadUrl method:
+				/* chapter3 excerpt from an Android WebView shown loading a
+				conventional website */
+				WebView webview = new WebView(this);
+				webview.getSettings().setJavaScriptEnabled(true);
+				final Activity activity = this;
+				webview.setWebViewClient(new WebViewClient() {
+				webview.loadUrl("http://www.google.com");
+		The WebView instance shown here is just a control for the device’s internal web browser. The Android device’s browser is completely dependent on the website for functionality. If the website that is linked to goes down or the network connection is lost, the user’s browser will hang and completely stop working
+
+	Choice Two
+		The second option would require the developer to write a native or HTML5 mobile application that called web services on the backend for business functions. 
+
+		This approach would require adding REST web services to the existing web application to make use of existing business logic. Option two is, in effect, a complete rewrite of the application.
+
+		Option two would, however, offer the best application design and would provide the best user experience.
+
+		Fifteen years ago, when mobile devices were not in heavy use, that design was a common choice for application developers and architects.  Mobile device sales reached an all-time high in 2014, however, and most analysts predict that trend will only increase in the coming years.
+
+		AngularJS is a solid foundation for building scalable applications that run well on desktops and a broad array of mobile devices, with few if any modifications needed for each platform.
+
+A New and Better Way
+	AngularJS is a JavaScript MVC framework that cuts development time for both web applications and mobile applications that run on multiple device platforms.
+
+	AngularJS application that uses business logic that’s exposed through REST web services. Two popular frameworks used to build REST services are the Spring framework, written in Java, and ExpressJS for Node.js.
+
+	In this design option, the entire AngularJS application runs on the user’s hardware, in the user’s web browser. That may be a desktop browser or the browser of a mobile device.
+
+	With this design we shift the display logic from the server to the user’s hardware, resulting in a much better user experience. The application runs faster and is much more responsive — more like a thick-client or native application than a browser-based application. AngularJS applications harness the power of the user’s hardware.
+
+	The final option is the same AngularJS application deployed as part of an Android application. JavaScript, CSS3, and HTML5 code is all the same regardless of where the application is deployed. Not only does the design produce a better user experience, but it also cuts development time significantly. And as with the web browser design option, the application runs entirely on the user’s hardware, shifting the load from the server to the user’s device.
+
+Testing Considerations
+	The ability to effectively and easily test AngularJS applications is one of the strongest motivators for using the framework. Not only are AngularJS applications faster to write, but they are also much faster and easier to test than conventional web framework–based applications. Here is why.
+
+	Test scripts for AngularJS, known as test specifications, are always written in JavaScript.  One more thing: JavaScript tests run faster than tests written for conventional web frameworks. That is very important when a continuous integration system is used.
+
+	The two most popular test frameworks used for client-side JavaScript and AngularJS, Karma and Protractor, run on the Node.js framework. Applications and test scripts that run on Node.js run extremely fast.  JavaScript testing is faster in a CI environment like Travis CI and Jenkins.
+
+Responsive Design Considerations
+	Another consideration when you are comparing traditional web frameworks to AngularJS
+is how well responsive design is accomplished. A strong responsive design looks good
+both on a desktop and on all mobile devices that use the software
+	
+	Take, for example, CSS3 with a server-side application written with CakePHP, a web MVC framework. An application styled with this code would look fine on a desktop, and maybe a tablet. There would be major styling issues with a small mobile device, however. A mobile wrapper application like the one I mentioned earlier that wrapped a website that used this code would be at a great disadvantage. You could never make the application look good on a small phone.
+	
+	A mobile application built with AngularJS has media query lines like '@media screen' and '(min-width: 1200px)'' that wrap parts of the CSS3. Media queries let developers style AngularJS applications to specific screen sizes
+
+	If the web application written in CakePHP had been written with AngularJS, it would have been a simple task to convert the AngularJS application into a mobile application. The development team could then have fixed the CSS3 issues and been done. The application written with CakePHP had to be completely rewritten, however.
+*************************************************************
+*															*
+*															*
+*															*
+****    Chapter 4 - AngularJS Controllers      **************
+Controllers
+really have two primary responsibilities in an application. First, controllers should be used to initialize the model scope properties. These properties can be, then passed to the view (templates/parials).  The second primary use for controllers is adding behavior to the '$scope' object. 
+
+AngularJS controllers are at the center of AngularJS applications and are probably the most important component to understand. AngularJS clearly defines controllers, and controllers are at the center of AngularJS applications. Almost everything that happens in an AngularJS application passes through a controller at some point.
+
+Dependency injection is used to add the needed dependencies, as shown in the following example file, which illustrates how to create a new controller:
+		/* chapter4/controllers.js - a new controller */
+		var addonsControllers = angular.module('addonsControllers', []);
+
+		addonsControllers.controller('AddonsCtrl',
+			[	'$scope', 
+				'checkCreds', 
+				'$location', 
+				'AddonsList', 
+				'$http', 
+				'getToken',
+				function AddonsCtrl($scope, checkCreds, $location, AddonsList, $http, getToken) {
+					if (checkCreds() !== true) {
+						$location.path('/loginForm');
+					}
+
+					$http.defaults.headers.common['Authorization'] = 'Basic ' + getToken();
+					
+					AddonsList.getList({},
+						function success(response) {
+							console.log("Success:" +
+							JSON.stringify(response));
+							$scope.addonsList = response;
+						},
+						function error(errorResponse) {
+							console.log("Error:" +
+							JSON.stringify(errorResponse));
+						}
+					);
+
+					$scope.addonsActiveClass = "active";
+		}]);
+
+In this code, we first create a new module named addonsController by making a call to the module method of angular. 
+			var helloWorldControllers =  angular.module('helloWorldControllers', []);
+
+On the second line, we create a new controller named AddonsCtrl by calling the controller method of the addonsControllers module. 
+			addonsControllers.controller('AddonsCtrl',
+
+Doing that attaches the new controller to that module. All controllers created in the controllers.js file will be added to the addonsControllers module.
+			addonsControllers.controller('<controllerCreated>',
+
+Also notice the line console.log("Success:" + JSON.stringify(response)). Most modern browsers have accompanying developer tools that give developers easy access to the JavaScript console. This line uses the JSON.stringify method to log the JSON that’s returned from the web service to the JavaScript console. Developers can easily use the JavaScript console to troubleshoot REST service issues by viewing the JSON logged in the success callback function, or in the error callback function if a service call fails.
+
+The following code is an excerpt of the previous file. It shows how we use dependency injection to add dependencies to the new controller. This code shows $scope, checkCreds, $location, AddonsList, $http, and getTokens as dependencies for the new controller
+		/* chapter4/controllers.js excerpt */
+		/* using dependency injection */
+		['$scope', 'checkCreds', '$location', 'AddonsList', '$http', 'getToken',
+			function AddonsCtrl($scope, checkCreds, $location, AddonsList,, $http, getToken) {
+		}
+
+Initializing the Model ('$scope') with Controllers
+	AngularJS controllers have two primary duties in an application. First, controllers should be used to initialize the model scope properties. When a controller is created and attached to the DOM, a child scope is created. The child scope holds a model used specifically for the controller to which it is attached. You can access the child scope by using the $scope object.
+
+	Model properties can be added to the scope, and once added they are available inside the view templates. The controller code shown here illustrates how to add two properties to the scope. After adding the customer name and customer number to the scope, both are available to the view and can be accessed with double curly braces:
+				/* chapter4/controllers.js excerpt */
+				helloWorldControllers.controller('CustomerCtrl', ['$scope',
+					function CustomerCtrl($scope) {
+						$scope.customerName = "Bob's Burgers";
+						$scope.customerNumber = "44522";
+				}]);
+		
+				<!-- chapter4/partials/customer.html -->
+				<div><b>Customer Name:</b> {{customerName}}</div>
+				<div><b>Customer Number:</b> {{customerNumber}}</div>
+
+Adding Behavior with Controllers
+	The second primary use for controllers is adding behavior to the $scope object. We add behavior by adding methods to the scope, as shown in the following controller code. . Here, we attach a changeCustomer method to $scope so that it can be invoked from inside the view. By doing this, we are adding behavior that allows us to change the customer name and customer number:
+			$scope.changeCustomer = function () {
+			    $scope.customerName = $scope.cName;
+			    $scope.customerNumber = $scope.cNumber;
+			};
+
+	The following code shows the customer.html file and the changes needed in the view to make use of the new behavior that was just added. We add two new properties to the model by using ng-model="cName" and ng-model="cNumber". We use ngclick="changeCustomer();" to invoke the new changeCustomer method that is attached to the scope:
+				<form>
+				    <div>
+				        <input type="text" ng-model="cName" required/>
+				    </div>
+				    
+				    <div>
+				        <input type="number" ng-model="cNumber" required/>
+				    </div>
+				    
+				    <div>
+				        <button ng-click="changeCustomer();">Change Customer</button>
+				    </div>
+				</form>
+	Once the changeCustomer method is invoked, the new properties are attached to $scope and available to the controller. As you can see, we simply assign the two new properties bound to the model back to the original two properties, customerName and customerNumber, inside the changeCustomer method. Both ng-model and ng-click are AngularJS directives.
+
+Controller Business Logic
+	Controllers are used as just demonstrated to add business logic to an application. Business logic added in the controller, however, should be specific to the view associated with that one controller and used to support some display logic functionality of that one view. Any business logic that can be pushed off the client-side application should be implemented as a REST service and not actually inside the AngularJS application.
+
+	There is one caveat to this concept, however: REST services must have a response time of two (2) seconds or less. Long-running services will only cause delays in the UI and make for a bad user experience. 
+
+	Business logic that can’t be placed in REST services but needs to be available to multiple controllers should not be placed in the controller but should instead be placed in AngularJS non-REST services. Business logic that is placed in the controller should be simple logic that relates only to the controller in which it is defined.
+
+Presentation Logic and Formatting Data
+	Presentation logic should not be placed inside the controller but instead should be placed in the view. AngularJS has features especially designed for formatting data, and that’s where data formatting should take place.
+
+	As you can see, we use standard HTML for the form with nothing really special except the directives. The directive ng-submit binds the method named submit, defined in the AddCustomerCtrl controller, to the form for form submission. The ng-model directive binds the two input elements to scope properties.
+					<form ng-submit="submit()" ng-controller="AddCustomerCtrl">					    
+					    <div>
+					        <input type="text" ng-model="cName" required/>
+					    </div>
+					    <div>
+					        <input type="text" ng-model="cCity" required/>
+					    </div>
+					    <div>
+					        <button type="submit">Add Customer</button>
+					    </div>
+					</form>
+
+	Two or more controllers can be applied to the same element, and we can use controller as to identify each individual controller. The following code shows how controller as is used. You can see that addCust identifies the AddCustomerCtrl controller. We use addCust to access the properties and methods of the controller, as shown:
+				<!-- chapter4/partials/newCustomer.html (with controller as) -->
+				<form ng-submit="addCust.submit()" ng-controller="AddCustomerCtrl as addCust">
+					<div>
+						<input type="text" ng-model="addCust.cName" required/>
+					</div>
+					<div>
+						<input type="text" ng-model="addCust.cCity" required/>
+					</div>
+					<div>
+						<button id="f1" type="submit" >Add Customer</button>
+					</div>
+				</form>
 
 
+Using Submitted Form Data
+	In the code segment below, you can see there are two parameters, customer and city, for the addedCustomer route. The values are passed as arguments to a new controller, AddedCustomerCtrl, shown in the following excerpt. We use the $routeParams service in the new controller to get access to the values passed as path parameter arguments in the URL.
+				}).when('/addedCustomer/:customer/:city', {
+					templateUrl: 'partials/addedCustomer.html',
+					controller: 'AddedCustomerCtrl'
+				});
+				/* chapter4/controllers.js excerpt */
+				helloWorldControllers.controller('AddedCustomerCtrl',
+					['$scope', '$routeParams',
+					 function AddedCustomerCtrl($scope, $routeParams) {
+						$scope.customerName = $routeParams.customer;
+						$scope.customerCity = $routeParams.city;
+				}]);	
 
+JS Test Driver
+	NetBeans has a great testing environment for both JS Test Driver and Karma. We will focus first on JS Test Driver for unit testing. We will then take a look at Karma for unit testing.
 
+	The rest of this chapter will cover setting up a test environment and testing AngularJS controllers. We will focus first on setting up JS Test Driver for unit testing. 
 
+		1) Download the JS Test Driver JAR.
+		2) In the Services tab, right-click “JS Test Driver” and click “Configure”. 
+		3) Select the location of the JS Test Driver JAR just downloaded and choose the browser of your choice. 
+		4) Right-click the project node, then click “New”→“Other”→“Unit Tests.” 
+		5) Select “jsTestDriver Configuration File” and click “Next.” 
+		6) Make sure the file is placed in the 'config' subfolder. 
+		7) Make sure the checkbox for “Download and setup Jasmine”. 
+		8) Click “Finish.” 
+		9) Right-click the project node, click Properties, and select “JavaScript Testing.” 
+		10) Select “jsTestDriver” from the drop-down box.
 
+	Inside the JS Test Driver configuration file, we specify the server URL that is used by JS Test Driver. We also specify the needed library files in the load section of the file, along with the locations of our JavaScript files and test scripts.
+				/* chapter4/jsTestdriver.conf */
+				server: http://localhost:42442
+				load:
+				- test/lib/jasmine/jasmine.js
+				- test/lib/jasmine-jstd-adapter/JasmineAdapter.js
+				- public_html/js/libs/angular.min.js
+				- public_html/js/libs/angular-mocks.js
+				- public_html/js/libs/angular-cookies.min.js
+				- public_html/js/libs/angular-resource.min.js
+				- public_html/js/libs/angular-route.min.js
+				- public_html/js/*.js
+				- test/unit/*.js
+				exclude:
+	Notice we’ve added angular-mocks.js to the list of required AngularJS library files. That file is needed for unit testing AngularJS applications. So, before continuing, add the angular-mocks.js file to the js/libs folder
 
+	Creating Test Scripts
+		Next, create a new JavaScript file in the unit subfolder of the newly created Unit Test folder. Name the new file controllerSpec.js. The contents of the controllerSpec.js file are shown next. Our test script filename will end with Spec. The file specifies a standard set of unit tests commonly used to test AngularJS controllers. Notice that we have a test for each of our controllers defined in the controllers.js file 
+			describe('Hello World', function(){
+			    beforeEach(module('helloWorldApp'));
+			    describe('MainCtrl', function(){
+			        var scope, ctrl;
+			        beforeEach(inject(function($rootScope, $controller){ 
+			            scope = $rootScope.$new();
+			            ctrl = $controller('MainCtrl', {$scope: scope});
+			        }));
+			        it('should create initialed message', function(){
+			            expect(scope.message)
+			                    .toEqual("Hello World, White spaces make a difference");
+			        });
+			    }); 
+			    describe('ShowCtrl', function(){
+			        var scope, ctrl;
+			        beforeEach(inject(function($rootScope, $controller){
+			            scope = $rootScope.$new();
+			            ctrl  = $controller('ShowCtrl', {$scope: scope});
+			        }));
+			        it('should create initialed message', function(){
+			            expect(scope.message).toEqual("Show The World we here homie");
+			        });
+			    });
+			    describe('CustomerCtrl', function(){
+			        var scope, ctrl; 
+			        beforeEach(inject(function($rootScope, $controller){
+			            scope = $rootScope.$new();
+			            ctrl  = $controller('CustomerCtrl', {$scope: scope});
+			        }));
+			        it('should create intialed message', function(){
+			            expect(scope.customerName).toEqual("Hakeem's Bean Pies");
+			        });
+			    });
+			}); 
+		This test script uses Jasmine as the behavior-driven development framework for testing our code. We will use Jasmine for all our test scripts in this book.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	Testing with JS Test Driver
+		Now to actually test the controllers we’ve defined, just right-click the project node and select “Test” from the menu. If your project is configured correctly, you should see a success message for all three controllers that were tested.
 
 
 
