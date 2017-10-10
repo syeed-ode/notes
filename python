@@ -220,36 +220,51 @@ This information was gathered from reading Head First Python.
 *
 *
 ****    Chapter 10 - Function Decorators: Your Web Server Runs Your Code    ****
-When Flask runs your webapp on your computer, it keeps your code in memory all of the time.  When Flask runs on your computer, your webapp code runs directly, resulting in 'app.run' (i.e. 'if __name__ == '__main__': app.run(debug=True) ') line executing.
-
-However, when a web server is configure to execute your code your webapp's code is imported, and the app.run line does not run.
-
-The web server runs your code as it sees fit.  The web server may load/unload parts of your code as needed.  That can lead to problems with storing your webapp state in variables.  Any values associated with global variables are likely lost, and are going to be reset to their starting value when your code is next imported. Storing your webapp's state in a global variable is a bad idea.
-
-We need two things: 1) a way to store variables withou using globals and 2) a way to keep one webapp user's data from interfeering with another.  By providing state, the 'session' dictionary takes care of both of these tasks.
-
-By importing 'sessioin' [from flask import session] you give you webapp the ability to remmeber state. Additionally, any data stored in 'session' is keyed by a unique browser cookie, whic ensures your session data is kept away from that of every other user of your webapp. 
-
-To enable this, you need to seed Flask's cookie generation technology with a "secret key" [app.secret_key = "<gnerated value>"] which is used by Flask to encrypt your cookie.
-
-The session dictionary maintains a browser-identifiable value by storing a cookie within each browser.  From each browser's perspective, it's as if there is only ever one value of data -- the one associated with their cookie.
-
-Remember when using a dictionary it's better to check in and use pop, than check value, if possible prefer: [f 'logged_in' in session: print('Found it')] over [if session['logged_in']: print('Found it')]. When clearing use: [ session.pop('logged_in') ]
-
-Decorators are Python syntax for allowing one function to modify another function at runtime.  
-To use a decorator you need to know four things: 1) How to create a function. 2) How to pass a function as an argument to a function. 3) How to return a function from a function. And, 4) how to process any number and type of function arguments.
+When Flask runs your webapp on your computer, it keeps your code in memory all of the time.  When Flask 
+	runs on your computer, your webapp code runs directly, resulting in 'app.run' 
+	(i.e. 'if __name__ == '__main__': app.run(debug=True) ') line executing.
+However, when a web server is configure to execute your code your webapp's code is imported, and the 
+	app.run line does not run.
+The web server runs your code as it sees fit.  The web server may load/unload parts of your code as 
+	needed.  That can lead to problems with storing your webapp state in variables.  Any values 
+	associated with global variables are likely lost, and are going to be reset to their starting 
+	value when your code is next imported. Storing your webapp's state in a global variable is a bad idea.
+We need two things: 1) a way to store variables withou using globals and 2) a way to keep one webapp 
+	user's data from interfering with another.  By providing state, the 'session' dictionary takes 
+	care of both of these tasks.
+By importing 'session' [from flask import session] you give you webapp the ability to remmeber state. 
+	Additionally, any data stored in 'session' is keyed by a unique browser cookie, which ensures 
+	your session data is kept away from that of every other user of your webapp. 
+To enable this, you need to seed Flask's cookie generation technology with a "secret key" 
+	[app.secret_key = "<gnerated value>"] which is used by Flask to encrypt your cookie.
+The session dictionary maintains a browser-identifiable value by storing a cookie within each browser.  
+	From each browser's perspective, it's as if there is only ever one value of data -- the one 
+	associated with their cookie.
+Remember when using a dictionary it's better to check in and use pop, than check value, if possible 
+	prefer: [if 'logged_in' in session: print('Found it')] over 
+	[if session['logged_in']: print('Found it')]. When clearing use: [ session.pop('logged_in') ]
+Decorators are Python syntax for allowing one function to modify another function at 
+	runtime.  
+To use a decorator you need to know four things: 1) How to create a function. 2) How to pass a 
+	function as an argument to a function. 3) How to return a function from a function. And, 
+	4) how to process any number and type of function arguments.
 
 How to pass a function as a function:
-	Remember everything in Python is an object.  Functions are actually function objects, equipped with an object ID. (You can see this id with the 'id' BIF.)  
+	Remember everything in Python is an object.  Functions are actually function objects, equipped 
+		with an object ID. (You can see this id with the 'id' BIF.)  
 
-	When a function object is passed to another function, the receiving function can invoke the passed-in function object: [ def apply(func: object, value: object) -> 'object': return func(object) ] 
+	When a function object is passed to another function, the receiving function can invoke the 
+		passed-in function object: 
+		[ def apply(func: object, value: object) -> 'object': return func(object) ] 
 
 How to return a function from a function.
-	Python allows nested (inner) functions, function that are created from within the suite of an existing function. This technique is helpful for a complex function with many lines of code.  
-
-	When you use a function object as an argument to a function, you can have the receiving function invoke the passed-in function object by appending parenthses.
-
-	A more common usage is for the enclosing function to return the nested function as its value.  This is what allows you to create a decorator. The example below illustrates:
+	Python allows nested (inner) functions, function that are created from within the suite of an 
+		existing function. This technique is helpful for a complex function with many lines of 
+		code.  
+	When you use a function object as an argument to a function, you can have the receiving 
+		function invoke the passed-in function object by appending parenthses.
+	A more common usage is for the enclosing function to return the nested function as its value.  
+		This is what allows you to create a decorator. The example below illustrates:
 			def outer():
 				def inner():
 					print('This is inner')
@@ -267,16 +282,18 @@ How to return a function from a function.
 			This is inner
 
 How to process any number and type of function arguments
-	The star args parameter can be processed as a list of arguments (even though it's a tuple).  Using this technique you can pass a list or you can instruct the interpreter to expand the liast sot that it processes the elements of the list and individual arguments. To do the latter, pass the variable proceeding after the * operator.
-
+	The star args parameter can be processed as a list of arguments (even though it's a tuple).  
+		Using this technique you can pass a list or you can instruct the interpreter to expand 
+		the list so that it processes the elements of the list and individual arguments. To do 
+		the latter, pass the variable proceeding after the * operator.
 	Keyword args are defined by the ** operator and represent keyword value pairs.
 			def myfuct2(**kwargs):
 				for v, v, in kwargs.items():
 					print(k, v, sep='|', end=' ')
 				if kwargs:
 					print()
-
-	When passing in the ** operater it tells the interpreter to treat the interpreter as a collection of keys and their associated value.
+	When passing in the ** operater it tells the interpreter to treat the interpreter as a 
+		collection of keys and their associated value.
 
 To create a decorator you nned to understand that: 1) a decorator is a function, 2) a decorator takes the decorated function as an argument 3) a decorator returns a new function 4) a decorator maintains the decorated functions signature
 
