@@ -3,16 +3,6 @@ This is how you find your external IP using the dig command
                     				[DIG COMMAND FOR FINDING EX IP]
           	     (find external ip using idg)#: dig +short myip.opendns.com @resolver1.opendns.com
 
-dig query types: (https://en.wikipedia.org/wiki/List_of_DNS_record_types , https://tools.ietf.org/html/rfc1035#page-12)
-A	- an Internet IP address
-TXT	- text protocols
-MX 	- mail exchanges
-NS 	- nameservers
-	therefore, dig a.root-servers.net A +noall +answer   #finds ip
-	           dig a.root-servers.net NS +noall +answer  #finds namw server
-		   dig a.root-servers.net ANY +noall +answer #finds all of the available types
-
-
 This information was gather from reading Unix and Linux System Administration Handbook, 4th Edition 
 	by O'Reilly, Chapter 17: DNS: The Domain Name System.  It a collection of notes, broken down 
 	by section.
@@ -145,6 +135,14 @@ DNSSEC
 DNSSEC Lookaside Validation (DLV)
 
 Internet System Consortium (ISC)  
+*
+*
+*
+*
+****    Section 17.7 - Limitations of 512 byte packets    ****
+The section in the books is entitled, "what's New in DNS." But, I wanted to answer the following question: "Explain the significance for DNS of the 512-byte limit on UDP packets. What are the potential problems, are what are the workarounds that address them?"
+
+SPF/TXT Limitation: The Sender Policy Framework and TXT records have a text string limitation of 255 bytes, so characters strings longer than that have to have multiple quoted strings.  The total length is limited to 450 bytes.  This is so that query responses can fit within the 512 UPD packet limiation.
 *
 *
 *
@@ -327,8 +325,73 @@ MX records:
 		wildcard MX records. It sends every other domain to that MX subnet.
 
 CNAME records:
+	The canonical name (CNAME) is a nickname for the host.  When a query finds a CNAME for a record it stops looking for the CNAME and starts looking for the real name. 
 	
+	If you use CNAMES, the PTR record should point to the real name, not the CNAME.	You can avoid CNAMEs altogether by publishing an A record for both the host name and the real name. This makes lookups slightly faster.
+	
+	If you have a CNAME record, other records (A, MX, NS, etc.) must point to the real naem, not the CNAME. This rule was explicitly relaxed for DNSSEC which adds digtical signatures to each DNS record set. The RRSIG for the CNAME refers to the nickname.  
+	
+	The format of the CNAME record is:
+			<nickname> [ttl] [IN] CNAME <hostname, i.e. realname>
 
+The CNAME Hack
+	CNAMES are also used to encourage the usage of CIDR addresses verses the use of byte boundary addresseing. For example if the class B network 128.138 was subnetted to a class C network, each subnet would make a tidy package in the in-addr.arpa domain. The reverse zone for the subnet would be 243.128.138.
+	
+	But what happens if the 243 network is further divided, into say, four pieces of /26 network? If all four pieces are assigned to the same organization, there is actually no problem.  The four subnets can share a single file that contains all of their PTR records.
+	
+	However if an ISP has four clients on different subnets. It must 1) maintain the reverse records for each of its clients or 2) it must find a way to take the third octet and delagate each independently.
+	
+	The trick is to add a CNAME for each host in the subnet.  The CNAME should point to the zone owner (SOA) for the subnet. The parent and the child domains must coordinate this. It may complicate the parents zone file, but it delegates authority for those hosts to the subdomains SOA.
+	
+The SRV (services) record
+	The SRV records specifies the location of services in the domain.  Before SRV, you had to hope that a sysadmin added an FTP record. Now you can query the SRV record for the ftp host. The SRV records are used extensively by Windows.
+	
+	The SRV records resuemble generalized MX records. They steer and load balance connections from the outside world. The format is:
+			<service.pro.name> [ttl] [IN] SVR <pri> <wt> <port> <target>
+				<service>	a service defined in the IANA (Internet Assigned Numbers Authority) assigned numbers database (see https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml)
+				<pro>		is either 'tcp' or 'upp'
+				<name>>		the domain to which the SRV record refers
+				[IN]		class (network type)
+				<pri>		MX stype priority
+				<wt>		the weight used for load balancing amoung serveral servers, "0" means no load balancing
+				<port>		the port on which the service runs
+				<target>	the hostname of teh server that provides the service, "." service is not provided at thsi site
+	To avoid a second round trip, DNS usually provides teh A record of teh server providing the service in the answer along with the target.
+	
+	MS Exchange uses SRV records to help Outlook clients find them and to provide automatic configuratoin for Outlook Anywhere.  The SRV records are teh fourth thing tried, after Active Directory and pre-configured URLs. Windows uses a GUI tool called DNS Manager to setup SRV records.
+
+The TXT record
+	The (TXT) text record adds arbitrary text to a host's DNS record.  For example, some sites have a text record that identifies them.  The format of the text record is:
+			<name> [TTL] [IN] TXT <info>
+	All info items must be quoted. You can use a single quoted string or multiple strings that are individually quated.  To encode long items such as address, use long text lines rather than a collection of several TXT records.
+	
+	Because TXT records have no particular format, they are sometimes used to test perspective new types of DNS records without requiring change to the DNS system itself.
+	
+IPV6 resource records
+	IPV6, a new version of teh IP protocol, was originally motivated by a need for more IP network addresses. 
+	
+	The stopgap solutions for this problem (CIDR, NAT, private addresses, and stricter control of addresses) have been so successful it turns out that mass migration to IPV6 is not as essential as previouslly thought. 
+	
+SPF (sender policy framework) records
+	SPF (sender policy framework) records are an attempt to identify forged email From headers which are often spam or phishing. 
+	
+	If the site receiving the messages determined that the headers are forged, it can drop it, filter it or tag it as spam before delivering it to the recipient.
+	
+	This functionality was first implemented as TXT records. But we now have a dedicated SPF record. (When I ddi a query for GMAIL, it returned the SOA for the spf query. Then I did a query for txt and got the correct SPF inforation.)
+			] $ dig gmail.com txt
+			;; ANSWER SECTION:
+			gmail.com.		300	IN	TXT	"v=spf1 redirect=_spf.google.com"
+			] $ dig _spf.google.com txt
+			;; QUESTION SECTION:
+			;_spf.google.com.		IN	TXT
+
+			;; ANSWER SECTION:
+			_spf.google.com.	255	IN	TXT	"v=spf1 include:_netblocks.google.com include:_netblocks2.google.com include:_netblocks3.google.com ~all"
+	
+	There are two version Microsofts (2v.0) and the rest of teh worlds (v1.0).
+	
+DKIM (DomainKey identificaton mail) and ADSP (author domain signing practice) records
+	
 
 
 
