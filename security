@@ -32,7 +32,7 @@ The first engines we'll look at generate cryptographic keys. All together there 
 engine - MD & DigSig
 engine - operation (cryptographic algorithm itself (operation))
        - message digest may be implemented by a particular algorithm, such as MD5 or 
-       		SHA
+       		SHA, Secure Hash Algorithm
        - abstract class
        - (i.e. Engine.class(es)) these classes come with the Java virtual machine as 
        		part of the core API
@@ -373,5 +373,93 @@ server:
   ssl:
     key-store: <file location>
     key-store-password: changeit
-    key-password: changeit
-    
+    key-password: changeit  
+*
+*
+*
+*
+****Chapter 13 - Cipher−Based Encryption [pg247]****
+With ciphers, the encryption of data is separate from its transmission. This is in sharp contrast to SSL, which can encrypt only data that is sent over sockets.
+
+Cipher−based encryption is part of the JCE, which contains an engine (the cipher engine) that performs encryption as well as several classes that support data encryption. All the classes in this chapter are available only with the security provider that comes with JCE.
+
+The Cipher Engine
+	First, we'll look at the engine that performs encryption within JCE. This engine is called the Cipher class (javax.crypto.Cipher); it provides an interface to encrypt and decrypt data either in arrays within the program or as that data is read or written through Java's stream interfaces.
+
+	The Cipher class is normally used to encrypt or decrypt data. However, it may also be used to wrap and unwrap keys. If the op is Cipher.ENCRYPT_MODE, the cipher is initialized to encrypt data; if op is Cipher.DECRYPT_MODE, the cipher will be used to decrypt the data.
+
+	The naming convention for the cipher engine is different in that cipher algorithms are compound names that can include the name of the algorithm along with the name of a padding scheme and the name of a mode.
+
+	Padding schemes are present in the Cipher class because that class implements what is known as a block cipher; that is, it expects to operate on data one block (e.g., 8 bytes) at a time. Padding schemes are required in order to ensure that the length of the data is an integral number of blocks.
+
+	Modes are provided to further alter the encrypted data in an attempt to make it harder to break the encryption.  Depending upon the mode used by a cipher, it may need to be initialized in a special manner when the cipher is used for decryption. Some modes require initialization via an initialization vector.
+
+	Modes also enable a block cipher to behave as a stream cipher; that is, instead of requiring a large, 8−byte chunk of data to operate upon, a mode may allow data to be processed in smaller quantities. So modes are very important in stream−based operations where data may need to be transmitted one or two characters at a time.
+
+Using the Cipher Class for Encryption/Decryption
+	Obtain a cipher engine that can perform encryption and decryption by implementing the named algorithm.
+
+	public static Cipher getInstance(String algorithmName)
+	public static Cipher getInstance(String algorithmName, String provider)
+		The algorithm name passed to the getInstance( ) method may either be a simple algorithm name (e.g., DES), or it may be an algorithm name that specifies a mode and padding in this format: algorithm/mode/padding (e.g., DES/ECB/PKCS5Padding).
+
+	public final void init(int op, Key k)
+	public final void init(int op, Certificate c)
+	public final void init(int op, Key k, AlgorithmParameterSpec aps)
+	public final void init(int op, Key k, AlgorithmParameterSpec aps, SecureRandom sr)
+	public final void init(int op, Key k, SecureRandom sr)
+	public final void init(int op, Certificate c, SecureRandom sr)
+	public final void init(int op, Key k, AlgorithmParameters ap)
+	public final void init(int op, Key k, AlgorithmParameters ap, SecureRandom sr)
+		Once you've obtained a cipher object, you must initialize it. An object can be initialized for encryption, decryption, or for key wrapping, but in any case, you must provide a key. The key must match the algorithm type: a DES cipher must use a DES key, and so on). 
+
+		Many algorithm modes we discussed earlier require an initialization vector to be specified when the cipher is initialized for decrypting. In these cases, the initialization vector must be passed to the init( ) method within the algorithm parameter specification or algorithm parameters; typically, the IvParameterSpec class is used to do this for DES encryption.
+
+	public final byte[] getIV( )
+		In order to initialize some ciphers for decryption, you need to specify an initialization vector; this initialization vector must be the same vector that was used when the cipher was initialized for encryption. For encryption, you may specify the initialization vector, or you may use a system−provided initialization vector. 
+
+		In order to retrieve this vector for later use (e.g., to send it to someone who will eventually need to decrypt the data), you may use this method:  
+
+
+In order to preallocate an output buffer for use in the update( ) and doFinal( ) methods, you must know its size, which is returned from this method:
+
+*
+*
+*
+*
+****Chapter 11 - Message Digests [pg211]****
+Message digests provide the first link in creating and verifying a digital signature −− one of the most important goals of the provider architecture. However, message digests are useful entities in their own right since a message digest can verify that data has not been tampered with −− up to a point.
+
+We'll examine how developers can use the message digest in this chapter and also explore how a security provider can implement her own message digest algorithm.
+
+public static MessageDigest getInstance 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
