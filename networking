@@ -391,9 +391,29 @@ SPF (sender policy framework) records
 	There are two version Microsofts (2v.0) and the rest of teh worlds (v1.0).
 	
 DKIM (DomainKey identificaton mail) and ADSP (author domain signing practice) records
+	DomainKey identificaton mail allows the receiver to authenticate the sender and guarantee the message's integrity (no meddling).  It requires no per-user or per-host changes to implement. Everything currently is implmented in the TXT record.
+
+	To find the DKIM record information, query the domain with '_domainkey' prepended to it.  This returns the sites public key in the record data.  The sending site computes a signature of certain header fields and the body with its private key.  It sends this DKIM Signature in the body of an outgoing message.  
+
+	The sending site's public can be obtain by quering the TXT record at the loation of <selector>._domainkey.<domain>.  The receiving site does a DNS lookup for this key and uses it to validate the message signature.  Successful signature verification authenticates the message as having come from the purported sending domain and verifies that the message has not been modified in transit.
+
+	Author domain signing practice expresses an overall policy with respect to signing messages.  You can access this through the text record at the domain _adsp.domainkey.<domain>. The TXT record should include a 'dkim=' clause specify 1) all, for domains that sign all outgoing email messages; 2) uknown, for domains that ight sign some email messages; and 3) discardable, for domains that sign all email and recommend that recipients discard essages who signature connot be verified.
+
+	Currently gmail does not implement ADSP. However Yahoo! does.
+
+SSHFP resource records
+	DNS's SSHFP (ssh finger print) records allows ssh of the local host to verify the remote host's (user's) key automatically, ensuring hat the user has reached the intended machine and not some imposter.  SSHFP records do not store a complete copy of a host's public keys. Intead, they store digests (i.e., cryptographic hashes) of those keys
+			<name> [ttl] [IN] SSHFP <algorithm># <fingerprint_algorithm># <fingerprint>
+				<algorithm> 				identifies the public key cryptosystem used to generate the (remote) host's key, RSA is algorithm 1, DSA is algorithm 2
+				<fingerprint_algorithm> 	how to process the the public key of the remote host to produce the hash for comparison; currently only SHA-1 is defined so it is always set to 1
+				<fingerprint> 				the digest (cryptographic hash) of the key to me matched
+
+	The remote host (user's end) stores the accept host's public keys in the .ssh/known_hosts file in the user's home directory.  You can grab the keys from that directory to build your SSHFP resource record. 
+
+	You can also ask Openssh to use SSHFP recordsby setting the VerifyHostKeyDNS option to yes.  
+
+DNSSEC resource records
 	
-
-
 
 
 
