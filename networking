@@ -208,7 +208,7 @@ Resource records
 		DS	Delegation signer, a hash of child zone's key signing key
 		DNSKEY	Public key for a DNS name
 		NSEC
-		NSEC3	Next secure (version 3), used with DNSSEC for negative answer 
+		NSEC3	Next secure (version 3), used with DNSSEC for negative answers 
 		RRSIG	Signature; signed, authenticated resource record set
 		DLV	Lookaside, non root trust anchor for DNS
 		SSHFP	SSH Fingerprint, SSH host key allows verification of DNS
@@ -413,6 +413,18 @@ SSHFP resource records
 	You can also ask Openssh to use SSHFP recordsby setting the VerifyHostKeyDNS option to yes.  
 
 DNSSEC resource records
+	This section is too big for a sub section on it's records.  It is covered in detail later in the book.  Reprenting the records here, but will update when appropriate.
+		DS	Delegation signer, a hash of child zone's key signing key
+		DNSKEY	Public key for a DNS name
+		NSEC
+		NSEC3	Next secure (version 3), used with DNSSEC for negative answers 
+		RRSIG	Signature; signed, authenticated resource record set
+		DLV	Lookaside, non root trust anchor for DNS
+		SSHFP	SSH Fingerprint, SSH host key allows verification of DNS
+		SPF	Sender policy framework, identifies mail server inhibits forgery
+		DKIM	DomainKey Identificaton Mail, verify email sender and message integrity
+
+Glue records: links between zones
 	
 
 
