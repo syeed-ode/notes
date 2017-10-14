@@ -140,9 +140,9 @@ As you can see, we are now using the model to populate the messages that get dis
 			<div>{{ message }}</div>
 Using double curly braces is AngularJS’s way of displaying scope properties in the view. 
 *************************************************************
-*															*
-*															*
-*															*
+*							    *
+*							    *
+*							    *
 ****    Chapter 2 - The IDE and AngularJS Projects    *******
 Testing AngularJS Applications in the IDE
 	To enable the chrome bar for debugging go to 'chrome://flags/#silent-debugger-extension-api'.
@@ -307,9 +307,9 @@ Protractor
 To run Protractor, issue the following command. Once you run the command, the browser window should open and display the test results:
 				protractor conf.js
 *************************************************************
-*															*
-*															*
-*															*
+*							    *
+*							    *
+*							    *
 ****    Chapter 3 - MVC and AngularJS   *********************
 There are two advantages for using angular: 1) Support for mobile devices and 2) quicker development time adn quicker testing time because of the use of JavaScript. The second benefit has an addtional benefit of faster CI time.
 
@@ -398,9 +398,9 @@ both on a desktop and on all mobile devices that use the software
 
 	If the web application written in CakePHP had been written with AngularJS, it would have been a simple task to convert the AngularJS application into a mobile application. The development team could then have fixed the CSS3 issues and been done. The application written with CakePHP had to be completely rewritten, however.
 *************************************************************
-*															*
-*															*
-*															*
+*							    *
+*							    *
+*							    *
 ****    Chapter 4 - AngularJS Controllers      **************
 Controllers
 really have two primary responsibilities in an application. First, controllers should be used to initialize the model scope properties. These properties can be, then passed to the view (templates/parials).  The second primary use for controllers is adding behavior to the '$scope' object. 
@@ -661,9 +661,9 @@ JS Test Driver
 		Running Karma Unit Tests
 			Now to actually run the unit tests (using the test specification written earlier) under Karma, right-click the project and select “Test” from the menu. Karma will start. You should see both Chrome and Firefox browser windows open. The NetBeans test results window should open and display three passed tests for Chrome and three passed tests for Firefox.
 *************************************************************
-*															*
-*															*
-*															*
+*							    *
+*							    *
+*							    *
 ****    Chapter 5 - AngularJS Views and Bootstrap [pg100]****
 We will now start a new AngularJS project that uses public REST services created especially for this book. We will start off by building the views and the controllers for those views. 
 
