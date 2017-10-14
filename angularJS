@@ -621,11 +621,73 @@ JS Test Driver
 	Testing with JS Test Driver
 		Now to actually test the controllers we’ve defined, just right-click the project node and select “Test” from the menu. If your project is configured correctly, you should see a success message for all three controllers that were tested.
 
+		<I had an extreme amount of trouble getting this to work. I'm assuming it's because I don't know enough about javaScript or the NetBeans IDE in general.  My project file was jacked up, making references to node.js. I fixed that, I kept getting an error that it couldn't find the scope variables I was creating. Finally, I had enough. I just imported the code from the book and moved on.  I will pick up a JS book later. Until then, learning the AngularJs framework, how it flows will have to be enough.>
+
+	Testing with Karma
+		Karma is a new and fun way to unit test AngularJS applications. We will use Karma here to test the controllers that we tested earlier.
+
+		Installing Karma
+			Karma runs on Node.js, so first you must install Node.js if it’s not already installed. You’ll also need to install the Node.js package manager (npm) on your system. npm is a command-line tool used to add the needed Node.js modules to a project.
+
+			Now, in the root of the Chapter 4 project, create a JSON file named package.json and add the following content. The package.json file is used as a configuration file for Node.js:
+					{
+						"name": "package.json",
+						"devDependencies": {
+							"karma": "*",
+							"karma-chrome-launcher": "*",
+							"karma-firefox-launcher": "*",
+							"karma-jasmine": "*",
+							"karma-junit-reporter": "*",
+							"karma-coverage": "*"
+						}
+					}
+
+			Type this command to actually install the Node.js dependencies defined in the package.json file:
+					npm install
+
+			Now install the Karma command-line interface (karma-cli) by typing the following command:
+					npm install -g karma-cli
+			Make sure to record the location where karma-cli was installed. You will need the location later.
+
+		Karma Configuration
+			Next, create a new Karma configuration file named karma.conf.js inside the project test folder.
+						1. Right-click the project.
+						2. Select “Properties.”
+						3. Select “JavaScript Testing” from the list of categories.
+						4. Select “Karma” as the testing provider.
+						5. Select the location of the karma-cli tool installed earlier.
+						6. Select the location of the karma.conf.js file just created.
+						7. Select “OK.”			
+		Running Karma Unit Tests
+			Now to actually run the unit tests (using the test specification written earlier) under Karma, right-click the project and select “Test” from the menu. Karma will start. You should see both Chrome and Firefox browser windows open. The NetBeans test results window should open and display three passed tests for Chrome and three passed tests for Firefox.
+*************************************************************
+*															*
+*															*
+*															*
+****    Chapter 5 - AngularJS Views and Bootstrap [pg100]****
+We will now start a new AngularJS project that uses public REST services created especially for this book. We will start off by building the views and the controllers for those views. 
+
+Twitter Bootstrap is a free collection of HTML and CSS templates. We will build the
+AngularJS views with the help of Twitter Bootstrap to help cut development time. Once we have the views and controllers in place and understand their operation, we will focus on the model and REST services.
+
+AngularJS Templates
+	AngularJS views are defined by building templates (partials). Views in AngularJS are composed of HTML code with directives added, such as the ng-model directive shown previously. AngularJS builds the views dynamically at runtime by merging the templates with the properties passed to the templates in the $scope object. The end result is pure HTML code bound to the ng-view directive.
 
 
-
-
-
+Adding a New Blog Controller
+	The following code fudefines the blogControllers module and the BlogCtrl controller for that module.
+/* chapter5/controllers.js */
+'use strict';
+/* Controllers */
+var blogControllers =
+angular.module('blogControllers', []);
+blogControllers.controller('BlogCtrl', ['$scope',
+function BlogCtrl($scope) {
+$scope.blogArticle =
+"This is a blog post about AngularJS.
+We will cover how to build a blog and how to add
+comments to the blog post.";
+}]);
 
 
 
