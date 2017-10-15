@@ -465,6 +465,85 @@ The use and verification of digital signatures is another standard engine that i
 You perform two operations on digital signatures when you handle them. 1) You create them by taking a piece of data, creating a message digest of the data, and signing the message digest with a private key. 2) The digitally signed data is then transmitted to someone else, who must verify the digital signature by creating a message digest of the data and verifying the signed digest using a public key. 
 
 All of these operations are embodied within the Signature class ('java.security.Signature'): [public abstract class Signature extends SignatureSpi] which, provides an engine to create and verify digital signatures. The Sun security providers include implementations of this class that generate signatures based on the DSA and RSA algorithms.
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+This information was gathered from reading The Web Application H's Handbook.  It is a listing of 
+	notes and information.  It is starting out as just a question guideline for each chapter. The 
+	book itself is overly verbose, making note taking extremely difficult to do in real time. So,
+	I'll add notes periodically.
+*************************************************************
+*							    *
+*							    *
+*							    *
+***  Chapter 3 - Web Appplication Technologies [pg39 - 71] ***
+1. What is the 'OPTIONS' method used for?
+It returns all the methods that are available on a resource.  
+['OPTIONS' asks the serever the methods that are available for a resurce.  The server returns an 'Allow' header that lists the available methods.]
+
+2. What are the 'If-Modified-Since' and 'If-None-Match' headers used for?
+
+3. What is the significance of the 'secure' flag when a server sets a cookie?
+
+4. What is the difference between the common status codes 301 and 302?
+
+5. How does a browser iteroperate with a web proxy when SSL is being used?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
