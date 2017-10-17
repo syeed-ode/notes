@@ -148,6 +148,11 @@ SPF/TXT Limitation: The Sender Policy Framework and TXT records have a text stri
 *
 *
 ****    Section 17.8 - The DNS Database    ****
+*************************************************************
+*							    *
+*							    *
+*							    *
+****    Section 17.8 - The DNS Database [pg574 - 597]   *****
 The zone's DNS database is a set of text files maintained on the zone's primary servers. They are 
 	sometimes refered to as zone files. They contain two types of entries: parser commands and 
 	resource records.
@@ -302,7 +307,7 @@ PTR records:
 		183.173.63.in-addr.arpa. .
 	Another way to do reverse matching is to put the records such as 
 		[ 1 89		IN  PTR. any.root-server.com. ] in the zone 
-		173.63.in-addr.arpa.. Since root-server.com and 173.63.in-addr.arpa. are two different 
+		173.63.in-addr.arpa.. Since root-server.com. and 173.63.in-addr.arpa. are two different 
 		regions of the DNS namespace, they each have their own start of authority (SOA) and 
 		resource records. They represent two different zones.
 	It is important that A records match their corresponding PTR records. Mismatched PTR records 
@@ -425,7 +430,150 @@ DNSSEC resource records
 		DKIM	DomainKey Identificaton Mail, verify email sender and message integrity
 
 Glue records: links between zones
+	Each zone stands alone with its own set of data files, name servers and clients. But zones need to form a coherent hierarchy: 'booklab.atrust.com' is a part of 'atrust.com' and we need a DNS linkage between them. 
+
+	It si not necessry for a domain server to know about the zones above it in the DNS hierarchy. However, a parent domain must know the IP addresses of the 'names severs' below for all of its subdomains. *Only* the names servers known to the parent can be returned as referreals in responses to external queries.
+
+	Repeated in DNS terms:  The parent zone needs to contain the NS record for each delegated zone.
+
+	Since NS records are hostnames rather than IP address, the parent zone must have a way of resolving to IP (getting the A record). There are two ways to resolve this: 1) by including a copy of the A records directly with the parent zone or 2) by using stub zones.
+
+	Glue Records - A Records in parent zone
+		With the first record, simply include the NS and A records within the parent zone. The foriegn A records are called 'glue' records because they don't really belong in this zone file.  Missing or incorrect glue records leave the subzone inaccessible. The error returned is "host uknown".
+
+		It is a common error to include glue records (A records) for hostnames that don't need them. For example including the A record for 'ns.cs.colorado.edu' in 'atrust.com''s zone file would initially be just unnecessary. But it could later become out of date and wrong if 'ns.cs.colorado.edu''s address were to change.  BIND logs their presence as an error.
+
+		The scheme requires the child to keep in touch with the parent about any changes or additions to its name server fleet. Updates can be a tedious manual task that requires coordination across administrative boundaries.
+
+	Stub Zones
+		The second way to maintain links is to use stub zones. A stub zone is esssentially the same thing as a secondary zone, but it includes only the zone's NS records and the corresponding A records of those name servers.
+
+		Like a secondary, a stub zone is automatically updated so it eliminates the need to for administrative communication. Stub zones *must* be configured identially on both the primary and secondary servers **of the parent zone**. 
+
+		An important acveat is that stub zones msut be configured identically on both the primary and secondary servers of *the parent zone*. Just keep in touch manually with your parent domain and verify its configuration a couple times a year (especially if its local).
+
+		To see which of your server your parent domain is advertising, run:
+						dig <parent-domain> ns
+		To determine the name servers for yo uparent domain, pick one and run:
+						dig @<name-server.parent-domain> <child-domain> ns
+		This will show you which of your name servers the parent domain is publishing.
+
+		Stub zones are good for internal networks that use private IP address space and you need to keep the delegations in sync. 
+*************************************************************
+*							    *
+*							    *
+*							    *
+****    Section 17.9 - The BIND Software [pg597 - 618]  *****
+The Berkely Internet Name Domain (BIND) system have four main flavors: BIND 4, BIND 8, BIND 9 and BIND 10. This section only discusses BIND 9.
+
+To determine the version number, sometimes the administrator hides this information, yet try using the dig command:
+		[20171016-15:21:16 syeedode:~/java_projects/notes master*] $ dig @k.root-servers.net version.bind txt chaos
+
+		; <<>> DiG 9.8.3-P1 <<>> @k.root-servers.net version.bind txt chaos
+		; (2 servers found)
+		;; global options: +cmd
+		;; Got answer:
+		;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 8054
+		;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+		;; WARNING: recursion requested but not available
+
+		;; QUESTION SECTION:
+		;version.bind.			CH	TXT
+
+		;; ANSWER SECTION:
+		version.bind.		0	CH	TXT	"9.11"
+
+		;; Query time: 85 msec
+		;; SERVER: 2001:7fd::1#53(2001:7fd::1)
+		;; WHEN: Mon Oct 16 15:21:25 2017
+		;; MSG SIZE  rcvd: 47
+  
+Another piece of dat in the CHAOS class identifies the name of the server queried.  Some of the busiest servers (e.e., the root name servers) are multiple machines scattered aroudn the globe, that all have the same server name and IP address.
+
+This replication scheme is called "anycast routing". The routing system takes you to the closes instance. If you are trying to debug a problem, it may be important to distinguish which of the replicated server you have reached.
+		[20171016-15:35:45 syeedode:~/java_projects/notes master*] $ dig @k.root-servers.net hostname.bind txt chaos
+
+		; <<>> DiG 9.8.3-P1 <<>> @k.root-servers.net hostname.bind txt chaos
+		; (2 servers found)
+		;; global options: +cmd
+		;; Got answer:
+		;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 25385
+		;; flags: qr rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+		;; WARNING: recursion requested but not available
+
+		;; QUESTION SECTION:
+		;hostname.bind.			CH	TXT
+
+		;; ANSWER SECTION:
+		hostname.bind.		0	CH	TXT	"ns3.gb-lon.k.ripe.net"
+
+		;; Query time: 100 msec
+		;; SERVER: 2001:7fd::1#53(2001:7fd::1)
+		;; WHEN: Mon Oct 16 15:36:00 2017
+		;; MSG SIZE  rcvd: 65
+You could also use [dig @k.root-servers.net id.server txt ch].
+
+As an administrator, you an start the name server ('named' or 'nsd') with the -v flag to print its version to the standard output. The BIND name server logs its version to syslog as it start up.
+
+Components of BIND
+	The BIND distribution has four major compontents:
+			named					daemon that answers queries
+			resolver library 		queries DNS servers on behalf of users
+			cmd line interface 		DNS interface with 'dig', 'nslookup', 'host'
+
+	The 'named' configuration consists of the config file, the zone data files that contain address mappings for each host, and the root name server hints file. 
+
+	Authoritative servers need a config file and zone data files for each zone for which they are the primary server.
+
+	Caching servers need teh config file and the root hints file.
+
+	'named''s config file is different from the resource record files.
+
+	'named''s config file, 'named.conf', specifies the roles (primary, secondary, stub or caching-only) of its host and how it should obtain its copy of the for the every zone it serves.  It is also where the options for the operation of 'named' and zone specific operation applying to DNS traffic management.
+
+	You can check that the config file is formatted correctly using 'named-checkzone' and 'named-checkconf', for zone files and config file respectively.  It doesn't catch everything. For example a missing glue record can still cause heavy load on root and gTLD servers.
+
+	Each statement begins with a keyword. There only be one instance of the 'options' and 'logging' statements; all others can have more than one.  Below is a preview of the statements for the 'named.conf':
+				include 				Interpolates a file
+				options 				Sets global configuration options/defaults
+				acl 					Defines access control lists
+				key 					Defines authentication infomration
+				trusted-keys 			Uses preconfigured cryptographic keys
+				server 					Specifies per-server options
+				masters 				Defines a list of primary for stub and secondary zones
+				logging 				Specifies logging categories and their destinations
+				statistics-channels 	Outputs real-time statistics in XML
+				zone 					Defines a zone of resource records
+				controls 				Defines channels used to control 'named' with 'rndc' 
+				view 					Defines a view of the zone data
+
+	The address match list is a data structure that is used in many of the 'named.conf' statements.  An address match list is a generalization of an IP address that includes the following items:
+				- An IP address, either v4 or v6
+				- An IP network, specified with a CIDR netmask
+				- The name of a previously defined ACL
+				- The name of a cryptographic authentication key
+				- The '!' character to negate things
+
+	Address match lists are used as parameters to many statements and options, here are examples
+				{ ! 1.2.3.13; 1.2.3/24; };
+				{ 128.138/16; 198.11.16/24; 204.228.69/24; 127.0.0.1; };
+	The first of these lists excludes the host 1.2.3.13, but includes the rest of the 1.2.3.0/24 network.  The second defines the networks assigned to the University of Colorado.  
+
+	The order of entries is important; the top of the file is more important than the bottom.  The address match list is listed in descreasing order of importance, when matching an IP address the first IP addres found will be matched first. For example if the first list swaped it's entries, 1.2.3.13 would never be negated.
+
 	
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
