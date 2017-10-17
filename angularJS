@@ -676,18 +676,184 @@ AngularJS Templates
 
 Adding a New Blog Controller
 	The following code fudefines the blogControllers module and the BlogCtrl controller for that module.
-/* chapter5/controllers.js */
-'use strict';
-/* Controllers */
-var blogControllers =
-angular.module('blogControllers', []);
-blogControllers.controller('BlogCtrl', ['$scope',
-function BlogCtrl($scope) {
-$scope.blogArticle =
-"This is a blog post about AngularJS.
-We will cover how to build a blog and how to add
-comments to the blog post.";
-}]);
+			/* chapter5/controllers.js */
+			'use strict';
+			/* Controllers */
+			var blogControllers =
+			angular.module('blogControllers', []);
+			blogControllers.controller('BlogCtrl', ['$scope',
+				function BlogCtrl($scope) {
+				$scope.blogArticle =
+					"This is a blog post about AngularJS.
+					We will cover how to build a blog and how to add
+					comments to the blog post.";
+			}]);
+
+	Next is the code for the app.js file that starts the booting process for the blog application. We define 'ngRoute' and 'blogControllers' as dependencies of the application at startup time, using inline array annotations. The two dependencies are injected into the application using DI and are available throughout the application when we need them. Any controllers attached to the blogControllers module are accessible to the 'blogApp' module (the AngularJS application):
+			/* chapter5/app.js */
+			'use strict';
+			/* App Module */
+			var blogApp = angular.module('blogApp', [
+				'ngRoute',
+				'blogControllers'
+			]);
+			blogApp.config(['$routeProvider', '$locationProvider',
+				function($routeProvider, $locationProvider) {
+				$routeProvider.
+				when('/', {
+				templateUrl: 'partials/main.html',
+				controller: 'BlogCtrl'
+			});
+
+			$locationProvider.html5Mode(false).hashPrefix('!');
+			}]);
+	The routes are defined in the application configuration block. We define BlogCtrl as the controller and 'partials/main.html' as the template used for the main route.
+
+Adding a New Blog Template
+	 Add a new HTML page named main.html in the partials folder. 
+
+Twitter Bootstrap
+	 If you run into JavaScript errors related to Twitter Bootstrap, you can easily replace the bootstrap.min.js file with the nonminified bootstrap.js file.
+
+	 The nonminified version of the file allows the developer to place breakpoints in the Bootstrap JavaScript file and debug any related issues.
+
+	 First, we need to add three more folders and some additional Twitter Bootstrap files to the project. We will add all the Bootstrap files here, although much of Bootstrap is not actually used in this project. Do the following:
+		1. Add a subfolder named css under the Site Root folder.
+		2. Add a subfolder named fonts under the Site Root folder.
+		3. Add a subfolder named lib-css under the Site Root folder.
+		4. Copy the bootstrap-theme.min.css and bootstrap.min.css files into the lib-css folder.
+		5. Copy the following files to the fonts folder:
+			a. glyphicons-halflings-regular.eot
+			b. glyphicons-halflings-regular.svg
+			c. glyphicons-halflings-regular.ttf
+			d. glyphicons-halflings-regular.woff
+		6. Add the two lines of code shown next to the index.html file. These two lines are all that we need to make use of Twitter Bootstrap:
+					<!-- chapter5/index.html excerpt -->
+					<link rel="stylesheet" href="lib-css/bootstrap.min.css" media="screen"/>
+					<script src="js/libs/bootstrap.min.js"></script>
+	The added CSS files and fonts will give us access to many time-saving features of Twitter Bootstrap. 
+
+Adding a Bootstrap Menu
+	The following are the contents of the menu.html file. Most of the code shown is clearly explained on the Bootstrap project site.
+
+	The styles added to the menu here are defined in the bootstrap.min.css file added in the previous section. Then, construct your menu.html file.
+
+	Add the menu.html file inside the 'main.html' file. The first line shows the needed addition to main.html. As you see, we use the 'ng-include' directive to include the menu template inside the main template. This approach allows us to keep the menu completely separate from the other templates. Using this approach makes the code base easy to maintain and understand.
+		<!-- chapter5/main.html -->
+		<div ng-include src="'partials/menu.html'"></div>
+		{{blogArticle}}	
+
+Adding Mock Blog Data
+	We will modify the BlogCtrl controller and set a list of blog posts as a scope property named blogList. The JSON list represents the data that will eventually be retrieved from a REST service. 
+
+	For now, however, we will just hardcode the JSON into the controller as mock data. There are more advanced ways to add mock data to an AngularJS application, but that is beyond the scope of this book
+
+	There is no presentation logic and no data formatting in the controller. The date is sent to the view as a long value. Trying to format the date in the controller would be an incorrect design that shouldn’t be used. AngularJS has many features that make formatting and presenting data easy.
+
+Using CSS3 to Style the Page
+	Create a new CSS file named style.css. Now modify the index.html file, adding the line shown here to load the newly created CSS file:
+				<link rel="stylesheet" href="css/styles.css" media="screen"/>
+
+Adding Styles and Presentation Logic
+	You must modify the main.html template to make use of the new styles and to add proper presentation logic for displaying blog posts and formatting data. The second line, <div id="container" class="container">, sets up a Bootstrap container and is standard practice with Twitter Bootstrap:
+				<div ng-include src="'partials/menu.html'"></div>
+				<div id="container" class="container">
+				    <div class="blog-post-label">Blog Posts</div>
+				    
+				    <div class="post-wrapper">
+				        
+				        <div ng-repeat="blogPost in blogList">
+				            <div class="blog-post-outer">
+				                <div class="blog-intro-text">
+				                    Posted: {{blogPost.date | date:'MM/dd/yyyy @ h:mma'}}
+				                </div>
+				                <div class="blog-intro-text">
+				                    {{blogPost.introText}}
+				                </div>
+				                <div class="blog-read-more">
+				                    <a href="#!blogPost/{{blogPost._id}}">
+				                        Read More
+				                    </a>
+				                </div>
+				            </div>
+				        </div>
+				        
+				    </div>
+				    
+				</div>
+
+	The Bootstrap container handles much of the page styling for various screen sizes to make the page responsive for any screen size on any device.
+
+	The line <div ngrepeat="blogPost in blogList"> is very important to understanding AngularJS views. The directive ng-repeat works like a for loop, iterating over the list of blog posts in the scope property blogList.
+
+	Each iteration through the list gives access to each item in the list through the variable 'blogPost'. Another line that is very important is the HTML template binding {{blogPost.date | date:'MM/dd/yyyy @ h:mma'}}, which allows us to format the date in the view, where it should be formatted. 
+
+Viewing the Blog Post
+	To add a controller, route, and view to display the individual blog post when a user clicks on the “View More” link.  First append this CSS code to the end of the styles.css file:
+
+	Add code to the bottom of the controllers.js file. Next, add a new template file named 'blogPost.html' in the partials folder. Replace the generated code with the code shown here:
+
+				<div ng-include src="'partials/menu.html'"></div>
+
+				<div id="container" class="container">
+				    <div class="blog-post-label">Blog Entry</div>
+				    
+				    <div class="blog-entry-wrapper">
+				        
+				        <div class="blog-intro-text">
+				            Posted: {{blogEntry.date| date:'MM/dd/yyyy @ h:mma'}}
+				        </div>
+				        
+				        <div class="blog-entry-outer">
+				            {{blogEntry.blogText}}
+				        </div>
+				        
+				        <div class="blog-comment-wrapper">
+				            <div class="blog-comment-label">Blog Comments</div>
+				            
+				            <div class="blog-entry-comments" ng-repeat="comment in
+				                blogEntry.comments">
+				                {{comment.commentText}}
+				            </div>
+				        </div>
+				        
+				    </div>
+				    
+				</div>
+
+	And add this code to the route provider section of app.js.
+		.when('/blogPost/:id', {
+			templateUrl: 'partials/blogPost.html',
+			controller: 'BlogViewCtrl'
+
+	If you look at the route definition, you’ll see the 'id' passed as a path parameter argument. Look at the new controller and you can see how we handle the id parameter  [var blogId = $routeParams.id;]. Since we do not yet have REST services in place, we hardcoded the JSON for the two blog posts into the controller. 
+
+	Once we retrieve the passed id from $routeParams, we use that to determine which blog entry to set as a scope property. Notice that we never actually set a scope property until we know which blog entry gets sent to the view.
+
+	You should never add properties to the scope that are not needed in the view.
+
+Testing with Karma
+		From the root of the project, create a JSON file named package.json and add the following contents.
+
+		The package.json file is used as a configuration file for Node.js. Now type the following command to install the Node.js dependencies defined in the package.json file.
+					npm install
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
