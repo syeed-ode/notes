@@ -838,7 +838,202 @@ Testing with Karma
 		The package.json file is used as a configuration file for Node.js. Now type the following command to install the Node.js dependencies defined in the package.json file.
 					npm install
 
-		
+*************************************************************
+*							    *
+*							    *
+*							    *
+****    Chapter 6 - AngularJS and REST Services   [pg128]****
+The business logic for AngularJS applications should always be placed in REST services whenever possible. 
+
+As AngularJS evolves over the next few years, it is very possible that most AngularJS applications will be rewritten. This means that any business logic placed inside an AngularJS application will need to be rewritten as well. 
+
+REST services may undergo upgrades and modifications, but a complete service rewrite is unlikely in most casesThe best place for business logic is the place that will undergo the least amount of change and be available to all types of applications, now and in the future.
+
+REST Services
+	REST (REpresentational State Transfer) services allow for a “separation of concerns.” REST services are not concerned with the user interface or user state, and clients that use REST services are not concerned with data storage or business logic.
+
+	REST services should be stateless. A REST service should never hold data in a session variable. All information needed for a REST service call should be contained in the request and header passed from the client to the service.
+
+	Any state should be held in the client and not in the service. There are many ways to hold state in an AngularJS application, including local storage, cookies, or cache storage.
+
+	A REST web service is said to be RESTful when it adheres to the following constrants:
+			- It’s URL-based (e.g., http://www.micbutton.com/rs/blogPost).
+			- It uses an Internet media type such as JSON for data interchange.
+			- It uses standard HTTP methods (GET, PUT, POST, DELETE).
+
+	The following is the standard way that HTTP methods should be used with REST services:
+			- POST should be used to:
+				a. Create a new resources.
+				b. Retrieve a list of resources when a large amount of request data is required to be passed to the service.
+			- PUT should be used to update a resource.
+			- GET should be used to retrieve a resource or a list of resources.
+			- DELETE should be used to delete a resource.
+
+AngularJS and REST Services
+	AngularJS REST service calls are asynchronous Ajax calls based on the $q service’s promise and deferred APIs. Making asynchronous Ajax REST service calls is not specific to AngularJS or any other client-side JavaScript framework. Many libraries provide Ajax functionality, including jQuery, Dojo, and others.
+
+Ways to Create AngularJS Services
+	There are three ways to create and register services in AngularJS. They are as follows:
+			- Using the 'service' function
+			- Using the 'provider' function
+			- Using the 'factory' function
+
+	Here’s how to create a service with the service function (we will not use this method to create services in this book)
+				var blogServices = angular.module('blogServices', ['ngResource']);
+				blogServices.service('BlogPost', […]
+	
+	You can also create services with the provider function, as shown here:
+				/* chapter6/ provider function */
+				var blogServices = angular.module('blogServices', ['ngResource']);
+				blogServices.provider('BlogPost', […]
+	
+	The third way to create services in AngularJS is with the factory function. This is the most commonly used method, and the method we will use to create AngularJS services throughout this book:
+				var blogServices = angular.module('blogServices', ['ngResource']);
+				blogServices.factory('BlogPost', […]
+
+	We will now look at how to connect to REST services in AngularJS, although we will not actually implement the service code in our blog application until later. We need to get a good theoretical understanding of AngularJS services before we start coding. Once we have that understanding, we will be set for coding.
+
+Ways to Communicate with REST Services
+	There are currently two ways to communicate with REST services using AngularJS:
+		The $http service
+			This service provides low-level interaction with REST services using the browser’s XMLHttpRequest object.
+
+		The $resource object
+			This object provides a high-level approach to interacting with REST services, simplifying the process considerably.
+
+	We will focus mostly on using the $resource object for communicating with REST services. We will use the $http service in later chapters for handling Basic Authentication headers.
+
+	The following code shows how to define an AngularJS service that can be used to interact with a REST service. Notice that we pass the REST service URL to the $resource object. 
+
+	The methods defined match the REST services that are defined on that particular URL. Once the 'BlogPost' service is defined, it can be used like a standard JavaScript object to access the different REST services defined on this URL.
+				/* chapter6/services.js */
+				'use strict';
+
+				/* Services */
+				var blogServices = angular.module('blogServices', ['ngResource']);
+				
+				blogServices.factory('BlogPost', 
+					['$resource',
+					function($resource) {
+						return $resource("http://www.micbutton.com/rs/blogPost", {}, {
+							get: {method: 'GET', cache: false, isArray: false},
+							save: {method: 'POST', cache: false, isArray: false},
+							update: {method: 'PUT', cache: false, isArray: false},
+							delete: {method: 'DELETE', cache: false, isArray: false}
+						});
+				}]);
+	Using the $resource object is by far the easiest way to call REST services.
+
+	As you can see from this example, the AngularJS service code is straightforward and really fairly uncomplicated. Even when many services are defined, the services.js file is relatively simple.
+
+	Using the '$http' service would require many more lines of code related to REST service calls than we need using the $resource object. 
+
+Updating the Project for REST
+	Before we can use our service, the new services.js file must be loaded at runtime and the new services module, blogServices, must be specified as a dependency of the application at startup time. Here is the line that should be added to the index.html file to load the services.js file:
+				/* chapter6/index.html excerpt */
+				<script src="js/services.js"></script>
+
+	The following code shows how we use inline annotations to add the new BlogServices module as a dependency of the application at startup time. Once the new module is added here, the services defined on the module can be used by any controller in the application:
+				var blogApp = angular.module('blogApp', [
+					'ngRoute',
+					'blogControllers',
+					'blogServices'
+				]);
+
+REST Services and Controllers
+	Now let’s look at how to use the BlogPost service inside the BlogViewCtrl controller. First we must define the service as a requirement of the controller, as shown here. We then make a call to the get method and pass the id as an argument. We also define two callback functions, success and error (if you do not understand JavaScript callback functions, now would be a good time to stop and research how they work):
+				blogControllers.controller('BlogViewCtrl',
+					['$scope', '$routeParams', 'BlogPost',
+					function BlogViewCtrl($scope, $routeParams, BlogPost) {
+						var blogId = $routeParams.id;
+
+						BlogPost.get({id: blogId},
+							function success(response) {
+								console.log("Success:" + JSON.stringify(response));
+								$scope.blogEntry = response;
+							},
+							function error(errorResponse) {
+								console.log("Error:" + JSON.stringify(errorResponse));
+							}
+						);
+				}]);
+
+	When a call is made to the BlogViewCtrl controller, the id is retrieved from $routeParams. A call is then made to the get method of the BlogPost service, passing the id as an argument. 
+
+	At that point, the call to the controller completes. Theoretically we don’t know when the REST service call will return results, but when it does, either the success callback function or the error callback function will be called. 
+
+	If the REST service call fails, the code inside the error callback function should handle the error condition. If the REST service call is successful, the code inside the success callback function handles the success functionality.
+
+The JSON Response
+	If the REST service call is successful, we set the JSON returned as the value of a scope property named blogEntry. The property is at that point bound to the view, and AngularJS updates the view with the new values that were retrieved from the REST service call.
+
+	If the REST service call fails, the screen is not updated, but we log the error to the console to help diagnose the failure.
+
+	The JSON response object returned from a successful call looks like this:
+			{ "chapter: 6,"JSON": "response"}
+			
+			{
+				"_id":1,
+				"date":1400623623107,
+				"introText":"This is a blog post about AngularJS. We will cover how to build",
+				"blogText":"This is a blog post about AngularJS. We will cover how to build a blog and how to add comments to the blog post.",
+				"comments":[
+					{
+						"commentText":"Very good post. I love it."
+					},
+					{
+						"commentText":"When can we learn services."
+					}
+				]
+			}
+
+List Services
+	If we wanted a list of blog posts, We could define the following REST service: GET: http://www.micbutton.com/rs/blogList. we would define that service in the services.js file. Notice that we specify 'isArray: true'. This defines the service as returning a list and not an individual resource:
+				blogServices.factory('BlogList', 
+				    ['$resource',
+				    function($resource) {
+				        return $resource(
+				            "http://nodeblog-micbuttoncloud.rhcloud.com/NodeBlog/blogList", 
+				            {}, 
+				            {
+				                get: {method: 'GET', cache: false, isArray: true}
+				        });
+				}]);
+
+	Following is the controller code used to access the BlogList service. We inject the service into the controller as we did earlier, and like before, we pass success and error callback functions to the service call.
+				blogControllers.controller('BlogCtrl', 
+			    ['$scope', 
+			    'BlogList',
+			    function BlogCtrl($scope, BlogList) {
+			        BlogList.get({},
+			            function success(response) {
+			                console.log("Success:" + JSON.stringify(response));
+			                $scope.blogList = response;
+			            },
+			            function error(errorResponse) {
+			                console.log("Error:" + JSON.stringify(errorResponse));
+			            }
+			        );
+			}]);
+*************************************************************
+*							    *
+*							    *
+*							    *
+****    Chapter 7 - AngularJS Models   [pg147]       ********
+AngularJS models are held in the $scope object. In AngularJS, '$scope' is used to gain access to the model related to a particular controller. '$scope' is a child scope of '$rootScope'.
+
+$rootScope is a parent scope that can be used to save and access model properties that span multiple controllers. The use of '$rootScope' is highly discouraged in most designs, however. There is only one '$rootScope' in an application. 
+
+A properly designed AngularJS application will have little or no use for '$rootScope' to store model properties. In this chapter we will focus only on '$scope', used to store the model retrieved from REST services.
+
+Public REST Services
+	
+
+
+
+
+
+
 
 
 
