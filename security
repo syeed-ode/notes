@@ -95,7 +95,9 @@ MAC 	Message Authentication Code
 *
 *
 ****Chapter 9 - Key's and Certificates****
-Keys are required to create and verify digital signatures or to perform encryption. There are two general types of keys: asymmetric and symmetric. Asymmetric keys come in two types as well, public and private. A public key and a private key are related and are referred to as a key pair. Symmetric keys are also called secret keys.
+Keys are required to create and verify digital signatures or to perform encryption. 
+
+There are two general types of keys: asymmetric and symmetric. Asymmetric keys come in two types as well, public and private. A public key and a private key are related and are referred to as a key pair. Symmetric keys are also called secret keys.
 
 Certificates are used to authenticate public keys; when public keys are transmitted electronically, they are often embedded within certificates. 
 
@@ -484,18 +486,61 @@ This information was gathered from reading The Web Application H's Handbook.  It
 *							    *
 *							    *
 *							    *
-***  Chapter 3 - Web Appplication Technologies [pg39 - 71] ***
+*** Chapter 3 - Web Appplication Technologies [pg39 - 71] ***
 1. What is the 'OPTIONS' method used for?
 It returns all the methods that are available on a resource.  
 ['OPTIONS' asks the serever the methods that are available for a resurce.  The server returns an 'Allow' header that lists the available methods.]
 
 2. What are the 'If-Modified-Since' and 'If-None-Match' headers used for?
+[These header keys are used to by the client to ask the server for any updates to a resource. If the server has no updates, the server returns a 304 response status code.]
 
 3. What is the significance of the 'secure' flag when a server sets a cookie?
+[The secure flag is used to encrypt the cookie's session token.]
 
 4. What is the difference between the common status codes 301 and 302?
+[The 301 status code is to indicate a resource has permenantly moved. A 302 indicates a resource has moved temporarily.]
 
 5. How does a browser iteroperate with a web proxy when SSL is being used?
+[A proxy sits between a requesting client and the server who responds to the request. The proxy communicates with the client via an unsecure connection, HTTP. Then it communicates with the server on behalf of the client with an SSL connection. Vulnerabilites exist bewteen the client and proxy.]
+*************************************************************
+*							    *
+*							    *
+*							    *
+***  Chapter 4 - Mapping the Application   [pg73 - 115] *****
+1. While mapping an application ou encounter the follwing URL: 'https://wahh-app.com/CookieAuth.ddl?GetLogon?curl=22Fdefault.aspx'. What information can you deduce about the technologies employed on the server and how it is likely to behave?
+
+2. The application you are targeting implements web forum functionality. Here is the only URL you have discovered: 'http://wahh-app.com/forums/ucp.php?mode=register'. How might you obtain a listing of forum members?
+
+3. While mapping an application, you encouter the following URL: 'https://wahh-app.com/public/profile/Address.asp?action=view&location=default'. What information can you infer about server-side technologies? What can you conjecture about other content and functionality that may exist?
+
+4. A web server's responses include the following header: 'Server: Apache-Coyote/1.1'. What does this indicate about the technologies in use on the server?
+
+5. you are mapping two different web applications, and you request the URL '/admn.cpf' from eah appplication.  The response headers returned by eah request are shown here. From these headers alone, what can you deduce about the presence of the requested resoure within eadh application?
+
+		'http//1.1 200 Ok 						// it uses HTTP version 1.1
+		 Server: Microsift-IIS/5.0 				// the container is a MS containter IIS
+		 Expires: Mon, Jun 2011 14:49:21 GMT 	// the resource has x amount of time before it expires
+		 										// the resource is updated every x second; perhaps 
+		 										// now looking at the date, the date expires immediately
+		 										// the client cannot cache the resource
+		 Content-Location: http://wahh-appp.com/includes/error.htm?404:http://wahh-app.com/admin.cpf
+												// there is a page specifically for 404. 
+		 Date: Mon, 20 Jun 2011 14:59:21 GMT		// the response was made on this date.
+		 Content-Type: text/html 				// the response is an html page
+		 Content-Length							// the requet body was of this length
+		'
+
+		'HTTP/1.1 404 Unauthorized 				
+		'
+
+The task is to examine behavior and the technologies (on both the client and server) to identify the key attack surface. Also to find exploitable vulnerabilities this analysis exercise can unccover.  
+
+Effective mapping is a valuable skill.  A seasoned expert can triage classes of vulnerabilities as opposed to instances. 
+
+This chapter describesl the steps to follow during application mapping and trics to maximize effective tools that can assist you in the process.
+
+Enumerating Content and Functionality
+	
 
 
 
