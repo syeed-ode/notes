@@ -1027,8 +1027,39 @@ $rootScope is a parent scope that can be used to save and access model propertie
 A properly designed AngularJS application will have little or no use for '$rootScope' to store model properties. In this chapter we will focus only on '$scope', used to store the model retrieved from REST services.
 
 Public REST Services
-	
+	The following excerpt shows how AngularJS services access the REST services used. 
+				/* chapter7/services.js excerpt */
+				$resource(
+				"http://nodeblog-micbuttoncloud.rhcloud.com/NodeBlog/blog/:id"
+				...
+				$resource(
+				"http://nodeblog-micbuttoncloud.rhcloud.com/NodeBlog/blogList"
+	The complete modified services.js file is shown here: 
+				var blogServices = angular.module('blogServices', ['ngResource']);
+				blogServices.factory('BlogPost', 
+				    ['$resource',
+				    function($resource) {
+				        return $resource("http://www.micbutton.com/rs/blogPost", {}, {
+				            get:       {method: 'GET', cache: false, isArray: false},
+				            save:     {method: 'POST', cache: false, isArray: false},
+				            update:    {method: 'PUT', cache: false, isArray: false},
+				            delete: {method: 'DELETE', cache: false, isArray: false}
+				        });
+				}]);
+				blogServices.factory('BlogList', 
+				    ['$resource',
+				    function($resource) {
+				        return $resource(
+				            "http://nodeblog-micbuttoncloud.rhcloud.com/NodeBlog/blogList", 
+				            {}, 
+				            {
+				                get: {method: 'GET', cache: false, isArray: true}
+				        });
+				}]);
 
+
+Changes to the Controllers
+	The
 
 
 
