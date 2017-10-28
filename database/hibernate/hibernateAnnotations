@@ -61,16 +61,28 @@ Repeatable Reads:		Not possible 		Not possible 			Possible
 Seralizable:			Not possible 		Not possible 			Not possible
 
 Optimistic Locking
-	Optimistic Locking is a strategy where you read a record, take note of a version number (other methods to do this involve dates, timestamps or checksums/hashes) and check that the version hasn't changed before you write the record back. When you write the record back you filter the update on the version to make sure it's atomic. (i.e. hasn't been updated between when you check the version and write the record to the disk) and update the version in one hit.
+	Optimistic Locking is a strategy where you read a record, take note of a version number (other methods to do this involve dates, timestamps or checksums/hashes) and check that the version hasn't changed before you write the record back. 
+
+	When you write the record back you filter the update on the version to make sure it's atomic. (i.e. hasn't been updated between when you check the version and write the record to the disk) and update the version in one hit.
 
 	If the record is dirty (i.e. different version to yours) you abort the transaction and the user can re-start it.
 
-	This strategy is most applicable to high-volume systems and three-tier architectures where you do not necessarily maintain a connection to the database for your session. In this situation the client cannot actually maintain database locks as the connections are taken from a pool and you may not be using the same connection from one access to the next.
+	This strategy is most applicable to high-volume systems and three-tier architectures where you do not necessarily maintain a connection to the database for your session. 
+
+	A three-tier architecture is the most widespread use of multitier architecture. Multilayered architecture is a client–server architecture in which presentation, application processing, and data management functions are physically separated
+
+	In this situation the client cannot actually maintain database locks as the connections are taken from a pool and you may not be using the same connection from one access to the next.
 
 Pessimistic Locking
-	Pessimistic Locking is when you lock the record for your exclusive use until you have finished with it. It has much better integrity than optimistic locking but requires you to be careful with your application design to avoid Deadlocks. To use pessimistic locking you need either a direct connection to the database (as would typically be the case in a two tier client server application) or an externally available transaction ID that can be used independently of the connection.
+	Pessimistic Locking is when you lock the record for your exclusive use until you have finished with it. It has much better integrity than optimistic locking but requires you to be careful with your application design to avoid Deadlocks. 
 
-	In the latter case you open the transaction with the TxID and then reconnect using that ID. The DBMS maintains the locks and allows you to pick the session back up through the TxID. This is how distributed transactions using two-phase commit protocols (such as XA or COM+ Transactions) work.
+	To use pessimistic locking you need either a direct connection to the database (as would typically be the case in a two tier client server application) or an externally available transaction ID that can be used independently of the connection.
+
+	When using an externally available transaction ID, you open the transaction with the TxID and then reconnect using that ID. The DBMS maintains the locks and allows you to pick the session back up through the TxID. 
+
+	This is how distributed transactions using two-phase commit protocols (such as XA or COM+ Transactions) work.
+
+	The two phase commit protocol is a distributed algorithm which lets all sites in a distributed system agree to commit a transaction. The protocol results in either all nodes committing the transaction or aborting, even in the case of site failures and message losses.
 *
 *
 *
@@ -359,12 +371,467 @@ JPA - Java Persistence API
 *
 *
 This information was gathered from reading Hibernate's Annotations Documention, Mapping Entities:
-	https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html. 
+	https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/index.html. 
+*************************************************************
+*							    *
+*							    *
+*							    *
+******            Preface                                                 ******
+Metadata governs the transformation of data from one representation to the other. Hibernate Annotations provides annotation-based metadata.
+
+The JPA specification standardizes the basic APIs and the metadata needed for any object/relational persistence mechanism.
+
+Hibernate EntityManager together with Hibernate Annotations offers a complete (and standalone) JPA persistence solution on top of the Hibernate Core.  You may use a combination of all three together or at all time you can fall back to Hibernate native APIs, or if required, even to native JDBC and SQL.
+
+Hibernate Annotations is based on the JPA 2 specification. 
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
 *************************************************************
 *							    *
 *							    *
 *							    *
 *** Chapter 2.2 - Mapping with JPA (Java Persistence Annotations) [pg1 - 25] ***
+JPA entities are plain POJOs. Actually, they are Hibernate persistent entities. Their mappings are defined through JDK 5.0 annotations instead of hbm.xml files.
+
+Annotations can be split in two categories.
+
+The logical mapping annotations (describing the object model, the association between two entities etc.)
+
+The physical mapping annotations (describing the physical schema, tables, columns, indexes, etc)
+
+JPA annotations are in the javax.persistence.* package. JPA annotations are plain JDK 5 annotations.
+
+A good and complete set of working examples can be found in the Hibernate Annotations test suite itself: most of the unit tests have been designed to represent a concrete example and be a source of inspiration for you. You can get the test suite sources in the distribution.
+
+2.2.1. Marking a POJO as persistent entity
+	Every persistent POJO class is an entity and is declared using the @Entity annotation (at the class level):
+				@Entity
+				public class Flight implements Serializable {
+				    Long id;
+
+				    @Id
+				    public Long getId() { return id; }
+
+				    public void setId(Long id) { this.id = id; }
+				}         
+
+	@Entity declares the class as an entity (i.e. a persistent POJO class). The other mapping declarations are implicit. The class Flight is mapped to the Flight table, using the column id as its primary key column.
+
+	The concept of configuration by exception is central to the JPA specification.  
+			See https://stackoverflow.com/questions/34125441/what-is-exactely-a-configuration-by-exception-in-jpa.
+
+			So, configuration by exception is the concept that only the places that require something out of the ordinary need to receive additional configuration.
+
+			For example, when you annotate a JPA entity with @Access( AccessType.FIELD ) you are saying that the default access mechanism to be used by JPA throughout this entity should be field access.
+
+			But if at some point within your class you have a getter that you would like JPA to use instead of a field, then you can specify an additional @Access( AccessType.PROPERTY ) annotation on just that one getter, and JPA will use that getter. 
+
+			You always have the freedom to override the default behaviour by supplying an extra annotation on a case by case basis.
+
+	
+	Mixing annotations in both fields and methods should be avoided. Hibernate will guess the access type from the position of @Id or @EmbeddedId.
+
+	Field-based access vs. Property-based access - https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/access.html
+			By default, the placement of the @Id annotation gives the default access strategy. When placed on a field, Hibernate will assume field-based access. 
+					@Entity
+					public class Simple {
+					    @Id
+					    private Integer id;
+					    public Integer getId() {
+					        return id;
+					    }
+					    public void setId( Integer id ) {
+					        this.id = id;
+					    }
+					}
+				Field-based access - https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/access.html
+
+				When using field-based access, Hibernate won’t consider other entity-level methods as part of the persistence state. 
+
+				To exclude a field from being part of the entity persistent state, the field must be marked with the @Transient annotation.
+
+				Another advantage is that some entity attributes can be hidden from outside the entity. An example is the entity @Version field, which must not be manipulated by the data access layer. We can simply omit the getter and the setter for this version field, and Hibernate can still leverage the optimistic concurrency control mechanism.
+
+			Place on the identifier getter, Hibernate will use property-based access. 
+					@Entity
+					public class Simple {
+
+					    private Integer id;
+
+					    @Id
+					    public Integer getId() {
+					        return id;
+					    }
+
+					    public void setId( Integer id ) {
+					        this.id = id;
+					    }
+					}
+				Property-based access - https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/access.html
+
+				When using property-based access, Hibernate uses the accessors for both reading and writing the entity state.
+
+				Every other method that will be added to the entity (e.g. helper methods for synchronizing both ends of a bidirectional one-to-many association) will have to be marked with the @Transient annotation.
+
+			Overriding the default access strategy
+				The default access strategy mechanism can be overridden with the JPA @Access annotation. 
+
+				In the following example, the @Version attribute is accessed by its field and not by its getter, like the rest of entity attributes.
+
+			Embeddable types inherit the access strategy from their parent entities.
+					Embeddable types -  https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/embeddables.html
+
+					Historically Hibernate called embeddable types components. JPA calls them embeddables. Either way the concept is the same: a composition of values.
+
+					For example we might have a Name class that is a composition of first-name and last-name, or an Address class that is a composition of street, city, postal code, etc.
+							@Embeddable
+							public class Name {
+							    private String firstName;
+							    private String middleName;
+							    private String lastName;
+							    ...
+							}
+
+					An embeddable type is another form of value type, and its lifecycle is bound to a parent entity type, therefore inheriting the attribute access from its parent.
+
+					The embeddable types can overrule the default implicit access strategy (inherited from the owning entity). In the following example, the embeddable uses property-based access, no matter what access strategy the owning entity is choosing:
+							@Embeddable
+							@Access(AccessType.PROPERTY)
+							public static class Change {
+							    private String path;
+							    private String diff;
+							    public Change() {}
+							    
+							    @Column(name = "path", nullable = false)
+							    public String getPath() {
+							        return path;
+							    }
+							    public void setPath(String path) {
+							        this.path = path;
+							    }
+							    @Column(name = "diff", nullable = false)
+							    public String getDiff() {
+							        return diff;
+							    }
+							    public void setDiff(String diff) {
+							        this.diff = diff;
+							    }
+							}
+					The owning entity can use field-based access, while the embeddable uses property-based access as it has chosen explicitly:
+							@Entity
+							public class Patch {
+							    @Id
+							    private Long id;
+							    @Embedded
+							    private Change change;
+							}
+					This works also for collection of embeddable types:
+							@Entity
+							public class Patch {
+							    @Id
+							    private Long id;
+							    @ElementCollection
+							    @CollectionTable(
+							        name="patch_change",
+							        joinColumns=@JoinColumn(name="patch_id")
+							    )
+							    @OrderColumn(name = "index_id")
+							    private List<Change> changes = new ArrayList<>();
+							    public List<Change> getChanges() {
+							        return changes;
+							    }
+							}
+	
+	2.2.1.1. Defining the table
+		@Table is set at the class level; it allows you to define the table, catalog, and schema names for your entity mapping. If no @Table is defined the default values are used: the unqualified class name of the entity.
+				@Entity
+				@Table(name="tbl_sky")
+				public class Sky implements Serializable { ... }  
+
+		For naming strategies see https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/naming.html          
+
+		You can also define unique constraints to the table using the @UniqueConstraint annotation in conjunction with @Table. Below a unique constraint is applied to the tuple month, day. Note that the columnNames array refers to the logical column names.
+				@Table(name="tbl_sky",
+				    uniqueConstraints = {@UniqueConstraint(columnNames={"month", "day"})}
+				)
+
+		For a unique constraint bound to a single column, it is recommended to use the @Column.unique approach.
+
+	2.2.1.2. Versioning for optimistic locking
+		You can add optimistic locking capability to an entity using the @Version annotation. 
+				@Entity
+				public class Flight implements Serializable {
+				...
+				    @Version
+				    @Column(name="OPTLOCK")
+				    public Integer getVersion() { ... }
+				}
+
+		The version property will be mapped to the OPTLOCK column, and the entity manager will use it to detect conflicting updates (preventing lost updates you might otherwise see with the last-commit-wins strategy).
+
+		The version column may be a numeric (the recommended solution) or a timestamp. Hibernate supports any kind of type provided that you define and implement the appropriate UserVersionType.
+
+		The application must not alter the version number set up by Hibernate in any way. To artificially increase the version number, check in Hibernate Entity Manager's reference documentation LockModeType.OPTIMISTIC_FORCE_INCREMENT or LockModeType.PESSIMISTIC_FORCE_INCREMENT.
+
+2.2.2. Mapping simple properties
+	2.2.2.1. Declaring basic property mappings
+		Every non static non transient property (field or method depending on the access type) of an entity is considered persistent, unless you annotate it as @Transient.
+
+		The transient keyword, however, is a Java keyword which marks a member variable not to be serialized when it is persisted to streams of bytes.
+
+		Not having an annotation for your property is equivalent to the appropriate @Basic annotation. The @Basic annotation allows you to declare the fetching strategy for a property:
+				public transient int counter; //transient property
+
+				private String firstname; //persistent property
+
+				@Transient
+				String getLengthInMeter() { ... } //transient property
+
+				String getName() {... } // persistent property
+
+				@Basic
+				int getLength() { ... } // persistent property
+
+				@Basic(fetch = FetchType.LAZY)
+				String getDetailedComment() { ... } // persistent property
+
+				@Temporal(TemporalType.TIME)
+				java.util.Date getDepartureTime() { ... } // persistent property           
+
+				@Enumerated(EnumType.STRING)
+				Starred getNote() { ... } //enum persisted as String in database
+
+		counter, a transient field, and lengthInMeter, a method annotated as @Transient, and will be ignored by the entity manager.
+
+		name, length, and firstname properties are mapped persistent and eagerly fetched (the default for simple properties).
+
+		The detailedComment property value will be lazily fetched from the database once a lazy property of the entity is accessed for the first time.
+
+		If your classes are not instrumented, e.g. bytecode is added to the original class, property level lazy loading is silently ignored.
+
+		Hibernate Annotations support out of the box enum type. The persistence representation, defaulted to ordinal, can be overridden through the @Enumerated annotation as shown in the note property example.
+
+		Temporal data can have DATE, TIME, or TIMESTAMP precision (ie the actual date, only the time, or both). Use the @Temporal annotation to fine tune that.
+
+		@Lob indicates that the property should be persisted in a Blob or a Clob depending on the property type: java.sql.Clob, Character[], char[] and java.lang.String will be persisted in a Clob. 
+
+		java.sql.Blob, Byte[], byte[] and serializable type will be persisted in a Blob.
+				@Lob
+				public String getFullText() {
+				    return fullText;
+				}
+
+				@Lob 
+				public byte[] getFullCode() {
+				    return fullCode;
+				}
+
+	2.2.2.2. Access type
+		By default the access type of a class hierarchy is defined by the position of the @Id or @EmbeddedId annotations. 
+
+		However in some situations, you need to:
+						@Entity
+						public class Order {
+						   @Id private Long id;
+						   public Long getId() { return id; }
+						   public void setId(Long id) { this.id = id; }
+
+						   @Embedded private Address address;
+						   public Address getAddress() { return address; }
+						   public void setAddress() { this.address = address; }
+						}
+
+						@Entity
+						public class User {
+						   private Long id;
+						   @Id public Long getId() { return id; }
+						   public void setId(Long id) { this.id = id; }
+
+						   private Address address;
+						   @Embedded public Address getAddress() { return address; }
+						   public void setAddress() { this.address = address; }
+						}
+
+						@Embeddable
+						@Access(AcessType.PROPERTY)
+						public class Address {
+						   private String street1;
+						   public String getStreet1() { return street1; }
+						   public void setStreet1() { this.street1 = street1; }
+
+						   private hashCode; //not persistent
+						}
+				- force the access type of the entity hierarchy
+				- override the access type of a specific entity in the class hierarchy
+				- override the access type of an embeddable type
+
+	2.2.2.3. Declaring column attributes
+		You can use this annotation at the property level for properties that are:
+				- not annotated at all
+				- annotated with @Basic
+				- annotated with @Version
+				- annotated with @Lob
+				- annotated with @Temporal
+
+		This annotation can be applied to regular properties as well as @Id or @Version properties.
+				@Column(
+				    name="colu(1)mnName";
+				    boolean un(2)ique() default false;
+				    boolean nu(3)llable() default true;
+				    boolean in(4)sertable() default true;
+				    boolean up(5)datable() default true;
+				    String col(6)umnDefinition() default "";
+				    String tab(7)le() default "";
+				    int length(8)() default 255;
+				    int precis(9)ion() default 0; // decimal precision
+				    int scale((10)) default 0; // decimal scale
+
+    2.2.2.4. Embedded objects (aka components)
+    	It is possible to declare an embedded component inside an entity and even override its column mapping. Component classes have to be annotated at the class level with the @Embeddable annotation.
+
+    	It is possible to override the column mapping of an embedded object for a particular entity using the @Embedded and @AttributeOverride annotation in the associated property:
+				@Entity
+				public class Person implements Serializable {
+
+				    // Persistent component using defaults
+				    Address homeAddress;
+
+				    @Embedded
+				    @AttributeOverrides( {
+				            @AttributeOverride(name="iso2", column = @Column(name="bornIso2") ),
+				            @AttributeOverride(name="name", column = @Column(name="bornCountryName") )
+				    } )
+				    Country bornIn;
+				    ...
+				}
+				@Embeddable
+				public class Address implements Serializable {
+				    String city;
+				    Country nationality; //no overriding here
+				}
+				@Embeddable
+				public class Country implements Serializable {
+				    private String iso2;
+				    @Column(name="countryName") private String name;
+
+				    public String getIso2() { return iso2; }
+				    public void setIso2(String iso2) { this.iso2 = iso2; }
+
+				    
+				    public String getName() { return name; }
+				    public void setName(String name) { this.name = name; }
+				    ...
+				}
+		
+		The Person entity has two component properties, homeAddress and bornIn. homeAddress property has not been annotated, but Hibernate will look for the @Embeddable annotation in the Address class.
+
+		We also override the mapping of a column name (to bornCountryName) with the @Embedded and @AttributeOverride annotations for each mapped attribute of Country.
+
+		As you can see, Country is also a nested component of Address, again using auto-detection by Hibernate and JPA defaults.
+
+		Overriding columns of embedded objects of embedded objects is through dotted expressions.
+				@Embedded
+				@AttributeOverrides( {
+				        @AttributeOverride(name="city", column = @Column(name="fld_city") ),
+				        @AttributeOverride(name="nationality.iso2", column = @Column(name="nat_Iso2") ),
+				        @AttributeOverride(name="nationality.name", column = @Column(name="nat_CountryName") )
+				        //nationality columns in homeAddress are overridden
+				} )
+				Address homeAddress;
+
+		You can also use association annotations in an embeddable object (ie @OneToOne, @ManyToOne, @OneToMany or @ManyToMany). To override the association columns you can use @AssociationOverride.
+
+2.2.3. Mapping identifier properties
+	The @Id annotation, the identifier of your entity, can be set by the application itself or be generated by Hibernate (preferred).
+
+	You can define the identifier generation strategy with the @GeneratedValue annotation.
+
+	JPA defines five types of identifier generation strategies:
+			AUTO - either identity column, sequence or table depending on the underlying DB
+			TABLE - table holding the id
+			IDENTITY - identity column
+			SEQUENCE - sequence
+			identity copy - the identity is copied from another entity
+
+	The AUTO generator is the preferred type for portable applications (across several DB vendors).
+
+	See https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html for more information on Composite identifiers and generators in general.
+
+2.2.4. Mapping inheritance
+	See https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html for more information.	
+
+2.2.5. Mapping entity associations/relationships
+	2.2.5.1. One-to-one
+		You can associate entities through a one-to-one relationship using @OneToOne. There are three cases for one-to-one associations:
+				- the associated entities share the same primary keys values
+				- a foreign key is held by one of the entities (note that this FK column in the database should be constrained unique to simulate one-to-one multiplicity)
+				a association table is used to store the link between the 2 entities (a unique constraint has to be defined on each fk to ensure the one to one multiplicity
+
+		First, we map a real one-to-one association using shared primary keys. The @PrimaryKeyJoinColumn annotation does say that the primary key of the entity is used as the foreign key value to the associated entity:
+				@Entity
+				public class Body {
+				    @Id
+				    public Long getId() { return id; }
+
+				    @OneToOne(cascade = CascadeType.ALL)
+				    @PrimaryKeyJoinColumn
+				    public Heart getHeart() {
+				        return heart;
+				    }
+				    ...
+				}            
+				@Entity
+				public class Heart {
+				    @Id
+				    public Long getId() { ...}
+				}
+   		
+   		In the following example, the associated entities are linked through an explicit foreign key column. A Customer is linked to a Passport, with a foreign key column named passport_fk in the Customer table.
+				@Entity
+				public class Customer implements Serializable {
+				    @OneToOne(cascade = CascadeType.ALL)
+				    @JoinColumn(name="passport_fk")
+				    public Passport getPassport() {
+				        ...
+				    }
+			    }
+
+				@Entity
+				public class Passport implements Serializable {
+				    @OneToOne(mappedBy = "passport")
+				    public Customer getOwner() {}
+				    ...
+				}
+
+		The join column is declared with the @JoinColumn annotation and has parameter named 'referencedColumnName'. This parameter declares the column in the 'targeted entity' that will be used to the join. See docs for other considerations when using 'referencedColumnName'.
+
+		In a bidirectional relationship, one of the sides (and only one) has to be the owner: the owner is responsible for the association column(s) update.
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+This information was gathered from reading Hibernate's Annotations Documention, Mapping Entities:
+	https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html. 
+*************************************************************
+*							    *
+*							    *
+*							    *
 *****      Chapter 2.3 - Mapping Queries [pg25 - 29]    *******
 *************************************************************
 *							    *
@@ -516,6 +983,14 @@ This information was gathered from reading Hibernate's Annotations Documention, 
 			optional: If enabled (the default), Hibernate will insert a row only if the properties defined by this join are non-null and will always use an outer join to retrieve the properties.
 
 			foreignKey: defines the Foreign Key name of a secondary table pointing back to the primary table.
+
+
+
+
+
+
+
+
 
 
 

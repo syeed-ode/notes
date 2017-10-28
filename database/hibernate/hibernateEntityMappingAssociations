@@ -1,0 +1,427 @@
+*
+*
+*
+*				Dirty Reads:		Nonrepeatable (Fuzzy) Reads:	Phantom Reads:
+				TxA reads data that	TxA reads datq once. When it	TxA reads data once. When it
+				TxB put there but has	rereads the same data, TxB has	rereads the same data, TxB has
+				not yet commited.	removed the data or modified 	has commited more rows to the 
+							it (via commits).		data
+				---------------------	------------------------------	------------------------------
+Read Uncommitted:		Possible		Possible			Possible
+
+Read Committed:			Not possible 		Possible			Possible
+
+Repeatable Reads:		Not possible 		Not possible 			Possible
+
+Seralizable:			Not possible 		Not possible 			Not possible
+
+Optimistic Locking
+	Optimistic Locking is a strategy where you read a record, take note of a version number (other methods to do this involve dates, timestamps or checksums/hashes) and check that the version hasn't changed before you write the record back. 
+
+	When you write the record back you filter the update on the version to make sure it's atomic. (i.e. hasn't been updated between when you check the version and write the record to the disk) and update the version in one hit.
+
+	If the record is dirty (i.e. different version to yours) you abort the transaction and the user can re-start it.
+
+	This strategy is most applicable to high-volume systems and three-tier architectures where you do not necessarily maintain a connection to the database for your session. 
+
+	A three-tier architecture is the most widespread use of multitier architecture. Multilayered architecture is a client–server architecture in which presentation, application processing, and data management functions are physically separated
+
+	In this situation the client cannot actually maintain database locks as the connections are taken from a pool and you may not be using the same connection from one access to the next.
+
+Pessimistic Locking
+	Pessimistic Locking is when you lock the record for your exclusive use until you have finished with it. It has much better integrity than optimistic locking but requires you to be careful with your application design to avoid Deadlocks. 
+
+	To use pessimistic locking you need either a direct connection to the database (as would typically be the case in a two tier client server application) or an externally available transaction ID that can be used independently of the connection.
+
+	When using an externally available transaction ID, you open the transaction with the TxID and then reconnect using that ID. The DBMS maintains the locks and allows you to pick the session back up through the TxID. 
+
+	This is how distributed transactions using two-phase commit protocols (such as XA or COM+ Transactions) work.
+
+	The two phase commit protocol is a distributed algorithm which lets all sites in a distributed system agree to commit a transaction. The protocol results in either all nodes committing the transaction or aborting, even in the case of site failures and message losses.
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+	Inner and Outer Joins from https://www.essentialsql.com/get-ready-to-learn-sql-server-14-introduction-to-outer-joins/ 
+		Both inner and outer joins are used to combine rows from two or more tables into a single result. This is done by specifying how columns from each table are matched to one another.  The aim is to find equal values between tables, and include those matches.
+
+		Inner joins don’t include non-matching rows. In its simplest case, where there is no join condition, an inner join would combine all rows from one table with those from another.  If the first table contained three rows, and the second, four, then the final result would contain twelve (3 x 4 = 12) !
+
+		If a person has more than one phone number, then more than one match is made.  From this you can see we may get more rows returned than we have for each person. Conversely, if a person has no phone number, then there won’t be an entry in PersonPhone, and no match made.  That particular person won’t be included in the results, as only those with matches are included. Keep in mind the inner join only returns row where the match condition is true.  
+
+		Let’s try an example. The {INNER JOIN} specifies [which tables to join] and the <match condition> for doing so.  The condition PH.Phone NumberTyeID = 3 limits the query to work numbers.
+					SELECT   P.FirstName,
+					         P.LastName,
+					         P.Title,
+					         PH.PhoneNumber
+					FROM     [ Person.Person ] AS P
+					         {INNER JOIN}
+					         [ Person.PersonPhone ] AS PH
+					         ON < P.BusinessEntityID = PH.BusinessEntityID
+					         AND PH.PhoneNumberTypeID = 3 >
+					ORDER BY P.LastName
+
+
+		In this example, rows where the BusinessEntityID’s don’t match aren’t included.  This could be an issue if a person doesn’t have a phone number as those employees wouldn’t be on the list.
+
+	Outer Joins
+		If you wish to include these employees you can use an Outer join. Outer joins do include non matching rows. 
+
+		The outer join will return every row from one specified table, even if the join condition fails. If the HR manager wanted to list every employee regardless of whether they had a work phone number, then using an outer join would make it so.
+
+	Types of Outer Joins
+		Left Outer Join – All rows from the left table are included, unmatched rows from the right are replaced with NULL values.
+
+		Right Outer Join – All rows from the right table are included, unmatched rows from the left are replaced with NULL values.
+
+		Full Outer Join – All rows from both tables are included, NULL values fill unmatched rows
+
+	Left Outer Join
+		Understand that when a {LEFT OUTER JOIN} is used, all rows for [the table] in the FROM clause are included in the result, even if a match isn’t found with the other table. When a match isn’t found, then a NULL is place in the column.
+					SELECT   P.FirstName,
+					         P.LastName,
+					         P.Title,
+					         PH.PhoneNumber
+					FROM     [ Person.Person ] AS P
+					         {LEFT OUTER JOIN}
+					         Person.PersonPhone AS PH
+					         ON P.BusinessEntityID = PH.BusinessEntityID
+					         AND PH.PhoneNumberTypeID = 3
+					ORDER BY P.LastName
+
+		In this model, there is 1 Person to 0 or 1 Employees. To construct a list of ALL Person LastNames, yet, ALSO show JobTitle IF the Person is an Employee, we need a way of joining the two tables and include Person rows in the result, even if they don’t match Employee.
+
+		This type of join is called a left outer join, as all the rows for the table from the left side of the JOIN keyword are included regardless of the match.
+					SELECT person.Person.BusinessEntityID,
+					       Person.Person.LastName,
+					       HumanResources.Employee.NationalIDNumber,
+					       HumanResources.Employee.JobTitle
+					FROM   person.Person // return all person.Person rows
+					LEFT OUTER JOIN
+					      HumanResources.Employee
+					      ON person.BusinessEntityID = Employee.BusinessEntityID
+	Right Outer Join
+		Below is our sample query written as a right outer join.  The key difference is that now we are going to return all records from the Employee table, which is the table to the right of the join keyword.  If a matching Employee record isn’t found, then NULL will be returned for BusinessEntityID and LastName.
+					SELECT person.Person.BusinessEntityID,
+					       Person.Person.LastName,
+					       HumanResources.Employee.NationalIDNumber,
+					       HumanResources.Employee.JobTitle
+					FROM   person.Person
+					RIGHT OUTER JOIN
+					      HumanResources.Employee
+					      ON person.BusinessEntityID = Employee.BusinessEntityID
+      	This returns all records and no null values.  The data model is the reason why. There is 1 Person to 0..1 Employees.  That means if every Employee is a Person.  But a person may not be an Employee. If the Employee exists it has to be in the person table as well.
+
+  	Left versus Right Outer Joins
+  		There is no difference in functionality between a left outer join and a right outer join. Note in the two queries below, the table names are reversed so they are EXACTLY the same.
+					SELECT person.Person.BusinessEntityID,
+					       HumanResources.Employee.NationalIDNumber
+					FROM   person.Person
+					LEFT OUTER JOIN
+					       HumanResources.Employee
+					      ON person.BusinessEntityID = Employee.BusinessEntityID
+  		Is exactly the same as: 
+					SELECT person.Person.BusinessEntityID,
+					       HumanResources.Employee.NationalIDNumber
+					FROM   HumanResources.Employee
+					RIGHT OUTER JOIN
+					      person.Person
+					      ON person.BusinessEntityID = Employee.BusinessEntityID
+
+      	Using the LEFT OUTER JOIN may be more intuitive since thats where the from is located.
+
+  	Full Outer Join
+  		A full outer join is the combination of results from a left and right outer join.  The results returned from this type of join include all rows from both tables.  
+
+  		Where matches occur, values are related.  Where matched from either table don’t, then NULL are returned instead. (Think the result from the no option comm Linux command.)
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+This information was gathered from reading Hibernate's Annotations Documention, Mapping Entities:
+	https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/index.html. 
+*************************************************************
+*							    *
+*							    *
+*							    *
+******            Preface                                                 ******
+Metadata governs the transformation of data from one representation to the other. Hibernate Annotations provides annotation-based metadata.
+
+The JPA specification standardizes the basic APIs and the metadata needed for any object/relational persistence mechanism.
+
+Hibernate EntityManager together with Hibernate Annotations offers a complete (and standalone) JPA persistence solution on top of the Hibernate Core.  You may use a combination of all three together or at all time you can fall back to Hibernate native APIs, or if required, even to native JDBC and SQL.
+
+Hibernate Annotations is based on the JPA 2 specification. 
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*************************************************************
+*							    *
+*							    *
+*							    *
+*** Chapter 2.2 - Mapping with JPA (Java Persistence Annotations) [pg1 - 25] ***
+JPA entities are plain POJOs. Actually, they are Hibernate persistent entities. Their mappings are defined through JDK 5.0 annotations instead of hbm.xml files.
+
+Annotations can be split in two categories.
+
+The logical mapping annotations (describing the object model, the association between two entities etc.)
+
+The physical mapping annotations (describing the physical schema, tables, columns, indexes, etc)
+
+JPA annotations are in the javax.persistence.* package. JPA annotations are plain JDK 5 annotations.
+
+A good and complete set of working examples can be found in the Hibernate Annotations test suite itself: most of the unit tests have been designed to represent a concrete example and be a source of inspiration for you. You can get the test suite sources in the distribution.
+
+2.2.5. Mapping entity associations/relationships
+	2.2.5.1. One-to-one
+		You can associate entities through a one-to-one relationship using @OneToOne. There are three cases for one-to-one associations:
+				- the associated entities share the same primary keys values
+				- a foreign key is held by one of the entities (note that this FK column in the database should be constrained unique to simulate one-to-one multiplicity)
+				a association table is used to store the link between the 2 entities (a unique constraint has to be defined on each fk to ensure the one to one multiplicity
+
+	First, we map a real one-to-one association using shared primary keys. 
+		The @PrimaryKeyJoinColumn annotation does say that the primary key of the entity is used as the foreign key value to the associated entity:
+				@Entity
+				public class Body {
+				    @Id
+				    public Long getId() { return id; }
+
+				    @OneToOne(cascade = CascadeType.ALL)
+				    @PrimaryKeyJoinColumn
+				    public Heart getHeart() {
+				        return heart;
+				    }
+				    ...
+				}            
+				@Entity
+				public class Heart {
+				    @Id
+				    public Long getId() { ...}
+				}
+   		
+   		The owner is responsible for the the association column(s) update.
+
+	Next, the second case is presented. 
+   		In the following example, the associated entities are linked through an explicit foreign key column. A Customer is linked to a Passport, with a foreign key column named passport_fk in the Customer table.
+				@Entity
+				public class Customer implements Serializable {
+				    @OneToOne(cascade = CascadeType.ALL)
+				    @JoinColumn(name="passport_fk")
+				    // passport is NOT the owner
+				    public Passport getPassport() {
+				        ...
+				    }
+			    }
+
+				@Entity
+				public class Passport implements Serializable {
+				    @OneToOne(mappedBy = "passport") // passport is NOT the owner
+				    // passport has not '@JoinColumn' references
+				    public Customer getOwner() {}
+				    ...
+				}
+
+		The join column is declared with the @JoinColumn annotation and has parameter named 'referencedColumnName'. 
+
+		See docs for using 'referencedColumnName'.
+
+		In a bidirectional relationship, one of the sides (and only one) has to be the owner: the owner is responsible for the association column(s) update.
+
+		To declare a side as "'NOT'" responsible for the relationship, the attribute mappedBy is used. 
+
+		mappedBy refers to the property name of the association on the owner side. In our case, this is passport.
+
+		As you can see, you don't have to (must not) declare the join column since it has already been declared on the owners side.
+
+		If no @JoinColumn is declared on the owner side, the defaults apply. A join column(s) will be created in the owner table.
+
+		Its name will be the concatenation of the name of the relationship in the owner side, _ (underscore), and the name of the primary key column(s) in the own'ed' side.
+
+		In this example passport_id because the property name is passport and the column id of Passport is id.
+
+	Finally, third possibility (using an association table) is quite exotic. 
+		A Customer (owner table) is linked to a Passport (owned table) through a association table named CustomerPassports.
+
+		This association table has a foreign key column named passport_fk pointing to the Passport (owned side) table (materialized by the inverseJoinColumn, and a foreign key column named customer_fk pointing to the Customer table materialized by the joinColumns attribute).
+				@Entity
+				public class Customer implements Serializable {
+				    @OneToOne(cascade = CascadeType.ALL)
+				    @JoinTable(name = "CustomerPassports",
+				        joinColumns = @JoinColumn(name="customer_fk"),
+				        inverseJoinColumns = @JoinColumn(name="passport_fk")
+				    )
+				    public Passport getPassport() {
+				        ...
+				    }
+			    }
+				@Entity
+				public class Passport implements Serializable {
+				    @OneToOne(mappedBy = "passport")
+				    public Customer getOwner() { ... }
+				}
+
+2.2.5.2. Many-to-one
+	Many-to-one associations are declared at the property level with the annotation @ManyToOne. The @JoinColumn attribute is optiona.
+
+	The default value(s) is like in one to one, the concatenation of the name of the relationship in the owner side, _ (underscore), and the name of the primary key column in the own'ed' side. 
+
+	In this example company_id because the property name is company (the owned table) and the column id of Company is id.
+			@Entity()
+			public class Flight implements Serializable {
+			    @ManyToOne( cascade = {CascadeType.PERSIST, CascadeType.MERGE} )
+			    @JoinColumn(name="COMP_ID")
+			    public Company getCompany() {
+			        return company;
+			    }
+			    ...
+			}  
+
+	@ManyToOne has a parameter named targetEntity which describes the target entity name. You usually don't need this parameter in almost all cases.
+
+	However this is useful when you want to use interfaces as the return type instead of the regular entity:
+			@Entity
+			public class Flight implements Serializable {
+			    @ManyToOne( cascade = {CascadeType.PERSIST, CascadeType.MERGE}, targetEntity=CompanyImpl.class )
+			    @JoinColumn(name="COMP_ID")
+			    public Company getCompany() {
+			        return company;
+			    }
+			    ...
+			}
+
+			public interface Company {
+			    ...
+			}
+
+	You can also map a many-to-one association through an association table, described by the @JoinTable annotation.
+
+	This association table, @JoinTable annotation, will contain a foreign key referencing back the entity table (through @JoinTable.joinColumns).
+
+	The @JoinTable annotation will also contain a foreign key referencing the target entity table (through @JoinTable.inverseJoinColumns).
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+This information was gathered from reading Hibernate's Annotations Documention, Mapping Entities:
+	https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html. 
+*************************************************************
+*							    *
+*							    *
+*							    *
+*****      Chapter 2.3 - Mapping Queries [pg25 - 29]    *******
+*************************************************************
+*							    *
+*							    *
+*							    *
+** Chapter 2.4 - Hibernate Annotation Extensions [pg29 - 41] **
+2.4.1. Entity
+	@org.hibernate.annotations.Entity adds additional metadata that may be needed beyond what is defined in the standard @Entity
+
+	@javax.persistence.Entity is still mandatory, @org.hibernate.annotations.Entity is not a replacement.
+			dynamicInsert: allow dynamic SQL for inserts
+			
+			polymorphism: whether the entity polymorphism is of PolymorphismType.IMPLICIT (default) or PolymorphismType.EXPLICIT
+
+			optimisticLock: optimistic locking strategy (OptimisticLockType.VERSION, OptimisticLockType.NONE, OptimisticLockType.DIRTY or OptimisticLockType.ALL)
+
+			@org.hibernate.annotations.Proxy defines the laziness attributes of the entity. lazy (default to true) define whether the class is lazy or not. proxyClassName is the interface used to generate the proxy (default is the class itself).
+
+			@org.hibernate.annotations.Where defines an optional SQL WHERE clause used when instances of this class is retrieved. 
+
+			DDL refers to "Data Definition Language", a subset of SQL statements that change the structure of the database schema in some way, typically by creating, deleting, or modifying schema objects such as databases, tables, and views.
+
+			Most Impala DDL statements start with the keywords CREATE , DROP , or ALTER.
+
+			@org.hibernate.annotations.Check defines an optional check constraints defined in the DDL statetement. The CHECK constraint is used to limit the value range that can be placed in a column. If you define a CHECK constraint on a single column it allows only certain values for this column. If you define a CHECK constraint on a table it can limit the values in certain columns based on values in other columns in the row.
+						CREATE TABLE Persons (
+						    ID int NOT NULL,
+						    LastName varchar(255) NOT NULL,
+						    FirstName varchar(255),
+						    Age int,
+						    CHECK (Age>=18)
+						);
+
+			@OnDelete(action=OnDeleteAction.CASCADE) on joined subclasses: use a SQL cascade delete on deletion instead of the regular Hibernate mechanism.
+
+	@org.hibernate.annotations.Table is a complement, not a replacement to @javax.persistence.Table. 
+
+	Especially, if you want to change the default name of a table, you must use @javax.persistence.Table, not @org.hibernate.annotations.Table.
+
+	@Table(appliesTo="tableName", indexes = { @Index(name="index1", columnNames={"column1", "column2"} ) } ) creates the defined indexes on the columns of table tableName. This can be applied on the primary table or any secondary table. 
+
+	The @Tables annotation allows your to apply indexes on different tables. This annotation is expected where @javax.persistence.Table or @javax.persistence.SecondaryTable(s) occurs.
+
+	@org.hibernate.annotations.Table can also be used to define the following elements of secondary tables:
+			fetch: 
+				If set to JOIN, the default, Hibernate will use an inner join to retrieve a secondary table defined by a class or its superclasses. 
+
+				If set to JOIN, Hibernate will use outer join for a secondary table defined by a subclass. 
+
+				If set to select then Hibernate will use a sequential select for a secondary table defined on a subclass, which will be issued only if a row turns out to represent an instance of the subclass. 
+
+				If set to select, Inner joins will still be used to retrieve a secondary defined by the class and its superclasses.
+
+			inverse: If true, Hibernate will not try to insert or update the properties defined by this join. Default to false.
+
+			optional: If enabled (the default), Hibernate will insert a row only if the properties defined by this join are non-null and will always use an outer join to retrieve the properties.
+
+			foreignKey: defines the Foreign Key name of a secondary table pointing back to the primary table.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

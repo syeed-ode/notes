@@ -1,0 +1,1015 @@
+I was trying to get the MySql to start from "System Preferences" -> "mysql" -> 
+	"start MySql Server". I ran into this issue: Warning the 
+	/user/local/mysql/data directory is not owned by the mysql user. So, I 
+	found this resoution.
+		sudo chown -RL root:mysql /usr/local/mysql
+		sudo chown -RL mysql:mysql /usr/local/mysql/data
+		sudo /usr/local/mysql/support-files/mysql.server start
+	But that didn't work as epxected i got the error below.
+I saw: 'ERROR 2002 (HY000): Can't connect to local MySQL server through socket 
+	'/var/run/mysqld/mysqld.sock' (2)'. Stackoverflow said I should try the following 
+	below. See, https://serverfault.com/questions/751277/mysql-daemon-lock-issue from 
+	https://stackoverflow.com/questions/34954455/mysql-daemon-lock-issue
+At first i Add skip-external-locking to /usr/local/Cellar/mysql/5.7.18_1/.bottle/etc/my.cnf 
+	under the [mysqld] section:
+	https://stackoverflow.com/questions/34954455/mysql-daemon-lock-issue
+		skip-external-locking
+MySQL Help
+B.5.3.2.1 Resetting the Root Password: Windows Systems - 
+	https://dev.mysql.com/doc/refman/5.7/en/resetting-permissions.html. Use the following 
+	procedure to reset the password for the MySQL 'root'@'localhost' account. 
+Create a text file containing the password-assignment statement on a single line. Replace the 
+	password with the password that you want to use.
+		MySQL 5.7.6 and later:
+		ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPass';	
+	Save the file. This example assumes that you name the file 
+		/Users/syeedode/junk/mysql_rootPassword.txt
+	Start the MySQL server with the special --init-file option (notice that the backslash 
+		in the option value is doubled):
+			[20170930-12:34:52 syeedode:/usr/local/Cellar/mysql] $ mysqld 
+				--init-file=/Users/syeedode/junk/mysql_rootPassword.txt
+	You should now be able to connect to the MySQL server as root using the new password. Stop 
+		the MySQL server and restart it normally.
+	If the ALTER USER statement fails to reset the password, try repeating the procedure using 
+		the following statements to modify the user table directly:
+			UPDATE mysql.user
+				  SET authentication_string = PASSWORD('MyNewPass')
+				, password_expired = 'N'
+			WHERE User = 'root' AND Host = 'localhost';
+			FLUSH PRIVILEGES;			
+	To create a user and DB now: 
+			GRANT ALL ON vsearchlogDB.* 
+				TO 'vsearch' 
+			IDENTIFIED BY 'vsearchpasswd';
+	Finally, attempt to add another privilege user.  I'm trying to allow the `syeedode` user to 
+		kickoff my sql.  This, I'm hoping, will allow the 
+*
+*
+*
+*				Dirty Reads:		Nonrepeatable (Fuzzy) Reads:	Phantom Reads:
+				TxA reads data that	TxA reads datq once. When it	TxA reads data once. When it
+				TxB put there but has	rereads the same data, TxB has	rereads the same data, TxB has
+				not yet commited.	removed the data or modified 	has commited more rows to the 
+							it (via commits).		data
+				---------------------	------------------------------	------------------------------
+Read Uncommitted:		Possible		Possible			Possible
+
+Read Committed:			Not possible 		Possible			Possible
+
+Repeatable Reads:		Not possible 		Not possible 			Possible
+
+Seralizable:			Not possible 		Not possible 			Not possible
+
+Optimistic Locking
+	Optimistic Locking is a strategy where you read a record, take note of a version number (other methods to do this involve dates, timestamps or checksums/hashes) and check that the version hasn't changed before you write the record back. 
+
+	When you write the record back you filter the update on the version to make sure it's atomic. (i.e. hasn't been updated between when you check the version and write the record to the disk) and update the version in one hit.
+
+	If the record is dirty (i.e. different version to yours) you abort the transaction and the user can re-start it.
+
+	This strategy is most applicable to high-volume systems and three-tier architectures where you do not necessarily maintain a connection to the database for your session. 
+
+	A three-tier architecture is the most widespread use of multitier architecture. Multilayered architecture is a client–server architecture in which presentation, application processing, and data management functions are physically separated
+
+	In this situation the client cannot actually maintain database locks as the connections are taken from a pool and you may not be using the same connection from one access to the next.
+
+Pessimistic Locking
+	Pessimistic Locking is when you lock the record for your exclusive use until you have finished with it. It has much better integrity than optimistic locking but requires you to be careful with your application design to avoid Deadlocks. 
+
+	To use pessimistic locking you need either a direct connection to the database (as would typically be the case in a two tier client server application) or an externally available transaction ID that can be used independently of the connection.
+
+	When using an externally available transaction ID, you open the transaction with the TxID and then reconnect using that ID. The DBMS maintains the locks and allows you to pick the session back up through the TxID. 
+
+	This is how distributed transactions using two-phase commit protocols (such as XA or COM+ Transactions) work.
+
+	The two phase commit protocol is a distributed algorithm which lets all sites in a distributed system agree to commit a transaction. The protocol results in either all nodes committing the transaction or aborting, even in the case of site failures and message losses.
+*
+*
+*
+*
+This information was gather from reading the Spring Framework Reference Documentation: Data access and transaction management section.  The focus of the notes is only on Transaction Management.  It a collection of notes, broken down by section.
+
+https://docs.spring.io/spring/docs/current/spring-framework-reference/data-access.html#spring-data-tier
+*
+*
+*
+*
+JDO - Java Data Objects
+JTA - Java Transaction API (depends on JNDI)
+JPA - Java Persistence API
+*
+*
+*
+*
+17.2 Advantages of the Spring Framework’s transaction support model
+17.2.1 Global transactions
+	When transaction manager is handled by one framework/platform for all transactions, like EJB CMT.
+17.2.2 Local transactions
+	When transacton manager cannot work across multiple transaction resources 
+17.2.3 Spring Framework’s consistent programming model
+			Do you need an application server for transaction management?
+
+
+
+
+17.3 Understanding the Spring Framework transaction abstraction (2 - 5)
+	class PlatformTransactionManager
+		TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
+			TransactionStatus  // defines type and state of transaction
+				boolean isNewTransaction();
+				boolean hasSavepoint();
+				void setRollbackOnly();
+				boolean isRollbackOnly();
+				void flush();
+				boolean isCompleted();
+			TransactionDefiniton 
+				Isolation:, Propagation, Timeout, Readonly
+		void commit(TransactionStatus status) throws TransactionException;
+		void rollback(TransactionStatus status) throws TransactionException;
+	PlatformTransactionManager implementations normally require knowledge of the environment in 
+		which they work: JDBC, JTA, Hibernate, and so on. 
+	PlatformTransactionManager implementers are (not exhaustive list): 
+		DataSourceTransactionManager, JtaTransactionManager, 	(depends on a dataSource object)
+		HibernateTransactionManager				(depends on a sessionFactory object)
+
+
+
+
+17.4 Synchronizing resources with transactions (2) [2 - 6]
+	Discusses how application code creates, uses, reuses, and tears down a persistance api
+		such as Hibernate, JDBC, JDO, or JTA
+	Discusses how transaction synchronization is triggered (optionally) throught the relevant
+		PlatformTransactionManager
+17.4.1 High-level synchronization approach (2)
+	Use a "transaction aware" template (JdbcTemplate, for example) that does teardown, setup 
+		and transactioin synchronoization for you. 
+17.4.2 Low-level synchronization approach (2 - 5)
+	Use a  DataSourceUtils (for JDBC), EntityManagerFactoryUtils (for JPA), 
+		SessionFactoryUtils (for Hibernate), PersistenceManagerFactoryUtils (for JDO) to 
+		manage the creation of connections directly. This code assignes the connection to an
+		existing transcation.
+17.4.3 TransactionAwareDataSourceProxy (6)
+	Wraps an existing data source.  Only use if trying to get existing code to use spring
+		managed transactions.  That's why this is a (virtual) proxy it is making the existing 
+		datasource aware of Spring's transactions, see, Head First Design Patterns: Controlling 
+		Object Access Page 45 for more on proxies types and their usages.
+
+
+
+
+17.5 Declarative transaction management (6 - 7) [6 - 23]
+	Unlike EJB CMT, which is tied to JTA, the Spring Framework’s declarative transaction 
+		management works in any environment. It can work with JTA transactions or local 
+		transactions using JDBC, JPA, Hibernate or JDO by simply adjusting the configuration 
+		files
+	The concept of rollback rules is important: they enable you to specify which exceptions 
+		(and throwables) should cause automatic rollback. You specify this declaratively, in 
+		configuration, not in Java code.
+17.5.1 Understanding the Spring Framework’s declarative transaction implementation (7)
+	Spring Framework’s declarative transaction support is enabled via AOP proxies.  An AOP proxy 
+		in conjunction with a PlatformTransactionManager implementation drive transactions 
+		around method invocations.
+17.5.2 Example of declarative transaction implementation (7 - 10)
+	1) Create a PlatformTransactionManager 
+		<bean id="txManager" class="DataSourceTransactionManager">
+			<property name="dataSource" ref="dataSource"/>
+		</bean>
+	2) Create an AOP advice 
+		<tx:advice id="txAdvice" transaction-manager="txManager">
+			<tx:attributes>
+			 	<!-- all methods starting with 'get' are read-only -->
+ 				<!-- other methods use the default transaction settings (see below) -->
+				<tx:method name="get*" read-only="true"/>
+				<tx:method name="*"/>
+ 			</tx:attributes>
+ 		</tx:advice>
+	3) Create an AOP aspect config (advice/pointcut) 
+ 		<!-- ensure that the above transactional advice runs for any execution of an -->
+ 		<!-- operation defined by the FooService interface -->
+		<aop:config>
+			<aop:pointcut id="fooSerOp" expression="execution(* x.y.service.FooService.*(..))"/>
+			<aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceOperation"/>
+		</aop:config>
+	4) Run sample
+		public final class Boot {
+			public static void main(final String[] args) throws Exception {
+				ApplicationContext ctx = 
+					new ClassPathXmlApplicationContext("context.xml", Boot.class);
+				FooService fooService = (FooService) ctx.getBean("fooService");
+				fooService.insertFoo (new Foo());
+			}
+		}
+17.5.3 Rolling back a declarative transaction (10 - 11)
+	In its default configuration, the Spring Framework’s transaction only rollsback in the case
+		of runtime, unchecked exceptions; that is, when the thrown exception is an instance or 
+	 	subclass of RuntimeException.
+	 You can configure exactly which Exception types mark a transaction for rollback, including 
+	 	checked exceptions. You can also specify 'no rollback rules', if you do not want a 
+	 	transaction, even for uncheckec exceptions.
+		<tx:advice id="txAdvice" transaction-manager="txManager">
+			<tx:attributes>
+				<tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
+				<tx:method name="updateStock" no-rollback-for="InstrumentNotFoundException"/>
+				<tx:method name="*"/>
+			</tx:attributes>
+		</tx:advice>	 
+17.5.4 Configuring different transactional semantics for different beans (11 - 13)
+	You can configure an advice for no transaction support. Just add the advice to the <aop:config>
+		<aop:config>
+			<aop:pointcut id="defaultServiceOperation" 
+				expression="execution(* x.y.service.*Service.*(..))"/>
+			<aop:pointcut id="noTxServiceOperation" 
+				expression="execution(* x.y.service.ddl.DefaultDdlManager.*(..))"/>
+			<aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
+			<aop:advisor pointcut-ref="noTxServiceOperation" advice-ref="noTxAdvice"/>
+		</aop:config>	
+		<tx:advice id="noTxAdvice">
+			<tx:attributes>
+				<tx:method name="*" propagation="NEVER"/> <!-- specifies no tx -->
+			</tx:attributes>
+		</tx:advice>
+17.5.5 <tx:advice/> settings (13)
+	These attributes are for the <tx:method/> tag only
+		read-only
+		rollback-for="Specified Checked or Unchecked Exception"
+		no-rollback-for="Specified Checked or Unchecked Exception"
+		propagation
+		isolation
+		timeout
+17.5.6 Using @Transactional (14 - 17) [14 - 19]
+	Simply add the following line to the application-context.xml
+		<!-- enable the configuration of transactional behavior based on annotations -->
+		<!-- a PlatformTransactionManager is still required -->
+		<tx:annotation-driven transaction-manager="txManager"/>
+	The @EnableTransactionManagement annotation provides equivalent support if you are using Java 
+		based configuration. Simply add the annotation to a @Configuration class. See the javadocs 
+		for full details.
+	You can place the @Transactional annotation before an interface definition, a method on an 
+		interface, a class definition, or a public method on a class.
+	Spring recommends that you only annotate concrete classes (and methods of concrete classes).
+					
+	The proxy-target-class attribute controls what type of transactional proxies are created for 
+		classes annotated with the @Transactional annotation. If proxy-target-class is set to true, 
+		class-based proxies are created (i.e. it uses CGLIB to read the class not just the interface.
+		The differnce is only the interface methods are gathered with JDK. The class methods may not
+		be. If CGLIB (code geneartor library) is ued, all the class mehtods are proxied as well.). 
+		If proxy-target-class is false or if the attribute is omitted, standard JDK interface-based 
+		proxies are created.
+	@EnableTransactionManagement and <tx:annotation-driven/> only looks for @Transactional on beans 
+		in the same application context they are defined in.
+	The most derived location takes precedence when evaluating the transactional settings for a 
+		method.  The @Transactional annotation on the updateFoo(Foo) method in the same class takes 
+		precedence.
+			@Transactional(readOnly = true)
+			public class DefaultFooService implements FooService {
+				public Foo getFoo(String fooName) {
+					// do something
+				}
+
+				// these settings have precedence for this method
+				@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+				public void updateFoo(Foo foo) {
+					// do something
+				}
+			}
+
+					@Transactional settings (17)
+	value			Optional qualifier specifying the transaction manager to be used
+	read-only
+	rollback-for 		Specified Checked or Unchecked Exception
+	no-rollback-for 	Specified Checked or Unchecked Exception
+	propagation
+	isolation
+	timeout
+
+					Multiple Transaction Managers with @Transactional (18)
+	Allows two different datasources.
+
+					Custom shortcut annotations (19)
+17.5.7 Transaction propagation (19 - 20)
+	Be aware of the difference between physical and logical transactions, and how the 
+	 	propagation setting applies to this difference.
+
+						Required (20)
+	PROPAGATION_REQUIRED
+		a logical transaction scope is created for each method upon which the setting is
+			applied, with an  outer transaction scope being logically independent from 
+			the inner transaction scope.
+		in standard behavior,  all these scopes will be mapped to the same physical 
+		 	transaction
+		a rollback-only marker set in the inner transaction scope DOES affect the outer 
+			transaction’s chance to actually commit (as you would expect it to).
+
+						RequiresNew (20)
+	PROPAGATION_REQUIRES_NEW
+		uses a completely independent transaction for each affected transaction scope. 
+			the underlying physical transactions are different and hence can commit or 
+			roll back independently, with an 
+		outer transaction NOT affected by an inner transaction’s rollback status.
+
+						Nested (20)
+	PROPAGATION_NESTED - JDBC ONLY
+		uses a single physical transaction with multiple savepoints that it can roll back 
+			to. Such partial rollbacks allow an inner transaction scope to trigger a 
+			rollback for its scope, with the outer transaction being able to continue the 
+			physical transaction despite some operations having been rolled back. This 
+			setting is typically mapped onto JDBC savepoints, so will only work with JDBC 
+			resource transactions. 
+17.5.8 Advising transactional operations (21 - 23)
+17.5.9 Using @Transactional with AspectJ (23)
+
+
+
+
+17.6 Programmatic transaction management (24) [24 - 25]
+17.6.1 Using the TransactionTemplate (24 - 25)
+			Specifying transaction settings (25)
+17.6.2 Using the PlatformTransactionManager (25)
+
+
+
+
+17.7 Choosing between programmatic and declarative transaction management (26)
+
+
+
+
+
+17.8 Transaction bound event (26)
+
+
+
+
+
+
+17.9 Application server-specific integration (26 - 27)
+17.9.1 IBM WebSphere (27)
+17.9.2 Oracle WebLogic Server (27)
+
+
+
+
+
+
+17.10 Solutions to common problems (27)
+
+
+
+
+
+
+17.11 Further Resources (27)
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+This information was gathered from reading Hibernate's Annotations Documention, Mapping Entities:
+	https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/index.html. 
+*************************************************************
+*							    *
+*							    *
+*							    *
+******            Preface                                                 ******
+Metadata governs the transformation of data from one representation to the other. Hibernate Annotations provides annotation-based metadata.
+
+The JPA specification standardizes the basic APIs and the metadata needed for any object/relational persistence mechanism.
+
+Hibernate EntityManager together with Hibernate Annotations offers a complete (and standalone) JPA persistence solution on top of the Hibernate Core.  You may use a combination of all three together or at all time you can fall back to Hibernate native APIs, or if required, even to native JDBC and SQL.
+
+Hibernate Annotations is based on the JPA 2 specification. 
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*************************************************************
+*							    *
+*							    *
+*							    *
+*** Chapter 2.2 - Mapping with JPA (Java Persistence Annotations) [pg1 - 25] ***
+JPA entities are plain POJOs. Actually, they are Hibernate persistent entities. Their mappings are defined through JDK 5.0 annotations instead of hbm.xml files.
+
+Annotations can be split in two categories.
+
+The logical mapping annotations (describing the object model, the association between two entities etc.)
+
+The physical mapping annotations (describing the physical schema, tables, columns, indexes, etc)
+
+JPA annotations are in the javax.persistence.* package. JPA annotations are plain JDK 5 annotations.
+
+A good and complete set of working examples can be found in the Hibernate Annotations test suite itself: most of the unit tests have been designed to represent a concrete example and be a source of inspiration for you. You can get the test suite sources in the distribution.
+
+2.2.1. Marking a POJO as persistent entity
+	Every persistent POJO class is an entity and is declared using the @Entity annotation (at the class level):
+				@Entity
+				public class Flight implements Serializable {
+				    Long id;
+
+				    @Id
+				    public Long getId() { return id; }
+
+				    public void setId(Long id) { this.id = id; }
+				}         
+
+	@Entity declares the class as an entity (i.e. a persistent POJO class). The other mapping declarations are implicit. The class Flight is mapped to the Flight table, using the column id as its primary key column.
+
+	The concept of configuration by exception is central to the JPA specification.  
+			See https://stackoverflow.com/questions/34125441/what-is-exactely-a-configuration-by-exception-in-jpa.
+
+			So, configuration by exception is the concept that only the places that require something out of the ordinary need to receive additional configuration.
+
+			For example, when you annotate a JPA entity with @Access( AccessType.FIELD ) you are saying that the default access mechanism to be used by JPA throughout this entity should be field access.
+
+			But if at some point within your class you have a getter that you would like JPA to use instead of a field, then you can specify an additional @Access( AccessType.PROPERTY ) annotation on just that one getter, and JPA will use that getter. 
+
+			You always have the freedom to override the default behaviour by supplying an extra annotation on a case by case basis.
+
+	
+	Mixing annotations in both fields and methods should be avoided. Hibernate will guess the access type from the position of @Id or @EmbeddedId.
+
+	Field-based access vs. Property-based access - https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/access.html
+			By default, the placement of the @Id annotation gives the default access strategy. When placed on a field, Hibernate will assume field-based access. 
+					@Entity
+					public class Simple {
+					    @Id
+					    private Integer id;
+					    public Integer getId() {
+					        return id;
+					    }
+					    public void setId( Integer id ) {
+					        this.id = id;
+					    }
+					}
+				Field-based access - https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/access.html
+
+				When using field-based access, Hibernate won’t consider other entity-level methods as part of the persistence state. 
+
+				To exclude a field from being part of the entity persistent state, the field must be marked with the @Transient annotation.
+
+				Another advantage is that some entity attributes can be hidden from outside the entity. An example is the entity @Version field, which must not be manipulated by the data access layer. We can simply omit the getter and the setter for this version field, and Hibernate can still leverage the optimistic concurrency control mechanism.
+
+			Place on the identifier getter, Hibernate will use property-based access. 
+					@Entity
+					public class Simple {
+
+					    private Integer id;
+
+					    @Id
+					    public Integer getId() {
+					        return id;
+					    }
+
+					    public void setId( Integer id ) {
+					        this.id = id;
+					    }
+					}
+				Property-based access - https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/access.html
+
+				When using property-based access, Hibernate uses the accessors for both reading and writing the entity state.
+
+				Every other method that will be added to the entity (e.g. helper methods for synchronizing both ends of a bidirectional one-to-many association) will have to be marked with the @Transient annotation.
+
+			Overriding the default access strategy
+				The default access strategy mechanism can be overridden with the JPA @Access annotation. 
+
+				In the following example, the @Version attribute is accessed by its field and not by its getter, like the rest of entity attributes.
+
+			Embeddable types inherit the access strategy from their parent entities.
+					Embeddable types -  https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/embeddables.html
+
+					Historically Hibernate called embeddable types components. JPA calls them embeddables. Either way the concept is the same: a composition of values.
+
+					For example we might have a Name class that is a composition of first-name and last-name, or an Address class that is a composition of street, city, postal code, etc.
+							@Embeddable
+							public class Name {
+							    private String firstName;
+							    private String middleName;
+							    private String lastName;
+							    ...
+							}
+
+					An embeddable type is another form of value type, and its lifecycle is bound to a parent entity type, therefore inheriting the attribute access from its parent.
+
+					The embeddable types can overrule the default implicit access strategy (inherited from the owning entity). In the following example, the embeddable uses property-based access, no matter what access strategy the owning entity is choosing:
+							@Embeddable
+							@Access(AccessType.PROPERTY)
+							public static class Change {
+							    private String path;
+							    private String diff;
+							    public Change() {}
+							    
+							    @Column(name = "path", nullable = false)
+							    public String getPath() {
+							        return path;
+							    }
+							    public void setPath(String path) {
+							        this.path = path;
+							    }
+							    @Column(name = "diff", nullable = false)
+							    public String getDiff() {
+							        return diff;
+							    }
+							    public void setDiff(String diff) {
+							        this.diff = diff;
+							    }
+							}
+					The owning entity can use field-based access, while the embeddable uses property-based access as it has chosen explicitly:
+							@Entity
+							public class Patch {
+							    @Id
+							    private Long id;
+							    @Embedded
+							    private Change change;
+							}
+					This works also for collection of embeddable types:
+							@Entity
+							public class Patch {
+							    @Id
+							    private Long id;
+							    @ElementCollection
+							    @CollectionTable(
+							        name="patch_change",
+							        joinColumns=@JoinColumn(name="patch_id")
+							    )
+							    @OrderColumn(name = "index_id")
+							    private List<Change> changes = new ArrayList<>();
+							    public List<Change> getChanges() {
+							        return changes;
+							    }
+							}
+	
+	2.2.1.1. Defining the table
+		@Table is set at the class level; it allows you to define the table, catalog, and schema names for your entity mapping. If no @Table is defined the default values are used: the unqualified class name of the entity.
+				@Entity
+				@Table(name="tbl_sky")
+				public class Sky implements Serializable { ... }  
+
+		For naming strategies see https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/naming.html          
+
+		You can also define unique constraints to the table using the @UniqueConstraint annotation in conjunction with @Table. Below a unique constraint is applied to the tuple month, day. Note that the columnNames array refers to the logical column names.
+				@Table(name="tbl_sky",
+				    uniqueConstraints = {@UniqueConstraint(columnNames={"month", "day"})}
+				)
+
+		For a unique constraint bound to a single column, it is recommended to use the @Column.unique approach.
+
+	2.2.1.2. Versioning for optimistic locking
+		You can add optimistic locking capability to an entity using the @Version annotation. 
+				@Entity
+				public class Flight implements Serializable {
+				...
+				    @Version
+				    @Column(name="OPTLOCK")
+				    public Integer getVersion() { ... }
+				}
+
+		The version property will be mapped to the OPTLOCK column, and the entity manager will use it to detect conflicting updates (preventing lost updates you might otherwise see with the last-commit-wins strategy).
+
+		The version column may be a numeric (the recommended solution) or a timestamp. Hibernate supports any kind of type provided that you define and implement the appropriate UserVersionType.
+
+		The application must not alter the version number set up by Hibernate in any way. To artificially increase the version number, check in Hibernate Entity Manager's reference documentation LockModeType.OPTIMISTIC_FORCE_INCREMENT or LockModeType.PESSIMISTIC_FORCE_INCREMENT.
+
+2.2.2. Mapping simple properties
+	2.2.2.1. Declaring basic property mappings
+		Every non static non transient property (field or method depending on the access type) of an entity is considered persistent, unless you annotate it as @Transient.
+
+		The transient keyword, however, is a Java keyword which marks a member variable not to be serialized when it is persisted to streams of bytes.
+
+		Not having an annotation for your property is equivalent to the appropriate @Basic annotation. The @Basic annotation allows you to declare the fetching strategy for a property:
+				public transient int counter; //transient property
+
+				private String firstname; //persistent property
+
+				@Transient
+				String getLengthInMeter() { ... } //transient property
+
+				String getName() {... } // persistent property
+
+				@Basic
+				int getLength() { ... } // persistent property
+
+				@Basic(fetch = FetchType.LAZY)
+				String getDetailedComment() { ... } // persistent property
+
+				@Temporal(TemporalType.TIME)
+				java.util.Date getDepartureTime() { ... } // persistent property           
+
+				@Enumerated(EnumType.STRING)
+				Starred getNote() { ... } //enum persisted as String in database
+
+		counter, a transient field, and lengthInMeter, a method annotated as @Transient, and will be ignored by the entity manager.
+
+		name, length, and firstname properties are mapped persistent and eagerly fetched (the default for simple properties).
+
+		The detailedComment property value will be lazily fetched from the database once a lazy property of the entity is accessed for the first time.
+
+		If your classes are not instrumented, e.g. bytecode is added to the original class, property level lazy loading is silently ignored.
+
+		Hibernate Annotations support out of the box enum type. The persistence representation, defaulted to ordinal, can be overridden through the @Enumerated annotation as shown in the note property example.
+
+		Temporal data can have DATE, TIME, or TIMESTAMP precision (ie the actual date, only the time, or both). Use the @Temporal annotation to fine tune that.
+
+		@Lob indicates that the property should be persisted in a Blob or a Clob depending on the property type: java.sql.Clob, Character[], char[] and java.lang.String will be persisted in a Clob. 
+
+		java.sql.Blob, Byte[], byte[] and serializable type will be persisted in a Blob.
+				@Lob
+				public String getFullText() {
+				    return fullText;
+				}
+
+				@Lob 
+				public byte[] getFullCode() {
+				    return fullCode;
+				}
+
+	2.2.2.2. Access type
+		By default the access type of a class hierarchy is defined by the position of the @Id or @EmbeddedId annotations. 
+
+		However in some situations, you need to:
+						@Entity
+						public class Order {
+						   @Id private Long id;
+						   public Long getId() { return id; }
+						   public void setId(Long id) { this.id = id; }
+
+						   @Embedded private Address address;
+						   public Address getAddress() { return address; }
+						   public void setAddress() { this.address = address; }
+						}
+
+						@Entity
+						public class User {
+						   private Long id;
+						   @Id public Long getId() { return id; }
+						   public void setId(Long id) { this.id = id; }
+
+						   private Address address;
+						   @Embedded public Address getAddress() { return address; }
+						   public void setAddress() { this.address = address; }
+						}
+
+						@Embeddable
+						@Access(AcessType.PROPERTY)
+						public class Address {
+						   private String street1;
+						   public String getStreet1() { return street1; }
+						   public void setStreet1() { this.street1 = street1; }
+
+						   private hashCode; //not persistent
+						}
+				- force the access type of the entity hierarchy
+				- override the access type of a specific entity in the class hierarchy
+				- override the access type of an embeddable type
+
+	2.2.2.3. Declaring column attributes
+		You can use this annotation at the property level for properties that are:
+				- not annotated at all
+				- annotated with @Basic
+				- annotated with @Version
+				- annotated with @Lob
+				- annotated with @Temporal
+
+		This annotation can be applied to regular properties as well as @Id or @Version properties.
+				@Column(
+				    name="colu(1)mnName";
+				    boolean un(2)ique() default false;
+				    boolean nu(3)llable() default true;
+				    boolean in(4)sertable() default true;
+				    boolean up(5)datable() default true;
+				    String col(6)umnDefinition() default "";
+				    String tab(7)le() default "";
+				    int length(8)() default 255;
+				    int precis(9)ion() default 0; // decimal precision
+				    int scale((10)) default 0; // decimal scale
+
+    2.2.2.4. Embedded objects (aka components)
+    	It is possible to declare an embedded component inside an entity and even override its column mapping. Component classes have to be annotated at the class level with the @Embeddable annotation.
+
+    	It is possible to override the column mapping of an embedded object for a particular entity using the @Embedded and @AttributeOverride annotation in the associated property:
+				@Entity
+				public class Person implements Serializable {
+
+				    // Persistent component using defaults
+				    Address homeAddress;
+
+				    @Embedded
+				    @AttributeOverrides( {
+				            @AttributeOverride(name="iso2", column = @Column(name="bornIso2") ),
+				            @AttributeOverride(name="name", column = @Column(name="bornCountryName") )
+				    } )
+				    Country bornIn;
+				    ...
+				}
+				@Embeddable
+				public class Address implements Serializable {
+				    String city;
+				    Country nationality; //no overriding here
+				}
+				@Embeddable
+				public class Country implements Serializable {
+				    private String iso2;
+				    @Column(name="countryName") private String name;
+
+				    public String getIso2() { return iso2; }
+				    public void setIso2(String iso2) { this.iso2 = iso2; }
+
+				    
+				    public String getName() { return name; }
+				    public void setName(String name) { this.name = name; }
+				    ...
+				}
+		
+		The Person entity has two component properties, homeAddress and bornIn. homeAddress property has not been annotated, but Hibernate will look for the @Embeddable annotation in the Address class.
+
+		We also override the mapping of a column name (to bornCountryName) with the @Embedded and @AttributeOverride annotations for each mapped attribute of Country.
+
+		As you can see, Country is also a nested component of Address, again using auto-detection by Hibernate and JPA defaults.
+
+		Overriding columns of embedded objects of embedded objects is through dotted expressions.
+				@Embedded
+				@AttributeOverrides( {
+				        @AttributeOverride(name="city", column = @Column(name="fld_city") ),
+				        @AttributeOverride(name="nationality.iso2", column = @Column(name="nat_Iso2") ),
+				        @AttributeOverride(name="nationality.name", column = @Column(name="nat_CountryName") )
+				        //nationality columns in homeAddress are overridden
+				} )
+				Address homeAddress;
+
+		You can also use association annotations in an embeddable object (ie @OneToOne, @ManyToOne, @OneToMany or @ManyToMany). To override the association columns you can use @AssociationOverride.
+
+2.2.3. Mapping identifier properties
+	The @Id annotation, the identifier of your entity, can be set by the application itself or be generated by Hibernate (preferred).
+
+	You can define the identifier generation strategy with the @GeneratedValue annotation.
+
+	JPA defines five types of identifier generation strategies:
+			AUTO - either identity column, sequence or table depending on the underlying DB
+			TABLE - table holding the id
+			IDENTITY - identity column
+			SEQUENCE - sequence
+			identity copy - the identity is copied from another entity
+
+	The AUTO generator is the preferred type for portable applications (across several DB vendors).
+
+	See https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html for more information on Composite identifiers and generators in general.
+
+2.2.4. Mapping inheritance
+	See https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html for more information.	
+
+2.2.5. Mapping entity associations/relationships
+	2.2.5.1. One-to-one
+		You can associate entities through a one-to-one relationship using @OneToOne. There are three cases for one-to-one associations:
+				- the associated entities share the same primary keys values
+				- a foreign key is held by one of the entities (note that this FK column in the database should be constrained unique to simulate one-to-one multiplicity)
+				a association table is used to store the link between the 2 entities (a unique constraint has to be defined on each fk to ensure the one to one multiplicity
+
+		First, we map a real one-to-one association using shared primary keys. The @PrimaryKeyJoinColumn annotation does say that the primary key of the entity is used as the foreign key value to the associated entity:
+				@Entity
+				public class Body {
+				    @Id
+				    public Long getId() { return id; }
+
+				    @OneToOne(cascade = CascadeType.ALL)
+				    @PrimaryKeyJoinColumn
+				    public Heart getHeart() {
+				        return heart;
+				    }
+				    ...
+				}            
+				@Entity
+				public class Heart {
+				    @Id
+				    public Long getId() { ...}
+				}
+   		
+   		In the following example, the associated entities are linked through an explicit foreign key column. A Customer is linked to a Passport, with a foreign key column named passport_fk in the Customer table.
+				@Entity
+				public class Customer implements Serializable {
+				    @OneToOne(cascade = CascadeType.ALL)
+				    @JoinColumn(name="passport_fk")
+				    public Passport getPassport() {
+				        ...
+				    }
+			    }
+
+				@Entity
+				public class Passport implements Serializable {
+				    @OneToOne(mappedBy = "passport")
+				    public Customer getOwner() {}
+				    ...
+				}
+
+		The join column is declared with the @JoinColumn annotation and has parameter named 'referencedColumnName'. This parameter declares the column in the 'targeted entity' that will be used to the join. See docs for other considerations when using 'referencedColumnName'.
+
+		In a bidirectional relationship, one of the sides (and only one) has to be the owner: the owner is responsible for the association column(s) update.
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+This information was gathered from reading Hibernate's Annotations Documention, Mapping Entities:
+	https://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html. 
+*************************************************************
+*							    *
+*							    *
+*							    *
+*****      Chapter 2.3 - Mapping Queries [pg25 - 29]    *******
+*************************************************************
+*							    *
+*							    *
+*							    *
+** Chapter 2.4 - Hibernate Annotation Extensions [pg29 - 41] **
+2.4.1. Entity
+	@org.hibernate.annotations.Entity adds additional metadata that may be needed beyond what is defined in the standard @Entity
+
+	@javax.persistence.Entity is still mandatory, @org.hibernate.annotations.Entity is not a replacement.
+			dynamicInsert: allow dynamic SQL for inserts
+			
+			polymorphism: whether the entity polymorphism is of PolymorphismType.IMPLICIT (default) or PolymorphismType.EXPLICIT
+
+			optimisticLock: optimistic locking strategy (OptimisticLockType.VERSION, OptimisticLockType.NONE, OptimisticLockType.DIRTY or OptimisticLockType.ALL)
+
+			@org.hibernate.annotations.Proxy defines the laziness attributes of the entity. lazy (default to true) define whether the class is lazy or not. proxyClassName is the interface used to generate the proxy (default is the class itself).
+
+			@org.hibernate.annotations.Where defines an optional SQL WHERE clause used when instances of this class is retrieved. 
+
+			DDL refers to "Data Definition Language", a subset of SQL statements that change the structure of the database schema in some way, typically by creating, deleting, or modifying schema objects such as databases, tables, and views.
+
+			Most Impala DDL statements start with the keywords CREATE , DROP , or ALTER.
+
+			@org.hibernate.annotations.Check defines an optional check constraints defined in the DDL statetement. The CHECK constraint is used to limit the value range that can be placed in a column. If you define a CHECK constraint on a single column it allows only certain values for this column. If you define a CHECK constraint on a table it can limit the values in certain columns based on values in other columns in the row.
+						CREATE TABLE Persons (
+						    ID int NOT NULL,
+						    LastName varchar(255) NOT NULL,
+						    FirstName varchar(255),
+						    Age int,
+						    CHECK (Age>=18)
+						);
+
+			@OnDelete(action=OnDeleteAction.CASCADE) on joined subclasses: use a SQL cascade delete on deletion instead of the regular Hibernate mechanism.
+
+	@org.hibernate.annotations.Table is a complement, not a replacement to @javax.persistence.Table. 
+
+	Especially, if you want to change the default name of a table, you must use @javax.persistence.Table, not @org.hibernate.annotations.Table.
+
+	@Table(appliesTo="tableName", indexes = { @Index(name="index1", columnNames={"column1", "column2"} ) } ) creates the defined indexes on the columns of table tableName. This can be applied on the primary table or any secondary table. 
+
+	The @Tables annotation allows your to apply indexes on different tables. This annotation is expected where @javax.persistence.Table or @javax.persistence.SecondaryTable(s) occurs.
+
+	Inner and Outer Joins from https://www.essentialsql.com/get-ready-to-learn-sql-server-14-introduction-to-outer-joins/ 
+		Both inner and outer joins are used to combine rows from two or more tables into a single result. This is done by specifying how columns from each table are matched to one another.  The aim is to find equal values between tables, and include those matches.
+
+		Inner joins don’t include non-matching rows. In its simplest case, where there is no join condition, an inner join would combine all rows from one table with those from another.  If the first table contained three rows, and the second, four, then the final result would contain twelve (3 x 4 = 12) !
+
+		If a person has more than one phone number, then more than one match is made.  From this you can see we may get more rows returned than we have for each person. Conversely, if a person has no phone number, then there won’t be an entry in PersonPhone, and no match made.  That particular person won’t be included in the results, as only those with matches are included. Keep in mind the inner join only returns row where the match condition is true.  
+
+		Let’s try an example. The {INNER JOIN} specifies [which tables to join] and the <match condition> for doing so.  The condition PH.Phone NumberTyeID = 3 limits the query to work numbers.
+					SELECT   P.FirstName,
+					         P.LastName,
+					         P.Title,
+					         PH.PhoneNumber
+					FROM     [ Person.Person ] AS P
+					         {INNER JOIN}
+					         [ Person.PersonPhone ] AS PH
+					         ON < P.BusinessEntityID = PH.BusinessEntityID
+					         AND PH.PhoneNumberTypeID = 3 >
+					ORDER BY P.LastName
+
+
+		In this example, rows where the BusinessEntityID’s don’t match aren’t included.  This could be an issue if a person doesn’t have a phone number as those employees wouldn’t be on the list.
+
+	Outer Joins
+		If you wish to include these employees you can use an Outer join. Outer joins do include non matching rows. 
+
+		The outer join will return every row from one specified table, even if the join condition fails. If the HR manager wanted to list every employee regardless of whether they had a work phone number, then using an outer join would make it so.
+
+	Types of Outer Joins
+		Left Outer Join – All rows from the left table are included, unmatched rows from the right are replaced with NULL values.
+
+		Right Outer Join – All rows from the right table are included, unmatched rows from the left are replaced with NULL values.
+
+		Full Outer Join – All rows from both tables are included, NULL values fill unmatched rows
+
+	Left Outer Join
+		Understand that when a {LEFT OUTER JOIN} is used, all rows for [the table] in the FROM clause are included in the result, even if a match isn’t found with the other table. When a match isn’t found, then a NULL is place in the column.
+					SELECT   P.FirstName,
+					         P.LastName,
+					         P.Title,
+					         PH.PhoneNumber
+					FROM     [ Person.Person ] AS P
+					         {LEFT OUTER JOIN}
+					         Person.PersonPhone AS PH
+					         ON P.BusinessEntityID = PH.BusinessEntityID
+					         AND PH.PhoneNumberTypeID = 3
+					ORDER BY P.LastName
+
+		In this model, there is 1 Person to 0 or 1 Employees. To construct a list of ALL Person LastNames, yet, ALSO show JobTitle IF the Person is an Employee, we need a way of joining the two tables and include Person rows in the result, even if they don’t match Employee.
+
+		This type of join is called a left outer join, as all the rows for the table from the left side of the JOIN keyword are included regardless of the match.
+					SELECT person.Person.BusinessEntityID,
+					       Person.Person.LastName,
+					       HumanResources.Employee.NationalIDNumber,
+					       HumanResources.Employee.JobTitle
+					FROM   person.Person // return all person.Person rows
+					LEFT OUTER JOIN
+					      HumanResources.Employee
+					      ON person.BusinessEntityID = Employee.BusinessEntityID
+	Right Outer Join
+		Below is our sample query written as a right outer join.  The key difference is that now we are going to return all records from the Employee table, which is the table to the right of the join keyword.  If a matching Employee record isn’t found, then NULL will be returned for BusinessEntityID and LastName.
+					SELECT person.Person.BusinessEntityID,
+					       Person.Person.LastName,
+					       HumanResources.Employee.NationalIDNumber,
+					       HumanResources.Employee.JobTitle
+					FROM   person.Person
+					RIGHT OUTER JOIN
+					      HumanResources.Employee
+					      ON person.BusinessEntityID = Employee.BusinessEntityID
+      	This returns all records and no null values.  The data model is the reason why. There is 1 Person to 0..1 Employees.  That means if every Employee is a Person.  But a person may not be an Employee. If the Employee exists it has to be in the person table as well.
+
+  	Left versus Right Outer Joins
+  		There is no difference in functionality between a left outer join and a right outer join. Note in the two queries below, the table names are reversed so they are EXACTLY the same.
+					SELECT person.Person.BusinessEntityID,
+					       HumanResources.Employee.NationalIDNumber
+					FROM   person.Person
+					LEFT OUTER JOIN
+					       HumanResources.Employee
+					      ON person.BusinessEntityID = Employee.BusinessEntityID
+  		Is exactly the same as: 
+					SELECT person.Person.BusinessEntityID,
+					       HumanResources.Employee.NationalIDNumber
+					FROM   HumanResources.Employee
+					RIGHT OUTER JOIN
+					      person.Person
+					      ON person.BusinessEntityID = Employee.BusinessEntityID
+
+      	Using the LEFT OUTER JOIN may be more intuitive since thats where the from is located.
+
+  	Full Outer Join
+  		A full outer join is the combination of results from a left and right outer join.  The results returned from this type of join include all rows from both tables.  
+
+  		Where matches occur, values are related.  Where matched from either table don’t, then NULL are returned instead. (Think the result from the no option comm Linux command.)
+	
+	@org.hibernate.annotations.Table can also be used to define the following elements of secondary tables:
+			fetch: 
+				If set to JOIN, the default, Hibernate will use an inner join to retrieve a secondary table defined by a class or its superclasses. 
+
+				If set to JOIN, Hibernate will use outer join for a secondary table defined by a subclass. 
+
+				If set to select then Hibernate will use a sequential select for a secondary table defined on a subclass, which will be issued only if a row turns out to represent an instance of the subclass. 
+
+				If set to select, Inner joins will still be used to retrieve a secondary defined by the class and its superclasses.
+
+			inverse: If true, Hibernate will not try to insert or update the properties defined by this join. Default to false.
+
+			optional: If enabled (the default), Hibernate will insert a row only if the properties defined by this join are non-null and will always use an outer join to retrieve the properties.
+
+			foreignKey: defines the Foreign Key name of a secondary table pointing back to the primary table.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
