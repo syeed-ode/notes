@@ -1,0 +1,56 @@
+
+
+@Immutabe must be used on root entities only. What is a root entity? Oh. The context indicated the meaning. It is the actual type parameter of a generic type, specifically, a collection. 
+
+shell> bin/mysqld --initialize --user=mysql
+bin/mysqld: error while loading shared libraries: libnuma.so.1: cannot
+open shared object file: No such file or directory
+
+shell> bin/mysqld --initialize --user=mysql
+
+1. After connecting, assign a new root password: mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';
+2. shell> mysql -u root -p
+Enter password: (enter the random root password here)
+
+
+10.6 MySQL Server Time Zone Support
+MySQL Server maintains several time zone settings:
+* The system time zone. When the server starts, it attempts to determine the time zone of the host machine and uses it to set the system_time_zone system variable. The value does not change thereafter.
+* You can set the system time zone for MySQL Server at startup with the --timezone=timezone_name option to mysqld_safe. You can also set it by setting the TZenvironment variable before you start mysqld. 
+* The server's current time zone. The globaltime_zone system variable indicates the time zone the server currently is operating in. 
+* The initial global server time zone value can be specified explicitly at startup with the --default-time-zone=timezone option on the command line. 
+* If you have the SYSTEM_VARIABLES_ADMIN orSUPER privilege, you can set the global server time zone value at runtime with this statement:
+                       mysql> SET GLOBAL time_zone = timezone;
+* Per-connection time zones. Each client that connects has its own time zone setting, given by the session time_zone variable. The client can change its own time zone with this statement:               mysql> SET time_zone = timezone;
+* Values for TIMESTAMP columns are converted from the current time zone to UTC for storage, and from UTC to the current time zone for retrieval.
+* The current time zone setting does not affect values displayed by functions such as UTC_TIMESTAMP() or values in DATE, TIME, or DATETIME columns. Nor are values in those data types stored in UTC; the time zone applies for them only when converting from TIMESTAMP values.  
+* If you want locale-specific arithmetic for DATE, TIME, or DATETIME values, convert them to UTC, perform the arithmetic, and then convert back.
+* The current values of the global and client-specific time zones can be retrieved like this:
+                 mysql> SELECT @@global.time_zone, @@session.time_zone;
+
+11.3.1 The DATE, DATETIME, and TIMESTAMP Types
+* The DATE type is used for values with a date part but no time part. MySQL retrieves and displays DATEvalues in 'YYYY-MM-DD' format. 
+* The DATETIME type is used for values that contain both date and time parts. MySQL retrieves and displaysDATETIME values in 'YYYY-MM-DD HH:MM:SS' format. 
+* The TIMESTAMP data type is used for values that contain both date and time parts. TIMESTAMP has a range of '1970-01-01 00:00:01' UTC to '2038-01-19 03:14:07' UTC.
+* Any fractional part (6 digits) in a value inserted into a DATETIME or TIMESTAMP column is stored rather than discarded. 
+* MySQL converts TIMESTAMP values from the current time zone to UTC for storage, and back from UTC to the current time zone for retrieval.
+* By default, the current time zone for each connection is the server's time. The time zone can be set on a per-connection basis.
+* If you store a TIMESTAMP value, and then change the time zone and retrieve the value, the retrieved value is different from the value you stored
+* M
+* N
+* 
+* 
+
+The current values of the global and client-specific time zones can be retrieved like this:
+mysql> SELECT @@global.time_zone, @@session.time_zone;
+
+
+Here is a simple example that associates a trigger with a table, to activate for INSERT operations. The trigger acts as an accumulator, summing the values inserted into one of the columns of the table.
+mysql> 
+CREATE TABLE account (acct_num INT, amount DECIMAL(10,2));
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> 
+CREATE TRIGGER ins_sum BEFORE INSERT ON account
+       FOR EACH ROW SET @sum = @sum + NEW.amount;
+Query OK, 0 rows affected (0.01 sec)

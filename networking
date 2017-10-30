@@ -525,15 +525,15 @@ Components of BIND
 
 	Authoritative servers need a config file and zone data files for each zone for which they are the primary server.
 
-	Caching servers need teh config file and the root hints file.
+	Caching servers need the config file and the root hints file.
 
 	'named''s config file is different from the resource record files.
 
-	'named''s config file, 'named.conf', specifies the roles (primary, secondary, stub or caching-only) of its host and how it should obtain its copy of the for the every zone it serves.  It is also where the options for the operation of 'named' and zone specific operation applying to DNS traffic management.
+	'named''s config file, 'named.conf', specifies the roles (primary, secondary, stub or caching-only) of its host and how it should obtain its copy of the for every zone it serves.  It is also where the options for the operation of 'named' and zone specific operation applying to DNS traffic management.
 
-	You can check that the config file is formatted correctly using 'named-checkzone' and 'named-checkconf', for zone files and config file respectively.  It doesn't catch everything. For example a missing glue record can still cause heavy load on root and gTLD servers.
+	You can check that the config file is formatted correctly using 'named-checkzone' and 'named-checkconf', for zone files and config file respectively.  It doesn't catch everything. For example a missing glue record can still cause heavy load on root and gTLD (generic top level domains) servers.
 
-	Each statement begins with a keyword. There only be one instance of the 'options' and 'logging' statements; all others can have more than one.  Below is a preview of the statements for the 'named.conf':
+	Each statement begins with a keyword. There will only be one instance of the 'options' and 'logging' statements; all others can have more than one.  Below is a preview of the statements for the 'named.conf':
 				include 				Interpolates a file
 				options 				Sets global configuration options/defaults
 				acl 					Defines access control lists
