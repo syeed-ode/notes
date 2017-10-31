@@ -559,8 +559,83 @@ Components of BIND
 				{ 128.138/16; 198.11.16/24; 204.228.69/24; 127.0.0.1; };
 	The first of these lists excludes the host 1.2.3.13, but includes the rest of the 1.2.3.0/24 network.  The second defines the networks assigned to the University of Colorado.  
 
-	The order of entries is important; the top of the file is more important than the bottom.  The address match list is listed in descreasing order of importance, when matching an IP address the first IP addres found will be matched first. For example if the first list swaped it's entries, 1.2.3.13 would never be negated.
+	The order of entries is important; the top of the file is more important than the bottom.  The address match list is listed in descreasing order of importance, when matching an IP address the first IP address found will be matched first. For example if the first list swaped it's entries, 1.2.3.13 would never be negated.
 
+
+The include statement
+	To break up or better orgainize a large configuation, subsidiary files are brought into 'named.conf' with an 'include' statement:
+			include <path>
+
+	If the path is relative, it is relative to the directory specified with the 'directory' option.
+
+	A common use of the 'include' statement is to bring n cryptographic keys, rather than closing read access to the whole 'named.conf' file.
+
+	Many sites put zone statments in a separate file. This helps separate the parts of the configuration that are static from those that are likely to change.
+
+The options statement
+	The 'options' statement specifies global options which may be overridden for particualr zones or servers. If no 'options' statement is the 'name.conf', default values are used. The format is:
+			options { 
+				option;
+				option;
+			}
+
+	BIND has over 150 options. The ARM document in the 'doc' directory describes each one. Options can be listed in any order. Here are some examples with [default values]:
+
+	'directory' and 'key-directory'
+		directory "path"		[diretory where teh server was started]
+		key-directory "path"	[same as 'directory' entry]
+
+		The 'directory' statement causes 'named' to 'cd' to s specified directory. Pathnames in 'named''s configuration are relative to this option. Output files and logging files go here as well.
+
+		The 'key-directory' is where cryptographic keys are stored, it should not be word readable.
+
+		The BIND related configuration files (other than 'named.conf' and 'resolv.conf') should be beneath '/var'. Examples are '/var/named' or '/var/domain'.
+
+	'version'
+		version "string"		[real version number of the server]
+		hostname "string"		[real hostname of the server]
+		server=id "string"		[none]
+
+		The 'version' string identifies the version of the name server software running on the server. The 'hostname' and 'server-id' identifies the server itself.
+
+		These are the values reported by CHOAS in the TXT records. It is discouraged to tamper with these values.
+
+		If you must hide the version number, enter a string for your sysadmins but isn't obvious to the outside world. The NSID record does exactly this.
+
+		The 'hostname' and 'server-id' are used for anycast routing to duplicate instances of the root and gTLD servers.
+
+	'notify', 'also_notify' and 'allow-notify'
+		notify yes | master-only | explicit | no; 		[yes]
+		also-noitfy <servers_ipaddrs>;					[empty]
+		allow-notify <address-match-list>; 				[empty]
+
+		The 'notify' and  'also-notify' clauses apply only to primary servers. 'allow-notify' applies only to secondary servers.
+
+		Early versions of BIND synchronized zone files when the refresh timeout in the SOA record had expired.
+
+		These days, the primary 'named' notifies its peers whenever the zone database has been reloaded if the 'notify' is set to yes. 
+
+		The secondary servers can rendezvous with the master to see if the file has changed, and if so, to update their copies of the zone data.
+
+		You can use 'notify' as a global and zone specific option, making the zone file converge more quickly after you make a change.
+
+		By default every authoritative server sends updated to every other authoritative server (splattercast). If 'notify' is set to 'master-only', notifications are sent to secondary servers for which this server is a primary.
+
+		If 'notify' is set to 'explicit', then named only notifies servers listed in 'also-notify'.
+
+		'named' figures out secondary servers by looking at the zone's NS records. 'also-notify' allows other servers to be included, not just name-servers.
+
+		Don't 'also-notify' stub servers they are only interested in the zone's NS records and can wait for the regular update cycle.
+
+		You must use the 'allow-notify' clause if you want a name server other than the primray to notify secondaries.
+
+	'recursion' and 'allow-recursion'
+
+
+
+
+
+This option allows curl to proceed and operate even for server connections otherwise considered insecure.
 	
 
 
