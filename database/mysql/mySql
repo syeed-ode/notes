@@ -1,4 +1,14 @@
 
+create database blogdb;
+
+create user if not exists 
+	`blogdbuser` 
+identified by 
+	'blogdbpsswd'; 
+
+
+grant all privileges on blogdb.* to `blogdbuser`;
+
 
 @Immutabe must be used on root entities only. What is a root entity? Oh. The context indicated the meaning. It is the actual type parameter of a generic type, specifically, a collection. 
 

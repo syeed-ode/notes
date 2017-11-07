@@ -1,0 +1,27 @@
+
+
+This option allows curl to proceed and operate even for server connections otherwise considered insecure.
+
+23.5 Caching and Proxy Servers
+	Web caching is the temporary storage of web objects (such as HTML documents) for later retrieval. There are three significant advantages to web caching: 
+			reduced bandwidth consumption 
+				(fewer requests and responses that need to go over the network), 
+
+			reduced server load 
+				(fewer requests for a server to handle), and 
+
+			reduced latency 
+				(since responses for cached requests are available immediately, and closer to the client being served).
+
+	Together, they make the web less expensive and better performing.
+
+	It doesn't make sense to transmit a popular web page from Autralia to North America millions of times each day. There should be a way to store this informaiton.
+
+	Fortunately, there is -- at least at the site leve. A web proxy lets you cache and manage your site's outbound requests for web content.
+
+	Client web browser contact the proxy server to request content. The proxy server makes a request on the client's behalf or provides the object from its cache.
+
+	Proxy severs are often used to enhance security or filter content.
+
+	In a proxy-based system, only one machine gets access to the internet going through a firewall. Many commercial proxies are available today. See http://www.web-caching.com/proxy-caches.html.
+

@@ -1059,7 +1059,11 @@ Public REST Services
 
 
 Changes to the Controllers
-	The
+	The e services needed for each individual controller are injected and made accessible for that particular controller to use.
+
+	The blog ID is passed as a path parameter argument to the BlogPost service. A path parameter is used because we defined /:id at the end of the BlogPost service URL in the services.js file.
+
+	If we removed the /:id from the end of the service URL, AngularJS would pass the value as a query parameter argument instead.
 
 
 
@@ -1069,6 +1073,52 @@ Changes to the Controllers
 
 
 
+http://localhost:8383/AngularJsBlogChapter7/index.html#!/
+
+
+
+
+UTF-8 is a character coding that has support for many alphabets, including non-western ones. You’ve probably seen other character sets used in the past, but UTF-8 is being promoted as the new standard. And it’s way shorter and easier to remember than previous character encodings.
+
+
+Function declarations can appear anywhere
+in your script. You can declare a function below
+where you use it if you want. This works because
+when you first load your page, the browser parses
+all the JavaScript in the page (or in the external
+file) and sees the function declaration before it
+starts executing the code. You can also put your
+global variable declarations anywhere in your script,
+although we recommend declaring all your global
+variables at the top of your files so they’re easy to
+locate.
+One thing to keep in mind when using more than
+one external JavaScript file is that if you have two
+functions in different files named the same thing, the
+function that the browser sees last will be the one
+that is used. 
+
+
+Latitude and Longitude Closeup
+	You’ve probably seen latitude and longitude specfied in both degrees/minutes/seconds, such as (47˚38’34’’, 122˚32’32’’), and in decimal values, such as (47.64, -122.54). With the Geolocation API we always use decimal values. If you need to convert degrees/minutes/seconds to decimal, you can use this function:
+			function degreesToDecimal(degrees, minutes, seconds) {
+			return degrees + (minutes / 60.0) + (seconds / 3600.0);
+			}
+
+How the Geolocation API determins your location
+	All browsers (in devices and on your desktop) are using a few different ways to determine where you are, some more accurate than others. Let’s take a look:
+
+	Smartphones have GPS built right into the phone. Global Positioning System, supported by many newer mobile devices, provides extremely accurate location information based on satellites. Location data may include altitude, speed and heading information. To use it, though, your device has to be able to see the sky, and it can take a long time to get a location. GPS can also be hard on your batteries.
+
+	Location information based on your IP address uses an external database to map the IP address to a physical location. Often IP addresses are resolved to locations such as your ISP’s local office. Think of this method as being reliable to the city or sometimes neighborhood level.
+
+	Cell phone triangulation figures out your location based on your distance from one or more cell phone towers (obviously the more towers, the more accurate your location will be). This method can be fairly accurate and works indoors (unlike GPS); it also can be much quicker than GPS. Then again, if you’re in the middle of nowhere with only one cell tower, your accuracy is going to suffer.
+
+	WiFi positioning uses one or more WiFi access points to triangulate your location. This method can be very accurate, works indoors and is fast. Obviously it requires you are somewhat stationary (perhaps drinking a venti iced tea at a coffee house).
+
+	 Based on the accuracy, you can determine how useful the location is going to be for you. Stay tuned — we’ll get back to accuracy a little bit later
+
+	 https://developers.google.com/maps/documentation/javascript/?csw=1
 
 
 
@@ -1078,22 +1128,24 @@ Changes to the Controllers
 
 
 
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAaRHLJ5ZO49joDJk8W3ZJxM9lheHkM9Wc&callback=initMap" type="text/javascript"></script>
+
+
+
+Keychain Access
+Open Keychain Access app
+http://www.mactip.net/how-to-find-a-saved-wi-fi-password-on-the-mac/
+Open Keychain Access app. It is located in the Applications > Utilities folder.
+Select the System keychain in the left menu bar, and select Passwords from the category menu. This will filter the keychains to just your stored passwords.
 
 
 
 
+Failed to load http://wickedlysmart.com/ifeelluckytoday/: No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://localhost:63342' is therefore not allowed access.
 
 
-
-
-
-
-
-
-
-
-
-
+If you want to make further changes to your Apache system or user config files, you will need to restart the Apache server with:
+			sudo apachectl graceful
 
 
 
