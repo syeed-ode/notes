@@ -47,11 +47,17 @@ Pessimistic Locking
 		database (as would typically be the case in a two tier client 
 		server application) or an externally available transaction ID 
 		that can be used independently of the connection.
-	When using an externally available transaction ID, you open the transaction with the TxID and then reconnect using that ID. The DBMS maintains the locks and allows you to pick the session back up through the TxID. 
-
-	This is how distributed transactions using two-phase commit protocols (such as XA or COM+ Transactions) work.
-
-	The two phase commit protocol is a distributed algorithm which lets all sites in a distributed system agree to commit a transaction. The protocol results in either all nodes committing the transaction or aborting, even in the case of site failures and message losses.
+	When using an externally available transaction ID, you open the 
+		transaction with the TxID and then reconnect using that ID. The 
+		DBMS maintains the locks and allows you to pick the session 
+		back up through the TxID. 
+	This is how distributed transactions using two-phase commit protocols 
+		(such as XA or COM+ Transactions) work.
+	The two phase commit protocol is a distributed algorithm which lets all 
+		sites in a distributed system agree to commit a transaction. 
+		The protocol results in either all nodes committing the 
+		transaction or aborting, even in the case of site failures and 
+		message losses.
 *
 *
 *
@@ -64,13 +70,29 @@ Pessimistic Locking
 *
 *
 	Inner and Outer Joins from https://www.essentialsql.com/get-ready-to-learn-sql-server-14-introduction-to-outer-joins/ 
-		Both inner and outer joins are used to combine rows from two or more tables into a single result. This is done by specifying how columns from each table are matched to one another.  The aim is to find equal values between tables, and include those matches.
-
-		Inner joins don’t include non-matching rows. In its simplest case, where there is no join condition, an inner join would combine all rows from one table with those from another.  If the first table contained three rows, and the second, four, then the final result would contain twelve (3 x 4 = 12) !
-
-		If a person has more than one phone number, then more than one match is made.  From this you can see we may get more rows returned than we have for each person. Conversely, if a person has no phone number, then there won’t be an entry in PersonPhone, and no match made.  That particular person won’t be included in the results, as only those with matches are included. Keep in mind the inner join only returns row where the match condition is true.  
-
-		Let’s try an example. The {INNER JOIN} specifies [which tables to join] and the <match condition> for doing so.  The condition PH.Phone NumberTyeID = 3 limits the query to work numbers.
+		Both inner and outer joins are used to combine rows from two or 
+			more tables into a single result. This is done by 
+			specifying how columns from each table are matched to 
+			one another.  The aim is to find equal values between 
+			tables, and include those matches.
+		Inner joins don’t include non-matching rows. In its simplest 
+			case, where there is no join condition, an inner join 
+			would combine all rows from one table with those from 
+			another.  If the first table contained three rows, and 
+			the second, four, then the final result would contain 
+			twelve (3 x 4 = 12) !
+		If a person has more than one phone number, then more than one 
+			match is made.  From this you can see we may get more 
+			rows returned than we have for each person. Conversely, 
+			if a person has no phone number, then there won’t be an 
+			entry in PersonPhone, and no match made.  That particular 
+			person won’t be included in the results, as only those 
+			with matches are included. Keep in mind the inner join 
+			only returns rows where the match condition is true.  
+		Let’s try an example. The {INNER JOIN} specifies 
+			[which tables to join] and the <match condition> for 
+			doing so.  The condition PH.Phone NumberTyeID = 3 limits 
+			the query to work numbers.
 					SELECT   P.FirstName,
 					         P.LastName,
 					         P.Title,
@@ -82,21 +104,28 @@ Pessimistic Locking
 					         AND PH.PhoneNumberTypeID = 3 >
 					ORDER BY P.LastName
 
-
-		In this example, rows where the BusinessEntityID’s don’t match aren’t included.  This could be an issue if a person doesn’t have a phone number as those employees wouldn’t be on the list.
+		In this example, rows where the BusinessEntityID’s don’t match 
+			aren’t included.  This could be an issue if a person 
+			doesn’t have a phone number as those employees wouldn’t 
+			be on the list.
 
 	Outer Joins
-		If you wish to include these employees you can use an Outer join. Outer joins do include non matching rows. 
-
-		The outer join will return every row from one specified table, even if the join condition fails. If the HR manager wanted to list every employee regardless of whether they had a work phone number, then using an outer join would make it so.
-
+		If you wish to include these employees you can use an Outer join. 
+			Outer joins do include non matching rows. 
+		The outer join will return every row from one specified table, 
+			even if the join condition fails. If the HR manager wanted 
+			to list every employee regardless of whether they had a 
+			work phone number, then using an outer join would make it 
+			so.
 	Types of Outer Joins
-		Left Outer Join – All rows from the left table are included, unmatched rows from the right are replaced with NULL values.
-
-		Right Outer Join – All rows from the right table are included, unmatched rows from the left are replaced with NULL values.
-
-		Full Outer Join – All rows from both tables are included, NULL values fill unmatched rows
-
+		Left Outer Join  	– All rows from the left table are 
+					  included, unmatched rows from the right 
+					  are replaced with NULL values.
+		Right Outer Join  	– All rows from the right table are 
+					  included, unmatched rows from the left 
+					  are replaced with NULL values.
+		Full Outer Join  	– All rows from both tables are included, 
+					  NULL values fill unmatched rows
 	Left Outer Join
 		Understand that when a {LEFT OUTER JOIN} is used, all rows for [the table] in the FROM clause are included in the result, even if a match isn’t found with the other table. When a match isn’t found, then a NULL is place in the column.
 					SELECT   P.FirstName,
@@ -196,17 +225,21 @@ Hibernate Annotations is based on the JPA 2 specification.
 *							    *
 *							    *
 *** Chapter 2.2 - Mapping with JPA (Java Persistence Annotations) [pg1 - 25] ***
-JPA entities are plain POJOs. Actually, they are Hibernate persistent entities. Their mappings are defined through JDK 5.0 annotations instead of hbm.xml files.
-
-Annotations can be split in two categories.
-
-The logical mapping annotations (describing the object model, the association between two entities etc.)
-
-The physical mapping annotations (describing the physical schema, tables, columns, indexes, etc)
-
-JPA annotations are in the javax.persistence.* package. JPA annotations are plain JDK 5 annotations.
-
-A good and complete set of working examples can be found in the Hibernate Annotations test suite itself: most of the unit tests have been designed to represent a concrete example and be a source of inspiration for you. You can get the test suite sources in the distribution.
+JPA entities are plain POJOs. Actually, they are Hibernate persistent entities. 
+	Their mappings are defined through JDK 5.0 annotations instead of 
+	hbm.xml files.
+Annotations can be split in two 
+	categories.
+The logical mapping annotations (describing the object model, the association 
+	between two entities etc.)
+The physical mapping annotations (describing the physical schema, tables, 
+	columns, indexes, etc)
+JPA annotations are in the javax.persistence.* package. JPA annotations are 
+	plain JDK 5 annotations.
+A good and complete set of working examples can be found in the Hibernate 
+	Annotations test suite itself: most of the unit tests have been designed 
+	to represent a concrete example and be a source of inspiration for you. 
+	You can get the test suite sources in the distribution.
 *
 *
 *
