@@ -1,27 +1,73 @@
 
 
-This option allows curl to proceed and operate even for server connections otherwise considered insecure.
 
-23.5 Caching and Proxy Servers
-	Web caching is the temporary storage of web objects (such as HTML documents) for later retrieval. There are three significant advantages to web caching: 
-			reduced bandwidth consumption 
-				(fewer requests and responses that need to go over the network), 
+CORS (Cross Origin Resource Sharing)
+	This section was taken from WAHH page 64, Chapter 3. It deals with the basics of the Same-Origin Policy.
+			The same-origin policy is key to keeping content that came from different origins from interfering with each other.
 
-			reduced server load 
-				(fewer requests for a server to handle), and 
+			Content received from one website is not allowed to access content received from another site.
 
-			reduced latency 
-				(since responses for cached requests are available immediately, and closer to the client being served).
+			If a user browsed to a malicious website, script code running on that site could access the data and functionality of any other website also visited by the user.
 
-	Together, they make the web less expensive and better performing.
+			For this reason, browsers implement restrictions to this type of intereaction. In practice, this leads to various complications and compromises. 
 
-	It doesn't make sense to transmit a popular web page from Autralia to North America millions of times each day. There should be a way to store this informaiton.
+			Here are some: 
+					1) a page on one domain can request data from another domain (for example by submitting a form or loading an image), but it cannot process the data. 
 
-	Fortunately, there is -- at least at the site leve. A web proxy lets you cache and manage your site's outbound requests for web content.
+					2) a page on one domain can load a script from another domain, because scripts are code rather than data.
 
-	Client web browser contact the proxy server to request content. The proxy server makes a request on the client's behalf or provides the object from its cache.
+					3) a page on one domain cannot read or modify the cookies or DOM data belonging to another domain.
 
-	Proxy severs are often used to enhance security or filter content.
+			Further complication arise with browser extensions which implement same-origin restrictions in different ways.
 
-	In a proxy-based system, only one machine gets access to the internet going through a firewall. Many commercial proxies are available today. See http://www.web-caching.com/proxy-caches.html.
+	This section was taken from https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS. 
+			Cross-Origin Resource Sharing (CORS) uses additional HTTP headers to let a user agent gain permission to access resources from a server on a different origin (domain) than the site (domain) currently in use. A cross-origin HTTP request is a request to a different domain, protocol, or port than the one from which the current document originated.
+
+			An example: A HTML page served from http://domain-a.com makes an <img> src request for http://domain-b.com/image.jpg. Pages load resources like CSS stylesheets, images, and scripts from separate domains, such as content delivery networks (CDNs).
+
+			Browsers, for security reasons, restrict cross-origin HTTP requests initiated from within scripts. XMLHttpRequest and the Fetch API follow the same-origin policy. A web application using those APIs can only request HTTP resources from the same domain the application was loaded from unless CORS headers are used.
+
+			
+
+
+
+	This section was taken from https://developer.mozilla.org/en-US/docs/Web/HTTP/Server-Side_Access_Control. 
+			Browsers send specific HTTP headers for cross-site requests initiated from within XMLHttpRequest or the Fetch API. It also expects to see specific HTTP headers sent back with cross-site responses.
+
+			These concepts can be applied to any server-side programming environment that processes HTTP requests and dynamically formulates HTTP responses.
+
+
+
+
+
+	This section was taken from WAHH page 524, Chapter 13. It deals with the details of the Same-Origin Policy.
+
+
+
+
+This section was taken from UNIX and Linux System Administration Handbook
+	This option allows curl to proceed and operate even for server connections otherwise considered insecure.
+
+	23.5 Caching and Proxy Servers
+		Web caching is the temporary storage of web objects (such as HTML documents) for later retrieval. There are three significant advantages to web caching: 
+				reduced bandwidth consumption 
+					(fewer requests and responses that need to go over the network), 
+
+				reduced server load 
+					(fewer requests for a server to handle), and 
+
+				reduced latency 
+					(since responses for cached requests are available immediately, and closer to the client being served).
+
+		Together, they make the web less expensive and better performing.
+
+		It doesn't make sense to transmit a popular web page from Autralia to North America millions of times each day. There should be a way to store this informaiton.
+
+		Fortunately, there is -- at least at the site level. A web proxy lets you cache and manage your site's outbound requests for web content.
+
+		Client web browser contact the proxy server to request content. The proxy server makes a request on the client's behalf or provides the object from its cache.
+
+		Proxy severs are often used to enhance security or filter content.
+
+		In a proxy-based system, only one machine gets access to the internet going through a firewall. Many commercial proxies are available today. See http://www.web-caching.com/proxy-caches.html.
 
