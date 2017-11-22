@@ -1148,6 +1148,8 @@ If you want to make further changes to your Apache system or user config files, 
 			sudo apachectl graceful
 
 
+https://discussions.apple.com/docs/DOC-11238
+	
 
 
 
@@ -1171,8 +1173,7 @@ If you want to make further changes to your Apache system or user config files, 
 
 
 
-
-
+Brightcove, Ooyala, & Kaltura
 
 
 
