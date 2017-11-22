@@ -7,9 +7,13 @@ git commit -m "first commit"
 git remote add origin https://github.com/syeed-ode/authentication-services.git
 git push -u origin master
 
+
 …or push an existing repository from the command line
 git remote add origin https://github.com/syeed-ode/authentication-services.git
 git push -u origin master
+
+
+git diff --staged angularJS
 
 ##Create java library with source and test directory
 gradle init --type java-library
