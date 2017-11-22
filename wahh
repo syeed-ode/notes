@@ -21,13 +21,69 @@ CORS (Cross Origin Resource Sharing)
 			Further complication arise with browser extensions which implement same-origin restrictions in different ways.
 
 	This section was taken from https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS. 
-			Cross-Origin Resource Sharing (CORS) uses additional HTTP headers to let a user agent gain permission to access resources from a server on a different origin (domain) than the site (domain) currently in use. A cross-origin HTTP request is a request to a different domain, protocol, or port than the one from which the current document originated.
+			Cross-Origin Resource Sharing (CORS) protocol uses additional HTTP headers to let a user agent gain permission to access resources from a server on a different origin (domain) than the site (domain) currently in use. A cross-origin HTTP request is a request to a different domain, protocol, or port than the one from which the current document originated.
 
 			An example: A HTML page served from http://domain-a.com makes an <img> src request for http://domain-b.com/image.jpg. Pages load resources like CSS stylesheets, images, and scripts from separate domains, such as content delivery networks (CDNs).
 
 			Browsers, for security reasons, restrict cross-origin HTTP requests initiated from within scripts. XMLHttpRequest and the Fetch API follow the same-origin policy. A web application using those APIs can only request HTTP resources from the same domain the application was loaded from unless CORS headers are used.
 
-			
+			CORS supports secure cross-domain requests and data transfers between browsers and web servers. Browsers use CORS in an API container such as XMLHttpRequest or Fetch to help mitigate the risks of cross-origin HTTP requests.
+
+			Cross-origin sharing standard is used to enable cross-site HTTP requests for:
+					Invocations of the XMLHttpRequest or Fetch APIs in a cross-site manner
+
+					Web Fonts (for cross-domain font usage in @font-face within CSS), so that servers can deploy TrueType fonts that can only be cross-site loaded and used by web sites that are permitted to do so. See https://www.w3.org/TR/css-fonts-3/#font-fetching-requirements for more detail.
+
+					WebGL textures. See, https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL for more detail.
+
+					Images/video frames drawn to a canvas using drawImage.
+
+					Stylesheets (for CSSOM access)
+
+					Scripts (for unmuted exceptions).
+
+			The Cross-Origin Resource Sharing works by adding new HTTP headers allowing servers to describe the origins that are permitted to read its information using a web browser.
+
+			Browsers "preflight" the request for HTTP request methods that can cause side-effects on server's data (for POST usage with certain MIME types).  Those browsers must solicit supported methods from the server with an HTTP OPTIONS request method. 
+
+			Once it gets the server's approval, the browser can send the actual request with the actual HTTP request method. Servers can also notify clients whether "credentials" (including Cookies and HTTP Authentication data) should be sent with requests.
+
+	Here are three scenarios that illustrate how Cross-Origin Resource Sharing works. All use the XMLHttpRequest object, which can be used to make cross-site invocations in any supporting browser.
+			Simple requests
+					Some requests don’t trigger a CORS preflight. Those are called “simple requests” in this article, though the Fetch spec (which defines CORS) doesn’t use that term. A request that doesn’t trigger a CORS preflight—a so-called “simple request”—is one that meets all the following conditions:
+
+					The only allowed methods are:
+							- GET 
+							- HEAD 
+							- POST
+
+					Apart from the headers set automatically by the user agent. See https://fetch.spec.whatwg.org/#forbidden-header-name for ones that explicitly can't be set. The only headers which are allowed to be manually set are:
+							- Accept
+							- Accept-Language 
+							- Content-Language
+							- Content-Type (but note the additional requirements below)
+							- Last-Event-ID
+							- DPR (Device Pixel Ratio) http://httpwg.org/http-extensions/client-hints.html#dpr
+							- Save-Data http://httpwg.org/http-extensions/client-hints.html#save-data
+							- Viewport-Width http://httpwg.org/http-extensions/client-hints.html#viewport-width
+							- Width http://httpwg.org/http-extensions/client-hints.html#width
+
+					The only allowed values for the Content-Type header are:
+							- application/x-www-form-urlencoded
+							- multipart/form-data
+							- text/plain
+
+					No event listeners are registered on any XMLHttpRequestUpload object used in the request; these are accessed using the XMLHttpRequest.upload property.
+
+					No ReadableStream object is used in the request.
+
+					These are the same kinds of cross-site requests that web content can already issue, and no response data is released to the requester unless the server sends an appropriate header. Therefore, sites that prevent cross-site request forgery have nothing new to fear from HTTP access control.
+
+					WebKit Nightly and Safari Technology Preview place additional restrictions on the values. (That section has been copied directly.) See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS. 
+
+
+
+
 
 
 
