@@ -1,0 +1,90 @@
+I got this from Apache HTTP Server Cookbook.
+
+Using one machine to run several domains clearly has its advantages (low maintenance costs, for example).
+
+It also has a few disadvantages as well (without a bandwidth balancer in place, a single site can end up consuming the entire bandwidth allocated for the server, thus impacting negatively the operation and performance of the rest).
+
+The main configuration file where system-wide settings are found is located in /etc/httpd/conf/httpd.conf in CentOS or /etc/apache2/apache.conf in Ubuntu.
+
+You will use configuration other files to define the directives for each virtual host. Although you can define virtual hosts inside the main configuration file, such practice is often discouraged. Using separate .conf files allows for scalability and easier maintenance.
+
+As the comment indicates, and as the IncludeOptional directive suggests, Apache will look for .conf files in the /etc/httpd/conf.d (in CentOS) or /etc/apache2/sites-enabled (Ubuntu) which, if present, are used to indicate the various directives that define a virtual host.
+
+Defining virtual hosts:
+	1) use 2 dummy domains (such as www.example1.com and www.example2.com, or 
+
+	2) use 2 “real” domains that you have registered. This last option also requires that you have set up DNS entries for those domains.
+		VPS (Virtual Private Server) is a virtual machine sold as a service by an Internet hosting service. A VPS where a customers may have superuser-level access to that operating system instance, so they can install almost any software that runs on that OS.
+
+		If you want to implement name-based virtual hosting set up the necessary DNS entries for each domain. 
+
+		A cloud VPS, which runs its own copy of an operating system (OS) with domains you have previously registered, could also be used implement name-based virtual hosting.
+
+		FreeDNS (https://freedns.afraid.org/) could also hold your DNS entries.
+
+Each virtual host will need a directory structure to store files and logs. In addition, the user Apache runs as (apache in CentOS or www-data in Ubuntu) needs to be able to read the web content.
+
+create the following directories and assign the indicated permissions:
+		mkdir -p /var/www/example1.com/public_html
+		mkdir -p /var/www/example2.com/public_html
+		chmod -R 0755 /var/www/
+
+Let’s start by defining www.example1.com. To do it, insert the following block in /etc/httpd/conf.d/example1.com. conf (CentOS) or /etc/apache2/sites-available/example1.com.conf (Ubuntu):
+		<VirtualHost *:80>
+			DocumentRoot "/var/www/example1.com/public_html/"
+			ServerName www.example1.com
+			ServerAlias example1.com
+			ErrorLog /var/www/example1.com/error.log
+			LogLevel info
+			CustomLog /var/www/example1.com/access.log combined
+		</VirtualHost>
+
+Since both www.example1.com and www.example2.com are dummy domains, we need to tell our client computer how to find them. The most basic name resolution method is using the /etc/hosts file in our computer to map the IP address of our web server to those domains.
+
+
+Using the Ubuntu server’s address (192.168.0.30, change to fit your environment) as example, add the following lines to the /etc/hosts file in each client computer that you want to access the virtual hosts:
+		192.168.0.30 example1.com www.example1.com
+		192.168.0.30 example2.com https://www.example2.com[www.example2.com]
+
+
+mod_rewrite is a well-known and widely module used to dynamically map incoming HTTP requests URLs to specific documents in your web server’s or virtual host internal structure, or to another external URL.
+
+In other words, this module will allow you to redirect (as the rewrite in the name suggests) an URL (https://www.example.com/scg/results.php?country=Argentina&province=Cordoba) to a more user or SEO friendly URL (https://www.example.com/scg/Argentina/Cordoba) in order to get a higher position in search engines rankings, which ultimately leads to more visitors.
+
+To accomplish this purpose, mod_rewrite realies heavily on PCRE (Perl Compatible Regular Expressions) vocabulary.
+
+The 'RewriteRule' directive, as its name implies, substitutes a given pattern with either one of three things:
+		An absolute path to a local resource found inside the system
+
+		A path to a local web resource
+
+		An absolute URL
+
+Its basic syntax is:
+		RewriteRule [Pattern] [Substitution] [Optional --> Flags]
+
+You can place this directive inside the main configuration file, inside a Virtual host definition or Directory block.
+
+You can use multiple 'RewriteRule' directives in the same context, each one with its own [Pattern], [Substitution] and  optionally) [Flags].
+
+You can insert 'RewriteRule' directives in .htaccess files.
+
+The 'RewriteCond' directive introduces a condition that must be met before the 'RewriteRule' rules are “activated”.
+
+Restart apache deamon
+	In CentOs
+		systemctl restart httpd
+
+	In Ubuntu
+		service apache2 restart
+
+	In MacOs
+		sudo apachectl graceful 
+
+Test the configuration after making a change
+	In MacOs
+		sudo apachectl configtest
+
+Set up log for teh server
+	ErrorLog "/private/var/log/apache2/error_log"
+
