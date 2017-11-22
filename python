@@ -5,9 +5,9 @@ This information was gathered from reading Effective Python
 *
 ****    Chapter 2 - Functions    ****
 Item 14: Prefer Exceptions to Returning None
-	Functions that return 'None' to indicate special meaning are error prone because 'None' and 
-		other values (e.g., zero, the empty string) all evaluate to 'False' in conditional 
-		expressions.
+	Functions that return 'None' to indicate special meaning are error prone 
+		because 'None' and other values (e.g., zero, the empty string) all 
+		evaluate to 'False' in conditional expressions.
 	Raise exceptions to indicate special situations instead of returning 'None'. Expect the calling 
 		code to handle exceptions properly when they're documented.
 
@@ -37,23 +37,30 @@ Item 13: Take advantage of Each Block in try/except/else/finally
 		block cleans up the file handle.
 
 <Item 39: Use 'Lock' to Prevent Data Races in Threads>
-Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' Behavior
-	The 'with' statement is used to indicate when code is running in a special context.  A good 
-		example is mutual exclusion blocks in with statements to indicate that the intented 
-		code only runs while the lock is held. 
-		[ lock = Lock(); with lock: print('Lock is held') ]. This example is equivalent to 
-		this 'try/finally' construction because the Lock class properly enables the 'with' 
-		statement. [ lock.acquire(); try: print('Lock is held'); finally: lock.release() ]
-	The 'with' statement version is better because it eliminates the need to write the repetitive 
-		code of the 'try/finally' block. It is easy to make you objects and function capable of
-		use in 'with' statements by using the 'contextlib' built-in module.
-	This module contains the 'contextmanger' decorator, which lets a simple function be used in 
-		'with' statements.  Ths is much easier than dfining a new class with the special 
-		methods (__enter__, __init__, __exit__), the standard way.
-	The default log level for my program is WARNING, so only the error message will print. (This 
-		wasn't the case for me. I got wierd results, need to investigate. So, I just copied 
-		directly from book.) ***I think i know why I got weird results...the 'yield' statement!!!
-		Now that I know what 'yeild' does.  I still need to revist this, though. To make sure.
+Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' 
+	Behavior
+		The 'with' statement is used to indicate when code is running in a 
+			special context.  A good example is mutual exclusion blocks in 
+			'with' statements to indicate that the intented code only runs 
+			while the lock is held. 
+			[ lock = Lock(); with lock: print('Lock is held') ]. This 
+			example is equivalent to this 'try/finally' construction 
+			because the Lock class properly enables the 'with' statement. 
+			[ lock.acquire(); try: print('Lock is held'); finally: lock.release() ]
+		The 'with' statement version is better because it eliminates the need to 
+			write the repetitive code of the 'try/finally' block. It is easy
+			to make your objects and function capable of use in 'with' 
+			statements by using the 'contextlib' built-in module.
+		This module contains the 'contextmanger' decorator, which lets a simple 
+			function be used in 'with' statements.  Ths is much easier than 
+			defining a new class with the special methods 
+			(__enter__, __init__, __exit__), the standard way.
+		The default log level for my program is WARNING, so only the error 
+			message will print. (This  wasn't the case for me. I got wierd 
+			results, need to investigate. So, I just copied directly from 
+			book.) ***I think i know why I got weird results...the 'yield' 
+			statement!!! Now that I know what 'yeild' does.  I still need 
+			to revist this, though. To make sure.
 				def my_function():
 					logging.debug('Some debug data')
 					logging.error('Error log here')
@@ -62,8 +69,9 @@ Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' 
 				>>> my_function()
 				Error log here
 
-	The code below elevates the log level temporarily by defining a context manager.  The yield 
-		expression is the point at which the with block's contents will eecute.
+		The code below elevates the log level temporarily by defining a context 
+			manager.  The yield expression is the point at which the with 
+			block's contents will eecute.
 				@contextmanager
 				def debug_loggging(level):
 				    logger = logging.getLogger()
@@ -74,9 +82,10 @@ Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' 
 				        yield
 				    finally:
 				        logger.setLevel(old_level)
-	Now we can call the logging function again, but in the debug_logging context.  All of the 
-		debugging messages will print during the 'with' block, but the same function running 
-		outside the 'with' block won't print debug messages.
+		Now we can call the logging function again, but in the debug_logging 
+			context.  All of the debugging messages will print during the 
+			'with' block, but the same function running outside the 'with' 
+			block won't print debug messages.
 				with debug_logging(logging.DEBUG):
 					print('Inside')
 					my_function()
@@ -90,27 +99,33 @@ Item 43: Consider 'contextlib' and 'with' Statements for Reusable 'try/finally' 
 				After:
 				Error log here
 
-	Using 'with' Targets
-		The 'context_manager', passed to a 'with' statement, may also return an object. This
-			gives the code running in the 'with' block the ability to directly intereact 
-			with its context. [ with open('my_output.txt') as hanlde: handle.write() ]. 
-			handle is the target. This allows the __exit__ function, which always executes to handle cleanup.
+		Using 'with' Targets
+			The 'context_manager', passed to a 'with' statement, may also 
+				return an object. This gives the code running in the 
+				'with' block the ability to directly intereact with its 
+				context. 
+				[ with open('my_output.txt') as hanlde: handle.write() ]
+				handle is the target. This allows the __exit__ function, 
+				which always executes to handle cleanup.
 
 		<Item 40: Consider Coroutines to Run Many Functions Concurrently>
-		This can also be done by "yielding" a value from your context manager.  In that case you can use the finally statement (not the __exit__ magic method).
-				@contextmanager
-				def debug_loggging(level):
-				    logger = logging.getLogger()
-				    old_level = logger.getEffectiveLevel()
-				    print(old_level)
-				    logger.setLevel(level=level)
-				    try:
-				        yield
-				    finally:
-				        logger.setLevel(old_level)
-		Calling logging methods like debug on the 'as' target will produce output because the 
-			severity level is set low enough in the 'with' block.  Bus using the 'logging' 
-			module directly won't print anyting; it's default is WARNING.
+		This can also be done by "yielding" a value from your context manager.  
+			In that case you can use the finally statement 
+				(not the __exit__ magic method).
+					@contextmanager
+					def debug_loggging(level):
+					    logger = logging.getLogger()
+					    old_level = logger.getEffectiveLevel()
+					    print(old_level)
+					    logger.setLevel(level=level)
+					    try:
+						yield
+					    finally:
+						logger.setLevel(old_level)
+		Calling logging methods like debug on the 'as' target will produce 
+			output because the severity level is set low enough in the 
+			'with' block.  Bus using the 'logging' module directly won't 
+			print anyting; it's default is WARNING.
 				with log_level(logging.DEBUG, 'my-log') as logger:
 					logger.debug('This is my message')
 					logging.debug('This will not print')
@@ -210,6 +225,42 @@ Item 20: Use 'None' and Docstrings to specify Dynamic Default Arguments (Must do
 					return json.loads(data)
 				except ValueError:
 					return default
+
+Item 22: Prefer Helper Classes Over Bookkeeping with Dictionaries and Tuples
+	Python's classes and inheritance make it easy to express our program's intended 
+		behaviors with objects. They provide flexibility in an environment of
+		changinge requirements. Knowing how to use them well enables ou to write
+		maintainable code.
+	
+	Python's built-in dictionary type is wondrful for maintaining dynamic cinternal state over the lifetime of an object. Dynamic means situations in which you need to do bookkeeping for an unexpected set of identifiers.
+	
+	For example, you can defin a class to sotre the names in a dictionary instead of using a predefined attribute.
+			class SimpleGradebook(object):
+			    def __init__(self):
+				self._grades = {}
+
+			    def add_student(self, name) -> None:
+				self._grades[name] = []
+
+			    def report_grade(self, name, score) -> None:
+				self._grades[name].append(score)
+
+			    def average_grade(self, name) -> int:
+				grades = self._grades[name]
+				return sum(grades) / len(grades)
+	
+	Using the class is simple
+			book = SimpleGradebook()
+			book.add_student('Isaac Newton')
+			book.report_grade('Isaac Newton', 90)
+			print(book.average_grade('Isaac Newton'))
+			>>>
+			90.0
+	
+	Dictionaries are so easy to use that there's a danger of overextending them to write brittle code.
+	
+	
+
 *
 *
 *
