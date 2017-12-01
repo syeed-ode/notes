@@ -1,5 +1,6 @@
 
 
+In addition to the website listed. This information is also available is the saved PDF named: CORS_HTTP_ MDN.pdf.
 
 CORS (Cross Origin Resource Sharing)
 	This section was taken from WAHH page 64, Chapter 3. It deals with the basics of the Same-Origin Policy.
@@ -414,6 +415,104 @@ Server-Side Access Control (CORS)
 			Browsers send specific HTTP headers for cross-site requests initiated from within XMLHttpRequest or the Fetch API. It also expects to see specific HTTP headers sent back with cross-site responses.
 
 			These concepts can be applied to any server-side programming environment that processes HTTP requests and dynamically formulates HTTP responses.
+
+	Discussion of HTTP headers
+		(That section has been copied directly.) See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS, The HTTP request headers. 
+
+		Also see the pdf in CORS_HTTP_ MDN.pdf (file:///~/books/software/javascript/CORS_HTTP_MDN.pdf)
+
+	Working code samples
+		All code is in file:///~/books/software/javascript/*_{CodeExample.htm,TextHeaderExchange.txt}
+
+	Simple cross-site requests
+		An HTTP/1.1 GET or a POST is used as request method. In the case of a POST, the Content-Type of the request body is one of 'application/x-www-form-urlencoded', 'multipart/form-data', or 'text/plain'.
+
+		No custom headers are sent with the HTTP request (such as X-Modified, etc.)
+
+		In this case, responses can be sent back based on some considerations.
+				If the resource in question is meant to be widely accessed (just like any HTTP resource accessed by GET)
+						then sending back the Access-Control-Allow-Origin: * header will be sufficient,
+
+						unless the resource needs credentials such as Cookies and HTTP Authentication information.
+
+		If the resource should be kept restricted based on requester domain, OR if the resource needs to be accessed with credentials (or sets credentials)
+				then filtering by the request's Origin header may be necessary, or at least echoing back the requester's Origin (e.g. Access-Control-Allow-Origin: http://arunranga.com)
+
+				the Access-Control-Allow-Credentials: true header will have to be sent
+
+		The section on Simple Access Control Requests shows you the header exchanges between client and server. Here is a PHP code segment that handles a Simple Request:
+				<?php
+
+				// We'll be granting access to only the arunranga.com domain 
+				// which we think is safe to access this resource as application/xml
+
+				if($_SERVER['HTTP_ORIGIN'] == "http://arunranga.com") {
+				    header('Access-Control-Allow-Origin: http://arunranga.com');
+				    header('Content-type: application/xml');
+				    readfile('arunerDotNetResource.xml');
+				} else {    
+				  header('Content-Type: text/html');
+				  echo "<html>";
+				  echo "<head>";
+				  echo "   <title>Another Resource</title>";
+				  echo "</head>";
+				  echo "<body>",
+				       "<p>This resource behaves two-fold:";
+				  echo "<ul>",
+				         "<li>If accessed from <code>http://arunranga.com</code> it returns an XML document</li>";
+				  echo   "<li>If accessed from any other origin including from simply typing in the URL into the browser's address bar,";
+				  echo   "you get this HTML document</li>", 
+				       "</ul>",
+				     "</body>",
+				   "</html>";
+				}
+				?>
+
+		The above checks to see if the Origin header sent by the browser (obtained through $_SERVER['HTTP_ORIGIN']) matches 'http://arunranga.com'.
+				If yes, it returns Access-Control-Allow-Origin: http://arunranga.com.
+
+	Preflighted requests
+		A method other than GET or POST is used, or if POST is used with a Content-Type other than one of 'application/x-www-form-urlencoded', 'multipart/form-data', or 'text/plain'.
+
+		For instance, if the Content-Type of the POST body is application/xml, a request is preflighted.
+
+		A custom header (such as X-PINGARUNER) is sent with the request.
+
+	Credentialed requests
+		Credentialed Access Control Requests – that is, requests that are accompanied by Cookies or HTTP Authentication information (and which expect Cookies to be sent with responses) – can be either Simple or Preflighted, depending on the request methods used.
+
+		In a Simple Request scenario, the request will be sent with Cookies (e.g. if the withCredentials flag is set on XMLHttpRequest). 
+				If the server responds with Access-Control-Allow-Credentials: true attached to the credentialed response
+						then the response is accepted by the client and exposed to web content.
+
+		In a Preflighted Request, the server can respond with 'Access-Control-Allow-Credentials: true' to the OPTIONS request.
+
+		Note that in the case of credentialed requests, the 'Access-Control-Allow-Origin:' header must not have a wildcard value of "*".
+
+	Apache examples
+		Restrict access to certain URIs
+			One helpful trick is to use an Apache rewrite, environment variable, and headers to apply Access-Control-Allow-* to certain URIs.
+
+			This is useful, for example, to constrain cross-origin requests to GET /api(.*).json requests without credentials:
+				RewriteRule ^/api(.*)\.json$ /api$1.json [CORS=True]
+				Header set Access-Control-Allow-Origin "*" env=CORS
+				Header set Access-Control-Allow-Methods "GET" env=CORS
+				Header set Access-Control-Allow-Credentials "false" env=CORS 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
