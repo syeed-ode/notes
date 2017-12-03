@@ -1,0 +1,16 @@
+'setDefault'
+	The single call to 'setdefault' has replace the two-line 'if/not in' statement and its usage guarantess that a key is always initialized to a starter value before it's used.
+
+	Any possibity of a 'KeyError' exception is negated. The below code shows what would generate a 'KeyError' exception.
+
+
+Item 22: Prefer Helper Classes Over Bookkeeping with Dictionaries and Tuples
+		Avoid more than one level of nesting (i.e. avoid dictionaries of dictionaries). It makes your code hard to read and sets you up for a maintenace nightmare. 
+
+		Avoid making dictionaries with values that are other dictionaries or long tuples.
+
+		Use 'namedtuple' for lightweight, immutable data containers before you need the flexibility of a full class.
+
+		Move your bookkeeping code to use multiple helper classes when your internal state dictionaries get complicated.
+
+
