@@ -293,91 +293,97 @@ You can define the identifier generation strategy thanks to the @GeneratedValue 
 				- a foreign key is held by one of the entities (note that this FK column in the database should be constrained unique to simulate one-to-one multiplicity)
 				- a association table is used to store the link between the 2 entities (a unique constraint has to be defined on each fk to ensure the one to one multiplicity)
 
-	First, we map a real one-to-one association using shared primary keys. 
-		The @PrimaryKeyJoinColumn annotation does say that the primary key of the entity is used as the foreign key value to the associated entity:
-				@Entity
-				public class Body {
-				    @Id
-				    public Long getId() { return id; }
+		First, we map a real one-to-one association using shared primary keys. 
+			The @PrimaryKeyJoinColumn annotation does say that the primary key of the entity is used as the foreign key value to the associated entity:
+					@Entity
+					public class Body {
+					    @Id
+					    public Long getId() { return id; }
 
-				    @OneToOne(cascade = CascadeType.ALL)
-				    @PrimaryKeyJoinColumn
-				    public Heart getHeart() {
-				        return heart;
+					    @OneToOne(cascade = CascadeType.ALL)
+					    @PrimaryKeyJoinColumn
+					    public Heart getHeart() {
+					        return heart;
+					    }
+					    ...
+					}            
+					@Entity
+					public class Heart {
+					    @Id
+					    public Long getId() { ...}
+					}
+	   		
+	   		The owner is responsible for the the association column(s) update.
+
+		Next, the second case is presented. 
+	   		In the following example, the associated entities are linked through an explicit foreign key column. 
+
+	   		@JoinColumn is always declared on the owner side. 
+	   		
+	   		@JoinColumn indicates a Customer (owner) is linked to a Passport (owned table), with a foreign key column named passport_fk in the Customer table.
+					@Entity
+					public class Customer implements Serializable {
+					    @OneToOne(cascade = CascadeType.ALL)
+					    @JoinColumn(name="passport_fk")
+					    // passport is NOT the owner
+					    public Passport getPassport() {
+					        ...
+					    }
 				    }
-				    ...
-				}            
-				@Entity
-				public class Heart {
-				    @Id
-				    public Long getId() { ...}
-				}
-   		
-   		The owner is responsible for the the association column(s) update.
 
-	Next, the second case is presented. 
-   		In the following example, the associated entities are linked through an explicit foreign key column. @JoinColumn in the owning tabler indicates a Customer (owner) is linked to a Passport (owned table), with a foreign key column named passport_fk in the Customer table.
-				@Entity
-				public class Customer implements Serializable {
-				    @OneToOne(cascade = CascadeType.ALL)
-				    @JoinColumn(name="passport_fk")
-				    // passport is NOT the owner
-				    public Passport getPassport() {
-				        ...
+					@Entity
+					public class Passport implements Serializable {
+					    @OneToOne(mappedBy = "passport") // passport is NOT the owner
+					    // passport has not '@JoinColumn' references
+					    public Customer getOwner() {}
+					    ...
+					}
+
+			The join column is declared with the @JoinColumn annotation and has parameter named 'referencedColumnName'. 
+
+			See docs for using 'referencedColumnName'.
+
+			In a bidirectional relationship, one of the sides (and only one) has to be the owner: the owner is responsible for the association column(s) update.
+
+			To declare a side as "'NOT'" responsible for the relationship, the attribute mappedBy is used. 
+
+			mappedBy refers to the property name of the association on the owner side. In our case, this is passport.
+
+			As you can see, you don't have to (must not) declare the join column since it has already been declared on the owners side.
+
+			If no @JoinColumn is declared on the owner side, the defaults apply. A join column(s) will be created in the owner table.
+
+			Its name will be the concatenation of the name of the relationship in the owner side, _ (underscore), and the name of the primary key column(s) in the own'ed' side.
+
+			In this example passport_id because the property name is passport and the column id of Passport is id.
+
+		Finally, third possibility (using an association table) is quite exotic. 
+			A Customer (owner table) is linked to a Passport (owned table) through a association table named CustomerPassports.
+
+			This association table has a foreign key column named passport_fk pointing to the Passport (owned side) table (materialized by the inverseJoinColumn, and a foreign key column named customer_fk pointing to the Customer table materialized by the joinColumns attribute).
+					@Entity
+					public class Customer implements Serializable {
+					    @OneToOne(cascade = CascadeType.ALL)
+					    @JoinTable(name = "CustomerPassports",
+					        joinColumns = @JoinColumn(name="customer_fk"),
+					        inverseJoinColumns = @JoinColumn(name="passport_fk")
+					    )
+					    public Passport getPassport() {
+					        ...
+					    }
 				    }
-			    }
-
-				@Entity
-				public class Passport implements Serializable {
-				    @OneToOne(mappedBy = "passport") // passport is NOT the owner
-				    // passport has not '@JoinColumn' references
-				    public Customer getOwner() {}
-				    ...
-				}
-
-		The join column is declared with the @JoinColumn annotation and has parameter named 'referencedColumnName'. 
-
-		See docs for using 'referencedColumnName'.
-
-		In a bidirectional relationship, one of the sides (and only one) has to be the owner: the owner is responsible for the association column(s) update.
-
-		To declare a side as "'NOT'" responsible for the relationship, the attribute mappedBy is used. 
-
-		mappedBy refers to the property name of the association on the owner side. In our case, this is passport.
-
-		As you can see, you don't have to (must not) declare the join column since it has already been declared on the owners side.
-
-		If no @JoinColumn is declared on the owner side, the defaults apply. A join column(s) will be created in the owner table.
-
-		Its name will be the concatenation of the name of the relationship in the owner side, _ (underscore), and the name of the primary key column(s) in the own'ed' side.
-
-		In this example passport_id because the property name is passport and the column id of Passport is id.
-
-	Finally, third possibility (using an association table) is quite exotic. 
-		A Customer (owner table) is linked to a Passport (owned table) through a association table named CustomerPassports.
-
-		This association table has a foreign key column named passport_fk pointing to the Passport (owned side) table (materialized by the inverseJoinColumn, and a foreign key column named customer_fk pointing to the Customer table materialized by the joinColumns attribute).
-				@Entity
-				public class Customer implements Serializable {
-				    @OneToOne(cascade = CascadeType.ALL)
-				    @JoinTable(name = "CustomerPassports",
-				        joinColumns = @JoinColumn(name="customer_fk"),
-				        inverseJoinColumns = @JoinColumn(name="passport_fk")
-				    )
-				    public Passport getPassport() {
-				        ...
-				    }
-			    }
-				@Entity
-				public class Passport implements Serializable {
-				    @OneToOne(mappedBy = "passport")
-				    public Customer getOwner() { ... }
-				}
+					@Entity
+					public class Passport implements Serializable {
+					    @OneToOne(mappedBy = "passport")
+					    public Customer getOwner() { ... }
+					}
 
 2.2.5.2. Many-to-one
 	The owner is responsible for the the association column(s) update.
 
-	@JoinColumn always declared on the owner side indicates a Customer (owner) is linked to a Passport (owned table), with a foreign key column named passport_fk in the Customer table.
+	@JoinColumn is always declared on the owner side. 
+
+	@JoinColumn indicates a Flight (owner) is linked to a Company (owned table), with a foreign key column named COMP_ID in the Flight table.
 
 	mappedBy is always declared on the owned side and refers to the **property name** of the association on the owner side. In our case, this is passport.
 
@@ -417,7 +423,13 @@ You can define the identifier generation strategy thanks to the @GeneratedValue 
 
 	This association table, @JoinTable annotation, will contain a foreign key referencing back the entity table (through @JoinTable.joinColumns).
 
+	@JoinTable.joinColumns references the owner table.
+
 	The @JoinTable annotation will also contain a foreign key referencing the target entity table (through @JoinTable.inverseJoinColumns).
+
+	@JoinTable.inverseJoinColumns references the owned table.
+
+	The target entity is the owned table.
 
 2.2.5.3. Collections
 	You can map Collection, List, Map and Set pointing to associated entities as one-to-many or many-to-many associations using the @OneToMany or @ManyToMany annotation respectively.

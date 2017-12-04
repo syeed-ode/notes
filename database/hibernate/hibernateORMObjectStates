@@ -1,0 +1,265 @@
+This information was gather from reading the Hibernate Documentation: Working with objects section.  The focus of the notes is only on object states.  It a collection of notes, broken down by section.
+
+https://docs.jboss.org/hibernate/orm/3.3/reference/en-US/html/objectstate.html
+
+Chapter 10. Working with objects
+	Hibernate offers state management of objects. This is a natural object-oriented view of persistence in Java applications.
+
+	Hibernate application developers should always think about the state of their objects, and not necessarily about the execution of SQL statements.
+
+	The execution of SQL statements is taken care of by Hibernate and is only relevant for the application developer when tuning the performance of the system.
+
+10.1. Hibernate object states
+	Hibernate defines and supports the following object states:
+			Transient		
+				an object is transient if it has just been instantiated using the new operator, and it is not associated with a Hibernate Session. 
+
+				It has no persistent representation in the database and no identifier value has been assigned.
+
+				Use the Hibernate Session to make an object persistent (and let Hibernate take care of the SQL statements that need to be executed for this transition).
+
+			Persistent
+				a persistent instance has a representation in the database and an identifier value.
+
+				It might just have been saved or loaded, however, it is by definition in the scope of a Session.
+
+				Hibernate will detect any changes made to an object in persistent state and synchronize the state with the database when the unit of work completes.
+
+				Developers do not execute manual UPDATE statements, or DELETE statements when an object should be made transient.
+
+			Detached
+				a detached instance is an object that has been persistent, but its Session has been closed.
+
+				The reference to the object is still valid, of course, and the detached instance might even be modified in this state.
+
+				A detached instance can be reattached to a new Session at a later point in time, making it (and all the modifications) persistent again.
+
+				This feature enables a programming model for long running units of work that require user think-time. We call them 'application transactions', i.e., a unit of work from the point of view of the user.
+
+			We will now discuss the states and state transitions (and the Hibernate methods that trigger a transition) in more detail.
+
+10.2. Making objects persistent
+	Newly instantiated instances of a a persistent class are considered transient by Hibernate. 
+
+	We can make a transient instance persistent by associating it with a session:
+			DomesticCat fritz = new DomesticCat();
+			fritz.setColor(Color.GINGER);
+			fritz.setSex('M');
+			fritz.setName("Fritz");
+			Long generatedId = (Long) sess.save(fritz);	
+
+	If Cat has a generated identifier, the identifier is generated and assigned to the cat when save() is called. 
+
+	If Cat has an assigned identifier, or a composite key, the identifier should be assigned to the cat instance before calling save().
+			You can also use persist() instead of save(), with the semantics defined in the EJB3 early draft.
+
+			persist() properties are:
+					persist() makes a transient instance persistent.
+
+					it does not guarantee that the identifier value will be assigned to the persistent instance immediately. 
+
+					the identifier value might be assigned at flush time.
+
+					persist() also guarantees that it will not execute an INSERT statement if it is called outside of transaction boundaries. This is useful in long-running conversations with an extended Session/persistence context.
+
+			save() has these properties instead: 
+					save() does guarantee to return an identifier immediately.
+
+					If an INSERT has to be executed to get the identifier ( e.g. "identity" generator, not "sequence"), this INSERT happens immediately, **no matter if you are inside or outside of a transaction**.
+
+					This is problematic in a long-running conversation with an extended Session/persistence context.
+
+	If the object you make persistent has associated objects (e.g. the kittens collection in the example),
+			DomesticCat pk = new DomesticCat();
+			pk.setColor(Color.TABBY);
+			pk.setSex('F');
+			pk.setName("PK");
+			pk.setKittens( new HashSet() );
+			pk.addKitten(fritz);
+			sess.save( pk, new Long(1234) );
+	these objects can be made persistent in any order you like unless you have a NOT NULL constraint upon a foreign key column. 
+
+	There is never a risk of violating foreign key constraints. However, you might violate a NOT NULL constraint if you save() the objects in the wrong order.
+
+	Usually you do not bother with this detail, as you will normally use Hibernate's transitive persistence feature to save the associated objects automatically.
+
+10.3. Loading an object (also see Fetching Stategies https://docs.jboss.org/hibernate/orm/3.3/reference/en-US/html/performance.html#performance-fetching)
+	The load() methods of Session provide a way of retrieving a persistent instance if you know its identifier. 
+			Cat fritz = (Cat) sess.load(Cat.class, generatedId);
+
+	load() takes a class object and loads the state into a newly instantiated instance of that class in a persistent state.
+			// you need to wrap primitive identifiers
+			long id = 1234;
+			DomesticCat pk = (DomesticCat) sess.load( DomesticCat.class, new Long(id) );
+
+	Be aware that load() will throw an unrecoverable exception if there is no matching database row. 
+
+	If the class is mapped with a proxy, load() just returns an uninitialized proxy and does not actually hit the database until you invoke a method of the proxy.
+			This is useful if you wish to create an association to an object without actually loading it from the database.
+
+			It also allows multiple instances to be loaded as a batch if batch-size is defined for the class mapping.
+
+	get() hits the database immediately and returns null if there is no matching row. If you are not certain that a matching row exists, you should use the get().
+			Cat cat = (Cat) sess.get(Cat.class, id);
+			if (cat==null) {
+			    cat = new Cat();
+			    sess.save(cat, id);
+			}
+			return cat;
+
+	Any associated instances or contained collections will not be selected FOR UPDATE, unless you decide to specify lock or all as a cascade style for the association.
+
+	refresh() re-loads an object and all its collections and cam be used at any time. This is useful when database triggers are used to initialize some of the properties of the object.
+
+10.5. Modifying persistent objects
+	'Transactional persistent instances' are objects loaded, saved, created or queried by the Session.
+
+	'Transactional persistent instances' can be manipulated by the application, and any changes to persistent state will be persisted when the Session is 'flushed'.
+
+	There is no need to call a particular method (like update(), which has a different purpose) to make your modifications persistent. 
+
+	The most straightforward way to update the state of an object is to load() it and then manipulate it directly while the Session is open:
+			DomesticCat cat = (DomesticCat) sess.load( Cat.class, new Long(69) );
+			cat.setName("PK");
+			sess.flush();  // changes to cat are automatically detected and persisted
+
+	Sometimes this programming model is inefficient, as it requires in the same session both an SQL SELECT to load an object and an SQL UPDATE to persist its updated state. 
+
+	Hibernate offers an alternate approach by using detached instances.
+
+10.6. Modifying detached objects
+	Many applications need to retrieve an object in one transaction, send it to the UI layer for manipulation, then save the changes in a new transaction. (This is also known as optimistic locking.)
+
+	Applications that use this kind of approach in a high-concurrency environment usually use versioned data to ensure isolation for the "long" unit of work.
+
+	Hibernate supports this model by providing for reattachment of detached instances using the Session.update() or Session.merge() methods:
+			// in the first session
+			Cat cat = (Cat) firstSession.load(Cat.class, catId);
+			Cat potentialMate = new Cat();
+			firstSession.save(potentialMate);
+
+			// in a higher layer of the application
+			cat.setMate(potentialMate);
+
+			// later, in a new session
+			secondSession.update(cat);  // update cat
+			secondSession.update(mate); // update mate
+
+	If the Cat with identifier catId had already been loaded by secondSession when the application tried to reattach it, an exception would have been thrown.
+
+	Use update() if you are certain that the session does not contain an already persistent instance with the same identifier. In other words, update() is usually the first method you would call in a fresh session.
+
+	Calling update() first ensurs that the reattachment of your detached instances is the first operation that is executed.
+
+	Use merge() if you want to merge your modifications at any time. 
+
+	merge() can be used with a session that has aready processed the object and remains open. Use merge() without consideration of the state of the session.
+
+	lock() also allows an application to reassociate an object with a new session. However, **the detached instance has to be unmodified**.
+			//just reassociate:
+			sess.lock(fritz, LockMode.NONE);
+			//do a version check, then reassociate:
+			sess.lock(izi, LockMode.READ);
+			//do a version check, using SELECT ... FOR UPDATE, then reassociate:
+			sess.lock(pk, LockMode.UPGRADE);
+
+10.7. Automatic state detection
+	saveOrUpdate() implements a general purpose method that either saves a transient instance by generating a new identifier or updates/reattaches the detached instances associated with its current identifier.
+			// in the first session
+			Cat cat = (Cat) firstSession.load(Cat.class, catID);
+
+			// in a higher tier of the application
+			Cat mate = new Cat();
+			cat.setMate(mate);
+
+			// later, in a new session
+			secondSession.saveOrUpdate(cat);   // update existing state (cat has a non-null id)
+			secondSession.saveOrUpdate(mate);  // save the new instance (mate has a null id)
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
