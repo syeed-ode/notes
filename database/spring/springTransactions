@@ -155,55 +155,73 @@ JPA - Java Persistence API
 
 
 17.4 Synchronizing resources with transactions (2) [2 - 6]
-	Discusses how application code creates, uses, reuses, and tears down a persistance api
-		such as Hibernate, JDBC, JDO, or JTA
-	Discusses how transaction synchronization is triggered (optionally) throught the relevant
-		PlatformTransactionManager
+	Discusses how application code creates, uses, reuses, and tears down a 
+		persistance api such as Hibernate, JDBC, JDO, or JTA
+	Discusses how transaction synchronization is triggered (optionally) 
+		through the relevant PlatformTransactionManager
 17.4.1 High-level synchronization approach (2)
-	Use a "transaction aware" template (JdbcTemplate, for example) that does teardown, setup 
-		and transactioin synchronoization for you. 
+	Use a "transaction aware" template (JdbcTemplate, for example) that 
+		does teardown, setup  and transactioin synchronoization for 
+		you. 
 17.4.2 Low-level synchronization approach (2 - 5)
 	Use a  DataSourceUtils (for JDBC), EntityManagerFactoryUtils (for JPA), 
-		SessionFactoryUtils (for Hibernate), PersistenceManagerFactoryUtils (for JDO) to 
-		manage the creation of connections directly. This code assignes the connection to an
-		existing transcation.
+		SessionFactoryUtils (for Hibernate), 
+		PersistenceManagerFactoryUtils (for JDO) to manage the 
+		creation of connections directly. This code assignes the 
+		connection to an existing transcation.
 17.4.3 TransactionAwareDataSourceProxy (6)
-	Wraps an existing data source.  Only use if trying to get existing code to use spring
-		managed transactions.  That's why this is a (virtual) proxy it is making the existing 
-		datasource aware of Spring's transactions, see, Head First Design Patterns: Controlling 
-		Object Access Page 45 for more on proxies types and their usages.
+	Wraps an existing data source.  Only use if trying to get existing 
+		code to use spring managed transactions.  That's why this is a 
+		(virtual) proxy it is making the existing datasource aware of 
+		Spring's transactions, see, Head First Design Patterns: 
+		Controlling Object Access Page 45 for more on proxies types 
+		and their usages.
 
 
 
 
 17.5 Declarative transaction management (6 - 7) [6 - 23]
-	Unlike EJB CMT, which is tied to JTA, the Spring Framework’s declarative transaction 
-		management works in any environment. It can work with JTA transactions or local 
-		transactions using JDBC, JPA, Hibernate or JDO by simply adjusting the configuration 
-		files
-	The concept of rollback rules is important: they enable you to specify which exceptions 
-		(and throwables) should cause automatic rollback. You specify this declaratively, in 
-		configuration, not in Java code.
+	The Spring Framework’s declarative transaction management is made possible with Spring aspect-oriented programming (AOP).
+	
+	The Spring Framework’s declarative transaction management is similar to EJB CMT in that you can specify transaction behavior (or lack of it) down to individual method level.
+	
+	Unlike EJB CMT, which is tied to JTA, the Spring Framework’s 
+		declarative transaction management works in any environment. 
+		It can work with JTA transactions or local transactions using 
+		JDBC, JPA, Hibernate or JDO by simply adjusting the 
+		configuration files
+	The concept of rollback rules is important: they enable you to specify 
+		which exceptions (and throwables) should cause automatic 
+		rollback. You specify this declaratively, in configuration, 
+		not in Java code.
 17.5.1 Understanding the Spring Framework’s declarative transaction implementation (7)
-	Spring Framework’s declarative transaction support is enabled via AOP proxies.  An AOP proxy 
-		in conjunction with a PlatformTransactionManager implementation drive transactions 
+	Spring Framework’s declarative transaction support is enabled via AOP 
+		proxies.  An AOP proxy in conjunction with a 
+		PlatformTransactionManager implementation drive transactions 
 		around method invocations.
 17.5.2 Example of declarative transaction implementation (7 - 10)
 	1) Create a PlatformTransactionManager 
 		<bean id="txManager" class="DataSourceTransactionManager">
 			<property name="dataSource" ref="dataSource"/>
 		</bean>
+		or,
+		<bean id="txManager" class="HibernateTransactionManager">
+			<property name="sessionFactory" ref="sessionFactory"/>
+		</bean>
 	2) Create an AOP advice 
 		<tx:advice id="txAdvice" transaction-manager="txManager">
 			<tx:attributes>
-			 	<!-- all methods starting with 'get' are read-only -->
- 				<!-- other methods use the default transaction settings (see below) -->
+			 	<!-- all methods starting with 'get' -->
+				<!--    are read-only -->
+ 				<!-- other methods use the default -->
+				<!--    transaction settings (see below) -->
 				<tx:method name="get*" read-only="true"/>
 				<tx:method name="*"/>
  			</tx:attributes>
  		</tx:advice>
 	3) Create an AOP aspect config (advice/pointcut) 
- 		<!-- ensure that the above transactional advice runs for any execution of an -->
+ 		<!-- ensure that the above transactional advice runs for -->
+		<!--    any execution of an -->
  		<!-- operation defined by the FooService interface -->
 		<aop:config>
 			<aop:pointcut id="fooSerOp" expression="execution(* x.y.service.FooService.*(..))"/>
@@ -219,34 +237,37 @@ JPA - Java Persistence API
 			}
 		}
 17.5.3 Rolling back a declarative transaction (10 - 11)
-	In its default configuration, the Spring Framework’s transaction only rollsback in the case
-		of runtime, unchecked exceptions; that is, when the thrown exception is an instance or 
-	 	subclass of RuntimeException.
-	 You can configure exactly which Exception types mark a transaction for rollback, including 
-	 	checked exceptions. You can also specify 'no rollback rules', if you do not want a 
-	 	transaction, even for uncheckec exceptions.
-		<tx:advice id="txAdvice" transaction-manager="txManager">
-			<tx:attributes>
-				<tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
-				<tx:method name="updateStock" no-rollback-for="InstrumentNotFoundException"/>
-				<tx:method name="*"/>
-			</tx:attributes>
-		</tx:advice>	 
+	In its default configuration, the Spring Framework’s transaction only 
+		rollsback in the case of runtime, unchecked exceptions; that 
+		is, when the thrown exception is an instance or subclass of 
+		RuntimeException.
+	 You can configure exactly which Exception types mark a transaction 
+	 	for rollback, including checked exceptions. You can also 
+		specify 'no rollback rules', if you do not want a transaction, 
+		even for uncheckec exceptions.
+			<tx:advice id="txAdvice" transaction-manager="txManager">
+				<tx:attributes>
+					<tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
+					<tx:method name="updateStock" no-rollback-for="InstrumentNotFoundException"/>
+					<tx:method name="*"/>
+				</tx:attributes>
+			</tx:advice>	 
 17.5.4 Configuring different transactional semantics for different beans (11 - 13)
-	You can configure an advice for no transaction support. Just add the advice to the <aop:config>
-		<aop:config>
-			<aop:pointcut id="defaultServiceOperation" 
-				expression="execution(* x.y.service.*Service.*(..))"/>
-			<aop:pointcut id="noTxServiceOperation" 
-				expression="execution(* x.y.service.ddl.DefaultDdlManager.*(..))"/>
-			<aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
-			<aop:advisor pointcut-ref="noTxServiceOperation" advice-ref="noTxAdvice"/>
-		</aop:config>	
-		<tx:advice id="noTxAdvice">
-			<tx:attributes>
-				<tx:method name="*" propagation="NEVER"/> <!-- specifies no tx -->
-			</tx:attributes>
-		</tx:advice>
+	You can configure an advice for no transaction support. Just add the 
+		advice to the <aop:config>
+			<aop:config>
+				<aop:pointcut id="defaultServiceOperation" 
+					expression="execution(* x.y.service.*Service.*(..))"/>
+				<aop:pointcut id="noTxServiceOperation" 
+					expression="execution(* x.y.service.ddl.DefaultDdlManager.*(..))"/>
+				<aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
+				<aop:advisor pointcut-ref="noTxServiceOperation" advice-ref="noTxAdvice"/>
+			</aop:config>	
+			<tx:advice id="noTxAdvice">
+				<tx:attributes>
+					<tx:method name="*" propagation="NEVER"/> <!-- specifies no tx -->
+				</tx:attributes>
+			</tx:advice>
 17.5.5 <tx:advice/> settings (13)
 	These attributes are for the <tx:method/> tag only
 		read-only
