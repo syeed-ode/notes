@@ -1,6 +1,7 @@
 This information was gather from reading the Hibernate Documentation: Working with objects section.  The focus of the notes is only on object states.  It a collection of notes, broken down by section.
 
 https://docs.jboss.org/hibernate/orm/3.3/reference/en-US/html/objectstate.html
+	(also see Fetching Stategies https://docs.jboss.org/hibernate/orm/3.3/reference/en-US/html/performance.html#performance-fetching)
 
 Chapter 10. Working with objects
 	Hibernate offers state management of objects. This is a natural object-oriented view of persistence in Java applications.
