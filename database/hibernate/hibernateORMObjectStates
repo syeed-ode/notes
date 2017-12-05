@@ -176,10 +176,84 @@ Chapter 10. Working with objects
 			secondSession.saveOrUpdate(cat);   // update existing state (cat has a non-null id)
 			secondSession.saveOrUpdate(mate);  // save the new instance (mate has a null id)
 
-	
+10.11. Transitive persistence
+	It is quite cumbersome to save, delete, or reattach individual objects, especially if you deal with a graph of associated objects. A common case is a parent/child relationship. Consider the following example:
+			If the children in a parent/child relationship would be value typed (e.g. a collection of addresses or strings),
+					their life cycle would depend on the parent 
 
+					no further action would be required for convenient "cascading" of state changes. 
 
+					When the parent is saved, the value-typed child objects are saved and when the parent is deleted, the children will be deleted, etc.
 
+					This works for operations such as the removal of a child from the collection. 
+
+					Since value-typed objects cannot have shared references, Hibernate will detect this and delete the child from the database.
+
+			Now consider the same scenario with parent and child objects being entities, not value-types (e.g. categories and items, or parent and child cats). 
+					Entities have their own life cycle and support shared references.
+
+					Removing an entity from the collection does not mean it can be deleted), and there is **by default** no cascading of state from one entity to any other associated entities.
+
+					Hibernate does not implement 'persistence by reachability' by default.
+
+					Persistence by reachability is modifying an associated entity (an entity is a non-value type) based upone changes made to the parent entity.
+
+	For each basic operation of the Hibernate session - including persist(), merge(), saveOrUpdate(), delete(), lock(), refresh(), evict(), replicate() - there is a corresponding cascade style.
+
+			the cascade styles are named create, merge, save-update, delete, lock, refresh, evict, replicate. 
+
+			If you want an operation to be cascaded along an association, you must indicate that in the mapping document. For example:
+					<one-to-one name="person" cascade="persist"/>
+
+			Cascade styles my be combined:
+					<one-to-one name="person" cascade="persist,delete,lock"/>
+
+			You can even use cascade="all" to specify that all operations should be cascaded along the association. 
+
+			The default cascade="none" specifies that no operations are to be cascaded.
+
+			A special cascade style, delete-orphan, applies only to one-to-many associations, 
+					it indicates that the delete() operation should be applied to any child object that is removed from the association.
+
+	It does not usually make sense to enable cascade on a <many-to-one> or <many-to-many> association.
+
+	Cascade is often useful for <one-to-one> and <one-to-many> associations.
+
+	If the child object's lifespan is bounded by the lifespan of the parent object, make it a life cycle object by specifying cascade="all,delete-orphan".
+
+	Otherwise, you might not need cascade at all. 
+			But if you think that you will often be working with the parent and children together in the same transaction, 
+
+			and you want to save yourself some typing, consider using cascade="persist,merge,save-update".
+
+	Mapping an association (either a single valued association, or a collection) with cascade="all"
+			marks the association as a parent/child style relationship
+
+			where save/update/delete of the parent results in save/update/delete of the child or children.
+
+	a mere reference to a child from a persistent parent will result in save/update of the child.
+			This metaphor is incomplete, however.
+
+			A child which becomes unreferenced by its parent is not automatically deleted,
+					except in the case of a <one-to-many> association mapped with cascade="delete-orphan".
+
+	The precise semantics of cascading operations for a parent/child relationship are as follows: 
+			If a parent is passed to persist(), all children are passed to persist()
+
+			If a parent is passed to merge(), all children are passed to merge()
+
+			If a parent is passed to save(), update() or saveOrUpdate(), all children are passed to saveOrUpdate()
+
+			If a transient or detached child becomes referenced by a persistent parent, it is passed to saveOrUpdate()
+
+			If a parent is deleted, all children are passed to delete()
+
+			If a child is dereferenced by a persistent parent, 'nothing special happens'
+					the application should explicitly delete the child if necessary
+
+					unless cascade="delete-orphan", in which case the "orphaned" child is deleted.
+
+	Finally, note that cascading of operations can be applied to an object graph at call time or at flush time. All operations, if enabled, are cascaded to associated entities reachable when the operation is executed. However, save-update and delete-orphan are transitive for all associated entities reachable during flush of the Session.
 
 
 
