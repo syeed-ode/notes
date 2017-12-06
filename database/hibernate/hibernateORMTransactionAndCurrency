@@ -64,142 +64,172 @@ Chapter 11. Transactions and Concurrency
 
 					These questions are addressed in the following sections.
 
-	11.1.1. Unit of work - or, business transaction
-		A unit of work is a design pattern which is a series of operations we wish to carry out against the database together.
 
-		A unit of work is a design pattern described by Martin Fowler as “[maintaining] a list of objects affected by a business transaction and coordinates the writing out of changes and the resolution of concurrency problems.”
+11.1.1. Unit of work - or, business transaction
+	A unit of work is a design pattern which is a series of operations we wish to carry out against the database together.
 
-		Basically, a unit of work is a it is a transaction.
+	A unit of work is a design pattern described by Martin Fowler as “[maintaining] a list of objects affected by a business transaction and coordinates the writing out of changes and the resolution of concurrency problems.”
 
-		Keep in mind fulfilling a unit of work will often span multiple physical database transactions. So really we are talking about a more abstract notion of a transaction.
+	Basically, a unit of work is a it is a transaction.
 
-		The term "business transaction" is also sometimes used in lieu of unit of work.
+	Keep in mind fulfilling a unit of work will often span multiple physical database transactions. So really we are talking about a more abstract notion of a transaction.
 
-		Do not use the 'session-per-operation' antipattern':
-				do not open and close a Session for every simple database call in a single thread.
+	The term "business transaction" is also sometimes used in lieu of unit of work.
 
-				The same is true for database transactions. Database calls in an application are made using a planned sequence.
-						Database calls in an application are grouped into atomic units of work.
+	Do not use the 'session-per-operation' antipattern':
+			do not open and close a Session for every simple database call in a single thread.
 
-						This also means that auto-commit after every single SQL statement is useless in an application as this mode is intended for ad-hoc SQL console work.
+			The same is true for database transactions. Database calls in an application are made using a planned sequence.
+					Database calls in an application are grouped into atomic units of work.
 
-				Hibernate disables, or expects the application server to disable, auto-commit mode immediately.
+					This also means that auto-commit after every single SQL statement is useless in an application as this mode is intended for ad-hoc SQL console work.
 
-				All communication with a database has to occur inside a transaction.
+			Hibernate disables, or expects the application server to disable, auto-commit mode immediately.
 
-		'session-per-request' is the most common pattern in a multi-user client/server application.
-				a request from the client is sent to the server, where the Hibernate persistence layer runs.
+			All communication with a database has to occur inside a transaction.
 
-				A new Hibernate Session is opened, and all database operations are executed in this unit of work.
+	'session-per-request' is the most common pattern in a multi-user client/server application.
+			a request from the client is sent to the server, where the Hibernate persistence layer runs.
 
-				On completion of the work, and once the response for the client has been prepared, the session is flushed and closed.
+			A new Hibernate Session is opened, and all database operations are executed in this unit of work.
 
-				Use a single database transaction to serve the clients request, starting and committing it when you open and close the Session.
+			On completion of the work, and once the response for the client has been prepared, the session is flushed and closed.
 
-				The relationship between the two is one-to-one and this model is a perfect fit for many applications.
+			Use a single database transaction to serve the clients request, starting and committing it when you open and close the Session.
 
-		The challenge of 'session-per-request' lies in the implementation. Hibernate provides built-in management of the "current session" to simplify this pattern.
-				Start a transaction when a server request has to be processed, and end the transaction before the response is sent to the client.
+			The relationship between the two is one-to-one and this model is a perfect fit for many applications.
 
-				Common solutions are 
-					ServletFilter
+	The challenge of 'session-per-request' lies in the implementation. Hibernate provides built-in management of the "current session" to simplify this pattern.
+			Start a transaction when a server request has to be processed, and end the transaction before the response is sent to the client.
 
-					AOP interceptor with a pointcut on the service methods (this is done with spring annotations) or 
+			Common solutions are 
+				ServletFilter
 
-					a proxy/interception container (this is done with spring annotations or programatically as well).
+				AOP interceptor with a pointcut on the service methods (this is done with spring annotations) or 
 
-				An EJB container is a standardized way to implement cross-cutting aspects such as transaction demarcation on EJB session beans, declaratively with CMT.
-						EJB CMT is considered a global transaction manager.
+				a proxy/interception container (this is done with spring annotations or programatically as well).
 
-						It is when transaction manager is handled by one framework/platform for all transactions.
+			An EJB container is a standardized way to implement cross-cutting aspects such as transaction demarcation on EJB session beans, declaratively with CMT.
+					EJB CMT is considered a global transaction manager.
 
-				If you use programmatic transaction demarcation, for ease of use and code portability, use the Hibernate Transaction API.
+					It is when transaction manager is handled by one framework/platform for all transactions.
 
-		Your application code can access a "current session" to process the request by calling sessionFactory.getCurrentSession().
-				You will always get a Session scoped to the current database transaction.
+			If you use programmatic transaction demarcation, for ease of use and code portability, use the Hibernate Transaction API.
 
-				This has to be configured for either resource-local or JTA environments.
+	Your application code can access a "current session" to process the request by calling sessionFactory.getCurrentSession().
+			You will always get a Session scoped to the current database transaction.
 
-		You can extend the scope of a Session and database transaction until the "view has been rendered". 
-				This is especially useful in servlet applications that utilize a separate rendering phase after the request has been processed.
+			This has to be configured for either resource-local or JTA environments.
 
-				Extending the database transaction until view rendering, is achieved by implementing your own interceptor.
+	You can extend the scope of a Session and database transaction until the "view has been rendered". 
+			This is especially useful in servlet applications that utilize a separate rendering phase after the request has been processed.
 
-				However, this will be difficult if you rely on EJBs with container-managed transactions.
+			Extending the database transaction until view rendering, is achieved by implementing your own interceptor.
 
-				See the Hibernate website and forum for tips and examples relating to this 'Open Session in View' pattern.
+			However, this will be difficult if you rely on EJBs with container-managed transactions.
 
-	11.1.2. Long conversations
-		The session-per-request pattern is not the only way of designing units of work.
-				Many business processes require a whole series of interactions with the user that are interleaved with database accesses.
+			See the Hibernate website and forum for tips and examples relating to this 'Open Session in View' pattern.
 
-				In web and enterprise applications, it is not acceptable for a database transaction to span a user interaction. 
 
-				Consider the following example:
-						The first screen of a dialog opens. 
+11.1.2. Long conversations
+	The session-per-request pattern is not the only way of designing units of work.
+			Many business processes require a whole series of interactions with the user that are interleaved with database accesses.
 
-						The data seen by the user has been loaded in a particular Session and database transaction. 
+			In web and enterprise applications, it is not acceptable for a database transaction to span a user interaction. 
 
-						The user is free to modify the objects.
+			Consider the following example:
+					The first screen of a dialog opens. 
 
-						The user clicks "Save" after 5 minutes and expects their modifications to be made persistent. 
+					The data seen by the user has been loaded in a particular Session and database transaction. 
 
-						The user also expects that they were the only person editing this information and, 
+					The user is free to modify the objects.
 
-						That no conflicting modification has occurred.
+					The user clicks "Save" after 5 minutes and expects their modifications to be made persistent. 
 
-		A single conversation spaning several database transactions is a unit of work called a 'long-running conversation' or 'application transaction' from the point of view of the user.
+					The user also expects that they were the only person editing this information and, 
 
-		There are many ways to implement this in your application.
-				A first naive implementation might keep the Session and database transaction open during user think time.
-						The locks held in the database to prevent concurrent modification and  
+					That no conflicting modification has occurred.
 
-						The database locks guaranteeing isolation and atomicity.
+	A single conversation spaning several database transactions is a unit of work called a 'long-running conversation' or 'application transaction' from the point of view of the user.
 
-						This is an anti-pattern, 
-								since lock contention would not allow the application to scale with the number of concurrent users.
+	There are many ways to implement this in your application.
+			A first naive implementation might keep the Session and database transaction open during user think time.
+					The locks held in the database to prevent concurrent modification and  
 
-				You have to use several database transactions to implement the conversation.
-						Maintaining isolation of business processes becomes the partial responsibility of the application tier.
+					The database locks guaranteeing isolation and atomicity.
 
-						A single conversation usually spans several database transactions.
+					This is an anti-pattern, 
+							since lock contention would not allow the application to scale with the number of concurrent users.
 
-						It will be atomic if only one of these database transactions (the last one) stores the updated data.
+			You have to use several database transactions to implement the conversation.
+					Maintaining isolation of business processes becomes the partial responsibility of the application tier.
 
-						All others simply read data (for example, in a wizard-style dialog spanning several request/response cycles).
+					A single conversation usually spans several database transactions.
 
-		A single conversation spaning several database transactions is easier to implement than it might sound
+					It will be atomic if only one of these database transactions (the last one) stores the updated data.
 
-		Especially if you utilize some of Hibernate's features:
-				Automatic Versioning: 	Hibernate can perform automatic 
-										optimistic concurrency control 
-										for you. 
+					All others simply read data (for example, in a wizard-style dialog spanning several request/response cycles).
 
-										It can automatically detect if a concurrent modification occurred during user think time. 
+	A single conversation spaning several database transactions is easier to implement than it might sound
 
-										Check for this at the end of the conversation.
+	Especially if you utilize some of Hibernate's features:
+			Automatic Versioning: 		Hibernate can perform 
+							automatic optimistic 
+							concurrency control for 
+							you. 
+							
+							It can automatically 
+							detect if a concurrent 
+							modification occurred 
+							during user think time.
+							
+							Check for this at the 
+							end of the conversation.
+							
+			Detached Objects: 		if you decide to use 
+							the 
+							'session-per-request' 
+							pattern, all loaded 
+							instances will be in 
+							the detached state 
+							during user think time.
+							
+							Hibernate allows you to 
+							reattach the objects 
+							and persist the 
+							modifications. 
+							
+							The pattern is called 
+							'session-per-request-with-detached-objects'. 
+							
+							Automatic versioning is 
+							used to isolate 
+							concurrent 
+							modifications.
 
-				Detached Objects: 		if you decide to use the 
-										session-per-request pattern, all loaded instances will be in the detached state during user think time. 
+			Extended (or Long) Session: 	the Hibernate Session 
+							can be disconnected 
+							from the underlying 
+							JDBC connection after 
+							the database 
+							transaction has been 
+							committed and 
+							reconnected when a new 
+							client request occurs. 
 
-										Hibernate allows you to reattach the objects and persist the modifications. 
+									This pattern is known as 'session-per-conversation' and makes even reattachment unnecessary. 
 
-										The pattern is called session-per-request-with-detached-objects. 
+									Automatic versioning is used to isolate concurrent modifications and 
 
-										Automatic versioning is used to isolate concurrent modifications.
+									The Session will not be allowed to be flushed automatically, but explicitly.
 
-				Extended (or Long) Session: 
-										the Hibernate Session can be disconnected from the underlying JDBC connection after the database transaction has been committed and reconnected when a new client request occurs. 
+	Both session-per-request-with-detached-objects and session-per-conversation have advantages and disadvantages.
 
-										This pattern is known as 'session-per-conversation' and makes even reattachment unnecessary. 
+	These disadvantages are discussed later in this chapter in the context of optimistic concurrency control.
 
-										Automatic versioning is used to isolate concurrent modifications and 
 
-										The Session will not be allowed to be flushed automatically, but explicitly.
 
-		Both session-per-request-with-detached-objects and session-per-conversation have advantages and disadvantages.
 
-		These disadvantages are discussed later in this chapter in the context of optimistic concurrency control.
 
 
 
@@ -211,12 +241,8 @@ Chapter 11. Transactions and Concurrency
 
 
 
-
-
-
-
-	11.1.3. Considering object identity
-	11.1.4. Common issues
+11.1.3. Considering object identity
+11.1.4. Common issues
 
 
 
