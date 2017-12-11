@@ -1,0 +1,43 @@
+This information was gathered from reading Head First HTML5 Programming: building web apps with javascript.
+
+
+Chapter 7: The Canvas: bringing out your inner artist p317
+	Introduction
+		HTML’s been liberated from being just a “markup” language. With HTML5’s new canvas element you’ve got the power to create, manipulate and destroy pixels, right in your own hands. In this chapter we'll use the canvas element to bring out your inner artist—no more talk about HTML being all semantics and no presentation; with canvas we're going to paint and draw with color. Now it's all about presentation. We’ll tackle how to place a canvas in your pages, how to draw text and graphics (using JavaScript of course), and even how to handle browsers that don't support the canvas element. And canvas isn't just a one-hit wonder; you're going to be seeing a lot more of canvas in other chapters in this book.
+
+	Canvas Text Up Close p364
+		The canvas is a fairly low-level API—you have to tell the context what text to draw, what position to use, and what font to use.
+
+		The 'textAlign' property specifies where the anchor point for the text is. “start” is the default.
+				context.textAlign = "left"; 
+
+		Possible values are: start, end, left, right, and center. Start and end mean the same as left and right in leftto-right languages, like English, and are reversed in right-to-left languages, like Hebrew.
+
+		Just like for rectangles, we can stroke and fill text. The 'fillText' and 'strokeText' take the same parameters. We provide the 
+				- text to draw
+				- the x, y position, and 
+				- an optional parameter, maxwidth, that causes the text to scale if it is wider than maxwidth.
+
+				context.fillText("Dog", 100, 100, 200);
+				context.strokeText("Cat", 100, 150, 200);
+
+		The 'font' properties take the same format used to using in CSS, which is handy. If you specify every property value, you’ll include: 
+				font style - italic; bold 
+				weight - 1.5em 
+				size 
+				family -  Times, serif
+
+				context.font = "italic bold 1.5em Times, serif";
+				context.fillText("Coffee", 100, 150);
+
+		The spec recommends that you use vector fonts only (bitmap fonts may not display very well). 
+
+		The 'textBaseline' property sets the alignment points in the font and determines **the line your letters sit on**. To see how the line affects the text, try drawing a line at the same x, y point you draw a text.
+				context.beginPath();
+				context.moveTo(100, 100);
+				context.lineTo(250, 100);
+				context.stroke();
+				context.textBaseline = "middle";
+				context.fillText("Alphabet", 100, 100);
+
+		Possible values are: top, hanging, middle, alphabetic, ideographic, and bottom. The default is alphabetic. Experiment with the different values to find what you need (and check out the spec for more details).
