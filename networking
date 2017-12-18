@@ -14,9 +14,10 @@ This information was gather from reading Unix and Linux System Administration Ha
 Delegation
 	Each domain can delegate authority for its subdomains to other servers.
 	
-	All name servers read the identities of the root servers from a local config file or have them built into the code.  
-	
-	The root servers know the name servers for com, net, edut, fi, de and other TLD.  Farther down the chain, edu knows about colorado.edu, berkeley.edu, and so.
+	All name servers read the identities of the root servers from a local config file or have 
+		them built into the code.  
+	The root servers know the name servers for com, net, edut, fi, de and other TLD.  Farther 
+		down the chain, edu knows about colorado.edu, berkeley.edu, and so.
 *
 *
 *
