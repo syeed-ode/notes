@@ -1,6 +1,7 @@
 This information was gathered from reading Head First HTML5 Programming: building web apps with javascript.
 
 
+
 Chapter 7: The Canvas: bringing out your inner artist p317
 	Introduction
 		HTML’s been liberated from being just a “markup” language. With HTML5’s new canvas element you’ve got the power to create, manipulate and destroy pixels, right in your own hands. In this chapter we'll use the canvas element to bring out your inner artist—no more talk about HTML being all semantics and no presentation; with canvas we're going to paint and draw with color. Now it's all about presentation. We’ll tackle how to place a canvas in your pages, how to draw text and graphics (using JavaScript of course), and even how to handle browsers that don't support the canvas element. And canvas isn't just a one-hit wonder; you're going to be seeing a lot more of canvas in other chapters in this book.
@@ -41,3 +42,258 @@ Chapter 7: The Canvas: bringing out your inner artist p317
 				context.fillText("Alphabet", 100, 100);
 
 		Possible values are: top, hanging, middle, alphabetic, ideographic, and bottom. The default is alphabetic. Experiment with the different values to find what you need (and check out the spec for more details).
+
+	There are no dumb questions: p371
+		There are lots of fancy things you can do with canvas and 'dropshadows' is certainly one of them. 
+				You create a shadow by setting properties on the context. To set the blur size of the shadow, you set 'context.shadowBlur'. 
+
+				You can set the position of the shadow with 'context.shadowOffsetX' and 'context.shadowOffsetY', and the color with 'context.shadowColor'.
+
+				Other things you can do with canvas you might want to check into are things like 
+						- drawing gradients, 
+						- rotating shapes, and 
+						- putting rounded corners on rectangles. 
+
+				Check out the canvas API for more: http://dev.w3.org/html5/2dcontext/.
+
+				What canvas is doing as “bitmap” drawing, if you’re familiar with the graphics terms “bitmap” and “vector” drawing.
+
+
+
+Chapter 8: Video (with special guest star "Ganvas"): not your father's tv p385
+	The browser makers have not agree on the actual format of the video files
+			For Safari you should already be using .mp4 (which contains H.264). 
+
+			For Google Chrome, use the .webm format by replacing your src attribute with: 
+
+			Firefox or Opera, then replace your src attribute with: 'src="video/preroll.ogv"'
+
+	How does the video element work? The video element we used in our markup have the following attributes.
+			<video 	
+					controls autoplay src="video/preroll.webm"
+					width="480"
+					height="360"
+					poster="images/prerollposter.jpg"
+					id="video">
+			</video>
+					controls      - If present, the controls attribute causes the player to supply controls for controlling the video and audio playback.
+					autoplay      - The autoplay attribute causes the video to start playback upon page load. While autoplay may be the best thing for sites like YouTube and Vimeo (or WebvilleTV for that matter), think twice before setting it in your <video> tag. Often, users want to participate in the decision of whether or not video is played when they load your page.
+					src           - The source location of the video.
+					width,height  - The width and height of the video in the page.
+					poster        - A poster image to show when the movie is not playing.
+					id            - An id for the video element so that we can access it later from JavaScript.
+					preload       - The boolean attribute preload is typically used for fine-grained control over how video loads for optimization purposes. Most of the time, the browser chooses how much video to load, based on things like whether autoplay is set and the user’s bandwidth. You can override this by setting preload to none (none of the video is downloaded until the user “plays”), metadata (the video metadata is downloaded, but no video content), and auto to let the browser make the decision.
+					loop          - Another boolean attribute, loop automatically restarts the video after it finishes playing.
+
+	The controls in each browser are different with HTML video. If you really feel motivated, you can implement custom controls for your apps. 
+
+	A video file contains two parts, a video part and an audio part, and each part is encoded (to reduce size and to allow it to be played back more efficiently) using a specific encoding type.
+
+	That encoding, for the most part, is what no one can agree on -- some browser makers are enamored with H.264 encodings, others really like VP8, and yet others like the open source alternative, Theora.
+
+	And to make all this even more complicated, the file that holds the video and audio encoding (which is known as a container) has its own format with its own name. 
+			WebM Container, preroll.webm 
+					- Vp8 Video Encoding
+					- Vorbis Audio Encoding
+
+			MP4 Container, preroll.mp4
+					- H.264 Video Encoding
+					- AAC Audio Encoding
+
+			Ogg Container, preroll.ogv
+					- Theora Video Encoding
+					- Vorbis Audio Encoding
+
+	The HTML5 specification allows for any video format. It is the browser implementation that determines what formats are actually supported.
+
+	The container is the file format that’s used to package up the video, audio and metadata information. Common container formats include: MP4, WebM, Ogg and Flash Video.
+
+	The codec is the software used to encode and decode a specific encoding of video or audio. Popular web codecs include: H.264, VP8, Theora, AAC, and Vorbis.
+			MP4 container with H.264 Video and AAC Audio
+					H.264 is licensed by the MPEG-LA group.
+
+					There is more than one kind of H.264; each is known as a “profile.”
+
+					MP4/H.264 is supported by Safari and IE9+. You may find support in some versions of Chrome
+
+					H.264 the industry darling, but not the reigning champ...
+
+			WebM container with VP8 Video and Vorbis Audio
+					WebM was designed by Google to work with VP8 encoded videos. 
+
+					WebM/VP8 is supported by Firefox, Chrome and Opera.
+
+					You’ll find WebM formatted videos with the .webm extension.
+
+					VP8, the contender, backed by Google, supported by others and coming on strong...
+
+			Ogg container with Theora Video and Vorbis Audio
+					Theora is an open source codec.
+
+					Video encoded with Theora is usually contained in an Ogg file, with the .ogv file extension.
+
+					Ogg/Theora is supported by Firefox, Chrome and Opera.
+
+					Theora. The open source alternative.
+
+	The browser decides what video it can decode and not all browser makers agree, so if you want to support everyone, you need multiple encodings.
+			You can use one <source> element (not to be confused with the 'src' attribute) per format inside a <video> element, to provide a set of videos, each with its own format, and let the browser pick the first one it supports
+					Note you have to remove 'src="video/preroll.mp4"' below. (The book has this struck through.)
+							<video src="video/preroll.mp4" id="video"
+							 poster="video/prerollposter.jpg" controls
+							 width="480" height="360">
+								 <source src="video/preroll.mp4">
+								 <source src="video/preroll.webm">
+								 <source src="video/preroll.ogv">
+								 <p>Sorry, your browser doesn’t support the video element</p>
+							</video>
+
+					The browser starts at the first <source> element and work its way down until it finds a format it can play.
+
+					For each <source> element the browser loads the metadata of the video file to see if it can play it (which can be a lengthy process, although we can make it easier on the browser...).
+
+			How to be even more specific with your video formats
+					Telling the browser the location of your source files gives it a selection of different versions to choose from. 
+
+					However the browser has to do some detective work before it can truly determine if a file is playable. 
+
+					You can help your browser even more by giving it more information about the MIME type and (optionally) codecs of your video files:
+							<source src="video/preroll.ogv" type='video/ogg; codecs="theora, vorbis"'>
+									The file you use in the src is actually a container for the actual video (and audio and some metadata).
+
+									'type' is an optional attribute that is a hint to the browser to help it figure out if it can play this kind of file. It is a MIME type; it specifies the container format.
+
+									The codecs parameter specifies which codecs were used for encoding the video ('theora') and audio ('vorbis') to create the encoded video file. Notice the double quotes on the codecs parameter. This means we need to use single quotes around the type attribute. 
+
+					We can update our <source> elements to include the type information for all three types of video we have, like this:
+							<video id="video" poster="video/prerollposter.jpg" controls width="480" height="360">
+									<source src="video/preroll.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+									<source src="video/preroll.webm" type='video/webm; codecs="vp8, vorbis"'>
+									<source src="video/preroll.ogv" type='video/ogg; codecs="theora, vorbis"'>
+									<p>Sorry, your browser doesn't support the video element</p>
+							</video>
+										The codecs for mp4 are more complicated than the other two because h.264 supports various “profiles,” different encodings for different uses (like high bandwidth vs. low bandwidth). So, to get those right, you’ll need to know more details about how your video was encoded.
+
+					If and when you do your own video encoding, you’ll need to know more about the various options for the type parameters to use in your source element. You can get a lot more information on type parameters at http://wiki.whatwg.org/wiki/Video_type_parameters.
+
+					There are a variety of video capture and encoding programs out there. You can start simple with programs like iMovie or Adobe Premiere Elements, which include the ability to encode your video for the Web. Many Content Delivery Network (CDN) offer encoding services.
+
+					The volume property can be set to an floating point value between 0.0 (sound off) to 1.0 (sound the loudest). Just use your video object to set this at any time:
+							video.volume = 0.9; 
+
+	If you think Flash video is still important and I want to have a fallback if the users’ browsers don’t support HTML5 video.
+			Insert an <object> element inside the <video> element. If the browser doesn't know about the <video> element, the <object> will be used. 
+					<video poster="video.jpg" controls>
+						<source src="video.mp4">
+						<source src="video.webm">
+						<source src="video.ogv">
+						<object>...</object>
+					</video>
+
+	The <video> element exposes a rich API that to implement all kinds of interesting video behaviors and experiences.
+			Methods
+				play, pause, load
+				canPlayType - helps determine which video types can be played programatically
+
+			Properties - Some you can set (like loop and muted); some are read only (like currentTime and error).
+				error 		videoHeight
+				duration 	currentTime
+				encode 		videoWidth
+				loop 		muted
+				paused 		readyState
+				seeking 	volume
+
+			Events -  handle by adding event handlers
+				play 		progress
+				error 		timeupdate
+				pause 		loadedmetadata
+				ended 		volumechange
+				abort 		loadeddata
+				waiting
+
+	In the past we’ve just assigned a handler function to be called when an event occurs like this:
+			video.onended = nextVideo;
+
+	At the time we’re writing this, support for all the event properties on the video object are a little spotty. 
+
+	That deficiency is going to allow us to show you another way of registering for events: addEventListener, which is a general method supported by many objects for registering for various events.
+			video.addEventListenter("<event>", <fucntion>, <false>);
+					"<venent>" 	- 'ended', for example, This is the event we’re listening for. Notice we don’t put an “on” before the event name like we do with handlers that we set with properties (like onload).
+
+					<function> 	- 'nextVideo', for example. This is the function we’re going to call when the event happens.
+
+					<false> 	- or true, controls some advanced methods of getting events if it is set to true. Unless you’re writing advanced code you’ll always set this to false.
+
+	Other than the fact the addEventListener method is a little more complicated than just adding a handler by setting the property to a function, it works pretty much the same way. 
+
+	How the canPlayType method works
+			The canPlayType method takes the same format description you used with the <source> tag and returns one of three values:
+					If we pass just the short form of a format then we can only get “” or “maybe” as a result.
+							video.canPlayType("video/ogg")
+
+					But if we pass the specific type with a codec, we might then get “”, “maybe” or “probably” as an answer.
+							video.canPlayType('video/ogg; codecs="theora, vorbis"')
+
+					Notice that the browser is only confident beyond “maybe” if you include the codec parameter in the type.
+
+					 Also notice that there’s no “I’m absolutely sure” return value. Even if the browser knows it can play a type of video, there’s still no guarantee it can play the actual video; for instance, if the bitrate of the video is too high, then the browser won’t be able to decode it.
+
+					 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
