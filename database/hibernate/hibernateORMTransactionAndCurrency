@@ -65,6 +65,7 @@ Chapter 11. Transactions and Concurrency
 					These questions are addressed in the following sections.
 
 
+
 11.1.1. Unit of work - or, business transaction
 	A unit of work is a design pattern which is a series of operations we wish to carry out against the database together.
 
@@ -129,6 +130,7 @@ Chapter 11. Transactions and Concurrency
 			However, this will be difficult if you rely on EJBs with container-managed transactions.
 
 			See the Hibernate website and forum for tips and examples relating to this 'Open Session in View' pattern.
+
 
 
 11.1.2. Long conversations
@@ -230,25 +232,347 @@ Chapter 11. Transactions and Concurrency
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 11.1.3. Considering object identity
+	An application can concurrently access the same persistent state in two different 'Session's. 
+
+	However, an instance of a persistent class is never shared between two 'Session' instances. 
+
+	It is for this reason that there are two different notions of identity:
+			Database Identity
+				foo.getId().equals( bar.getId() )
+
+			JVM Identity
+				foo==bar
+
+	For objects attached to a particular Session (i.e., in the scope of a Session), the two notions are equivalent. 
+			The JVM identity for database identity is guaranteed by Hibernate. 
+
+	While the application might concurrently access the "same" (persistent identity) business object in two different sessions. 
+			The two instances will actually be "different" (JVM identity).
+
+			Conflicts are resolved using an optimistic approach and automatic versioning at flush/commit time.
+
+			This approach leaves Hibernate and the database to worry about concurrency.
+
+			It also provides the best scalability
+					guaranteeing identity in single-threaded units of work means
+							there is no need for expensive locking
+
+							there is no need for other means of synchronization
+
+	The application does not need to synchronize on any business object as long as it maintains a single thread per Session.
+			Within a Session the application can safely use == to compare objects.
+
+			However, an application that uses == outside of a Session might produce unexpected results.
+					For example, if you put two detached instances into the same Set,
+							both might have the same database identity (i.e., they represent the same row)
+
+							JVM identity, however, is by definition not guaranteed for instances in a detached state
+
+			The developer has to override the equals() and hashCode() methods in persistent classes and implement their own notion of object equality.
+					never use the database identifier to implement equality.
+
+					Use a business key that is a combination of unique, usually immutable, attributes
+
+			The database identifier will change if a transient object is made persistent.
+					If the transient instance (usually together with detached instances) is held in a Set, changing the hashcode breaks the contract of the Set.
+
+					Attributes for business keys do not have to be as stable as database primary keys.
+
+					You only have to guarantee stability as long as the objects are in the same Set.
+
+
+
+
 11.1.4. Common issues
+	Do not use the anti-patterns 'session-per-user-session' or 'session-per-application'
+			A Session is not thread-safe. Things that work concurrently, like HTTP requests, session beans, or Swing workers, will cause race conditions if a Session instance is shared.
+
+			If you keep your Hibernate Session in your HttpSession, you should consider synchronizing access to your Http session. 
+					Otherwise, a user that clicks reload fast enough can use the same Session in two concurrently running threads.
+
+			An exception thrown by Hibernate means you have to rollback your database transaction and close the Session immediately. 
+					If your Session is bound to the application, you have to stop the application.
+
+					Rolling back the database transaction does not put your business objects back into the state they were at the start of the transaction.
+							This means that the database state and the business objects will be out of sync.
+
+							Usually this is not a problem, because exceptions are not recoverable and you will have to start over after rollback anyway.
+
+			The Session caches every object that is in a persistent state.
+					 If you keep it open for a long time or simply load too much data
+					 		it will grow endlessly until you get an OutOfMemoryException
+
+					 		you should consider a Stored Procedure if you need mass data operations.
 
 
 
+11.2. Database transaction demarcation
+	No communication with the database can occur outside of a database transaction. 
+
+	Always use clear transaction boundaries, even for read-only operations.
+			Depending on your isolation level and database capabilities this might not be required, but there is no downside if you always demarcate transactions explicitly.
+
+	Certainly, a single database transaction is going to perform better than many small transactions, even for reading data.
+
+	 Hibernate application can run in non-managed (i.e., standalone, simple Web- or Swing applications) and managed J2EE environments.
+	 		In a non-managed environment, 
+	 				Hibernate is usually responsible for its own database connection pool.
+
+	 				The application developer has to manually set transaction boundaries (begin, commit, or rollback database transactions) themselves.
+
+			 A managed environment usually provides 
+			 		a container-managed transactions (CMT),
+
+			 		the transaction assembly is defined declaratively (in deployment descriptors of EJB session beans, for example).
+
+			 		Programmatic transaction demarcation is then no longer necessary.
+
+	Ending a Session usually involves four distinct phases:
+			- flush the session
+			- commit the transaction
+			- close the session
+			- handle exceptions
+
+	We will now have a closer look at transaction demarcation and exception handling in both managed and non-managed environments.
 
 
 
+11.2.1. Non-managed environment
+	In a non-managed environment, database connections are handled by simple (i.e., non-DataSource) connection pools from which Hibernate obtains connections as needed. 
+			// Non-managed environment idiom
+			Session sess = factory.openSession();
+			Transaction tx = null;
+			try {
+			    tx = sess.beginTransaction();
+
+			    // do some work
+			    ...
+
+			    tx.commit();
+			}
+			catch (RuntimeException e) {
+			    if (tx != null) tx.rollback();
+			    throw e; // or display error message
+			}
+			finally {
+			    sess.close();
+			}
+
+			You do not have to flush() the Session explicitly: the call to commit() automatically triggers the synchronization depending on the FlushMode for the session.
+
+			close() marks the end of a session. The main implication of close() is that the JDBC connection will be relinquished by the session.
+					This Java code is portable and runs in both non-managed and JTA environments.
+
+	As outlined earlier, a much more flexible solution is Hibernate's built-in "current session" context management:
+			// Non-managed environment idiom with getCurrentSession()
+			try {
+			    factory.getCurrentSession().beginTransaction();
+
+			    // do some work
+			    ...
+
+			    factory.getCurrentSession().getTransaction().commit();
+			}
+			catch (RuntimeException e) {
+			    factory.getCurrentSession().getTransaction().rollback();
+			    throw e; // or display error message
+			}
+
+	You will not see these code snippets in a regular application; fatal (system) exceptions should always be caught at the "top". 
+			In other words, the code that executes Hibernate calls in the persistence layer, and the code that handles RuntimeException (and usually can only clean up and exit), are in different layers.
+
+			The current context management by Hibernate can significantly simplify this design by accessing a SessionFactory. 
+
+
+
+11.2.2. Using JTA
+	If your persistence layer runs in an application server (for example, behind EJB session beans),
+			every datasource connection obtained by Hibernate will automatically be part of the global JTA transaction. 
+
+	Hibernate offers two strategies for JTA integration
+
+	If you use bean-managed transactions (BMT), Hibernate will tell the application server to start and end a BMT transaction 
+			if you use the Transaction API.
+					// BMT idiom
+					Session sess = factory.openSession();
+					Transaction tx = null;
+					try {
+					    tx = sess.beginTransaction();
+
+					    // do some work
+					    ...
+
+					    tx.commit();
+					}
+					catch (RuntimeException e) {
+					    if (tx != null) tx.rollback();
+					    throw e; // or display error message
+					}
+					finally {
+					    sess.close();
+					}
+
+	If you want to use a transaction-bound Session, that is, the getCurrentSession() functionality for easy context propagation, 
+			use the JTA UserTransaction API directly:
+					// BMT idiom with getCurrentSession()
+					try {
+					    UserTransaction tx = (UserTransaction)new InitialContext()
+					                            .lookup("java:comp/UserTransaction");
+
+					    tx.begin();
+
+					    // Do some work on Session bound to transaction
+					    factory.getCurrentSession().load(...);
+					    factory.getCurrentSession().persist(...);
+
+					    tx.commit();
+					}
+					catch (RuntimeException e) {
+					    tx.rollback();
+					    throw e; // or display error message
+					}
+
+	With CMT, transaction demarcation is completed in session bean deployment descriptors, not programmatically. 
+			The code is reduced to:
+					// CMT idiom
+					 Session sess = factory.getCurrentSession();
+
+					 // do some work
+					 ...
+
+	 		In a CMT/EJB, even rollback happens automatically. 
+
+	 		An unhandled RuntimeException thrown by a session bean method tells the container to set the global transaction to rollback.
+
+	 		You do not need to use the Hibernate Transaction API at all with BMT or CMT, and you get automatic propagation of the "current" Session bound to the transaction.
+
+	The getCurrentSession() operation has one downside in a JTA environment.
+			There is one caveat to the use of after_statement connection release mode, which is then used by default.
+
+			Due to a limitation of the JTA spec
+					it is not possible for Hibernate to automatically clean up any unclosed ScrollableResults or Iterator instances returned by scroll() or iterate().
+
+					You must release the underlying database cursor by calling ScrollableResults.close() or Hibernate.close(Iterator) explicitly from a finally block.
+
+					Most applications can easily avoid using scroll() or iterate() from the JTA or CMT code.
+
+
+
+11.2.3. Exception handling
+	If the Session throws an exception, including any SQLException, 
+			- immediately rollback the database transaction
+			- call Session.close() 
+			- discard the Session instance.
+
+	No exception thrown by Hibernate can be treated as recoverable. Ensure that the Session will be closed by calling close() in a finally block.
+
+	The HibernateException, which wraps most of the errors that can occur in a Hibernate persistence layer, is an unchecked exception.
+			In most systems, unchecked and fatal exceptions are handled in one of the first frames of the method call stack (i.e., in higher layers) 
+					- either an error message is presented to the application user, or
+					- some other appropriate action is taken. 
+
+	Hibernate wraps SQLExceptions thrown while interacting with the database in a JDBCException.
+
+	The underlying SQLException is always available via JDBCException.getCause().
+
+	Hibernate converts the SQLException into an appropriate JDBCException subclass using the SQLExceptionConverter attached to the SessionFactory.
+
+	The standard JDBCException subtypes are:
+			JDBCConnectionException: indicates an error with the underlying JDBC communication.
+
+			SQLGrammarException: indicates a grammar or syntax problem with the issued SQL.
+
+			ConstraintViolationException: indicates some form of integrity constraint violation.
+
+			LockAcquisitionException: indicates an error acquiring a lock level necessary to perform the requested operation.
+
+			GenericJDBCException: a generic exception which did not fall into any of the other categories.
+
+
+
+11.2.4. Transaction timeout
+		An important feature provided by a managed environment like EJB, that is never provided for non-managed code, is transaction timeout. 
+				Transaction timeouts ensure that no misbehaving transaction can indefinitely tie up resources while returning no response to the user.
+
+				setTimeout() cannot be called in a CMT bean, where transaction timeouts must be defined declaratively.
+
+		Outside a managed (JTA) environment, Hibernate cannot fully provide this functionality.
+
+		However, Hibernate can at least ensure that database level deadlocks and queries with huge result sets are limited by a defined timeout.
+
+		In a managed environment, Hibernate can delegate transaction timeout to JTA. 
+				Session sess = factory.openSession();
+				try {
+				    //set transaction timeout to 3 seconds
+				    sess.getTransaction().setTimeout(3);
+				    sess.getTransaction().begin();
+
+				    // do some work
+				    ...
+
+				    sess.getTransaction().commit()
+				}
+				catch (RuntimeException e) {
+				    sess.getTransaction().rollback();
+				    throw e; // or display error message
+				}
+				finally {
+				    sess.close();
+				}
+
+				setTimeout() cannot be called in a CMT bean, where transaction timeouts must be defined declaratively.
+
+
+
+11.3. Optimistic concurrency control, or version checking
+	The only approach that is consistent with high concurrency and high scalability, is optimistic concurrency control with versioning.
+			Version checking uses version numbers, or timestamps, to detect conflicting updates and to prevent lost updates.
+
+	Hibernate provides three possible approaches to code that uses optimistic concurrency.
+		The use cases we discuss are in the context of long conversations, but version checking also has the benefit of preventing lost updates in single database transactions.
+
+
+
+11.3.1. Application version checking
+	Each interaction with the database occurs in a new Session 
+			The developer is responsible for reloading all persistent instances from the database before manipulating them.
+
+			The application is forced to carry out its own version checking to ensure conversation transaction isolation. 
+
+			This approach is the least efficient in terms of database access. It is the approach most similar to entity EJBs.
+					// foo is an instance loaded by a previous Session
+					session = factory.openSession();
+					Transaction t = session.beginTransaction();
+
+					int oldVersion = foo.getVersion();
+					session.load( foo, foo.getKey() ); // load the current state
+					if ( oldVersion != foo.getVersion() ) 
+							throw new StaleObjectStateException();
+					foo.setProperty("bar");
+
+					t.commit();
+					session.close();
+
+					The version property is mapped using <version>, and Hibernate will automatically increment it during flush if the entity is dirty.
+
+			If you are operating in a low-data-concurrency environment, and do not require version checking, 
+					you can use this approach and skip the version check.
+
+					In this case, 'last commit wins' is the default strategy for long conversations.
+
+			Be aware that this might confuse the users of the application
+					**they might experience lost updates without error messages** or a chance to merge conflicting changes.
+
+	Manual version checking is only feasible in trivial circumstances and not practical for most applications.
+			Often not only single instances, but complete graphs of modified objects, have to be checked.
+
+			Hibernate offers automatic version checking with either an extended Session or detached instances as the design paradigm.
+
+
+
+11.3.2. Extended session and automatic versioning
+	
 
 
 
