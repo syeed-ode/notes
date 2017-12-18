@@ -1,3 +1,21 @@
+
+**************************
+	THINGS TO ADJUST WHEN CONFIGURING LOCAL HOSTNAME
+
+1. ServerName 			- The hostname and port that the  server uses to identify itself. In /etc/apache2/httpd.conf and /etc/apache2/extra/httpd-vhosts.conf
+2. /etc/hosts 			- The most basic name resolution method is using the /etc/hosts file in our computer to map the IP address of our web server to those domains.
+						- ifconfig 
+3. UserDir    			- The name of the directory that's appended to the user's home directory. Lion and later versions no longer create personal web sites by default. 
+4. Set user config file - This gives your user (~syeedode) priveleges to the Sites directory where all of your web content is hosted. If that file doesn't exist, you will need to create it /etc/apache2/users/<your short user name>.conf
+		<Directory "/Users/<your short user name>/Sites/">
+		    AddLanguage en .en
+		    AddHandler perl-script .pl
+		    PerlHandler ModPerl::Registry
+		    Options Indexes MultiViews FollowSymLinks ExecCGI
+		    AllowOverride None
+		    Require host localhost
+		</Directory>
+**************************
 I got this from Apache HTTP Server Cookbook.
 
 Using one machine to run several domains clearly has its advantages (low maintenance costs, for example).
