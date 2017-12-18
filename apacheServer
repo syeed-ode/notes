@@ -4,8 +4,8 @@
 
 1. ServerName 			- The hostname and port that the  server uses to identify itself. In /etc/apache2/httpd.conf and /etc/apache2/extra/httpd-vhosts.conf
 2. /etc/hosts 			- The most basic name resolution method is using the /etc/hosts file in our computer to map the IP address of our web server to those domains.
-						- ifconfig 
-3. UserDir    			- The name of the directory that's appended to the user's home directory. Lion and later versions no longer create personal web sites by default. 
+						- ifconfig
+3. UserDir    			- The name of the directory that's appended to the user's home directory. Lion and later versions no longer create personal web sites by default.
 4. Set user config file - This gives your user (~syeedode) priveleges to the Sites directory where all of your web content is hosted. If that file doesn't exist, you will need to create it /etc/apache2/users/<your short user name>.conf
 		<Directory "/Users/<your short user name>/Sites/">
 		    AddLanguage en .en
@@ -29,12 +29,12 @@ You will use configuration other files to define the directives for each virtual
 As the comment indicates, and as the IncludeOptional directive suggests, Apache will look for .conf files in the /etc/httpd/conf.d (in CentOS) or /etc/apache2/sites-enabled (Ubuntu) which, if present, are used to indicate the various directives that define a virtual host.
 
 Defining virtual hosts:
-	1) use 2 dummy domains (such as www.example1.com and www.example2.com, or 
+	1) use 2 dummy domains (such as www.example1.com and www.example2.com, or
 
 	2) use 2 “real” domains that you have registered. This last option also requires that you have set up DNS entries for those domains.
 		VPS (Virtual Private Server) is a virtual machine sold as a service by an Internet hosting service. A VPS where a customers may have superuser-level access to that operating system instance, so they can install almost any software that runs on that OS.
 
-		If you want to implement name-based virtual hosting set up the necessary DNS entries for each domain. 
+		If you want to implement name-based virtual hosting set up the necessary DNS entries for each domain.
 
 		A cloud VPS, which runs its own copy of an operating system (OS) with domains you have previously registered, could also be used implement name-based virtual hosting.
 
@@ -97,7 +97,7 @@ Restart apache deamon
 		service apache2 restart
 
 	In MacOs
-		sudo apachectl graceful 
+		sudo apachectl graceful
 
 Test the configuration after making a change
 	In MacOs
