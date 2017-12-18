@@ -285,6 +285,27 @@ You can define the identifier generation strategy thanks to the @GeneratedValue 
 *							    *
 *							    *
 *							    *
+***   Chapter 2.2.4. Mapping inheritance    []                               ***
+EJB3 supports the three types of inheritance:
+	- Table per Class Strategy: the <union-class> element in Hibernate
+	- Single Table per Class Hierarchy Strategy: the <subclass> element in Hibernate
+	- Joined Subclass Strategy: the <joined-subclass> element in Hibernate
+
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*************************************************************
+*							    *
+*							    *
+*							    *
 ***   Chapter 2.2.5. Mapping entity associations/relationships    [pg1 - 25] ***
 2.2.5. Mapping entity associations/relationships
 	2.2.5.1. One-to-one
@@ -440,9 +461,9 @@ You can define the identifier generation strategy thanks to the @GeneratedValue 
 		One-to-many associations are declared at the property level with the annotation @OneToMany. One to many associations may be bidirectional.
 
 		2.2.5.3.1.1. Bidirectional
-			Since many to one are (almost) always the owner side of a bidirectional relationship in the JPA spec, the one to many association is annotated by @OneToMany(mappedBy=...)
+			Since many to one are (almost) always the owner side (Soldier) of a bidirectional relationship in the JPA spec, the one to many association is annotated by @OneToMany(mappedBy=...)
 
-			mappedBy is always declared on the owned side and refers to the **property name** of the association on the owner side. In our case, this is passport.
+			mappedBy is always declared on the owned side and refers to the **property name** of the association on the owner side. In our case, this is 'troop'. Since 'troop' is the property name in the Soldier class.
 					@Entity
 					public class Troop {
 					    @OneToMany(mappedBy="troop")
@@ -457,7 +478,7 @@ You can define the identifier generation strategy thanks to the @GeneratedValue 
 					    ...
 					} 
 
-			Troop has a bidirectional one to many relationship with Soldier through the troop property. You don't have to (must not) define any physical mapping in the mappedBy side.
+			'Troop' has a bidirectional one to many relationship with 'Soldier' through the 'troop' property. You don't have to (must not) define any physical mapping in the mappedBy side.
 
 			To map a bidirectional one to many, with the one-to-many side as the owning side, you have to remove the mappedBy element. 
 
@@ -483,6 +504,8 @@ You can define the identifier generation strategy thanks to the @GeneratedValue 
 
 		2.2.5.3.1.2. Unidirectional
 			A unidirectional one to many using a foreign key column in the **owned entity** is not that common and not really recommended. This kind of association is described through a @JoinColumn. 
+
+			We strongly advise you to use a join table for this kind of association.
 
 			Remember this is in the owned entity. So, normal @JoinColumn rules don't apply.
 
@@ -531,6 +554,19 @@ You can define the identifier generation strategy thanks to the @GeneratedValue 
 			The foreign key name(s) referencing the other side is the concatenation of the owner property name, _, and the other side primary key column(s) name.
 
 			A unique constraint is added to the foreign key referencing the other side table to reflect the one to many.
+
+			Trainer describes a unidirectional relationship with Tiger using the join table Trainer_Tiger, with a foreign key trainer_id to Trainer (table name, _, trainer id) and a foreign key trainedTigers_id to Tiger (property name, _, Tiger primary column).
+					@Entity
+					public class Trainer {
+					    @OneToMany
+					    public Set<Tiger> getTrainedTigers() {
+					    ...
+					}
+
+					@Entity
+					public class Tiger {
+					    ... //no bidir
+					}
 
 	2.2.5.3.2. Many-to-many
 		2.2.5.3.2.1. Definition
