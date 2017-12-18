@@ -1,54 +1,106 @@
 
-Apache modules are independent, separate pieces of software that provide specific 
-	functionality. It is important to have this definition in mind before we dive into 
-	the configuration directives.
-
+Apache modules are independent, separate pieces of software that provide 
+	specific functionality. It is important to have this definition 
+	in mind before we dive into the configuration directives.
 The following directives are listed in the main configuration file.
-	ServerRoot			The directory tree where the server’s configuration, error, and log files are kept.
-	Listen				The IP and port where Apache is bound. The default is listening on port 80 of all network interfaces, although it is more secure to specify a single IP address.
-	ServerName			The hostname and port that the server uses to identify itself.
-	DocumentRoot		The root directory where web pages and directories will be stored by default. Although all requests are taken made to this directory, you can create symbolic links to point to other locations.
-	LogLevel			Controls the verbosity of messages logged to ErrorLog. Possible values include: debug, info, notice, warn, error, crit, alert, emerg When a particular level is specified, messages from higher levels (indicated by the numbered list above) will be logged as well.
-	Directory 			Used to enclose a group of directives that will apply only to the named directory and all its contents.
-	Files 				Use to limit the scope of the enclosed directives by filename instead of by directory. Wildcards and other regular expressions are allowed.
-	IfModule 			Used to specify directives that are only applied if a specific module is present.
-	Include 			Includes other existing configuration files. If an absolute path is not used, it is relative to the ServerRoot directory.
-	IncludeOptional 	Similar to the Include directive, with the only difference is that it is ignored if there are no matches instead of causing an error (as it is the case with Include).
-
-Context indicates the place where a directive is valid. In the case of Include, the description indicates that it can only be used in the system-wide server configuration, inside a virtual host definition, and within Directory tags (server config, vitural host, directory).
-
-In this guide we will show you how to use Apache to run multiple sites using a single machine. This practice is known as namebased virtual hosting, and is key to our understanding of how a web server works.
-
-Using one machine to run several domains clearly has its advantages (low maintenance costs, for example).
-
-It also has a few disadvantages as well (without a bandwidth balancer in place, a single site can end up consuming the entire bandwidth allocated for the server, thus impacting negatively the operation and performance of the rest).
-
-The main configuration file where system-wide settings are found is located in /etc/httpd/conf/httpd.conf in CentOS or /etc/apache2/apache.conf in Ubuntu.
-
-You will use configuration other files to define the directives for each virtual host. Although you can define virtual hosts inside the main configuration file, such practice is often discouraged. Using separate .conf files allows for scalability and easier maintenance.
-
-As the comment indicates, and as the IncludeOptional directive suggests, Apache will look for .conf files in the /etc/httpd/conf.d (in CentOS) or /etc/apache2/sites-enabled (Ubuntu) which, if present, are used to indicate the various directives that define a virtual host.
-
+	ServerRoot			The directory tree where the 
+					server’s configuration, error, 
+					and log files are kept.
+	Listen				The IP and port where Apache is 
+					bound. The default is listening 
+					on port 80 of all network 
+					interfaces, although it is more 
+					secure to specify a single IP 
+					address.
+	ServerName			The hostname and port that the 
+					server uses to identify itself.
+	DocumentRoot			The root directory where web pages 
+					and directories will be stored by 
+					default. Although all requests are 
+					taken made to this directory, you 
+					can create symbolic links to point 
+					to other locations.
+	LogLevel			Controls the verbosity of messages 
+					logged to ErrorLog. Possible values 
+					include: debug, info, notice, warn, 
+					error, crit, alert, emerg When a 
+					particular level is specified, messages 
+					from higher levels (indicated by the 
+					numbered list above) will be logged 
+					as well.
+	Directory 			Used to enclose a group of directives 
+					that will apply only to the named 
+					directory and all its contents.
+	Files 				Use to limit the scope of the enclosed 
+					directives by filename instead of by 
+					directory. Wildcards and other regular 
+					expressions are allowed.
+	IfModule 			Used to specify directives that are 
+					only applied if a specific module is 
+					present.
+	Include 			Includes other existing configuration 
+					files. If an absolute path is not used, 
+					it is relative to the ServerRoot 
+					directory.
+	IncludeOptional 		Similar to the Include directive, with 
+					the only difference is that it is 
+					ignored if there are no matches instead 
+					of causing an error (as it is the case 
+					with Include).
+Context indicates the place where a directive is valid. In the case of Include, 
+	the description indicates that it can only be used in the system-wide 
+	server configuration, inside a virtual host definition, and within 
+	Directory tags (server config, vitural host, directory).
+In this guide we will show you how to use Apache to run multiple sites using a 
+	single machine. This practice is known as namebased virtual hosting, 
+	and is key to our understanding of how a web server works.
+Using one machine to run several domains clearly has its advantages (low 
+	maintenance costs, for example).
+It also has a few disadvantages as well (without a bandwidth balancer in place, 
+	a single site can end up consuming the entire bandwidth allocated for 
+	the server, thus impacting negatively the operation and performance of 
+	the rest).
+The main configuration file where system-wide settings are found is located in 
+	/etc/httpd/conf/httpd.conf in CentOS or /etc/apache2/apache.conf in 
+	Ubuntu.
+You will use other configuration files to define the directives for each virtual 
+	host. Although you can define virtual hosts inside the main configuration 
+	file, such practice is often discouraged. Using separate .conf files 
+	allows for scalability and easier maintenance.
+As the comment indicates, and as the IncludeOptional directive suggests, Apache 
+	will look for .conf files in the /etc/httpd/conf.d (in CentOS) 
+	or /etc/apache2/sites-enabled (Ubuntu) which, if present, are used to 
+	indicate the various directives that define a virtual host.
 Defining virtual hosts:
-	1) use 2 dummy domains (such as www.example1.com and www.example2.com, or 
-
-	2) use 2 “real” domains that you have registered. This last option also requires that you have set up DNS entries for those domains.
-		VPS (Virtual Private Server) is a virtual machine sold as a service by an Internet hosting service. A VPS where a customers may have superuser-level access to that operating system instance, so they can install almost any software that runs on that OS.
-
-		If you want to implement name-based virtual hosting set up the necessary DNS entries for each domain. 
-
-		A cloud VPS, which runs its own copy of an operating system (OS) with domains you have previously registered, could also be used implement name-based virtual hosting.
-
-		FreeDNS (https://freedns.afraid.org/) could also hold your DNS entries.
-
-Each virtual host will need a directory structure to store files and logs. In addition, the user Apache runs as (apache in CentOS or www-data in Ubuntu) needs to be able to read the web content.
-
+	1) use 2 dummy domains (such as www.example1.com and www.example2.com, 
+		or 
+	2) use 2 “real” domains that you have registered. This last option also 
+		requires that you have set up DNS entries for those domains.
+			VPS (Virtual Private Server) is a virtual machine sold 
+				as a service by an Internet hosting service. A 
+				VPS where a customers may have superuser-level 
+				access to that operating system instance, so 
+				they can install almost any software that runs 
+				on that OS.
+			If you want to implement name-based virtual hosting set 
+				up the necessary DNS entries for each domain. 
+			A cloud VPS, which runs its own copy of an operating 
+				system (OS) with domains you have previously 
+				registered, could also be used implement 
+				name-based virtual hosting.
+			FreeDNS (https://freedns.afraid.org/) could also hold 
+				your DNS entries.
+Each virtual host will need a directory structure to store files and logs. 
+	In addition, the user Apache runs as (apache in CentOS or www-data in 
+	Ubuntu) needs to be able to read the web content.
 create the following directories and assign the indicated permissions:
 		mkdir -p /var/www/example1.com/public_html
 		mkdir -p /var/www/example2.com/public_html
 		chmod -R 0755 /var/www/
-
-Let’s start by defining www.example1.com. To do it, insert the following block in /etc/httpd/conf.d/example1.com. conf (CentOS) or /etc/apache2/sites-available/example1.com.conf (Ubuntu):
+Let’s start by defining www.example1.com. To do it, insert the following block 
+	in /etc/httpd/conf.d/example1.com. conf (CentOS) or 
+	/etc/apache2/sites-available/example1.com.conf (Ubuntu) or, for Apple,
+	in /etc/apache2/extra/httpd-vhosts.conf:
 		<VirtualHost *:80>
 			DocumentRoot "/var/www/example1.com/public_html/"
 			ServerName www.example1.com
@@ -57,76 +109,98 @@ Let’s start by defining www.example1.com. To do it, insert the following block
 			LogLevel info
 			CustomLog /var/www/example1.com/access.log combined
 		</VirtualHost>
-
-Since both www.example1.com and www.example2.com are dummy domains, we need to tell our client computer how to find them. The most basic name resolution method is using the /etc/hosts file in our computer to map the IP address of our web server to those domains.
-
-
-Using the Ubuntu server’s address (192.168.0.30, change to fit your environment) as example, add the following lines to the /etc/hosts file in each client computer that you want to access the virtual hosts:
+	On my MAC it looks like this:
+		<VirtualHost *:80>
+		    DocumentRoot "/Users/syeedode/Sites/syeedode.com/public_html/"
+		    ServerName www.syeedode.com
+		    ServerAlias syeedode.com
+		    ErrorLog /Users/syeedode/Sites/syeedode.com/error.log
+		    LogLevel info
+		    CustomLog /Users/syeedode/Sites/syeedode.com/access.log combined
+		    <Directory "/Users/syeedode/angular_projects/angular-js-scratchwork/HeadFirstJSTutorial/public_html/partials/gumball/">
+			Require all granted
+		    </Directory>
+		    RewriteEngine on
+		    Options FollowSymLinks
+		    RewriteRule "^/vhosterrors" "/private/var/log/apache2/error_log"
+		    Header set Access-Control-Allow-Origin "*"
+		    Header set Access-Control-Allow-Methods "GET,POST"
+		</VirtualHost>
+Since both www.example1.com and www.example2.com are dummy domains, we need to 
+	tell our client computer how to find them. The most basic name 
+	resolution method is using the /etc/hosts file in our computer to map 
+	the IP address of our web server to those domains.
+Using the Ubuntu server’s address (192.168.0.30, change to fit your environment) 
+	as example, add the following lines to the /etc/hosts file in each 
+	client computer that you want to access the virtual hosts:
 		192.168.0.30 example1.com www.example1.com
 		192.168.0.30 example2.com https://www.example2.com[www.example2.com]
 
 
+URL redirecting (Web Forward) service https://discussions.apple.com/docs/DOC-11238
 
+Here is my definitive guide to getting a local web server running on 
+	OS X 10.12 “Sierra”. This is meant to be a development platform so 
+	that you can build and test your sites locally, then deploy to an 
+	internet server. This User Tip only contains instructions for 
+	configuring the Apache server, PHP module, and Perl module. I have 
+	another User Tip for installing and configuring MySQL and email servers.
 
+enable perl, python and user_dir modules to
+	Include /private/etc/apache2/extra/httpd-userdir.conf
 
-URL redirecting (Web Forward) service
+Now save and quit /etc/apache2/httpd.conf.
 
-
-https://discussions.apple.com/docs/DOC-11238
-	Here is my definitive guide to getting a local web server running on OS X 10.12 “Sierra”. This is meant to be a development platform so that you can build and test your sites locally, then deploy to an internet server. This User Tip only contains instructions for configuring the Apache server, PHP module, and Perl module. I have another User Tip for installing and configuring MySQL and email servers.
-
-	enable perl, python and user_dir modules to
-		Include /private/etc/apache2/extra/httpd-userdir.conf
-	Now save and quit /etc/apache2/httpd.conf.
-
-	Open the file You just enabled above with:
-sudo vi /etc/apache2/extra/httpd-userdir.conf
-and uncomment the following at line 16:
-#Include /private/etc/apache2/users/*.conf
-to
-Include /private/etc/apache2/users/*.conf
-Save and exit.
-
-
-Lion and later versions no longer create personal web sites by default. If you already had a Sites folder in Snow Leopard, it should still be there. To create one manually, enter the following:
-mkdir ~/Sites
-echo "<html><body><h1>My site works</h1></body></html>" > ~/Sites/index.html.en
-
-
-****
-While you are in /etc/apache2, double-check to make sure you have a user config file. It should exist at the path: /etc/apache2/users/<your short user name>.conf. That file may not exist and if you upgrade from an older version, you may still not have it. It does appear to be created when you create a new user. If that file doesn't exist, you will need to create it with:
- 
-sudo vi /etc/apache2/users/<your short user name>.conf
- 
+Open the file You just enabled above with:
+			sudo vi /etc/apache2/extra/httpd-userdir.conf
+	and uncomment the following at line 16:
+			#Include /private/etc/apache2/users/*.conf
+	to
+			Include /private/etc/apache2/users/*.conf
+	Save and exit.
+Lion and later versions no longer create personal web sites by default. If 
+	you already had a Sites folder in Snow Leopard, it should still be 
+	there. To create one manually, enter the following:
+			mkdir ~/Sites
+			echo "<html><body><h1>My site works</h1></body></html>" > ~/Sites/index.html.en
+While you are in /etc/apache2, double-check to make sure you have a user 
+	config file. It should exist at the path: 
+			/etc/apache2/users/<your short user name>.conf. 
+	That file may not exist and if you upgrade from an older version,
+		you may still not have it. It does appear to be created 
+		when you create a new user. If that file doesn't exist, 
+		you will need to create it with:
+ 			sudo vi /etc/apache2/users/<your short user name>.conf
 Use the following as the content:
-<Directory "/Users/<your short user name>/Sites/">
-    AddLanguage en .en
-    AddHandler perl-script .pl
-    PerlHandler ModPerl::Registry
-    Options Indexes MultiViews FollowSymLinks ExecCGI
-    AllowOverride None
-    Require host localhost
-</Directory>
-*****
-
-
-Now you are ready to turn on Apache itself. But first, do a sanity check. Sometimes copying and pasting from an internet forum can insert invisible, invalid characters into config files. Check your configuration by running the following command in the Terminal:
-apachectl configtest
- 
-If this command returns "Syntax OK" then you are ready to go. It may also print a warning saying "httpd: Could not reliably determine the server's fully qualified domain name". You could fix this by setting the ServerName directive in /etc/apache2/httpd.conf and adding a matching entry into /etc/hosts. But for a development server, you don't need to do anything. You can just ignore that warning. You can safely ignore other warnings too.
-
+		<Directory "/Users/<your short user name>/Sites/">
+		    AddLanguage en .en
+		    AddHandler perl-script .pl
+		    PerlHandler ModPerl::Registry
+		    Options Indexes MultiViews FollowSymLinks ExecCGI
+		    AllowOverride None
+		    Require host localhost
+		</Directory>
+Now you are ready to turn on Apache itself. But first, do a sanity check. 
+	Sometimes copying and pasting from an internet forum can insert 
+	invisible, invalid characters into config files. Check your 
+	configuration by running the following command in the Terminal:
+			apachectl configtest
+If this command returns "Syntax OK" then you are ready to go. It may also 
+	print a warning saying "httpd: Could not reliably determine the 
+	server's fully qualified domain name". 
+You could fix this by setting the ServerName directive in 
+	/etc/apache2/httpd.conf and adding a matching entry into 
+	/etc/hosts. But for a development server, you don't need to do 
+	anything. You can just ignore that warning. You can safely ignore 
+	other warnings too.
 Turn on the Apache httpd service by running the following command in the Terminal:
-sudo launchctl load -w /System/Library/LaunchDaemons/org.apache.httpd.plist
- 
+		sudo launchctl load -w /System/Library/LaunchDaemons/org.apache.httpd.plist
 In Safari, navigate to your web site with the following address:
-http://localhost/
- 
+		http://localhost/
 It should say:
- 
-It works!
- 
+		It works!
 Now try your user home directory:
-http://localhost/~<your short user name>
+		http://localhost/~<your short user name>
  
 It should say:
  
