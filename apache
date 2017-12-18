@@ -1,5 +1,7 @@
 
-Apache modules are g independent, separate pieces of software that provide specific functionality. It is important to have this definition in mind before we dive into the configuration directives.
+Apache modules are independent, separate pieces of software that provide specific 
+	functionality. It is important to have this definition in mind before we dive into 
+	the configuration directives.
 
 The following directives are listed in the main configuration file.
 	ServerRoot			The directory tree where the server’s configuration, error, and log files are kept.
