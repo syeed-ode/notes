@@ -1,0 +1,551 @@
+
+
+In addition to the website listed. This information is also available is the saved PDF named: CORS_HTTP_ MDN.pdf.
+
+CORS (Cross Origin Resource Sharing)
+	This section was taken from WAHH page 64, Chapter 3. It deals with the basics of the Same-Origin Policy.
+			The same-origin policy is key to keeping content that came from different origins from interfering with each other.
+
+			Content received from one website is not allowed to access content received from another site.
+
+			If a user browsed to a malicious website, script code running on that site could access the data and functionality of any other website also visited by the user.
+
+			For this reason, browsers implement restrictions to this type of intereaction. In practice, this leads to various complications and compromises. 
+
+			Here are some: 
+					1) a page on one domain can request data from another domain (for example by submitting a form or loading an image), but it cannot process the data. 
+
+					2) a page on one domain can load a script from another domain, because scripts are code rather than data.
+
+					3) a page on one domain cannot read or modify the cookies or DOM data belonging to another domain.
+
+			Further complication arise with browser extensions which implement same-origin restrictions in different ways.
+
+	This section was taken from https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS. 
+			A cross-origin HTTP request is a request to a different domain, protocol, or port than the one from which the current document originated.
+
+			Cross-Origin Resource Sharing (CORS) protocol uses additional HTTP headers to let a user agent gain permission to access resources from a server on a different origin (domain) than the site (domain) currently in use. 
+
+			An example: A HTML page served from http://domain-a.com makes an <img> src request for http://domain-b.com/image.jpg. 
+
+			Pages load resources like CSS stylesheets, images, and scripts from separate domains, such as content delivery networks (CDNs).
+
+			Browsers, for security reasons, restrict cross-origin HTTP requests initiated from within scripts. XMLHttpRequest and the Fetch API follow the same-origin policy. 
+
+			A web application using those APIs can only request HTTP resources from the same domain the application was loaded from unless CORS headers are used.
+
+			CORS supports secure cross-domain requests and data transfers between browsers and web servers. Browsers use CORS in an API container such as XMLHttpRequest or Fetch to help mitigate the risks of cross-origin HTTP requests.
+
+		Cross-origin sharing standard is used to enable cross-site HTTP requests for:
+					Invocations of the XMLHttpRequest or Fetch APIs in a cross-site manner
+
+					Web Fonts (for cross-domain font usage in @font-face within CSS), so that servers can deploy TrueType fonts that can only be cross-site loaded and used by web sites that are permitted to do so. See https://www.w3.org/TR/css-fonts-3/#font-fetching-requirements for more detail.
+
+					WebGL textures. See, https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL for more detail.
+
+					Images/video frames drawn to a canvas using drawImage.
+
+					Stylesheets (for CSSOM access)
+
+					Scripts (for unmuted exceptions).
+
+			The Cross-Origin Resource Sharing works by adding new HTTP headers allowing servers to describe the origins that are permitted to read its information using a web browser.
+
+			Browsers "preflight" the request for HTTP request methods that can cause side-effects on server's data (for POST usage with certain MIME types).  Those browsers must solicit supported methods from the server with an HTTP OPTIONS request method. 
+
+			Once it gets the server's approval, the browser can send the actual request with the actual HTTP request method. 
+
+			Servers can also notify clients whether "credentials" (including Cookies and HTTP Authentication data) should be sent with requests.
+
+	Here are three scenarios that illustrate how Cross-Origin Resource Sharing works. All use the XMLHttpRequest object, which can be used to make cross-site invocations in any supporting browser.
+
+	The three secnearios are Simple Requests, Preflight Requests, and Request with Credentials.
+	
+	Simple requests
+		Some requests don’t trigger a CORS preflight. Those are called “simple requests” in this article, though the Fetch spec (which defines CORS) doesn’t use that term. A request that doesn’t trigger a CORS preflight —- a so-called “simple request” —- is one that meets all the following conditions:
+
+		The only allowed methods are:
+				- GET 
+				- HEAD 
+				- POST
+
+		Apart from the headers set automatically by the user agent. See https://fetch.spec.whatwg.org/#forbidden-header-name for ones that explicitly can't be set. The only headers which are allowed to be manually set are:
+				- Accept
+				- Accept-Language 
+				- Content-Language
+				- Content-Type (but note the additional requirements below)
+				- Last-Event-ID
+				- DPR (Device Pixel Ratio) http://httpwg.org/http-extensions/client-hints.html#dpr
+				- Save-Data http://httpwg.org/http-extensions/client-hints.html#save-data
+				- Viewport-Width http://httpwg.org/http-extensions/client-hints.html#viewport-width
+				- Width http://httpwg.org/http-extensions/client-hints.html#width
+
+		The only allowed values for the Content-Type header are:
+				- application/x-www-form-urlencoded
+				- multipart/form-data
+				- text/plain
+
+		No event listeners are registered on any XMLHttpRequestUpload object used in the request; these are accessed using the XMLHttpRequest.upload property.
+
+		No ReadableStream object is used in the request.
+
+		These are the same kinds of cross-site requests that web content can already issue, and no response data is released to the requester unless the server sends an appropriate header. Therefore, sites that prevent cross-site request forgery have nothing new to fear from HTTP access control.
+
+		WebKit Nightly and Safari Technology Preview place additional restrictions on the values. (That section has been copied directly.) See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS. 
+
+		For example, suppose web content on domain http://foo.example wishes to invoke content on domain http://bar.other. Code of this sort might be used within JavaScript deployed on foo.example:
+				var invocation = new XMLHttpRequest();
+				var url = 'http://bar.other/resources/public-data/';
+				   
+				function callOtherDomain() {
+				  if(invocation) {    
+				    invocation.open('GET', url, true);
+				    invocation.onreadystatechange = handler;
+				    invocation.send(); 
+				  }
+				}
+
+		This will lead to a simple exchange between the client and the server, using CORS headers to handle the privileges:
+				Client 	----------------------> 	Server
+				       	(GET /doc HTTP/1.1)
+				       	(Origin: Server-b.com)
+
+		       	Client  <---------------------- 	Server
+				       	(HTTP/1.1 OK)
+				       	(Access-Control-Allow-Origin: *)
+
+		Let us look at what the browser will send to the server in this case, and let's see how the server responds:
+				GET /resource/public-data/ HTTP/1.1
+				HOST: bar.other
+				User-Agent: Mozilla/5.0 ((Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1b3pre) Gecko/20081130 Minefield/3.1b3pre)
+				Accespt: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+				Accept-Language: en-us,en;q=0.5
+				Accept-Encoding: gzip,deflate
+				Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+				Connection: keep-alive
+				******Referer: http://foo.example/examples/access-control/simpleXSInvocation.html******
+				******Origin: http://foo.example******
+		
+				HTTP/1.1 200 OK
+				Date: Mon, 01 Dec 2008 00:23:53 GMT
+				Server: Apache/2.0.61 
+				Access-Control-Allow-Origin: *
+				Keep-Alive: timeout=2, max=100
+				Connection: Keep-Alive
+				Transfer-Encoding: chunked
+				Content-Type: application/xml
+
+				[XML Data]
+
+		The lines up to 'Origin: http://foo.example' are headers sent. The main HTTP request header of note here is the 'Origin' header, which shows that the invocation is coming from content on the domain 'http://foo.example'.
+
+		The lines after the 'Origin: http://foo.example' header show the HTTP response from the server on domain http://bar.other. the server sends back an Access-Control-Allow-Origin header.
+
+		The use of the Origin header and of Access-Control-Allow-Origin show the access control protocol in its simplest use.
+
+		In this case, the server responds with a Access-Control-Allow-Origin: * which means that the resource can be accessed by **any** domain in a cross-site manner.
+
+		If the resource owners at http://bar.other wished to restrict access to the resource to requests only from 'http://foo.example', they would send back:
+					Access-Control-Allow-Origin: http://foo.example
+
+		Note that now, no domain other than http://foo.example (identified by the ORIGIN: header in the request, as in line 10 above) can access the resource  in a cross-site manner.  The Access-Control-Allow-Origin header should contain the value that was sent in the request's Origin header.
+
+	Preflighted requests
+		Unlike “simple requests” (discussed above), "preflighted" requests first send an HTTP request by the OPTIONS method to the resource on the other domain.
+
+		This step determines whether the actual request is safe to send. Cross-site requests are preflighted like this since they may have implications to user data.
+
+		In particular, a request is preflighted if any of the following conditions is true:
+				If the request uses any of the following methods:
+						- PUT
+						- DELETE
+						- CONNECT
+						- OPTIONS
+						- TRACE
+						- PATCH
+
+				Or if, the request includes any headers other than those which the Fetch spec defines as being a “CORS-safelisted request-header”, which are the following: (That section has been copied directly.) See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS, Preflighted requests.
+
+				Or if the Content-Type header has a value other than the following: application/x-www-form-urlencoded, multipart/form-data, text/plain.
+
+				Or if one or more event listeners are registered on an XMLHttpRequestUpload object used in the request.
+
+				Or if a ReadableStream object is used in the request.
+
+				WebKit Nightly and Safari Technology Preview place additional restrictions on the values allowed in the Accept, Accept-Language, and Content-Language headers. (That section has been copied directly.) See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS, Preflighted requests.
+
+		The following is an example of a request that will be preflighted.
+				var invocation = new XMLHttpRequest();
+				var url = 'http://bar.other/resources/post-here/';
+				var body = '<?xml version="1.0"?><person><name>Arun</name></person>';
+				    
+				function callOtherDomain(){
+				  if(invocation)
+				    {
+				      invocation.open('POST', url, true);
+				      invocation.setRequestHeader('X-PINGOTHER', 'pingpong');
+				      invocation.setRequestHeader('Content-Type', 'application/xml');
+				      invocation.onreadystatechange = handler;
+				      invocation.send(body); 
+				    }
+				}
+
+		In the example above, line 3 creates an XML body to send with the POST request in line 8.  
+
+		Also, on line 9, a "customized" (non-standard) HTTP request header is set (X-PINGOTHER: pingpong). Such headers are not part of the HTTP/1.1 protocol, but are generally useful to web applications.
+
+		Since the request uses a Content-Type of application/xml, and since a custom header is set, this request is preflighted.
+				Client 	----------------------> 	Server
+				       	(OPTONS /doc HTTP/1.1)
+				       	(Origin: Server-b.com)
+				       	(Access-Control-Request-Method: POST)
+				       	(Access-Control-Reqeust-Headers: X-PINGOTHER, Content-Type)
+
+		       	Client  <---------------------- 	Server
+				       	(HTTP/1.1 OK)
+				       	(Access-Control-Allow-Origin: http://foo.example)
+				       	(Access-Control-Allow-Methods: POST, GET, OPTIONS)
+				       	(Access-Control-Allow-Origin: X-PINGOTHER, Content-Type)
+				       	(Access-Control-Max-Age: 86400)
+
+				Client 	----------------------> 	Server
+				       	(POST /doc HTTP/1.1)
+				       	(X-PINGOTHER: pingpong)
+				       	(Content-Type: text/xml; charset-UTF-8)
+				       	(Origin: Server-b.com)
+				       	(Access-Control-Request-Method: POST)
+				       	(Access-Control-Reqeust-Headers: X-PINGOTHER, Content-Type)
+
+		       	Client  <---------------------- 	Server
+				       	(HTTP/1.1 OK)
+				       	(Access-Control-Allow-Origin: http://foo.example)
+				
+				(Note: as described below, the actual POST request does not include the Access-Control-Request-* headers; they are needed only for the OPTIONS request.)
+
+		Let's take a look at the full exchange between client and server. The first exchange is the preflight request/response:
+				OPTIONS /resources/post-here/ HTTP/1.1
+				Host: bar.other
+				User-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1b3pre) Gecko/20081130 Minefield/3.1b3pre
+				Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+				Accept-Language: en-us,en;q=0.5
+				Accept-Encoding: gzip,deflate
+				Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+				Connection: keep-alive
+				Origin: http://foo.example
+				Access-Control-Request-Method: POST
+				Access-Control-Request-Headers: X-PINGOTHER, Content-Type
+
+
+				HTTP/1.1 200 OK
+				Date: Mon, 01 Dec 2008 01:15:39 GMT
+				Server: Apache/2.0.61 (Unix)
+				Access-Control-Allow-Origin: http://foo.example
+				Access-Control-Allow-Methods: POST, GET, OPTIONS
+				Access-Control-Allow-Headers: X-PINGOTHER, Content-Type
+				Access-Control-Max-Age: 86400
+				Vary: Accept-Encoding, Origin
+				Content-Encoding: gzip
+				Content-Length: 0
+				Keep-Alive: timeout=2, max=100
+				Connection: Keep-Alive
+				Content-Type: text/plain
+
+		Once the preflight request is complete, the real request is sent:
+				POST /resources/post-here/ HTTP/1.1
+				Host: bar.other
+				User-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1b3pre) Gecko/20081130 Minefield/3.1b3pre
+				Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+				Accept-Language: en-us,en;q=0.5
+				Accept-Encoding: gzip,deflate
+				Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+				Connection: keep-alive
+				X-PINGOTHER: pingpong
+				Content-Type: text/xml; charset=UTF-8
+				Referer: http://foo.example/examples/preflightInvocation.html
+				Content-Length: 55
+				Origin: http://foo.example
+				Pragma: no-cache
+				Cache-Control: no-cache
+
+				<?xml version="1.0"?><person><name>Arun</name></person>
+
+
+				HTTP/1.1 200 OK
+				Date: Mon, 01 Dec 2008 01:15:40 GMT
+				Server: Apache/2.0.61 (Unix)
+				Access-Control-Allow-Origin: http://foo.example
+				Vary: Accept-Encoding, Origin
+				Content-Encoding: gzip
+				Content-Length: 235
+				Keep-Alive: timeout=2, max=99
+				Connection: Keep-Alive
+				Content-Type: text/plain
+
+				[Some GZIP'd payload]
+
+		The browser sends the preflight request with the OPTIONS method. This methos is based on the request parameters that the JavaScript above was using.
+
+		The server can respond whether it is acceptable to send the request with the actual request parameters.
+
+		OPTIONS is an HTTP/1.1 method that is used to determine further information from servers, and it can't be used to change the resource.
+
+		Note that along with the OPTIONS request, two other request headers are sent 'Access-Control-Request-Method: POST' and 'Access-Control-Request-Headers: X-PINGOTHER, Content-Type'.
+
+		The Access-Control-Request-Method header notifies the server as part of a preflight request. When the actual request is sent, it will be sent with a POST request method. 
+
+		The Access-Control-Request-Headers header notifies the server that when the actual request is sent, it will be sent with a X-PINGOTHER and Content-Type custom headers.
+
+		The server now has an opportunity to determine whether it wishes to accept a request under these circumstances.
+
+		The header response that the server sends back indicating that the request method (POST) and request headers (X-PINGOTHER) are acceptable is below:
+				Access-Control-Allow-Origin: http://foo.example
+				Access-Control-Allow-Methods: POST, GET, OPTIONS
+				Access-Control-Allow-Headers: X-PINGOTHER, Content-Type
+				Access-Control-Max-Age: 86400
+
+		The server responds with 'Access-Control-Allow-Methods' and says that POST, GET, and OPTIONS are viable methods to query the resource in question. 
+
+		Note that the 'Access-Control-Allow-Methods' header is similar to the 'Allow' **response** header, but used strictly within the context of access control. The 'Allow' header lists the set of methods support by a resource.
+
+		The server also sends Access-Control-Allow-Headers with a value of "X-PINGOTHER, Content-Type", confirming that these are permitted headers to be used with the actual request. Like Access-Control-Allow-Methods, Access-Control-Allow-Headers is a comma separated list of acceptable headers.
+
+		Preflighted requests and redirects
+			Most browsers currently don’t support following redirects for preflighted requests. If a redirect occurs for a preflighted request, most current browsers will report an error message such as the following.
+					The request was redirected to 'https://example.com/foo', which is disallowed for cross-origin requests that require preflight
+
+					Request requires preflight, which is disallowed to follow cross-origin redirect
+
+	Requests with credentials
+		The most interesting capability exposed by both XMLHttpRequest or Fetch and CORS is the ability to make "credentialed" requests that are aware of HTTP cookies and HTTP Authentication information. 
+
+		By default, in cross-site XMLHttpRequest or Fetch invocations, browsers will not send credentials. A specific flag has to be set on the XMLHttpRequest object or the Request constructor when it is invoked.
+
+		In this example, content originally loaded from http://foo.example makes a simple GET request to a resource on http://bar.other which sets Cookies.
+				var invocation = new XMLHttpRequest();
+				var url = 'http://bar.other/resources/credentialed-content/';
+				    
+				function callOtherDomain(){
+				  if(invocation) {
+				    invocation.open('GET', url, true);
+				    invocation.withCredentials = true;
+				    invocation.onreadystatechange = handler;
+				    invocation.send(); 
+				  }
+				}
+
+		the flag on XMLHttpRequest that has to be set in order to make the invocation with Cookies, namely the withCredentials boolean value. By default, the invocation is made without Cookies. 
+
+		Since this is a simple GET request, it is not preflighted.
+
+		But **the browser** will reject any response that does not have the Access-Control-Allow-Credentials: true header. Therefore, the response **won't** be availalbe to the invoking web content.
+				Client 	----------------------> 	Server
+				       	(GET /doc HTTP/1.1)
+				       	(Origin: Server-b.com)
+				       	(Cookie: pageAcces=2)
+				       	
+
+		       	Client  <---------------------- 	Server
+				       	(HTTP/1.1 OK)
+				       	(Access-Control-Allow-Origin: http://server-b.com)
+				       	(Access-Control-Allow-Credentials: true)
+
+
+		Here is a sample exchange between client and server:
+				GET /resources/access-control-with-credentials/ HTTP/1.1
+				Host: bar.other
+				User-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1b3pre) Gecko/20081130 Minefield/3.1b3pre
+				Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+				Accept-Language: en-us,en;q=0.5
+				Accept-Encoding: gzip,deflate
+				Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+				Connection: keep-alive
+				Referer: http://foo.example/examples/credential.html
+				Origin: http://foo.example
+				Cookie: pageAccess=2
+
+
+				HTTP/1.1 200 OK
+				Date: Mon, 01 Dec 2008 01:34:52 GMT
+				Server: Apache/2.0.61 (Unix) PHP/4.4.7 mod_ssl/2.0.61 OpenSSL/0.9.7e mod_fastcgi/2.4.2 DAV/2 SVN/1.4.2
+				X-Powered-By: PHP/5.2.6
+				Access-Control-Allow-Origin: http://foo.example
+				Access-Control-Allow-Credentials: true
+				Cache-Control: no-cache
+				Pragma: no-cache
+				Set-Cookie: pageAccess=3; expires=Wed, 31-Dec-2008 01:34:53 GMT
+				Vary: Accept-Encoding, Origin
+				Content-Encoding: gzip
+				Content-Length: 106
+				Keep-Alive: timeout=2, max=100
+				Connection: Keep-Alive
+				Content-Type: text/plain
+
+
+				[text/plain payload]
+
+		Although the Cookie is destined for the content on http://bar.other, if bar.other did not respond with an 'Access-Control-Allow-Credentials: true', the **response** would be ignored and not made available to web content.
+
+		Credentialed requests and wildcards
+			When responding to a credentialed request, **the server** **must** specify an origin in the value of the 'Access-Control-Allow-Origin' header, instead of specifying the "*" wildcard.
+
+			Because the request headers in the above example include a Cookie header, the request would fail if the value of the 'Access-Control-Allow-Origin' header were "*". 
+
+			But it does not fail: Because the value of the 'Access-Control-Allow-Origin' header is "http://foo.example" (an actual origin) rather than the "*" wildcard. 
+
+			The credential-cognizant content is returned to the invoking web content.
+
+			Note that the Set-Cookie response header in the example above also sets a further cookie.
+
+	The HTTP response headers
+		This section lists the **HTTP response** headers that servers send back for access control requests as defined by the Cross-Origin Resource Sharing specification.
+
+		(That section has been copied directly.) See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS, The HTTP response headers.
+
+	The HTTP request headers
+		This section lists headers that **clients** may use when issuing HTTP requests in order to make use of the cross-origin sharing feature.
+
+		Note that these headers are set for you when making invocations to servers. 
+
+		Developers using cross-site XMLHttpRequest capability do not have to set any cross-origin sharing request headers programmatically.
+
+		(That section has been copied directly.) See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS, The HTTP request headers.
+
+Server-Side Access Control (CORS)
+	This section was taken from https://developer.mozilla.org/en-US/docs/Web/HTTP/Server-Side_Access_Control. 
+			Browsers send specific HTTP headers for cross-site requests initiated from within XMLHttpRequest or the Fetch API. It also expects to see specific HTTP headers sent back with cross-site responses.
+
+			These concepts can be applied to any server-side programming environment that processes HTTP requests and dynamically formulates HTTP responses.
+
+	Discussion of HTTP headers
+		(That section has been copied directly.) See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS, The HTTP request headers. 
+
+		Also see the pdf in CORS_HTTP_ MDN.pdf (file:///~/books/software/javascript/CORS_HTTP_MDN.pdf)
+
+	Working code samples
+		All code is in file:///~/books/software/javascript/*_{CodeExample.htm,TextHeaderExchange.txt}
+
+	Simple cross-site requests
+		An HTTP/1.1 GET or a POST is used as request method. In the case of a POST, the Content-Type of the request body is one of 'application/x-www-form-urlencoded', 'multipart/form-data', or 'text/plain'.
+
+		No custom headers are sent with the HTTP request (such as X-Modified, etc.)
+
+		In this case, responses can be sent back based on some considerations.
+				If the resource in question is meant to be widely accessed (just like any HTTP resource accessed by GET)
+						then sending back the Access-Control-Allow-Origin: * header will be sufficient,
+
+						unless the resource needs credentials such as Cookies and HTTP Authentication information.
+
+		If the resource should be kept restricted based on requester domain, OR if the resource needs to be accessed with credentials (or sets credentials)
+				then filtering by the request's Origin header may be necessary, or at least echoing back the requester's Origin (e.g. Access-Control-Allow-Origin: http://arunranga.com)
+
+				the Access-Control-Allow-Credentials: true header will have to be sent
+
+		The section on Simple Access Control Requests shows you the header exchanges between client and server. Here is a PHP code segment that handles a Simple Request:
+				<?php
+
+				// We'll be granting access to only the arunranga.com domain 
+				// which we think is safe to access this resource as application/xml
+
+				if($_SERVER['HTTP_ORIGIN'] == "http://arunranga.com") {
+				    header('Access-Control-Allow-Origin: http://arunranga.com');
+				    header('Content-type: application/xml');
+				    readfile('arunerDotNetResource.xml');
+				} else {    
+				  header('Content-Type: text/html');
+				  echo "<html>";
+				  echo "<head>";
+				  echo "   <title>Another Resource</title>";
+				  echo "</head>";
+				  echo "<body>",
+				       "<p>This resource behaves two-fold:";
+				  echo "<ul>",
+				         "<li>If accessed from <code>http://arunranga.com</code> it returns an XML document</li>";
+				  echo   "<li>If accessed from any other origin including from simply typing in the URL into the browser's address bar,";
+				  echo   "you get this HTML document</li>", 
+				       "</ul>",
+				     "</body>",
+				   "</html>";
+				}
+				?>
+
+		The above checks to see if the Origin header sent by the browser (obtained through $_SERVER['HTTP_ORIGIN']) matches 'http://arunranga.com'.
+				If yes, it returns Access-Control-Allow-Origin: http://arunranga.com.
+
+	Preflighted requests
+		A method other than GET or POST is used, or if POST is used with a Content-Type other than one of 'application/x-www-form-urlencoded', 'multipart/form-data', or 'text/plain'.
+
+		For instance, if the Content-Type of the POST body is application/xml, a request is preflighted.
+
+		A custom header (such as X-PINGARUNER) is sent with the request.
+
+	Credentialed requests
+		Credentialed Access Control Requests – that is, requests that are accompanied by Cookies or HTTP Authentication information (and which expect Cookies to be sent with responses) – can be either Simple or Preflighted, depending on the request methods used.
+
+		In a Simple Request scenario, the request will be sent with Cookies (e.g. if the withCredentials flag is set on XMLHttpRequest). 
+				If the server responds with Access-Control-Allow-Credentials: true attached to the credentialed response
+						then the response is accepted by the client and exposed to web content.
+
+		In a Preflighted Request, the server can respond with 'Access-Control-Allow-Credentials: true' to the OPTIONS request.
+
+		Note that in the case of credentialed requests, the 'Access-Control-Allow-Origin:' header must not have a wildcard value of "*".
+
+	Apache examples
+		Restrict access to certain URIs
+			One helpful trick is to use an Apache rewrite, environment variable, and headers to apply Access-Control-Allow-* to certain URIs.
+
+			This is useful, for example, to constrain cross-origin requests to GET /api(.*).json requests without credentials:
+				RewriteRule ^/api(.*)\.json$ /api$1.json [CORS=True]
+				Header set Access-Control-Allow-Origin "*" env=CORS
+				Header set Access-Control-Allow-Methods "GET" env=CORS
+				Header set Access-Control-Allow-Credentials "false" env=CORS 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	This section was taken from WAHH page 524, Chapter 13. It deals with the details of the Same-Origin Policy.
+
+
+
+
+This section was taken from UNIX and Linux System Administration Handbook
+	This option allows curl to proceed and operate even for server connections otherwise considered insecure.
+
+	23.5 Caching and Proxy Servers
+		Web caching is the temporary storage of web objects (such as HTML documents) for later retrieval. There are three significant advantages to web caching: 
+				reduced bandwidth consumption 
+					(fewer requests and responses that need to go over the network), 
+
+				reduced server load 
+					(fewer requests for a server to handle), and 
+
+				reduced latency 
+					(since responses for cached requests are available immediately, and closer to the client being served).
+
+		Together, they make the web less expensive and better performing.
+
+		It doesn't make sense to transmit a popular web page from Autralia to North America millions of times each day. There should be a way to store this informaiton.
+
+		Fortunately, there is -- at least at the site level. A web proxy lets you cache and manage your site's outbound requests for web content.
+
+		Client web browser contact the proxy server to request content. The proxy server makes a request on the client's behalf or provides the object from its cache.
+
+		Proxy severs are often used to enhance security or filter content.
+
+		In a proxy-based system, only one machine gets access to the internet going through a firewall. Many commercial proxies are available today. See http://www.web-caching.com/proxy-caches.html.
+
