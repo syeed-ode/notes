@@ -1,0 +1,149 @@
+Add 36 to the page to get the pdf location. A page references are in PDF pages.
+*************************************************************
+*							    *
+*							    *
+*							    *
+****  Chapter 20 - A Web Application Hacker's Toolkit *******
+
+Summary
+	The most important tool is the intercepting proxy, which enables you to view and modify all traffic passing in both directions. In addition to one of these tools you need one or more browser extensions that enable you to work where a proxy cannot.  pg826
+
+	The other tool is a standalone scanner. They are unable to identify security flaws, and you can’t rely on them.  pg826
+
+	Ultimately, what will make you an accomplished hacker is your ability to understand how web applications function, where their defenses break down, and how to probe them for vulnerabilities. pg826
+
+	To do this you need tools that manipulate your interaction with applications and to leverage automation to make your attacks faster. pg826
+
+	Whichever tools you find most useful in achieving these objectives are the right ones for you. And if the available tools don’t meet your needs, you can always create your own. It isn’t that difficult, honest. pg826
+
+Web Browsers
+	Your choice of web browser impacts your effectiveness when attacking a web application.
+
+	Internet Explorer
+		Internet Explorer 8 introduced an anti-XSS filter you should disable the XSS fi lter while testing. Then reenable the filter and see whether you can bypass the filter using the vulnerability you have found.
+
+		Extensions are IEWatch and HttpWatch, which analyzes all HTTP requests and responses, providing headers, cookies, URLs, request parameters, HTTP status codes, and redirects.
+
+	Firefox
+		Firefox has no native support for ActiveX controls. Firefox’s popularity is that Firefox-specific XSS exploits are perfectly valid. You should test these against Firefox if you encounter difficulties getting them to work against IE.
+
+		A large number of extensions are available for Firefox.
+				HttpWatch, FoxyProxy which enables quick proxy switching, setting of different proxies for different URLs, and so on. LiveHTTPHeaders modify and replay individual requests.
+
+				PrefBar allows quick access control checks, as well as switching between different proxies.
+
+Integrated Testing Suites
+	After the web browser, the most useful item is an intercepting proxy.
+
+	Burp Suite is the most sophisticated toolkit that contains all the functionality described in the following sections.
+
+	How the Tools Work
+		Each testing suite contains tools that share information about the target application. The attacker engages with the application in the normal way via his browser. The tools monitor the resulting requests and responses, storing all relevant details.
+
+		Intercepting Proxies
+			The intercepting proxy remains the only essential component. To use an intercepting proxy, you must configure your browser to use a port on the local machine. The proxy is configured to listen on this port and receives all requests issued by the browser.
+
+			The proxy can stall each message for review and modification by the user. In Chrome go to settiongs ad search for "Open proxy settings" or "proxy". This can also be done on a mac by going to System Preferences-->Network-->Advanced...-->Proxies-->Web Proxies.
+
+		Intercepting Proxies and HTTPS
+			When dealing with unencrypted HTTP communications, the browser sends standard HTTP requests to the proxy. The URL in the first line of the request contains the full hostname of the destination web server.
+					The proxy parses this hostname, converts the request to its standard nonproxy equivalent, and forwards it to the destination server.
+
+					When that server responds, the proxy forwards the response back to the client browser.
+
+			For HTTPS communications, the browser first makes a request to the proxy using the CONNECT method.
+					When a normal (nonintercepting) proxy is used, the proxy responds with an HTTP 200 status code and keeps the TCP connection open.
+							From that point onward (for that connection) the proxy acts as a TCP-level relay to the destination server.
+
+							The browser then performs an SSL handshake with the destination server, setting up a secure tunnel through which to pass HTTP messages.
+					With an intercepting proxy, this process must work differently.
+							This way the proxy can gain access to the HTTP messages that the browser sends after responding to the CONNECT request with an HTTP 200 status code, the intercepting proxy does not act as a relay but instead performs the server’s end of the SSL handshake with the browser.
+
+							It also acts as an SSL client and performs a second SSL handshake with the destination web server. Hence, two SSL tunnels are created, with the proxy acting as a middleman.
+
+							This enables the proxy to decrypt each message received through either tunnel, gain access to its cleartext form, and then reencrypt it for transmission through the other tunnel.
+
+			If any attacker could perform this trick SSL would be fairly pointless.
+
+			For this reason, a key part of the SSL handshake involves using certificates to authenticate the identity of either party.
+
+			To perform the server’s handshake with the browser, the intercepting proxy must use its own certificate, because it does not have the private key used by the destination server.
+
+			To protect against attacks, browsers warn the user, allowing her to decide whether to trust it. When an intercepting proxy is being both the browser and proxy are fully under the attacker’s control.
+
+			When you are using your browser that uses a single domain, handling the browser security warning and accepting the proxy’s certificate is straightforward.
+
+			However, you may still encounter problems, involving cross-domain requests for images, script code, and other resources.
+
+			When HTTPS is being used, request to an external domain causes the browser to receive the proxy’s invalid SSL certificate. Browsers do not warn the user and do not give her the option to accept the invalid SSL certifi cate for each domain.
+
+			Rather, they typically drop the cross-domain requests, either silently or with an alert stating that this has occurred.
+
+			Another situation is when you use a thick client running outside the browser. Normally, these clients fail and provide no way to accept the certificate.
+
+			There is a way to circumvent these problems. Burp Suite generates a unique CA certificate. When Burp Proxy receives an HTTPS request to a new domain, it creates a new host certificate on-the-fly the user can install Burp’s CA certificate in her browser (or other trust store). All the resulting certificates are valid, removing all SSL errors caused by the proxy. pg793
+
+			To do this perform the following steps:
+					1. Visit any HTTPS URL with your browser via the proxy.
+					2. Select the root certifi cate in the tree (called PortSwigger CA).
+					3. Import this certifi cate into your browser as a trusted root or certifi cate authority. Depending on your browser, you may need to first export the certifi cate and then import it in a separate operation.
+					4. (See http://portswigger.net/burp/help/servercerts.html)
+
+		Common Features of Intercepting Proxies pg794
+			Intercepting proxies contain other features to help you attack web applications:
+		 			Allowing messages to be intercepted for review or silently forwarded based on target host, URL, method, resource type, response code, or appearance of specific expressions.
+
+		 			This allows you to flag only the messages you are interested in.
+
+ 			A history of requests and responses, allowing messages to passed on to other tools for further analysis. You can filter and search proxy history and annotate items for future reference.
+
+ 			Automated match-and-replace rules for dynamically modifying the contents of requests and responses, including rewriting the value of a cookie, the parameter in all requests, rmoving cache directives, simulating a specific browser by changing the 'User-Agent' header.
+
+ 			You can browse the proxy history and reissue individual requests from the context of your browser, enabling the responses to be fully processed and interpreted in the normal way.
+
+ 			Manipulate the format of HTTP messages by different request methods and encoding. This can be useful in cross-site scripting.
+
+ 			Modify HTML features on the fly: unhide hidden form fields, remove input field limits, and remove JavaScript form vaidation. pg795
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
