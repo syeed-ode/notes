@@ -1,0 +1,100 @@
+toc: 19
+pg496 - 560
+
+SECTION TWO: NETWORKING
+CHAPTER 14 TCP/IP NETWORKING 																496
+TCP/IP and its relationship to the Internet . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 447
+	Who runs the Internet? . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 448
+	Network standards and documentation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 449
+Networking road map . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 450
+	IPv4 and IPv6 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 451
+	Packets and encapsulation. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 452
+	Ethernet framing. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 453
+	Maximum transfer unit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 453
+Packet addressing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 454
+	Hardware (MAC) addressing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 454
+	IP addressing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 455
+	Hostname “addressing” . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 456
+	Ports . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 456
+	Address types. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 456
+IP addresses: the gory details . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 457
+	IPv4 address classes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 457
+	Subnetting . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 458
+	Tricks and tools for subnet arithmetic . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 459
+	CIDR: Classless Inter-Domain Routing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 460
+	Address allocation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 461
+	Private addresses and network address translation (NAT) . . . . . . . . . . . . . 462
+	IPv6 addressing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 464
+Routing. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 465
+	Routing tables . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 466
+	ICMP redirects . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 467
+ARP: the Address Resolution Protocol . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 468
+DHCP: the Dynamic Host Configuration Protocol . . . . . . . . . . . . . . . . . . . . . . . 469
+	DHCP software . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 470
+	How DHCP works . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 470
+	ISC’s DHCP software . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 471
+Security issues . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 472
+	IP forwarding . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 472
+	ICMP redirects . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 473
+	Source routing. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 473
+	Broadcast pings and other directed broadcasts . . . . . . . . . . . . . . . . . . . . . . . 473
+	IP spoofing. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 473
+	Host-based firewalls . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 474
+	Virtual private networks . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 475
+PPP: the Point-to-Point Protocol. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 476
+Basic network configuration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 476
+	Hostname and IP address assignment. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 477
+	ifconfig: configure network interfaces . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 478
+	Network hardware options . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 481
+	route: configure static routes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 481
+	DNS configuration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 483
+System-specific network configuration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 484
+Linux networking . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 484
+	NetworkManager . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 485
+	Ubuntu network configuration. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 486
+	SUSE network configuration. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 486
+	Red Hat network configuration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 487
+	Linux network hardware options . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 489
+	Linux TCP/IP options . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 490
+	Security-related kernel variables. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 492
+	Linux NAT and packet filtering . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 493
+Solaris networking . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 494
+	Solaris basic network configuration. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 494
+	Solaris configuration examples. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 496
+	Solaris DHCP configuration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 497
+	ndd: TCP/IP and interface tuning for Solaris. . . . . . . . . . . . . . . . . . . . . . . . . 498
+	Solaris security. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 499
+	Solaris firewalls and filtering. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 499
+	Solaris NAT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 500
+	Solaris networking quirks . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 501
+HP-UX networking . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 501
+	Basic network configuration for HP-UX. . . . . . . . . . . . . . . . . . . . . . . . . . . . . 501
+	HP-UX configuration examples . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 502
+	HP-UX DHCP configuration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 504
+	HP-UX dynamic reconfiguration and tuning . . . . . . . . . . . . . . . . . . . . . . . . 504
+	HP-UX security, firewalls, filtering, and NAT . . . . . . . . . . . . . . . . . . . . . . . . 505
+AIX networking . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 506
+	no: manage AIX network tuning parameters . . . . . . . . . . . . . . . . . . . . . . . . . 507
+Recommended reading . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 508
+Exercises. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 509
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

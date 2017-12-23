@@ -1,0 +1,160 @@
+Add 51 to the page to get the pdf location. A page references are in PDF pages.
+*************************************************************
+*							    *
+*							    *
+*							    *
+toc: 19
+pg496 - 560
+*************************************************************
+****          Chapter 14 - TCP/IP Networking          *******
+*************************************************************
+TCP/IP is the networking system that underlies the Internet, so devices that speak TCP/IP can all exchange data (“interoperate”) despite their many differences. 
+
+TCP/IP and its relationship to the Internet
+	Thel success of the Internet is due to the flexible design of TCP/IP and that tCP/IP is an open and nonproprietary protocol suite.
+
+	Today’s Internet is a collection of private networks owned by Internet service providers (ISPs) that interconnect at many so-called peering points.
+
+	Who runs the Internet?
+		Current Internet governance is split into administrative, technical, and political wings, but the boundaries between these functions are often vague. The major players are listed below:
+		 		ICANN (Internet Corporation for Assigned Names and Numbers)
+		 				IANA (Internet Assigned Numbers Authority) 
+
+						if any one group can be said to be in charge of the Internet, this is probably it.  It’s the only group with any sort of actual enforcement capability. 
+
+						ICANN controls the allocation of Internet addresses and domain names
+
+				ISOC (Internet Society)
+						an open-membership organization that represents Internet users.
+
+						it’s best known as the umbrella organization for the technical development of the Internet.
+
+						it is the parent organization of the IETF (Internet Engineering Task) Force (ietf.org), which oversees most technical work. IT HAS offices in Washington, D.C. and Geneva.
+
+				IGF (Internet Governance Forum)
+						The IGF was created by the United Nations for international and policy-oriented discussions related to the Internet.
+
+		ICANN has the toughest job.
+
+	Network standards and documentation
+		Accessing the Internet’s technical documentation is a crucial skill for system administrators.
+
+		The technical documents are known as Requests for Comments or RFCs. Protocol standards, proposed changes, and informational bulletins usually end up as RFCs. Updates are new RFCs with their own reference numbers.
+
+
+Networking road map pg499
+	TCP/IP is a protocol “suite,” a set of network protocols designed to work smoothly together. It includes several components, each defined by a standardstrack RFC or series of RFCs:
+			IP, the Internet Protocol, which routes data packets from one machine to another (RFC791)
+
+			ICMP, the Internet Control Message Protocol, which provides support for IP, including error messages, routing assistance, and debugging help (RFC792)
+
+			ARP, the Address Resolution Protocol, which translates IP addresses to hardware addresses (RFC826).
+					This is actually a little white lie. ARP is not really part of TCP/IP. 
+
+					It can be used with other protocol suites. However, it’s an integral part of the way TCP/IP works on most LAN media.
+
+			UDP, the User Datagram Protocol, which provides unverified, one-way data delivery (RFC768)
+
+			TCP, the Transmission Control Protocol, which implements reliable, full duplex, flow-controlled, error-corrected conversations (RFC793)
+
+			These protocols are arranged in a hierarchy or “stack”, with the higher-level protocols making use of the protocols beneath them.
+
+			TCP/IP is conventionally described as a five-layer system (as shown below):
+					Application: 			arp; SSH,FTP,HTTP; DNS,Halo3; traceroute
+					Transport: 				TCP; UDP
+					Network: 				IP; ICMP
+					Link: 					ARP; device drivers
+					Physical: 				Copper, optical fiber, radio waves
+
+			The actual TCP/IP protocols inhabit only three of these layers: transport, network and physical.
+
+	IPv4 and IPv6 pg500
+		The version of TCP/IP in use is revision 4. It uses four-byte IP addresses. IPv6 uses 16 bytes and incorporates several other lessons learned from the use of IPv4.
+
+		IPv6 also integrates security and authentication into the basic protocol. The development of IPv6 was motivated by the fact that we are runnin gout of 4-byte IPV4 address space.
+
+		If you understand IPv4, you already know most of what you need to know about IPv6, the main difference between lies in their addressing schemes. IPv6 introduces additional addressing concepts and some new notation. But that’s about it. 
+
+	Packets and encapsulation pg501
+		TCP/IP supports a variety of physical networks and transport systems, including: 
+				wireless Ethernet 				Ethernet		
+				token ring 						MPLS (Multiprotocol Label Switching)
+				serial-line-based systems
+
+		Hardware is managed within the link layer of the TCP/IP architecture. Higher-level protocols do not know or care about the specific hardware being used.
+
+		Data travels on a network in the form of packets, bursts of data with a maximum length imposed by the link layer.
+				Each packet consists of a header and a payload. The header tells where the packet came from and where it’s going. It can also include checksums, protocol-specific information, or other handling instructions.
+
+				The payload is the data to be transferred.
+
+				The layer of the protocol dtermins the data unit:
+						TCP Layer:  		Segment
+						IP Layer:  			Packet
+						Link Layer:  		Frame
+
+		As a packet travels down the protocol stack (from TCP or UDP transport to IP to Ethernet to the physical wire) each protocol adds its own header information.
+
+		Encapsulation is when each protocol’s finished packet becomes the payload part of the packet generated by the next protocol
+
+		On the receiving machine, the encapsulation is reversed as the packet travels back up the protocol stack.
+
+		UDP packet being transmitted over Ethernet contains three different wrappers or envelopes:
+				Ethernet Header 
+					The source and next-hop desitination hardware address
+
+					The length of the frame
+
+					The frames checksum (CRC)
+
+					The payload is the IP packet
+
+				IP packet payload is the UDP segment
+
+				UDP segement's payload is the data being transmitted
+
+		|
+		| Ethernet header
+		|    14 Bytes
+		|
+		Z
+
+		Z
+
+		Z
+
+		Z
+			Z
+
+			Z
+
+			Z
+
+
+	Z
+
+	Z
+
+	Z
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+
+
+
+

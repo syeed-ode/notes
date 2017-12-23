@@ -1,0 +1,49 @@
+toc: 19
+pg496 - 560
+
+1. How could listening to (i.e., obeying) ICMP (Internet Control Message Protocol) redirects allow an unauthorized user to compromise the network?
+
+
+2. What is the MTU (Maximum transmission unit) of a network link? What happens if the MTU for a given link is set too high? Too low?
+
+ 
+3. The network 134.122.0.0/16 has been subdivided into /19 networks.
+	
+	a) How many networks are there? List them. What is their netmask?
+
+	b) How many hosts could there be on each network?
+
+	c) Determine which network the address 134.122.67.124 belongs to.
+
+	d) What is the broadcast address for each network?
+
+
+4. Host 128.138.2.4 on network 128.138.2.0/24 wants to send a packet to host 128.138.129.12 on network 128.138.129.0/24. Assume that: 	
+	• Host 128.138.2.4 has a default route through 128.138.2.1.
+
+	• Host 128.138.2.4 just booted and has not sent or received any packets.
+
+	• All other machines on the network have been running for a long time.
+
+	• Router 128.138.2.1 has a direct link to 128.138.129.1, the gateway for the 128.138.129.0/24 subnet.
+
+
+
+	a) List all the steps that are needed to send the packet. Show the source and destination Ethernet and IP addresses of all packets transmitted.
+
+	b) If the network were 128.138.0.0/16, would your answer change? How or why not?
+
+	c) If the 128.138.2.0 network were a /26 network instead of a /24, would your answer change? How or why not?
+
+
+5. DHCP (Dynamic Host Configuration Protocol) lease times are configurable on the server. If there many more assignable IP addresses than potential clients, should you make the lease time as long as possible (say, weeks)? Why or why not? What about other DHCP parameters?
+
+
+6. After installing a new Linux system, how would you address the security issues mentioned in this chapter? Check to see if any of the security problems have been dealt with on the Linux systems in your lab. (May require root access.)
+
+
+7. What steps are needed to add a new machine to the network in your lab environment? In answering, use parameters appropriate for your network and local situation. Assume that the operating system has already been installed on the new machine.
+
+
+8. Create a configuration file for ISC’s (Internet Systems Consortium) DHCP server that assigns addresses in the range 128.138.192.[1-55]. Use a lease time of two hours and make sure that the host with Ethernet address 00:10:5A:C7:4B:89 always receives IP address 128.138.192.55.
+
