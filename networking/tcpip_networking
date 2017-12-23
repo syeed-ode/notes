@@ -60,11 +60,19 @@ Networking road map pg499
 			These protocols are arranged in a hierarchy or “stack”, with the higher-level protocols making use of the protocols beneath them.
 
 			TCP/IP is conventionally described as a five-layer system (as shown below):
-					Application: 			arp; SSH,FTP,HTTP; DNS,Halo3; traceroute
-					Transport: 				TCP; UDP
-					Network: 				IP; ICMP
-					Link: 					ARP; device drivers
-					Physical: 				Copper, optical fiber, radio waves
+					Application: 	arp; 
+							SSH,FTP,HTTP; 
+							DNS,Halo3; 
+							traceroute
+					Transport: 	TCP; 
+							UDP
+					Network: 	IP; 
+							ICMP
+					Link: 		ARP; 
+							device drivers
+					Physical: 	Copper, 
+							optical fiber, 
+							radio waves
 
 			The actual TCP/IP protocols inhabit only three of these layers: transport, network and physical.
 
@@ -77,8 +85,8 @@ Networking road map pg499
 
 	Packets and encapsulation pg501
 		TCP/IP supports a variety of physical networks and transport systems, including: 
-				wireless Ethernet 				Ethernet		
-				token ring 						MPLS (Multiprotocol Label Switching)
+				wireless Ethernet 		Ethernet		
+				token ring 			MPLS (Multiprotocol Label Switching)
 				serial-line-based systems
 
 		Hardware is managed within the link layer of the TCP/IP architecture. Higher-level protocols do not know or care about the specific hardware being used.
@@ -90,7 +98,7 @@ Networking road map pg499
 
 				The layer of the protocol dtermins the data unit:
 						TCP Layer:  		Segment
-						IP Layer:  			Packet
+						IP Layer:  		Packet
 						Link Layer:  		Frame
 
 		As a packet travels down the protocol stack (from TCP or UDP transport to IP to Ethernet to the physical wire) each protocol adds its own header information.
@@ -113,10 +121,13 @@ Networking road map pg499
 
 				UDP segement's payload is the data being transmitted
 
-		|
-		| Ethernet header
-		|    14 Bytes
-		|
+		|                 |             |            |                  |              |
+		| Ethernet header | IPv4 header | UDP header | Application data | Ethernet CRC |
+		|    14 Bytes     |  20  Bytes  |   8 Bytes  |    100 Bytes     |    4 Bytes   |
+		|                 |             |            |                  |              |
+		                                 >>>>>UDP segment (108 bytes)<<<
+			           >>>>>>>>>>>IPv4 packet (128 bytes)<<<<<<<<<<<
+		>>>>>>>>>>>>>>>>>>>>>>>>>Ethernet frame (146 bytes)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		Z
 
 		Z
