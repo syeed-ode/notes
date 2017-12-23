@@ -226,7 +226,7 @@ Chapter 8: Video (with special guest star "Ganvas"): not your father's tv p385
 
 	Other than the fact the addEventListener method is a little more complicated than just adding a handler by setting the property to a function, it works pretty much the same way. 
 
-	How the canPlayType method works
+	How the canPlayType method works pg405
 			The canPlayType method takes the same format description you used with the <source> tag and returns one of three values:
 					If we pass just the short form of a format then we can only get “” or “maybe” as a result.
 							video.canPlayType("video/ogg")
@@ -237,6 +237,32 @@ Chapter 8: Video (with special guest star "Ganvas"): not your father's tv p385
 					Notice that the browser is only confident beyond “maybe” if you include the codec parameter in the type.
 
 					 Also notice that there’s no “I’m absolutely sure” return value. Even if the browser knows it can play a type of video, there’s still no guarantee it can play the actual video; for instance, if the bitrate of the video is too high, then the browser won’t be able to decode it.
+
+ 	Putting canPlayType to use pg405
+ 			use canPlayType to determine which video format to use for Webville TV videos we have three versions of each file: MP4, WebM and Ogg, and depending on which browser you’re using, some will work and some won’t. 
+
+ 			We know we’ll only get “maybe” and empty string as answers, so we’ll just make sure our matching type doesn’t result in an empty string. For most use cases, if you don’t know the codecs, it’s good enough to be “maybe” confident.
+					function getFormatExtension() {
+						if (video.canPlayType("video/mp4") != "") {
+							return ".mp4";
+						} else if (video.canPlayType("video/webm") != "") {
+							return ".webm";
+						} else if (video.canPlayType("video/ogg") != "") {
+							return ".ogv";
+						}
+					}
+
+	Make sure your server is serving video files with the correct MIME type. pg407
+			You need to make sure that the videos are being served correctly. If they're not, they might not work properly. 
+
+			If you're on a Mac or Linux using a local server, you're most likely using Apache. You canvasmodify the httpd.conf file (if you have root access) or create a .htaccess file in the directory where your video files are stored, and add the following lines:
+					AddType video/ogg .ogv
+					AddType video/mp4 .mp4
+					AddType video/webm .webm
+
+			This tells the server how to serve files with those file extensions.
+
+			
 
 					 
 
