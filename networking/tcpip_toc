@@ -3,31 +3,31 @@ pg496 - 560
 
 SECTION TWO: NETWORKING
 CHAPTER 14 TCP/IP NETWORKING 																496
-TCP/IP and its relationship to the Internet . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 447
-	Who runs the Internet? . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 448
-	Network standards and documentation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 449
-Networking road map . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 450
-	IPv4 and IPv6 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 451
-	Packets and encapsulation. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 452
-	Ethernet framing. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 453
-	Maximum transfer unit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 453
-Packet addressing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 454
-	Hardware (MAC) addressing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 454
-	IP addressing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 455
-	Hostname “addressing” . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 456
-	Ports . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 456
-	Address types. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 456
-IP addresses: the gory details . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 457
-	IPv4 address classes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 457
-	Subnetting . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 458
-	Tricks and tools for subnet arithmetic . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 459
-	CIDR: Classless Inter-Domain Routing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 460
-	Address allocation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 461
-	Private addresses and network address translation (NAT) . . . . . . . . . . . . . 462
-	IPv6 addressing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 464
-Routing. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 465
-	Routing tables . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 466
-	ICMP redirects . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 467
+TCP/IP and its relationship to the Internet	 												496
+	Who runs the Internet?
+	Network standards and documentation
+Networking road map . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 499
+	IPv4 and IPv6 																			
+	Packets and encapsulation 																
+	Ethernet framing
+	Maximum transfer unit 																	
+Packet addressing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 503
+	Hardware (MAC) addressing 	
+	IP addressing 		 		
+	Hostname “addressing” 
+	Ports 
+	Address types
+IP addresses: the gory details . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  506
+	IPv4 address classes 
+	Subnetting 
+	Tricks and tools for subnet arithmetic 
+	CIDR: Classless Inter-Domain Routing 
+	Address allocation 
+	Private addresses and network address translation (NAT)
+	IPv6 addressing
+Routing  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  514
+	Routing tables 
+	ICMP redirects 
 ARP: the Address Resolution Protocol . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 468
 DHCP: the Dynamic Host Configuration Protocol . . . . . . . . . . . . . . . . . . . . . . . 469
 	DHCP software . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 470

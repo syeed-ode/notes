@@ -128,19 +128,257 @@ Networking road map pg499
 		                                 >>>>>UDP segment (108 bytes)<<<
 			           >>>>>>>>>>>IPv4 packet (128 bytes)<<<<<<<<<<<
 		>>>>>>>>>>>>>>>>>>>>>>>>>Ethernet frame (146 bytes)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		Z
+		
+	Ethernet framing pg502
+		The link layer adds headers to packets and to put separators between them. The headers contain each packet’s link-layer addressing information and checksums.
 
-		Z
+		The separators ensure that receivers can tell where one packet stops and the next one begins. The process of adding these extra bits is known generically as framing.
 
-		Z
+		The link layer is actually divided into two parts:
+				Media Access Control (MAC) sublayer - The MAC layer deals with the media and transmits packets onto the wire.
 
-		Z
-			Z
+				Link Layer Control (LLC) sublayer - The LLC layer handles the framing.
 
-			Z
+		A single standard for Ethernet framing is in common use: DIX Ethernet II.
 
-			Z
+	Maximum transfer unit - Link Layer
+		The size of packets on a network may be limited both by hardware and by protocol. A standard Ethernet frame is traditionally 1,500 bytes.
 
+		The size limit is associated with the link-layer protocol and is called the maximum transfer unit or MTU.
+			ZEthernet 	- 1,500 bytes
+			FDDI  		- 4,470 bytes
+			Token 		- Configurable
+			PPP modem 	- Configurable, 512 or 576
+			PPP (T1,T3)	- 1,500 or 4,500 bytes
+
+		The IP layer splits packets to conform to the MTU of a particular network link. If a packet is routed through several networks, an IPv4 router subdivides the packet in a process called fragmentation.
+
+		Fragmentation of in-flight packets is an unwelcome chore for a busy router so IPv6 largely removes this feature. Packets can still be fragmented, but the **originating host** must do the work itself.
+
+		Senders can discover the lowest-MTU link through which a packet must pass by setting the packet’s “do not fragment” flag.
+				If a router cannot forward the packet without fragmenting it returns an ICMP error message to the sender.
+
+				The ICMP packet includes the MTU and this MTU then becomes the governing packet size for communication with that destination.
+
+		The TCP protocol does path MTU discovery automatically, even in IPv4. UDP is not so nice and is happy to shunt extra work to the IP layer.
+
+		ZFragmentation problems can be insidious. Although path MTU discovery should automatically resolve MTU conflicts, an administrator must occasionally intervene.
+				If you are using a tunneled architecture for a virtual private network, the tunneling header is added, they become 1,540 bytes or so and must be fragmented.
+
+				Consult the 'ifconfig' man page to see how to set an interface’s MTU.
+
+Packet addressing pg503
+	Network packets must be properly addressed in order to reach their destinations several addressing schemes are used in combination:
+			MAC (media access control) addresses for use by hardware
+
+			IPv4 and IPv6 network addresses for use by software
+
+			Hostnames for use by people
+
+	Hardware (MAC) media access control addressing
+		Each of a host’s network interfaces usually has one link-layer MAC address that distinguishes it from other machines on the physical network, plus one or more IP addresses that identify the interface on the global Internet.
+
+		This last part bears repeating: IP addresses identify **network interfaces, not machines**
+
+		The lowest level of addressing is dictated by network hardware. 
+				Ethernet devices are assigned a unique 6-byte hardware address at the time of manufacture.
+						These addresses are traditionally written as a series of 2-digit hex bytes separated by colons; for example, 00:50:8D:9A:3B:DF.
+
+				Token ring interfaces have a similar address that is also six bytes long. 
+
+				Some point-to-point networks (such as PPP) need no hardware addresses at all; the identity of the destination is specified as the link is established.
+
+				Ethernet address is divided into two parts.
+						The first three bytes identify the manufacturer of the hardware,
+
+						The last three bytes are a unique serial number that the manufacturer assigns.
+
+						The 3-byte codes are actually IEEE Organizationally Unique Identifiers (OUIs), so you can also look up them up directly in the IEEE’s database at standards.ieee.org/regauth/oui
+
+						In theory, Ethernet hardware addresses are permanently assigned and immutable. However, many network interfaces now let you override the hardware address and set one of your own choosing.
+
+								This feature can be handy if all your switches filter it, or your DHCP server hands out addresses based on MAC addresses, or your MAC address is also a software license key.
+
+								Spoofable MAC addresses are also helpful if you need to infiltrate a wireless network that uses MAC-based access control.
+
+	IP addressing pg504
+		At the next level up from the hardware, Internet addressing (more commonly known as IP addressing) is used. IP addresses are globally unique5 and hardware independent.
+				In general, an IP address identifies a specific and unique destination.
+
+				However, NAT (page 462) uses one interface’s IP address to handle traffic for multiple machines. 
+
+				IP private address spaces (page 462) are addresses that multiple sites can use at once, as long as the addresses are not visible to the Internet
+
+				Anycast addressing shares one IP address among several machines.
+
+		The mapping from IP addresses to hardware addresses is implemented at the link layer of the TCP/IP model.
+				On networks such as Ethernet that support broadcasting (that is, networks that allow packets to be addressed to “all hosts on this physical network”)
+						Senders use the ARP protocol to discover mappings without assistance from a system administrator.
+
+				In IPv6, an interface’s MAC address can be used as part of the IP address, making translation between IP and hardware addressing virtually automatic.
+		
+	Hostname "addressing"
+		IP addresses are sequences of numbers, so they are hard for people to remember. Operating systems allow one or more hostnames to be associated with an IP address so that users can type rfc-editor.org instead of 128.9.160.27.
+
+		Under UNIX and Linux, this mapping can be set up in several ways, ranging from a static file (/etc/hosts) to the LDAP database system to DNS, the world-wide Domain Name System.
+
+		Hostnames are really IP address and refer to network interfaces rather than computers.
+
+	Ports
+		IP addresses identify a machine’s network interfaces, but they are not specific enough to address individual processes or services. Many may be actively using the same network at once.
+
+		TCP and UDP extend IP addresses with a concept known as a port, a 16-bit number that supplements an IP address to specify a particular communication channel.
+
+		Standard services such as email, FTP, and HTTP associate themselves with “well known” ports defined in /etc/services.
+				You can find a full list of assigned ports at iana.org/assignments/port-numbers.
+
+		To help prevent impersonation of these services, UNIX systems restrict server programs from binding to port numbers under 1,024 unless they are run as root.
+				Anyone can communicate with a server running on a low port number; the restriction applies only to the program listening on the port.
+
+	Address types
+		The IP layer defines several broad types of address, some of which have direct counterparts at the link layer
+				- Unicast – addresses that refer to a single network interface
+				- Multicast – addresses that simultaneously target a group of hosts
+				- Broadcast – addresses that include all hosts on the local subnet
+				- Anycast – addresses that resolve to any one of a group of hosts
+		
+		Multicast addressing (target a group of hosts) facilitates applications such as video conferencing in which the same set of packets must be sent to all participants.
+				The Internet Group Management Protocol (IGMP) constructs and manages sets of hosts that are treated as one multicast destination.
+
+				Multicast is largely unused on today’s Internet, but it’s slightly more mainstream in IPv6. IPv6 broadcast addresses are really just specialized forms of multicast addressing.
+
+		Anycast addresses (resolve to any one of a group of hosts) bring load balancing to the network layer by allowing packets to be delivered to whichever of several destinations is closest in terms of network routing.
+				You might expect that they’d be implemented similarly to multicast addresses, but in fact they are more like unicast addresses.
+
+				Anycast support are handled at the level of routing rather than IP. 
+
+				Anycast addressing is formally described for IPv6, but the same tricks can be applied to IPv4, too—for example, as is done for root DNS name servers.
+
+IP addresses: the gory details pg506
+	With the exception of multicast addresses, Internet addresses consist of a network portion and a host portion.
+			The network portion identifies a logical network.
+
+			The host portion identifies a node on that network.
+
+			In IPv4, addresses are four bytes long. The boundary between network and host portions is set administratively. 
+
+			In IPv6, addresses are 16 bytes long and the network portion and host portion are always eight bytes each.
+
+	IPv4 addresses are written as decimal numbers, one for each byte; for example, 209.85.171.147. The leftmost byte is the most significant and is always part of the network portion.
+			When 127 is the first byte of an address, it denotes the “loopback network,” a fictitious network that has no real hardware interface and only one host.
+
+			ZThe loopback address 127.0.0.1 always refers to the current host.
+
+	Historically, IP addresses had an inherent “class” that depended on the first bits of the leftmost byte.
+			The class determined which bytes of the address were in the network portion and which were in the host portion.
+
+			Today, an explicit mask identifies the network portion, and the boundary can fall between two adjacent bits, not just between bytes.
+
+	Classes A, B, and C denote regular IP addresses. Classes D and E are used for multicasting and research addresses.
+
+	Below is the class, 1st byte, format, comments
+		A 	1-127		N.H.H.H 	Very early networks, or reserved for DoD
+		B 	128-191 	N.N.H.H 	Large sites, usually subnetted, were hard to get
+		C 	192-223 	N.N.N.H 	Easy to get, ofen obtained in sets
+		D 	224-239 	- 			Multicast addresses, not permanently assigned
+		E 	240-255 	-  			Experimental addresses
+
+	It’s rare for a single physical network to have more than 100 computers attached to it, so class A and class B addresses (which allow for 16,777,214 hosts and 65,534 hosts per network, respectively) are really quite silly and wasteful.
+			Subnetting
+				To make better use of these addresses, you can now reassign part of the host portion to the network portion.
+
+				This is done by an explicit 4-byte “subnet mask” or “netmask”. In this case the 1's correspond to the network. And the 0's correspond to the host.
+						The 1s must be leftmost and contiguous.
+
+						At least eight bits must be allocated to the network part and at least two bits to the host. Ergo, there are really only 22 possible values for an IPv4 netmask.
+
+				For example, the four bytes of a class B address would normally be interpreted as N.N.H.H.
+						The implicit netmask for class B is therefore 255.255.0.0 in decimal notation.
+
+						With a netmask of 255.255.255.0, however, the address would be interpreted as N.N.N.H.
+
+						Use of the mask turns a single class B network address into 256 distinct class-C-like networks, each of which can support 254 hosts.
+
+				Netmasks are assigned with the ifconfig command as each network interface is set up. By default, ifconfig uses the inherent class of an address to figure out which bits are in the network part. When you set an explicit mask, you simply override this behavior. (see Basic network configuration)
+
+				Netmasks that do not end at a byte boundary can be annoying to decode and are often written as /XX, where XX is the number of bits in the network portion of the address.  This is sometimes called CIDR (see CIDR: Classless Inter-Domain Routing).
+						For example, the network address 128.138.243.0/26 refers to the first of four networks whose first bytes are 128.138.243. The other three networks have 64, 128, and 192 as their fourth bytes.
+
+						The netmask associated with these networks is 255.255.255.192 or 0xFFFFFFC0; in binary, it’s 26 ones followed by 6 zeros. 
+						128 		138 		243 		 0
+			IP Address 	128 		138 		243 		 0
+			Dec mask 	255 		255 		255 		192
+			Hex mask 	F F 		F F 		F F 		C 0
+			Bin mask 	
+						
+						A /26 network has 6 bits left (32 – 26 = 6) to number hosts. 2^6 is 64, so the network has 64 potential host addresses. 
+
+						However, it can only accommodate 62 actual hosts because the all-0 and all-1 host addresses are reserved (they are the network and broadcast addresses, respectively).
+
+						In our 128.138.243.0/26 example, the extra two bits of network address obtained by subnetting can take on the values 00, 01, 10, and 11.
+						1111 1111  - 1111 1111  - 1111 1111  - 1100 0000
+						Note: there are 26 1'a and 6 0's. So, the first two bits of the last octect can be toggled as follows:
+						The 128.138.243.0/24 network has thus been divided into four /26 networks:
+							128.138.243.0/26 	(0 in decimal is **00**000000 in binary)
+							128.138.243.64/26 	(64 in decimal is **01**000000 in binary)
+							128.138.243.128/26 	(128 in decimal is **10**000000 in binary) 
+							128.138.243.192/26 	(192 in decimal is **11**000000 in binary)
+
+						The astericked bits of the last byte of each address are the bits that belong to the network portion of that byte.
+			7 	6 	5 	4 	3 	2 	1 	0 
+
+			0 	0 	0 	0 	0 	0 	0 	0 	== 2^0 * 0 =   0
+			0 	1  	 	 	 	 	 	 	== 2^6 * 1 =  64
+			1 	0 	 	 	 	 	 	 	== 2^7 * 1 = 128
+			1 	1 	 	 	 	 	 	 	== 2^7 * 1 + 2^6 * 1 = 192
+
+
+			Tricks and tools for subnet arithmetic
+				The number of hosts per network and the value of the last byte in the netmask always add up to 256:
+						last netmask byte = 256 – net size
+
+				For example, 256 – 64 = 192, which is the final byte of the netmask in the preceding example.
+
+				Another arithmetic fact is that the last byte of an actual network address (as opposed to a netmask) must be evenly divisible by the number of hosts per network.
+						We see this fact in action in the 128.138.243.0/26 example, where the last bytes of the networks are 0, 64, 128, and 192—all divisible by 64.
+
+				Given an IP address (say, 128.138.243.100), we cannot tell without the associated netmask what the network address and broadcast address will be.
+						Below are the possibilities for /16 (the default for a class B address), /24 (a plausible value), and /26 (a reasonable value for a small network).
+
+						/16 = FF.FF.0.0
+						/24 = FF.FF.FF.0 {24 bits of 1's, 8 bits of 0's} {also 3 bytes of 1's and 1 byte of 0's}
+						/26 = FF.FF.FF.C0
+
+						F = 1111 {this is for a nibble (4bits)}
+						C = 1100 {this is for a hex digit, or nibble or half-byte}
+						{A=10=>1010, B=11=>1011, C=12=>1100, D=13=>1101, E=14=1110}
+						FF = 255 {this is for a byte}
+
+			IP address         	Netmask  			Network        	Broadcast
+			128.138.243.100/16 	255.255.0.0 		128.138.0.0   	128.138.255.255
+			128.138.243.100/24 	255.255.255.0 		128.138.243.0 	128.138.243.255
+			128.138.243.100/26 	255.255.255.192 	128.138.243.64 	128.138.243.127
+
+			
+
+
+						Z
+
+						Z
+
+						Z
+
+				Z
+
+				Z
+
+				Z
+
+				Z
+
+						Z
+
+						Z
 
 	Z
 
