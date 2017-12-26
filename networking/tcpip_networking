@@ -276,55 +276,58 @@ IP addresses: the gory details pg506
 
 	Classes A, B, and C denote regular IP addresses. Classes D and E are used for multicasting and research addresses.
 
-	Below is the class, 1st byte, format, comments
+	Below is the 
+		class, 	1st byte, 	format, 	comments
+		_____ 	_________ 	________ 	_______________________________________
 		A 	1-127		N.H.H.H 	Very early networks, or reserved for DoD
 		B 	128-191 	N.N.H.H 	Large sites, usually subnetted, were hard to get
 		C 	192-223 	N.N.N.H 	Easy to get, ofen obtained in sets
-		D 	224-239 	- 			Multicast addresses, not permanently assigned
-		E 	240-255 	-  			Experimental addresses
+		D 	224-239 	- 		Multicast addresses, not permanently assigned
+		E 	240-255 	-  		Experimental addresses
 
 	It’s rare for a single physical network to have more than 100 computers attached to it, so class A and class B addresses (which allow for 16,777,214 hosts and 65,534 hosts per network, respectively) are really quite silly and wasteful.
-			Subnetting
-				To make better use of these addresses, you can now reassign part of the host portion to the network portion.
+	
+	Subnetting
+		To make better use of these addresses, you can now reassign part of the host portion to the network portion.
 
-				This is done by an explicit 4-byte “subnet mask” or “netmask”. In this case the 1's correspond to the network. And the 0's correspond to the host.
-						The 1s must be leftmost and contiguous.
+		This is done by an explicit 4-byte “subnet mask” or “netmask”. In this case the 1's correspond to the network. And the 0's correspond to the host.
+				The 1s must be leftmost and contiguous.
 
-						At least eight bits must be allocated to the network part and at least two bits to the host. Ergo, there are really only 22 possible values for an IPv4 netmask.
+				At least eight bits must be allocated to the network part and at least two bits to the host. Ergo, there are really only 22 possible values for an IPv4 netmask.
 
-				For example, the four bytes of a class B address would normally be interpreted as N.N.H.H.
-						The implicit netmask for class B is therefore 255.255.0.0 in decimal notation.
+		For example, the four bytes of a class B address would normally be interpreted as N.N.H.H.
+				The implicit netmask for class B is therefore 255.255.0.0 in decimal notation.
 
-						With a netmask of 255.255.255.0, however, the address would be interpreted as N.N.N.H.
+				With a netmask of 255.255.255.0, however, the address would be interpreted as N.N.N.H.
 
-						Use of the mask turns a single class B network address into 256 distinct class-C-like networks, each of which can support 254 hosts.
+				Use of the mask turns a single class B network address into 256 distinct class-C-like networks, each of which can support 254 hosts.
 
-				Netmasks are assigned with the ifconfig command as each network interface is set up. By default, ifconfig uses the inherent class of an address to figure out which bits are in the network part. When you set an explicit mask, you simply override this behavior. (see Basic network configuration)
+		Netmasks are assigned with the ifconfig command as each network interface is set up. By default, ifconfig uses the inherent class of an address to figure out which bits are in the network part. When you set an explicit mask, you simply override this behavior. (see Basic network configuration)
 
-				Netmasks that do not end at a byte boundary can be annoying to decode and are often written as /XX, where XX is the number of bits in the network portion of the address.  This is sometimes called CIDR (see CIDR: Classless Inter-Domain Routing).
-						For example, the network address 128.138.243.0/26 refers to the first of four networks whose first bytes are 128.138.243. The other three networks have 64, 128, and 192 as their fourth bytes.
+		Netmasks that do not end at a byte boundary can be annoying to decode and are often written as /XX, where XX is the number of bits in the network portion of the address.  This is sometimes called CIDR (see CIDR: Classless Inter-Domain Routing).
+				For example, the network address 128.138.243.0/26 refers to the first of four networks whose first bytes are 128.138.243. The other three networks have 64, 128, and 192 as their fourth bytes.
 
-						The netmask associated with these networks is 255.255.255.192 or 0xFFFFFFC0; in binary, it’s 26 ones followed by 6 zeros. 
-						128 		138 		243 		 0
+				The netmask associated with these networks is 255.255.255.192 or 0xFFFFFFC0; in binary, it’s 26 ones followed by 6 zeros. 
+					128 		138 		243 		 0
 			IP Address 	128 		138 		243 		 0
 			Dec mask 	255 		255 		255 		192
 			Hex mask 	F F 		F F 		F F 		C 0
 			Bin mask 	
 						
-						A /26 network has 6 bits left (32 – 26 = 6) to number hosts. 2^6 is 64, so the network has 64 potential host addresses. 
+				A /26 network has 6 bits left (32 – 26 = 6) to number hosts. 2^6 is 64, so the network has 64 potential host addresses. 
 
-						However, it can only accommodate 62 actual hosts because the all-0 and all-1 host addresses are reserved (they are the network and broadcast addresses, respectively).
+				However, it can only accommodate 62 actual hosts because the all-0 and all-1 host addresses are reserved (they are the network and broadcast addresses, respectively).
 
-						In our 128.138.243.0/26 example, the extra two bits of network address obtained by subnetting can take on the values 00, 01, 10, and 11.
-						1111 1111  - 1111 1111  - 1111 1111  - 1100 0000
-						Note: there are 26 1'a and 6 0's. So, the first two bits of the last octect can be toggled as follows:
-						The 128.138.243.0/24 network has thus been divided into four /26 networks:
-							128.138.243.0/26 	(0 in decimal is **00**000000 in binary)
-							128.138.243.64/26 	(64 in decimal is **01**000000 in binary)
-							128.138.243.128/26 	(128 in decimal is **10**000000 in binary) 
-							128.138.243.192/26 	(192 in decimal is **11**000000 in binary)
+				In our 128.138.243.0/26 example, the extra two bits of network address obtained by subnetting can take on the values 00, 01, 10, and 11.
+				1111 1111  - 1111 1111  - 1111 1111  - 1100 0000
+				Note: there are 26 1'a and 6 0's. So, the first two bits of the last octect can be toggled as follows:
+				The 128.138.243.0/24 network has thus been divided into four /26 networks:
+					128.138.243.0/26 	(0 in decimal is **00**000000 in binary)
+					128.138.243.64/26 	(64 in decimal is **01**000000 in binary)
+					128.138.243.128/26 	(128 in decimal is **10**000000 in binary) 
+					128.138.243.192/26 	(192 in decimal is **11**000000 in binary)
 
-						The astericked bits of the last byte of each address are the bits that belong to the network portion of that byte.
+				The astericked bits of the last byte of each address are the bits that belong to the network portion of that byte.
 			7 	6 	5 	4 	3 	2 	1 	0 
 
 			0 	0 	0 	0 	0 	0 	0 	0 	== 2^0 * 0 =   0
@@ -333,28 +336,28 @@ IP addresses: the gory details pg506
 			1 	1 	 	 	 	 	 	 	== 2^7 * 1 + 2^6 * 1 = 192
 
 
-			Tricks and tools for subnet arithmetic
-				The number of hosts per network and the value of the last byte in the netmask always add up to 256:
-						last netmask byte = 256 – net size
+	Tricks and tools for subnet arithmetic
+		The number of hosts per network and the value of the last byte in the netmask always add up to 256:
+				last netmask byte = 256 – net size
 
-				For example, 256 – 64 = 192, which is the final byte of the netmask in the preceding example.
+		For example, 256 – 64 = 192, which is the final byte of the netmask in the preceding example.
 
-				Another arithmetic fact is that the last byte of an actual network address (as opposed to a netmask) must be evenly divisible by the number of hosts per network.
-						We see this fact in action in the 128.138.243.0/26 example, where the last bytes of the networks are 0, 64, 128, and 192—all divisible by 64.
+		Another arithmetic fact is that the last byte of an actual network address (as opposed to a netmask) must be evenly divisible by the number of hosts per network.
+				We see this fact in action in the 128.138.243.0/26 example, where the last bytes of the networks are 0, 64, 128, and 192—all divisible by 64.
 
-				Given an IP address (say, 128.138.243.100), we cannot tell without the associated netmask what the network address and broadcast address will be.
-						Below are the possibilities for /16 (the default for a class B address), /24 (a plausible value), and /26 (a reasonable value for a small network).
+		Given an IP address (say, 128.138.243.100), we cannot tell without the associated netmask what the network address and broadcast address will be.
+				Below are the possibilities for /16 (the default for a class B address), /24 (a plausible value), and /26 (a reasonable value for a small network).
 
-						/16 = FF.FF.0.0
-						/24 = FF.FF.FF.0 {24 bits of 1's, 8 bits of 0's} {also 3 bytes of 1's and 1 byte of 0's}
-						/26 = FF.FF.FF.C0
+				/16 = FF.FF.0.0
+				/24 = FF.FF.FF.0 {24 bits of 1's, 8 bits of 0's} {also 3 bytes of 1's and 1 byte of 0's}
+				/26 = FF.FF.FF.C0
 
-						F = 1111 {this is for a nibble (4bits)}
-						C = 1100 {this is for a hex digit, or nibble or half-byte}
-						{A=10=>1010, B=11=>1011, C=12=>1100, D=13=>1101, E=14=1110}
-						FF = 255 {this is for a byte}
+				F = 1111 {this is for a nibble (4bits)}
+				C = 1100 {this is for a hex digit, or nibble or half-byte}
+				{A=10=>1010, B=11=>1011, C=12=>1100, D=13=>1101, E=14=1110}
+				FF = 255 {this is for a byte}
 
-			IP address         	Netmask  			Network        	Broadcast
+			IP address         	Netmask  		Network        	Broadcast
 			128.138.243.100/16 	255.255.0.0 		128.138.0.0   	128.138.255.255
 			128.138.243.100/24 	255.255.255.0 		128.138.243.0 	128.138.243.255
 			128.138.243.100/26 	255.255.255.192 	128.138.243.64 	128.138.243.127
