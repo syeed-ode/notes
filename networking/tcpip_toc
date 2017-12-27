@@ -28,12 +28,12 @@ IP addresses: the gory details . . . . . . . . . . . . . . . . . . . . . . . . .
 Routing  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  514
 	Routing tables 
 	ICMP redirects 
-ARP: the Address Resolution Protocol . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 468
-DHCP: the Dynamic Host Configuration Protocol . . . . . . . . . . . . . . . . . . . . . . . 469
-	DHCP software . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 470
-	How DHCP works . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 470
-	ISC’s DHCP software . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 471
-Security issues . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 472
+ARP: the Address Resolution Protocol . . . . . . . . . . . . . . . . . . . . . . . . . . .  514
+DHCP: the Dynamic Host Configuration Protocol  . . . . . . . . . . . . . . . . . . . . . .  514
+	DHCP software
+	How DHCP works
+	ISC’s DHCP software
+Security issues   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 503
 	IP forwarding . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 472
 	ICMP redirects . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 473
 	Source routing. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 473

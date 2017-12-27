@@ -356,6 +356,7 @@ IP addresses: the gory details pg506
 				C = 1100 {this is for a hex digit, or nibble or half-byte}
 				{A=10=>1010, B=11=>1011, C=12=>1100, D=13=>1101, E=14=1110}
 				FF = 255 {this is for a byte}
+				FC = 252 {this is for a byte} 
 
 			IP address         	Netmask  		Network        	Broadcast
 			128.138.243.100/16 	255.255.0.0 		128.138.0.0   	128.138.255.255
@@ -363,13 +364,183 @@ IP addresses: the gory details pg506
 			128.138.243.100/26 	255.255.255.192 	128.138.243.64 	128.138.243.127
 
 			
+		The network address and broadcast address steal two hosts from each network, so it would seem that the smallest meaningful network would have four possible hosts: two real hosts—usually at either end of a point-to-point link—and the network and broadcast addresses.
+				To have four values for hosts requires two bits in the host portion. That is, 2^1 (or having one bit) would give you 2 values 0 & 1. While 2^2 (that is, having two bits) would yield 4 values 3, 2, 1, and 0.
+
+				So such a network would be a /30 network that is 30 1's with two 0's. The first two bits of the last nibble are for the host. 
+
+				The associated netmask 255.255.255.252 or 0xFFFFFFFC. We know that FF == 255, FC would subtract 3 from 255. C = 1100 so, subtract (2^1 * 1  +  2^0 * 1; or, 2 + 1 => 3).
+
+				However, a /31 network is in fact treated as a special case (see RFC3021) and has no network or broadcast address. Both of its two addresses are used for hosts, and its netmask is 255.255.255.254.
+
+				ZIP Calculator displays everything you might need to know about a network address and its netmask, broadcast address, hosts, etc.
+						brew install ipcalc
+
+				If a dedicated IP calculator isn’t available, the standard utility 'bc' makes a good backup utility since it can do arithmetic in any base. Set the input and output bases with the 'ibase' and 'obase' directives. Set the obase first; otherwise, it’s interpreted relative to the new 'ibase'
+
+	CIDR: Classless Inter-Domain Routing
+		CIDR relies on an explicit netmask to define the boundary between the network and host parts of an address. But unlike subnetting, CIDR allows the network portion to be made smaller than would be implied by an address’s implicit class.
+
+		A short CIDR mask may have the effect of aggregating several networks for purposes of routing. Hence, CIDR is sometimes referred to as supernetting.
+
+		CIDR simplifies routing information and imposes hierarchy on the routing process. For example, suppose that a site has been given a block of eight class C addresses numbered 192.144.0.0 through 192.144.7.0 (in CIDR notation, 192.144.0.0/21). 
+				21 1's and 11 0's. 16 1's in the first two octects. So, the third octect is specified as: 
+						1111 1000 -- note the last 3 bits are reserved for the network 0 - 7.
+							$ ipcalc 192.144.0.0/21
+							Address:   192.144.0.0          11000000.10010000.00000 000.00000000
+							Netmask:   255.255.248.0 = 21   11111111.11111111.11111 000.00000000
+							Wildcard:  0.0.7.255            00000000.00000000.00000 111.11111111
+							=>
+							Network:   192.144.0.0/21       11000000.10010000.00000 000.00000000
+							HostMin:   192.144.0.1          11000000.10010000.00000 000.00000001
+							HostMax:   192.144.7.254        11000000.10010000.00000 111.11111110
+							Broadcast: 192.144.7.255        11000000.10010000.00000 111.11111111
+							Hosts/Net: 2046                  Class C
+
+				Internally, the site could use them as:
+						1 network of length /21 with 2,046 hosts. This is calculated by the left over hosts: 09.FE (00000 111.11111110). The netmask is 255.255.248.0 (11111111.11111111.11111 000.00000000)
+							$ echo '1024+512+256+128+64+32+16+8+4+2' | bc
+							2046
+
+						8 networks of length /24 with 254 hosts each, netmask 255.255.255.0
+						$ echo '128+64+32+16+8+4+2' | bc # bits 7 - 1 used for hosts
+						254
+
+							000.1111111x - first network with 254 hosts
+							001.1111111x - second network with 254 hosts
+							010.1111111x - third network with 254 hosts
+
+						16 networks of length /25 with 126 hosts each, netmask 255.255.255.128
+							000.0111111x - first network with 126 hosts
+							000.1111111x - second network with 126 hosts
+							001.0111111x - third network with 126 hosts
+
+						32 networks of length /26 with 62 hosts each, netmask 255.255.255.192
+							000.0011111x - first network with 62 hosts
+							000.0111111x - second network with 62 hosts
+							001.1011111x - third network with 62 hosts
+
+				But from the perspective of the Internet, it’s not necessary to have 32, 16, or even 8 routing table entries for these addresses. They all refer to the same organization, and all the packets go to the same ISP. 
+
+				A single routing entry for 192.144.0.0/21 suffices. CIDR makes it easy to allocate portions of class A and B addresses and thus increases the number of available addresses manyfold.
+
+				Inside your network, you can mix and match regions of different subnet lengths as long as all the pieces fit together without overlaps. 
+
+				This is called variable length subnetting.
+
+				For example, an ISP with the 192.144.0.0/21 allocation could define some /30 networks for point-to-point customers, some /24s for large customers, and some /27s for smaller folks.
+
+				All the hosts on a network must be configured with the same netmask. You can’t tell one host that it is a /24 and another host on the same network that it is a /25.
+
+	Address allocation
+		Only network numbers are formally assigned; sites must define their own host numbers to form complete IP addresses. You can subdivide the address space that has been assigned to you into subnets in whatever manner you like.
+
+		ICANN (the Internet Corporation for Assigned Names and Numbers) has delegated blocks of addresses to five regional Internet registries, and these regional authorities are responsible for doling out subblocks to ISPs within their regions.
+
+	Private addresses and network address translation (NAT)
+		Another factor that has helped decelerate the rate at which IPv4 addresses are consumed is the use of private IP address spaces (RFC1918).
+
+		These addresses are used by your site internally but are never shown to the Internet. A border router translates between your private address space and the address space assigned by your ISP. 
+
+		RFC1918 sets aside 1 class A network, 16 class B networks, and 256 class C networks that will never be globally allocated and can be used internally by any site. The “CIDR range” column shows each range in the more compact CIDR notation; it does not add additional information.
+				IP Class     	From          	To                	CIDR Range
+				Class A 		10.0.0.0 		10.255.255.255 		10.0.0.0/8
+				------------------------------------------------------------------
+				$ ipcalc 10.0.0.0/8
+				Address:   10.0.0.0             00001010. 00000000.00000000.00000000
+				Netmask:   255.0.0.0 = 8        11111111. 00000000.00000000.00000000
+				Wildcard:  0.255.255.255        00000000. 11111111.11111111.11111111
+				=>
+				Network:   10.0.0.0/8           00001010. 00000000.00000000.00000000
+				HostMin:   10.0.0.1             00001010. 00000000.00000000.00000001
+				HostMax:   10.255.255.254       00001010. 11111111.11111111.11111110
+				Broadcast: 10.255.255.255       00001010. 11111111.11111111.11111111
+				Hosts/Net: 16777214              Class A, Private Internet
 
 
-						Z
+				Class B 		172.16.0.0 		172.31.255.255 		172.16.0.0/12 
+				------------------------------------------------------------------
+				$ ipcalc 172.16.0.0/12
+				Address:   172.16.0.0           10101100.0001 0000.00000000.00000000
+				Netmask:   255.240.0.0 = 12     11111111.1111 0000.00000000.00000000
+				Wildcard:  0.15.255.255         00000000.0000 1111.11111111.11111111
+				=>
+				Network:   172.16.0.0/12        10101100.0001 0000.00000000.00000000
+				HostMin:   172.16.0.1           10101100.0001 0000.00000000.00000001
+				HostMax:   172.31.255.254       10101100.0001 1111.11111111.11111110
+				Broadcast: 172.31.255.255       10101100.0001 1111.11111111.11111111
+				Hosts/Net: 1048574               Class B, Private Internet
 
-						Z
 
-						Z
+				Class C 		192.168.0.0 	192.168.255.255 	192.168.0.0/16
+				------------------------------------------------------------------
+				$ ipcalc 192.168.0.0/16
+				Address:   192.168.0.0          11000000.10101000. 00000000.00000000
+				Netmask:   255.255.0.0 = 16     11111111.11111111. 00000000.00000000
+				Wildcard:  0.0.255.255          00000000.00000000. 11111111.11111111
+				=>
+				Network:   192.168.0.0/16       11000000.10101000. 00000000.00000000
+				HostMin:   192.168.0.1          11000000.10101000. 00000000.00000001
+				HostMax:   192.168.255.254      11000000.10101000. 11111111.11111110
+				Broadcast: 192.168.255.255      11000000.10101000. 11111111.11111111
+				Hosts/Net: 65534                 Class C, Private Internet
+
+		The original idea was that sites would choose an address class from among these options to fit the size of their organizations. 
+
+		But now that CIDR and subnetting are universal, it probably makes the most sense to use the class A address (subnetted, of course) for all new private networks. pg511
+
+		To allow hosts that use these private addresses to talk to the Internet, the site’s border router runs a system called NAT (Network Address Translation).
+
+		NAT intercepts packets addressed with these internal addresses and rewrites their source addresses, using a real external IP address and perhaps a different source port number.
+
+		It also maintains a table of the mappings it has made between internal and external address/port pairs so that the translation can be performed in reverse when answering packets arrive from the Internet.
+
+		NAT’s use of port number mapping multiplexes several conversations onto the same IP address so that a single external address can be shared by many internal hosts. In some cases, a site can get by with only one “real” IP address.
+				For example, this is the default configuration for most mass-market routers used with cable and DSL modems.
+
+				A site that uses NAT must still request a small section of address space from its ISP, but most of the addresses thus obtained are used for NAT mappings and are not assigned to individual hosts.
+
+				If the site later wants to choose another ISP, only the border router and its NAT configuration need be updated, not the configurations of the individual hosts.
+
+				Large organizations must institute some form of central coordination so that all hosts have unique IP addresses. The situation can become complicated when one company merges with another. The combined organization must often renumber
+
+				It is possible to have a UNIX or Linux box perform the NAT function, but most sites prefer to delegate this task to their routers or network connection devices.
+						Of course, many routers now run embedded Linux kernels. Even so, these dedicated systems are still generally more proficient and more secure than general-purpose computers that also forward packets.
+
+				An incorrect NAT configuration can let private-address-space packets escape onto the Internet. The packets may get to their destinations, but answering packets won’t be able to get back.
+
+				CAIDA, an organization that collects operational data finds that 0.1% to 0.2% of packets have either private addresses or bad checksums. CAIDA, pronounced “kay duh,” is the Cooperative Association for Internet Data Analysis at the San Diego Supercomputer Center on the UCSD campus (caida.org).
+
+		One issue raised by NAT is that an arbitrary host on the Internet cannot initiate connections to your site’s internal machines.
+				To get around this limitation, NAT implementations let you preconfigure externally visible “tunnels” that connect to specific internal hosts and ports.
+
+				Many routers also support the Universal Plug and Play (UPnP) standards promoted by Microsoft. This allows interior hosts to set up their own dynamic NAT tunnels. 
+						ZThis can be either a godsend or a security risk, depending on your perspective. The feature is easily disabled at the router if you wish to do so.
+
+		Another issue is that some applications embed IP addresses in the data portion of packets; these applications are foiled or confused by NAT.
+				Examples include some media streaming systems, routing protocols, and FTP commands. NAT sometimes breaks VPNs (virtual private networks), too. 
+
+	IPv6 addressing
+		IPv6 addresses are 128 bits long. These long addresses were originally intended to solve the problem of IP address exhaustion. But now that they’re here, they are being exploited to help with issues of routing, mobility, and locality of reference. 
+
+		IPv4 addresses were not designed to be geographically clustered in the manner of phone numbers or zip codes, but clustering was added after the fact in the form of the CIDR conventions.
+				Of course, “geography” is really routing space rather than physical location. The hierarchical subassignment of network addresses is assumed throughout IPv6.
+
+				Your IPv6 ISP assigns you an address prefix that you prepend to the local parts of your addresses, at your border router.
+
+		The boundary between the network portion and the host portion of an IPv6 address is fixed at /64. Therefore, true subnetting no longer exists in the IPv6 world, although the term “subnet” lives on as a synonym for “local network."
+
+		Even though network numbers are always 64 bits long, routers needn’t pay attention to all 64 bits when making routing decisions. They can route packets based on prefixes, just as they do under CIDR.
+				ISPs are free to set delegation boundaries wherever they wish.
+
+		The 64-bit host ID can potentially be derived from the hardware interface’s 48-bit MAC address.
+				The host ID is the MAC address with the two bytes 0xFFFE inserted in the middle and one bit (bit 6 of the first byte, numbering bits from the left, starting at 0) complemented; see RFC4291.
+
+				The standard for converting 48-bit MAC addresses into 64-bit IP host numbers is known as EUI-64.
+
+		Z
+
+		Z
 
 				Z
 
