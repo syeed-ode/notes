@@ -260,7 +260,12 @@ Chapter 8: Video (with special guest star "Ganvas"): not your father's tv p385
 					AddType video/mp4 .mp4
 					AddType video/webm .webm
 
-			This tells the server how to serve files with those file extensions.
+			This tells the server how to serve files with those file extensions. pg433
+
+	If only it were a perfect world pg441
+
+	pg490
+	pg509
 
 			
 
