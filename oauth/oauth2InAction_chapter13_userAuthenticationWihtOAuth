@@ -1,0 +1,97 @@
+*************************************************************
+*							    *
+*							    *
+*							    *
+toc: 19
+pg496 - 560
+*************************************************************
+*****  Chapter 13 - User authentication with OAuth 2.0  *****
+*************************************************************
+The OAuth 2.0 specification defines a 'delegation' protocol useful for conveying 'authorization decisions' across a network of web-enabled applications and APIs. 
+
+	***OAuth 2.0 is not an authentication protocol.***
+
+Much of the confusion comes from the fact that OAuth 2.0 is commonly used 'inside' of authentication protocols. OAuth 2.0 embeds several authentication
+events inside of a regular OAuth 2.0 process. As a consequence, many developers assume they’re performing user authentication. 
+
+13.1 Why OAuth 2.0 is not an authentication protocol pg6
+
+'Authentication', in this context, is what tells an application who the current user is and whether they’re currently using your application. It’s the security architecture that says the user is who they claim to be, by providing credentials (usually a username and password) to prove it.
+
+A practical authentication protocol will tell you identity attributes such as a unique identifier, an email address, and a name.
+
+OAuth 2.0, on its own, says absolutely nothing about the user, nor does it say how the user proved their presence. As far as an OAuth 2.0 client is concerned, it asked for a token, it got a token, and it eventually used that token
+
+It doesn’t know anything about who authorized the application or whether there was even a user there at all. The major use cases for OAuth 2.0 are about obtaining an access token for use when the user isn’t able to interactively authorize the application.
+
+Thinking back to our printing example, the user is in no way directly involved in the connection 'between' the printing service and the storage service. Instead, the OAuth 2.0 access token allowed the printing service to act on the user’s behalf. 
+
+This is a powerful paradigm for delegated client 'authorization', but it’s rather  antithetical to 'authentication'. Remeber with 'authentication' the whole point is figuring out whether the user is there and who they are.
+
+	13.1.1 Authentication vs. authorization: a delicious metaphor pg6
+
+	It may be helpful to think of the difference between authentication and authorization in terms of a metaphor: fudge and chocolate.
+			Vittorio Bertocci for this excellent metaphor, from the blog post “OAuth 2.0 and Sign-In,” available at http://www.cloudidentity.com/blog/2013/01/02/oauth-2-0-and-sign-in-4/
+
+			Chocolate is an ingredient whereas fudge is a confection. You can make chocolate fudge, which is defined by its chocolaty character. It’s tempting—but ultimately incorrect—to say that chocolate and fudge are equivalent. 
+
+			Chocolate can be used to make many different things in many different forms. It’s a versatile and useful component that lends its distinct flavor to everything from cakes and ice creams to pastry fillings.
+
+			Here it’s clear chocolate is the star ingredient of chocolate fudge. 
+
+	OAuth 2.0, in this metaphor, is chocolate. It’s a versatile ingredient fundamental to a number of different security architectures on the web today.
+
+		It’s always made up of the same roles and actors. OAuth 2.0 can be used to protect RESTful APIs and web resources. 
+
+		It can be used by clients on web servers and native applications. It can be used by end users to delegate limited authority and by trusted applications to transmit back-channel data.
+
+		OAuth 2.0 can even be used to make an identity and authentication API, where it’s clear that OAuth 2.0 is the key enabling technology
+
+	z
+
+	z
+
+	z
+
+	z
+
+	z
+
+	z
+
+	z
+
+	z
+
+	z
+
+	z
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
