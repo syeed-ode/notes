@@ -1,0 +1,17 @@
+
+
+Add 36 to the page to get the pdf location. A page references are in PDF pages.
+*************************************************************
+*							    *
+*							    *
+*							    *
+*****       Chapter 4 - Mapping the Application       *******
+
+Enumerating Content and Functionality
+	Web Spidering
+	User-Directed Spidering
+	Discovering Hidden Content
+		Brute-Force Techniques
+			It is difficult to write a fully automated script to output a listing of valid resources. 
+			Capture as much information as possible about the application’s responses during the brute-force exercise and manually review it. pg121
+		Inference from Published Content
