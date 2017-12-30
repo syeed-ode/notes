@@ -3,3 +3,7 @@ find ~/java_projects/ -type f -name "*.java" | parallel --xargs grep -i csrf
 
 ****GET MULTIPLE FILES/DIRECTORIES FROM WEBSITE****
 wget -r --no-parent --reject "index.html*" --reject "ch01*" http://python.itcarlow.ie/ed2
+
+
+****GET MULTIPLE FILES/DIRECTORIES FROM WEBSITE****
+~/Downloads/proxychains-3.1/proxychains/proxychains wget -rl0 -kKE -t5 http://www.skyhookwireless.com/about-skyhook 2>~/junk/skyhookwireless
