@@ -1,3 +1,5 @@
+	                                                                   |
+
 This is how you find your external IP using the dig command
 
                     				[DIG COMMAND FOR FINDING EX IP]
@@ -348,21 +350,38 @@ The CNAME Hack
 	However if an ISP has four clients on different subnets. It must 1) maintain the reverse records for each of its clients or 2) it must find a way to take the third octet and delagate each independently.
 	
 	The trick is to add a CNAME for each host in the subnet.  The CNAME should point to the zone owner (SOA) for the subnet. The parent and the child domains must coordinate this. It may complicate the parents zone file, but it delegates authority for those hosts to the subdomains SOA.
-	
+	                                                                   |
 The SRV (services) record
-	The SRV records specifies the location of services in the domain.  Before SRV, you had to hope that a sysadmin added an FTP record. Now you can query the SRV record for the ftp host. The SRV records are used extensively by Windows.
-	
-	The SRV records resuemble generalized MX records. They steer and load balance connections from the outside world. The format is:
+	The SRV records specifies the location of services in the domain.  
+		Before SRV, you had to hope that a sysadmin added an FTP 
+		record. Now you can query the SRV record for the ftp host. 
+		The SRV records are used extensively by Windows.
+	The SRV records resemble generalized MX records. They steer and load 
+		balance connections from the outside world. The format is:
 			<service.pro.name> [ttl] [IN] SVR <pri> <wt> <port> <target>
-				<service>	a service defined in the IANA (Internet Assigned Numbers Authority) assigned numbers database (see https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml)
+				<service>	a service defined in the IANA 
+						(Internet Assigned Numbers 
+						Authority) assigned numbers 
+						database 
+						(see https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml)
 				<pro>		is either 'tcp' or 'upp'
-				<name>>		the domain to which the SRV record refers
+				<name>>		the domain to which the SRV 
+						record refers
 				[IN]		class (network type)
 				<pri>		MX stype priority
-				<wt>		the weight used for load balancing amoung serveral servers, "0" means no load balancing
-				<port>		the port on which the service runs
-				<target>	the hostname of teh server that provides the service, "." service is not provided at thsi site
-	To avoid a second round trip, DNS usually provides teh A record of teh server providing the service in the answer along with the target.
+				<wt>		the weight used for load 
+						balancing amoung serveral 
+						servers, "0" means no load 
+						balancing
+				<port>		the port on which the 
+						service runs
+				<target>	the hostname of the server 
+						that provides the service, 
+						"." means the service is not 
+						provided at this site
+	To avoid a second round trip, DNS usually provides the A record of 
+		the server providing the service in the answer along with 
+		the target.
 	
 	MS Exchange uses SRV records to help Outlook clients find them and to provide automatic configuratoin for Outlook Anywhere.  The SRV records are teh fourth thing tried, after Active Directory and pre-configured URLs. Windows uses a GUI tool called DNS Manager to setup SRV records.
 
