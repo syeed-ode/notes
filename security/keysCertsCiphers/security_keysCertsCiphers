@@ -1,83 +1,95 @@
-This information was gather from reading Java Security 2nd Edition by O'Reilly.  It is a listing of 
-	notes and information.  Not sure how immediately helpful, but as I went through this material 
-	it helped me out greatly in defining terms, relating different components and keeping track 
-	of relationships between objects.
+	                                                                   |
+	                                                                   |
+This information was gather from reading Java Security 2nd Edition by 
+	O'Reilly.  It is a listing of notes and information.  Not sure how 
+	immediately helpful, but as I went through this material it helped 
+	me out greatly in defining terms, relating different components and 
+	keeping track of relationships between objects.
 *
 *
 *
 *
 ****Chapter 7 - Introduction to Cryptology****
 author authentication - identity of the site
-data authentication - assure the class was not modified in transit over the network
+data authentication - assure the class was not modified in transit over 
+	the network
 *
 *
 *
 *
 ****Chapter 8 - Security Providers****
-input data + key -> engine -> encrypted output data; // this is a '''cryptographic engine''' for encryption
+input data + key -> engine -> encrypted output data; // this is a 
+                                                     // '''cryptographic engine''' 
+						     // for encryption
 	where,
 		input data = (April is the cruelest month)
 		encrypted output data = (Ncevy vf gur pehryg zbagu)
-		engine = (Some algorithm (DSA/MD5) which perform encryption operation)
-
+		engine = (Some algorithm (DSA/MD5) which perform encryption 
+			operation)
 there are two standard cryptographic engines - 
-		1) a message digest engine and 
+		1) a message digest engine (data integrity) and 
 		2) a digital signature engine.
-The first engines we'll look at generate cryptographic keys. All together there are 
-	three types of keys −− secret (symmetric), public and private (asymmetric). 
-	Public and private are a key pair.
+		
+Message digests are the simplest of the standard engines and can verify that data has not been tampered with −− up to a point. There are certain limitations on the security of a message digest that is transmitted along with the data it represents. 
 
+Digital signatures are engine used to create digitally signed objects that you can send between programs. When you handle digital signatures programatically, you perform two operations on them. You create them by taking a piece of data, creating a message digest of the data, and signing the message digest with a private key
+
+
+
+The first engines we'll look at generate cryptographic keys. All together 
+	there are three types of keys −− secret (symmetric), public, and 
+	private. Public and private are a key pair (asymmetric).
 
 (i.e Message Digest; Digital Signature)
 engine - MD & DigSig
 engine - operation (cryptographic algorithm itself (operation))
-       - message digest may be implemented by a particular algorithm, such as MD5 or 
-       		SHA, Secure Hash Algorithm
+       - message digest may be implemented by a particular algorithm, such 
+         as MD5 or SHA, Secure Hash Algorithm
        - abstract class
-       - (i.e. Engine.class(es)) these classes come with the Java virtual machine as 
-       		part of the core API
-
-
+       - (i.e. Engine.class(es)) these classes come with the Java virtual 
+         machine as part of the core API
 (i.e. PRNG, KeyGenerator, KeyPairGenerator)
-algorithm - an implementation of an engine (MD5 or SHA, for message digest); i.e. 
-		particular implementations of the cryptographic operation
+algorithm - an implementation of an engine (MD5 or SHA, for message digest); 
+            i.e. particular implementations of the cryptographic operation
           - defines how a particular operation should be executed
-          - (i.e. Algorithm.class(es)) there is a set of classes that implement 
-	  	particular algorithms for particular engines; single algorithm class 
-		provides a particular algorithm for a particular engine.
+          - (i.e. Algorithm.class(es)) there is a set of classes that 
+	    implement particular algorithms for particular engines; single 
+	    algorithm class provides a particular algorithm for a particular 
+	    engine.
 		
-
+security providers                                                          
+	The security providers rely on cooperation between themselves and 
+		the rest of the Java security package in order to fulfill 
+		their purpose. The details of this cooperation are handled 
+		for us −− when we use the MessageDigest class to generate a 
+		digest, for example, it's the responsibility of the 
+		MessageDigest class to ask the Security class which particular 
+		class to use to generate the digest. The Security class in 
+		turn asks each of the providers whether or not they can 
+		supply the desired digest.
 security providers   
-	** The security providers rely on cooperation between themselves and the rest of 
-		the Java security package in order to fulfill their purpose. The details 
-		of this cooperation are handled for us −− when we use the MessageDigest 
-		class to generate a digest, for example, it's the responsibility of the 
-		MessageDigest class to ask the Security class which particular class to 
-		use to generate the digest. The Security class in turn asks each of the 
-		providers whether or not they can supply the desired digest.
-
-security providers   
-	-  is transparently useful to the programmer and to the end user. 
-	     a system administrator, or a developer can configure the security provider; 
-	     this is a result of the security provider being based on a set of provider 
-	     classes.
+	-  is transparently useful to the programmer and to the end user. A 
+	   system administrator, or a developer can configure the security 
+	   provider; this is a result of the security provider being based 
+	   on a set of provider classes.
 	-  is the glue that manages the mapping between:
-	           - engines used by the rest of the security package (such as a message 
-		   	digest)
-	           - the specific algorithms that are valid for those engines (such as an 
-		   	SHA digest for MD5 engine)
+	           - engines used by the rest of the security package (such 
+		     as a message digest)
+	           - the specific algorithms that are valid for those engines 
+		     (such as an SHA digest for MD5 engine)
 	           - the availability of the specific implementations of that 
-		   	algorithm/engine pair to any particular Java virtual machine
-	-  allows an easy mechanism where the specific algorithms and their implementations 
-	     can be easily changed or substituted
+		     algorithm/engine pair to any particular Java virtual 
+		     machine
+	-  allows an easy mechanism where the specific algorithms and their 
+	   implementations can be easily changed or substituted
 
 
 
-Provider.class - A provider knows how to map particular algorithms to the actual class that 
-			implements the operation
-Security.class - The Security class maintains a list of the provider classes and consults 
-			each in turn to see which operations it supports
-                 ******  These two classes together make up the idea of a security provider   ******
+Provider.class - A provider knows how to map particular algorithms to the 
+                 actual class that implements the operation
+Security.class - The Security class maintains a list of the provider classes 
+                 and consults each in turn to see which operations it supports
+******  These two classes together make up the idea of a security provider   ******
 
 AES 	Advanced Encryption Standard
 DES 	Data Encryption Standard
@@ -86,7 +98,7 @@ JCE 	Java Cryptography Extension
 PKCS 	Public Key Cryptography Standard
 RSA 	Rivest, Shamir, and Adelman
 DSA 	Digital Signature Architecture
-MD 		Message Digest
+MD 	Message Digest
 SHA 	Secure Hashing Algorithm
 JKS 	Java Keystore
 MAC 	Message Authentication Code 
@@ -95,22 +107,31 @@ MAC 	Message Authentication Code
 *
 *
 ****Chapter 9 - Key's and Certificates****
-Keys are required to create and verify digital signatures or to perform encryption. 
-
-There are two general types of keys: asymmetric and symmetric. Asymmetric keys come in two types as well, public and private. A public key and a private key are related and are referred to as a key pair. Symmetric keys are also called secret keys.
-
-Certificates are used to authenticate public keys; when public keys are transmitted electronically, they are often embedded within certificates. 
-
-The core Java API comes with the necessary classes to handle public and private keys and their certificates. The classes necessary to handle secret keys come only with JCE.
-
-A generator class creates keys from scratch. With no input (or, possibly, input to initialize it to a certain state), the generator can produce one or more keys. Symmetric keys are generated by the 'KeyGenerator' class while asymmetric key pairs are generated by the 'KeyPairGenerator' class.
-
-The KeyFactory class translates between key objects and their external representations, which may be either a byte array or a key specification.
-
-Listing of providers, their services, the algorithms associated with these services, and the 
-	provider keys.  This information is useful when determining which algorthim you would 
-	like your key to be generated with.
-This was moved to ../providerList
+Keys are required to create and verify digital signatures or to perform 
+	encryption. 
+There are two general types of keys: asymmetric and symmetric. Asymmetric 
+	keys come in two types as well, public and private. A public key 
+	and a private key are related and are referred to as a key pair. 
+	Symmetric keys are also called secret keys.
+Certificates are used to authenticate public keys; when public keys are 
+	transmitted electronically, they are often embedded within 
+	certificates. 
+The core Java API comes with the necessary classes to handle public and 
+	private keys and their certificates. The classes necessary to 
+	handle secret keys come only with JCE.
+A generator class creates keys from scratch. With no input (or, possibly, 
+	input to initialize it to a certain state), the generator can 
+	produce one or more keys. Symmetric keys are generated by the 
+	'KeyGenerator' class while asymmetric key pairs are generated by 
+	the 'KeyPairGenerator' class.
+The KeyFactory class translates between key objects and their external 
+	representations, which may be either a byte array or a key 
+	specification.
+Listing of providers, their services, the algorithms associated with these 
+	services, and the provider keys.  This information is useful when 
+	determining which algorthim you would like your key to be generated 
+	with.
+This was moved to ./providerList
 --
 *
 *
@@ -119,73 +140,74 @@ This was moved to ../providerList
 ****Chapter 10 - Key Management****
 Common Keytool Commands and options:
 
-certificate					Verifies the public key is from who it says it's 
-							from.  Certificate Authority signs the 
-							cert. Contains: 1) signed by verifier, 
-							2) public key of person (to whome the 
-							cert has been issued), 3) DN of person
-key entry					Entry in keystore may be an asymmetric key pair, 
-							in which case it may store a chain of 
-							certificates: the first certificate always 
-							contains the public key of the entity. Or 
-							it may hold a secret key. 
-cert entry					Entry in keystore only a public key certificate.
-							It may also contain a certificate chain.
-keypass 					Password for the entire keystore
-storepass					Password for the entry of the particular private 
-							key (should be different from keypass)
-distinguished Name				Full name of the keystore entry (could be a 
-							cert-store entry or key entry)
-JKS						Key store engine. JKS stores on private keys. That
-							is, JKS stores a key pair and not secret
-							keys
-JCEKS						Key store engine. JCEKS stores secret keys (obviously) 
-							and private keys. 
-PKCS12						Key store engine. PCKS can be read and export keys -- 
-							but cannot write!! Algorithm does not supply a 
-							fully−functional keystore
-Certificate Signing Request (CSR)		Need to obtain a certificate from CA for a specific 
-							alias.  It contains: 1) DN, 2) public key and 
-							3) ***SIGNED WITH PRIVATE KEY***
+certificate			Verifies the public key is from who 
+					it says it's from.  Certificate 
+					Authority signs the cert. Contains: 
+					1) signed by verifier, 2) public key 
+					of person (to whome the cert has been 
+					issued), 3) DN (distinguished name, 
+					a long string which is a subset of 
+					its full X.500 name) of person
+keystore 			
+key entry			Entry in keystore. There are two type of key
+					entries. A key entry may be an 
+					asymmetric key pair, in which case 
+					it will be store a private key and 
+					public key certificate. A key entry
+					may also be a secret key.
+cert entry			Entry in keystore. It is only a public key 
+					certificate. An entry a single 
+					certificate NOT a chain. The 
+					certificate may be self−signed. But 
+					usally, the certificate is the root 
+					certificates of certificate 
+					authority that you trust to issue 
+					certificates. 
+	                                                                   |
+keypass 			Password for the entire keystore
+storepass				Password for the entry of the particular private key (should be different from keypass)
+	                                                                   |
+DN, distinguished Name			Full name of the keystore entry (could be a cert-store entry or key entry). a 
+					long string which is a subset of its 
+					full X.500 name) of person
+					CN=Scott Oaks, OU=JSD, O=Sun Microsystems, L=New York, S=NY, C=US
+					unlike an alias, the DN for a particular key is the same no matter what keystore it is located in: if I send you my public key, it will have the DN encoded in the public key's certificate.
+	                                                                   |
+JKS					Key store engine. JKS stores on private keys. That is, JKS stores a key pair and not secret keys
+JCEKS					Key store engine. JCEKS stores secret keys (obviously) and private keys. 
+	                                                                   |
+PKCS12					Key store engine. PCKS can be read and export keys -- but cannot write!! Algorithm does not supply a fully−functional keystore
+Certificate Signing Request (CSR)	Need to obtain a certificate from CA for a specific alias.  It contains: 1) DN, 2) public key and 3) ***SIGNED WITH PRIVATE KEY***
 
 
 To go through the process of getting a valid cert
 1) Generate a private key
+	                                                                   |
 2) Use key alias to generate a certificate signing request (CSR)
-	-- This is where I had problems.  When I went to the get a CA signed cert, the CA didn't like 
-		my CSR. I got pass the state length requirements (I had to use the full state name) and 
-		common name issue (the common name can't have spaces) only to end up at a wrong 
-		formatting issue.  I skiped using the keytool to generate my private key and went to 
-		using openssl.
-	-- I found out that the common name is actually the hostname of the site itself.  This caused a 
-		problem when using Thawte to get a CA signed cert.  This also caused a problem when I 
-		went to using org.apache.http.impl.client.CloseableHttpClient as a dependency on 
-		org.springframework.http.client.HttpComponentsClientHttpRequestFactory, which is a 
-		dependancy of the RestTemplate.  The default SSLConnectionSocketFactory from Apache has 
-		an hostname verifier that does this.  When doing this work in my own java sandbox, I use 
-		javax.net.ssl.SSLSocketFactory.  This factory does not check the CN.  However, the 
-		HttpComponentsClientHttpRequestFactory doesn't accept javax.net.ssl.SSLSocketFactory 
-		(I tried).
-				  (third attempt)#: keytool -genkey -alias syeedsthirdkey -keyalg RSA
-				    (genrate csr)#: keytool -certreq -alias syeedsthirdkey  -file sboCSR.cer 
-				    	## wrong format reported by CA (www.thawte.com, pronounced thought)
+	-- This is where I had problems.  When I went to the get a CA signed cert, the CA didn't like my CSR. I got pass the state length requirements (I had to use the full state name) and common name issue (the common name can't have spaces) only to end up at a wrong formatting issue.  I skiped using the keytool to generate my private key and went to using openssl.
+	                                                                   |
+	-- I found out that the common name is actually the hostname of the site itself.  This caused a problem when using Thawte to get a CA signed cert.  This also caused a problem when I went to using org.apache.http.impl.client.CloseableHttpClient as a dependency on org.springframework.http.client.HttpComponentsClientHttpRequestFactory, which is a dependancy of the RestTemplate.  The default SSLConnectionSocketFactory from Apache has an hostname verifier that does this.  When doing this work in my own java sandbox, I use javax.net.ssl.SSLSocketFactory.  This factory does not check the CN.  However, the HttpComponentsClientHttpRequestFactory doesn't accept javax.net.ssl.SSLSocketFactory (I tried).
+			  (third attempt)#: keytool -genkey -alias syeedsthirdkey -keyalg RSA
+			    (genrate csr)#: keytool -certreq -alias syeedsthirdkey  -file sboCSR.cer 
+				## wrong format reported by CA (www.thawte.com, pronounced thought)
 					
+	                                                                   |
 	   I was able to use openssl to generate a private key and signing request (CSR).  But that private 
 	   	key wasn't in my keystore. 
-        			  (priv key &CSR)#: openssl req -new -newkey rsa:2048 -nodes -keyout syeedsfourth.key -out sboCSR.csr
-						-new 	- this option generates a new certificate request. If 
-								the -key option is not used it will 
-								generate a new RSA private key
-        			  	  	-newkey	- this option creates a new certificate request and a 
-								new private key. The argument takes one of 
-								two forms. rsa:nbits, where nbits is the 
-								number of bits, generates an RSA key nbits in 
-								size. dsa:filename generates a DSA key using 
-								the parameters in the file filename
-        			  	  	-keyout	- this gives the filename to write the newly created 
-								private key to
-        			  	  	-out 	- This specifies the output filename to write the CSR 
-								to or standard output by default
+		  (priv key &CSR)#: openssl req -new -newkey rsa:2048 -nodes -keyout syeedsfourth.key -out sboCSR.csr
+			-new 	- this option generates a new certificate request. If 
+					the -key option is not used it will 
+					generate a new RSA private key
+			-newkey	- this option creates a new certificate request and a 
+					new private key. The argument takes one of 
+					two forms. rsa:nbits, where nbits is the 
+					number of bits, generates an RSA key nbits in 
+					size. dsa:filename generates a DSA key using 
+					the parameters in the file filename
+			-keyout	- this gives the filename to write the newly created 
+					private key to
+			-out 	- This specifies the output filename to write the CSR 
+					to or standard output by default
 	   Now I'm attempting to get that private key (and signed certificate) in my keystore. To do that take 
 	   	the following steps:
 	   	a) convert the certificate and PCKS into a PCKS12 file (used for storing private keys with 
@@ -226,6 +248,7 @@ To go through the process of getting a valid cert
 	  (change the alias name inside keystore)#: keytool -changealias -alias 1 -destalias syeedsselfsigned
 
 
+	                                                                   |
 3) New method to generate Certificate Signing Request (CSR)
 	-- I'm assuming the first CSR was due to an invalid key not being strong enough
 	-- So, this time I used RSA with strength of 2048.  (Basically, the command from up top)
@@ -237,28 +260,30 @@ To go through the process of getting a valid cert
 	-- Now I'm submitting the CSR to thawte for a CA signed cert...they won't let me do it for free...
 
 
+	                                                                   |
 4) Starting from scracth to generate a self-signed cert this time with the correct hostname
 	-- copying over the current keystore and trust store to the junk location (*_incorrect_CN_for_DN)
 	-- remove current .keystore
 	-- create a self signed certificate with private key
 	    (create a SS cert with private key)#: openssl req -x509 -newkey rsa:2048 -nodes -keyout syeedsfourth.key -out syeedsfourthkeysSelfSignedCert.cer
-							-x509 	- this option outputs a self signed 
-									certificate instead of a certificate 
-									request
-        			  	  		-newkey	- this option creates a new certificate 
-									request and a new private key. The 
-									argument takes one of two forms. 
-									rsa:nbits, where nbits is the number 
-									of bits, generates an RSA key nbits in 
-									size. dsa:filename generates a DSA key 
-									using the parameters in the file 
-									filename.
-        			  	  		-nodes	- if this option is specified then if a private 
-									key is created it will not be encrypted
-        			  	  		-keyout	- this gives the filename to write the newly 
-									created private key to
-        			  	  		-out 	- This specifies the output filename to write to 
-									or standard output by default
+	                                                                   |
+			-x509 	- this option outputs a self signed 
+					certificate instead of a certificate 
+					request
+			-newkey	- this option creates a new certificate 
+					request and a new private key. The 
+					argument takes one of two forms. 
+					rsa:nbits, where nbits is the number 
+					of bits, generates an RSA key nbits in 
+					size. dsa:filename generates a DSA key 
+					using the parameters in the file 
+					filename.
+			-nodes	- if this option is specified then if a private 
+					key is created it will not be encrypted
+			-keyout	- this gives the filename to write the newly 
+					created private key to
+			-out 	- This specifies the output filename to write to 
+					or standard output by default
 	-- validate the cert matches the private key
 (validate cert matches private key w/ openssl)#: openssl x509 -in syeedsfourthkeysSelfSignedCert.cer -pubkey -noout -outform pem | shasum5.18
 (validate private key matches cert w/ openssl)#: openssl rsa -pubout -in syeedsfourth.key 2>&1| grep -v "writing RSA key" | shasum5.18
