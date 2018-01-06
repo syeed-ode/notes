@@ -131,12 +131,12 @@ Internet Footpriting pg66, pg10
 				- the stable operations of the root DNS system
 
 		Although ICANN has many parts, three suborganizations are of particular interest to us at this point:
-				• Address SupportingOrganization (ASO), .aso.icann.org
+				• Address Supporting xOrganization (ASO), .aso.icann.org
 						The ASO allocates IP address blocks to various Regional Internet Registries (RIRs) who manage, distribute, and register public Internet number resources within their respective regions
 
 						These RIRs then allocate IPs to organizations, Internetservice providers (ISPs), or, in somecases, NationalInternet Registries (NIRs) or LocalInternet Registries (LIRs) if particular governments requireit (mostly in communist countries, dictatorships,etc.):
-								• APNIC(apnic.net) Asia-Pacificregion
-								• ARIN (arin.net) North and SouthAmerica, Sub-Sahara Africaregions
+								• APNIC (apnic.net) Asia-Pacific region
+								• ARIN (arin.net) North and South America, Sub-Sahara Africa regions
 								• LACNIC(lacnic.net) Portions of Latin Americaand the Caribbean
 								• RIPE(ripe.net) Europe, parts of Asia, Africa north of the equator, and the Middle East regions
 								• AfriNIC (afrinic.net, currently in observer status) Eventually both regions of Africa currently handled by ARIN and RIPE
