@@ -1,0 +1,219 @@
+*************************************************************
+*************************************************************
+The entire point of an authentication protocol is to know whether the user is present.
+*************************************************************
+*************************************************************
+The client is the piece of software that accesses the protected resource on behalf of the resource owner.
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 70
+*************************************************************
+*****    Chapter 3 - Building a simple OAuth Client    ******
+*************************************************************
+As we saw in the last chapter, the OAuth protocol is all about getting tokens to the client and letting the client use the access tokens to access protected resources on behalf of the resource owner.
+
+3.1 Register an OAuth client with an authorization server
+
+An OAuth client is identified by a string named client_id. The client identifier needs to be unique and is almost always assigned by the authorization server.
+		This assignment could happen through a developer portal, dynamic client registration (as discussed in chapter 12), or using manual configuration. 
+
+Our authorization server has assigned this client a client_id of oauth-client-1, we need to transfer that information to the client software.
+
+A 'confidential client' is one with a shared secret it stores to authenticate itself with the authorization server, known as the 'client_secret'.
+		The client_secret can be passed to the authorization server’s token endpoint in several different ways, but in our example we will be using HTTP Basic.
+
+		Client libraries may also include such as a redirect_uri, a set of scopes the client requests. These are determined by the client.
+
+The client needs to know which server it’s talking to: both the authorization endpoint and the token endpoint.
+		OOur server’s configuration information has been stored on the top-level variable named 'authServer'.
+				var authServer = {
+					authorizationEndpoint: 'http://localhost:9001/authorize',
+					tokenEndpoint: 'http://localhost:9001/token'
+				};
+
+3.2 Get a token using the authorization code grant type
+
+For an OAuth client to get a token from an authorization server, it needs to be delegated authority by a resource owner. We'll use 'authorization code grant type'.
+		The authorization code grant type uses a special code query parameter which is a one-time-use credential known as the 'authorization code'. 
+				The client will use that code in the next step. It will also check that the value of the state parameter matches the value that it sent in the previous step.
+		
+In 'authorization code grant type' the client sends the resource owner to the authorization server’s authorization endpoint.
+		The server then sends an authorization code back to the client through its 'redirect_uri'. 
+
+The client finally sends the code that it received to the authorization server’s token endpoint to receive an OAuth access token, which it needs to store
+		
+Why the authorization code grant type?
+		You may have already used other OAuth grant types (such as the implicit grant type or client credentials grant type), so why not start there?
+
+		The authorization code grant type fully separates all of the different OAuth parties. 
+				It is the foundational and most complex of the core grant types that we’ll cover in this book.
+
+				All of the other OAuth grant types are optimizations of this one.
+
+3.2.1 Sending the authorization request
+The homepage of the client application contains one button that sends the user to 'http://localhost:9000/authorize', and one button that fetches the protected resource, 'http://localhost:9002/resource'. 
+
+To initiate the authorization process, we need to redirect the user to the server’s authorization endpoint and include all of the appropriate query parameters on that URL.
+	Build the URL using a utility function and the JavaScript url library which formats and URL encodes the query parameters to use front-channel communication. 
+			var authorizeUrl = buildUrl(authServer.authorizationEndpoint, {
+				response_type: 'code',
+				client_id: client.client_id,
+				redirect_uri: client.redirect_uris[0]
+			});
+
+	Now, send an HTTP redirect to the user’s browser, sending them to the authorization endpoint. 
+			res.redirect(authGrantCodeUrl);
+
+	The redirect function is part of the express.js framework and sends an HTTP 302 Redirect message to the browser in response to the request on 'http://localhost:9000/authorize'. 
+			A real OAuth client application should never use an externally accessible trigger mechanism such as this, but should instead rely on tracking internal application state to determine when a new access token is needed.
+
+			When you click the Get OAuth Token button, you should be redirected to the authorization endpoint, which should prompt you to authorize the client application.
+
+3.2.2 Processing the authorization response
+At this point, you’re back at the client application, and on the URL 'http://localhost:9000/callback', with a few extra query parameters. This URL is served by the (currently empty) function:
+		For this part of the OAuth process, the request is coming in as a redirect from the authorization server, not as an HTTP response to our direct request.
+
+We need to look at the input parameters and read back the authorization code from the authorization server.
+		var code = req.query.code;
+
+Now we need to take this authorization code, include it as a form parameter in the request body, and send it to the token endpoint using an HTTP POST.
+		var form_data = qs.stringify({
+			grant_type: 'authorization_code',
+			code: code,
+			redirect_uri: client.redirect_uris[0]
+		});
+
+		Why do we include the 'redirect_uri' in this call?
+
+		According to the OAuth specification, if the redirect URI is specified in the authorization request, that same URI must also be included in the token request. 
+
+We need to send tell the server that this is an HTTP formencoded request and authenticate our client using HTTP Basic.
+		OAuth 2.0 tells us to use the client ID as the username and the client secret as the password, for HTTP Basic.
+				var headers = {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'Authorization': 'Basic ' + 
+						encodeClientCredentials(client.client_id, client.client_secret)
+				};
+
+We’ll then need to wire that in with a POST request to the server’s authorization endpoint:
+		var tokRes = request('POST', authServer.tokenEndpoint, {
+			body: form_data,
+			headers: headers
+		});
+		
+		res.render(‘index’, {access_token: body.access_token});
+
+		If the request is successful, the authorization server will return a JSON object which includes the access token value, among a few other things. This response looks something like the following:
+				{
+					"access_token": "987tghjkiu6trfghjuytrghj",
+					"token_type": "Bearer"
+				}
+
+Our application needs to read this result and parse the JSON object to retrieve the access token value, so we parse the response into the body variable:
+		var body = JSON.parse(tokRes.getBody());
+
+Our client now needs to save this token so that we can use it later:
+		access_token = body.access_token;
+
+3.2.3 Adding cross-site protection with the state parameter
+
+In the current setup, any time someone comes to 'http://localhost:9000/callback', the client will naively take in the input code value and attempt to post it to the authorization server. 
+		This means could fish for valid authorization codes at the authorization server, potentially causing our client to fetch a token it never requested.
+
+We can mitigate this by using an optional OAuth parameter called 'state'. Right after we throw out our old access token, we’ll create this value:
+		state = randomstring.generate();
+
+		Because we are using front channel communications, once the client sends the redirect to the authorization endpoint, the client application cedes control of the OAuth protocol until this return call happens.
+
+		We also need to add the state to the list of parameters sent on the authorization URL.
+				var authorizeUrl = buildUrl(authServer.authorizationEndpoint, {
+					response_type: 'code',
+					client_id: client.client_id,
+					redirect_uri: client.redirect_uris[0],
+					state: state
+				});
+
+The authorization server always return that state parameter unchanged to the client alongside the authorization code.
+
+We can check the state value that’s passed in to the redirect_uri page and compare it to our saved value from earlier.
+
+If it doesn’t match, we’ll display an error to the end user.
+		if (req.query.state != state) {
+			res.render('error', {error: 'State value did not match'});
+			return;
+		}
+
+3.3 Use the token with a protected resource
+
+The OAuth access token is known as a bearer token, which means that whoever holds the token can present it to the protected resource.
+		The OAuth Bearer Token Usage specification gives  three ways to send the token.
+				 HTTP Authorization header, form-encoded request body parameter (requires post), URL-encoded query parameter (may show up in logs).
+
+		 The Authorization header provides the maximum flexibility and security.
+
+The index page of our client application has a second button: Get Protected Resource. 
+		app.get('/fetch_resource', function(req, res) {
+
+		});
+
+First we need to make sure that we even have an access token. Then we’ll be making a POST request to the 'protectedResource' variable, sending the token using the OAuth-defined 'Authorization: Bearer' header.
+		var headers = {
+			'Authorization': 'Bearer ' + access_token
+		};
+		var resource = request('POST', protectedResource,
+			{headers: headers}
+		);
+
+3.4 Refresh the access token
+
+OAuth 2.0 provides a method of getting a new access token without involving the user interactively: 'the refresh token'.
+
+Is my token any good? The only real way to be sure is to use it and see what happens. The authorization server can use the optional 'expires_in' field of the token response.
+
+86 - 101
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

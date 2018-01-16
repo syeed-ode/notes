@@ -1,0 +1,343 @@
+*************************************************************
+*************************************************************
+The entire point of an authentication protocol is to know whether the user is present.
+*************************************************************
+*************************************************************
+The client is the piece of software that accesses the protected resource on behalf of the resource owner.
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+toc: 19
+pg496 - 560
+*************************************************************
+*****  Chapter 2 - User authentication with OAuth 2.0  ******
+*************************************************************
+2.1 Overview of the OAuth 2.0 protocol: getting and using tokens
+
+Fundamentally, there are two major steps to an OAuth transaction: issuing a token and using a token. 
+
+The token represents the access that’s been delegated to the client and it plays a central role in every part of OAuth 2.0.
+
+The OAuth transaction consists of the following sequence of events:
+		1.  The Resource Owner indicates to the Client that they would like the Client to act on their behalf (for example, “Go load my photos from that service so I can print them”).
+
+		2.  The Client requests authorization from the Resource Owner at the Authorization Server.
+
+		3.  The Resource Owner grants authorization to the Client.
+
+		4.  The Client receives a Token from the Authorization Server.
+
+		5.  The Client presents the Token to the Protected Resource.
+
+2.2 Following an OAuth 2.0 authorization grant in detail
+
+The 'authorization code grant' uses a temporary credential, the authorization code, to represent the resource owner’s delegation to the client
+
+		[client (application)] --> Client redirects user agent to authorization endpoint --> [resource owner (person)]
+		[resource owner (person)] --> User agent loads authorization endoint --> [authorization server] 
+		[authorization server] --> Resource owner authenticates to authoization server --> [resource owner (person)]
+		[resource owner (person)] <--> Resource owner authorizes client <--> [authorization server] 
+		[authorization server] > Authorization server redirects user agent to client with authorization code > [client (application)]
+		[resource owner (person)] --> User agent loads redirect URI at client with authorization code --> [client (application)] 
+
+	First, the resource owner goes to the client application and indicates to the client that they would like it to use a particular protected resource on their behalf.
+			This is where the user would tell the printing service to use a specific photo storage service. This service is an API that the client knows how to process, and the client knows that it needs to use OAuth to do so.
+					OOAuth pushes the way that the client knows how to talk to a given protected resource or how the client finds the authorization server tied to that protected out of scope. Typically the client has been statically configured to talk to both the protected resource and the authorization server.
+
+	When the client realizes that it needs to get a new OAuth access token, it sends the resource owner to the authorization server asking to be delegated authority by that resource owner. 
+			For example, our photo printer could ask the photo-storage service for the ability to read the photos stored there.
+
+			This takes the form of an HTTP redirect to the authorization server’s authorization endpoint.
+
+			The response from the client application looks like this:
+					HTTP/1.1 302 Moved Temporarily
+					x-powered-by: Express
+					Location: http://localhost:9001/authorize?response_type=code&scope=foo&client
+					_id=oauth-client-1&redirect_uri=http%3A%2F%2Flocalhost%3A9000%2Fcallback&
+					state=Lwt50DDQKUB8U7jtfLQCVGDL9cnmwHH1
+					Vary: Accept
+					Content-Type: text/html; charset=utf-8
+					Content-Length: 444
+					Date: Fri, 31 Jul 2015 20:50:19 GMT
+					Connection: keep-alive
+
+			***Sending the resource owner to the authorization server starts the process***
+
+	This redirect causes the browser to send an HTTP GET to the authorization server. 
+			GET /authorize?response_type=code&scope=foo&client_id=oauth-client
+			-1&redirect_uri=http%3A%2F%2Flocalhost%3A9000%
+			2Fcallback&state=Lwt50DDQKUB8U7jtfLQCVGDL9cnmwHH1 HTTP/1.1
+			Host: localhost:9001
+			User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0)
+			Gecko/20100101 Firefox/39.0
+			Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+			Referer: http://localhost:9000/
+			Connection: keep-alive
+
+	The client identifies itself and requests particular items by including query parameters in the URL it sends the user to.
+			The authorization server can parse those parameters and act accordingly, even though the client isn’t making the request directly.
+
+	Next, the authorization server will usually require the user to authenticate. This step is essential in determining who the resource owner is and what rights they’re allowed to delegate to the client. 
+			The user’s authentication passes directly between the user (and their browser) and the authorization server; it’s never seen by the client application.
+
+			This essential aspect protects the user from having to share their credentials with the client application. 
+
+			Because the authentication happens through a browser a wide variety of authentication techniques are available. OAuth doesn’t dictate the authentication technology you could use: username/password pair, cryptographic certificates, security tokens, federated single-sign-on, or any number of other possibilities.
+					The OAuth protocol is designed to protect against several major kinds of browser-based attacks, which we’ll cover in chapters 7, 8, and 9. 
+
+					This doesn’t convey any information about the authenticated user to the client.
+
+	Next, the user authorizes the client application. In this step, the resource owner chooses to delegate some portion of their authority to the client application.  The authorization server has many different options to make this work.
+			The client’s request can include an indication of what kind of access it’s looking for. This is know as OAuth scope.
+
+			The authorization server can allow the user to deny some or all of these scopes. Many authorization servers allow the storage of this authorization decision for future use. 
+					Then future requests for the same access by the same client won’t prompt the user interactively.
+
+					The user will still need to be logged in, but the decision to delegate authority to the client will have already been made during a previous attempt.
+
+					The authorization server can even override the end user’s decision based on an internal policy such as a client whitelist or blacklist.
+
+	Next, the authorization server redirects the user back to the client application in the form of an HTTP redirect to the client’s 'redirect_uri'.
+				HTTP 302 Found
+				Location: http://localhost:9000/oauth_callback?code=8V1pr0rJ&state=Lwt50DDQKUB8U7jtfLQCVGDL9cnmwHH1
+			
+			This in turn causes the browser to issue the following request back to the client:
+				GET /callback?code=8V1pr0rJ&state=Lwt50DDQKUB8U7jtfLQCVGDL9cnmwHH1 HTTP/1.1
+				Host: localhost:9000
+
+			Notice that this HTTP request is to the 'client' and not on the 'authorization server'.
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0
+					Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+					Referer: http://localhost:9001/authorize?response_type=code&scope=foo&client_id=oauth-client-1&redirect_uri=http%3A%2F%2Flocalhost%3A9000%2Fcallback&state=Lwt50DDQKUB8U7jtfLQCVGDL9cnmwHH1
+					Connection: keep-alive
+
+					*** Authorization server redirects resource owner back to the client with an authorization code ***
+
+	Since we’re using the authorization code grant type, this redirect includes the special code query parameter. The parameter is a one-time-use credential known as the 'authorization code'. It is the user’s authorization decision.
+			The client will use that code in the next step. It will also check that the value of the state parameter matches the value that it sent in the previous step.
+
+	Now that the client has the code, it can send it back to the authorization server on its token endpoint.
+			The client performs an HTTP POST with its parameters as a form-encoded HTTP entity body, passing its 'client_id' and 'client_secret' as an HTTP Basic authorization header.
+
+			This HTTP request is made directly between the client and the authorization server, without involving the browser or resource owner at all.
+					POST /token
+					Host: localhost:9001
+					Accept: application/json
+					Content-type: application/x-www-form-encoded
+					Authorization: <Basic b2F1dGgtY2xpZW50LTE6b2F1dGgtY2xpZW50LXNlY3JldC0x>
+
+					grant_type=authorization_code&
+					redirect_uri=http%3A%2F%2Flocalhost%3A9000%2Fcallback&code=<8V1pr0rJ>
+
+			This separation between different HTTP connections ensures that the client can authenticate itself directly without other components being able to see or manipulate the token request. 
+
+					*** Client sends the authorization code to the authorization server’s token endpoint; Client authenticates using its own credentials ***
+
+	The authorization server takes in this request and, if valid, issues a token. The authorization server performs a number of steps to ensure the request is legitimate.
+			First, it validates the client’s credentials (passed in the Authorization header here) to determine which client is requesting access.
+
+			Then, it reads the value of the code parameter from the body and looks up any information it has about that authorization code:
+					Which client made the initial authorization request and that it has not been previously used
+
+					Which user authorized it
+
+					What it was authorized for
+
+			If the code meets the validity checks, the authorization server generates and returns a new access token for the client. As a JSON object:
+					HTTP 200 OK
+					Date: Fri, 31 Jul 2015 21:19:03 GMT
+					Content-type: application/json
+
+					{
+						“access_token”: “987tghjkiu6trfghjuytrghj”,
+						“token_type”: “Bearer”
+					}
+
+	The client can use the access token at the protected resource.  
+			In this case the 'token_type' field is an OAuth Bearer token.
+					The OAuth specifications deal with 'bearer' tokens, which means taht anyone who carries the token has the right to use it.
+
+					Bearer tokens have particular security properties, which are enumerated in chapter 10, 
+
+					We'll take a look ahead at nonbearer tokens in chapter 15.
+
+			The response can also include a refresh token (used to get new access tokens without asking for authorization again).
+
+			It could include a hint about the token’s scopes and expiration time, as well.
+
+			The client can store this access token in a secure place for as long as it wants to use the token, even after the user has left.
+
+	With the token in hand, the client can present the token to the protected resource.
+			The client has several methods for presenting the access token we’re going to use the Authorization header.
+					GET /resource HTTP/1.1
+					Host: localhost:9002
+					Accept: application/json
+					Connection: keep-alive
+					Authorization: <Bearer 987tghjkiu6trfghjuytrghj>
+
+	The protected resource can determine whether the token is valid, look up who authorized it and what it was authorized for, and return the response accordingly.
+			A protected resource has options for token lookup the simplest option is to share a database with the autorization server that contains the token information.
+
+			The authorization server writes new tokens into the store when they’re generated, and the resource server reads tokens from the store.
+
+2.3 OAuth’s actors: clients, authorization servers, resource owners, and protected resources
+
+An OAuth 'client' is a piece of software that attempts to access the protected resource on behalf of the resource owner, and it uses OAuth to obtain that access.
+		Its responsibilities are largely centered on obtaining tokens from the authorization server and using tokens at the protected resource.
+
+		An OAuth client can be a web application, a native application, or even an in-browser JavaScript application, and we’ll cover the differences between these kinds of clients in chapter 6.
+
+		In our cloud-printing example, the printing service is the OAuth client.
+
+An OAuth protected resource is available through an HTTP server and it requires an OAuth token to be accessed.
+		It needs to validate the tokens presented to it and determine whether and how to serve requests. The protected resource has the final say as to whether or not to honor a token.
+
+		In our cloud-printing example, the photo-storage site is the protected resource.
+
+A 'resource owner' is the entity that has the authority to delegate access to the client. 
+		The resource owner isn’t a piece of software, the resource owner is the person using the client software to access something they control.
+
+		The resource owner interacts with the authorization server using a web browser (more generally known as the user agent).
+
+		In our cloud-printing example, the resource owner is the end user who wants to print their photos.
+
+An OAuth authorization server is an HTTP server is the central component to an OAuth system.
+		The authorization server authenticates the resource owner and client. 
+
+		It provides mechanisms for allowing resource owners to authorize clients. It may provide token introspection and remembering authorization decisions.
+
+		Finally, it issues tokens to the client.
+
+		In our cloud-printing example, the photo-storage site runs its own in-house authorization server for its protected resources.
+
+2.4 OAuth’s components: tokens, scopes, and authorization grants
+
+These are the bits that connect the actors in the previous section in a larger protocol. 
+
+2.4.1 Access tokens
+	An OAuth access token is issued by the authorization server indicates the rights that the client has been delegated.
+			It represents the combination of the client’s requested access, the resource owner that authorized the client, and the rights conferred during that authorization (usually including some indication of the protected resource).
+
+			OAuth tokens are opaque to the client, which means that the client has no need (and often no ability) to look at the token itself. The client’s job is to carry the token, requesting it from the authorization server and presenting it to the protected resource.
+
+	The authorization server and protected resource need to be able to understand the token and what it stands for. Tthe client is completely oblivious to all of this.
+			This allows the client to be much simpler as well as giving the authorization server and protected resource incredible flexibility.
+
+2.4.2 Scopes
+	An OAuth scope, a string representing a space-separated list, is a set of rights at a protected resource. 
+
+	Scopes are for limiting the access granted to a client. Scopes are defined by the protected resource, based on the API. 
+			Clients can request certain scopes.
+
+			Authorization server can allow the resource owner to grant or deny certain scopes to give to a client.
+
+	In our cloud-printing example.
+			The photo-storage service’s API defines several different scopes for accessing the photos: read-photo, read-metadata, update-photo, update-metadata, create, and delete.
+
+			The photo-printing service needs to only be able to read the photos in order to do its job,  it asks for the 'read-photo' scope.
+					Once it has an access token with this scope, the printer is able to read photos and print images.
+
+			If the user decides to print photos based on their date, the printing service will need the 'read-metadata' scope. 
+					The user will need to authorize them for this scope using the OAuth process.
+
+			Once the printing service has an access token with both scopes, it can perform actions that require either of them, or both of them together, using the same access token.
+
+2.4.3 Refresh tokens
+	An OAuth refresh token is similar in concept to the access token, in that it’s issued to the client by the authorization server and the client doesn’t know or care what’s inside the token.
+
+	What’s different, though, is that the token is never sent to the protected resource. Instead, the client uses the refresh token to request new access tokens without involving the resource owner.
+			In OAuth, an access token could stop working for a client at any point. The client will usually find out about the token being invalid by using it and receiving an error response.
+
+			Of course, the client could have the resource owner authorize it again, but what if the resource owner’s no longer there?
+					In OAuth 1.0, the client had no recourse but to wait for the resource owner’s return. 
+							To avoid this, tokens in OAuth 1.0 tended to live forever until explicitly revoked.
+
+							This is a bit problematic as it increases the attack surface for a stolen token.
+
+							The attacker can keep using the stolen token forever.
+
+					In OAuh 2.0, access tokens were given the option to expire automatically, but we still need a way to access resources when the user was no longer there.
+
+					The refresh token now takes the place of the long-lived token, but instead of it being used to obtain resources. It’s used to get new access tokens that, can get the resources.
+
+	Refresh tokens also give the client the ability to down-scope its access. 
+			If a client is granted scopes A, B, and C, but it only needs scope A, it can use the refresh token to request an access token for only scope A.
+
+			This lets a smart client follow the security principle of least privilege without burdening less-smart clients. 
+					Years of experience have shown that OAuth clients tend to be anything but smart, but it’s still good to have the advanced capability there for those that want to exercise it.
+
+	The fallback state for an OAuth client is to do OAuth again.
+
+2.4.4 Authorization grants
+	An 'authorization grant' is the means by which an OAuth client is given access to a protected resource using the OAuth protocol. It the process completes successfully it ultimately results in the client getting a token.
+
+	The entire OAuth process is the 'authorization grant': the client sending the user to the authorization endpoint, then receiving the code, then finally trading the code for the token.
+
+	In other words, the authorization grant is the method for getting a token.
+			Several different kinds of authorization grants exist in OAuth, each with its own characteristics. We’ll be covering these in detail in chapter 6. 
+
+			But most of our examples and exercises, use the authorization code 'authorization grant' type. That is the type used in the cloud-printing example.
+
+2.5 Interactions between OAuth’s actors and components: back channel, front channel, and endpoints
+
+Now that we know the different parts of an OAuth system, let’s take a look at how they communicate with each other. 
+		OAuth is an HTTP-based protocol, but OAuth communication doesn’t always happen through a simple HTTP request and response.
+				Draft standards exist that define how to use OAuth tokens over Generic Security Services Application Program Interface (GSS-API) (see https://tools.ietf.org/html/rfc7628) and Constrained Application Protocol (CoAP) (see https://tools.ietf.org/html/draft-ietf-ace-oauth-authz-09).
+						These can still use HTTP to bootstrap the process and the components translate the same as well.
+
+2.5.1 Back-channel communication
+	Many parts of the OAuth process use a normal HTTP request and response. Since these request and responses generally occur outside the purview of the resource owner and user agent, they are referred to as back-channel communication.
+			This is communication between the client, and, the authorization server and protected resource.
+
+	The client calls a token endpoint provided by the authorization server presenting a form-encoded set of parameters that the authorization server processes. The authorization server then responds with a JSON object, the token.
+
+	Tthe client makes a direct HTTP call in the back channel to the protected resource. The client presents the OAuth token and the protected resource must understand the token and the rights that it represents.
+
+2.5.2 Front-channel communication
+	Front-channel communication is a method of using HTTP requests to communicate indirectly between two systems through an intermediary web browser. 
+			Such as when the client interacts with the authorization endpoint of the authorization server.
+
+	This technique isolates the sessions on either side of the browser, which allows it to work across different security domains.
+			For instance, if the user needs to authenticate to one of the components, they can do so without exposing their credentials to the other system.
+					****  Front channel uses HTTP redirects through the web browser, no direct connections  ****
+
+			How can two pieces of software communicate without ever talking to each other?
+					Front-channel communication works by attaching parameters to a URL and indicating that the browser should follow that URL.
+
+					The receiving party can then parse the URL and consume the presented information.
+
+					The receiving party can then respond by redirecting the browser back to a URL hosted by the originator.
+
+			The two parties are communicating with each other indirectly through the use of the web browser as an intermediary.
+					This means that each front-channel request and response is actually a pair of HTTP request and response transactions.
+
+					For example, in the authorization code grant, the client needs to send the user to the authorization endpoint, but it also needs to communicate to the authorization server.
+							To do this, the client sends an HTTP redirect -- the server’s URL with query parameters --  to the browser.
+									HTTP 302 Found
+									Location: http://localhost:9001/authorize?client_id=oauth-client-1&response_type=code&state=843hi43824h42tj
+
+							The authorization server can parse the URL and find the information sent from the client. 
+
+							The authorization server can interact with the resource owner, authenticating them over HTTP transactions with the browser.
+
+							The authorization server sends an HTTP redirect to the browser, when it’s time to return the authorization code to the client. 
+									The sends the client's 'redirect_uri' to the browser. It also includes its own query parameters in the redirect.
+											HTTP 302 Found
+											Location: http://localhost:9000/oauth_callback?code=23ASKBWe4&state=843hi43824h42tj
+
+							When the browser follows this redirect, it will be served by the client application.
+
+							The client can parse the URL parameters from the incoming request.
+
+			The client and authorization server can pass messages back and forth to each other through an intermediary without ever talking to each other directly.
+
+	All information passed through the front channel is accessible to the browser, both to be read and potentially manipulated before the ultimate request is made.
+			The OAuth protocol accounts for this by limiting the of information that are passed through the front channel. 
+
+			None of the pieces of information used in the front channel can be used on their own to accomplish the task of delegation.
+
+			The authorization code can’t be used by the browser directly, but instead it must be presented alongside the client’s credentials in the back channel. 
+
+	Components use direct (back channel) and indirect (front channel) HTTP to communicate with each other.

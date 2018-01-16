@@ -1,5 +1,12 @@
 Add 51 to the page to get the pdf location. A page references are in PDF pages.
 *************************************************************
+*************************************************************
+The entire point of an authentication protocol is to know whether the user is present.
+*************************************************************
+*************************************************************
+The client is the piece of software that accesses the protected resource on behalf of the resource owner.
+*************************************************************
+*************************************************************
 *							    *
 *							    *
 *							    *
@@ -13,9 +20,9 @@ pg496 - 560
 OAuth 2.0 is a delegation protocol pg7
 
 OAuth 2.0 is letting someone who controls a resource to allow a software application to access that resource on their behalf without impersonating them.
-		There is the controller (photo storage) of the resource (photos)
-		There is the owner (person/user) of the resource
-		Software application (photo printing aka 'client') wants access to the resource
+		- There is the controller (photo storage) of the resource (photos)
+		- There is the owner (person/user) of the resource
+		- Software application (photo printing aka 'client') wants access to the resource
 
 The application requests authorization from the owner of the resource and receives tokens that it can use to access the resource. 
 
@@ -28,14 +35,14 @@ Say that you have a cloud photostorage service and a photoprinting service the a
 You can do this without giving your password away to the photo printer.
 
 OAuth is defined by: 
-		The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an  approval interaction between the resource owner and the HTTP service, or by allowing the  third-party application to obtain access on its own behalf. 
+		The OAuth 2.0 authorization framework enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf. 
 
-Let’s unpack that a bit: as an 'authorization framework',  OAuth  is all about getting the right of access from one component of a system to another. In the OAuth world, a client application (photo printing) wants to gain access to a protected resource on behalf of a resource owner (usually an end user). These are the components that we have so far:
-		The 'resource owner' has access to an API and can delegate access to that API. The resource owner is a person with access to a web browser.
+Let’s unpack that a bit: as an 'authorization framework',  OAuth  is all about getting the right of access from one component of a system to another. In the OAuth world, a client application (photo printing) wants to gain access to a protected resource (photos) on behalf of a resource owner (usually an end user). These are the components that we have so far:
+		The 'resource owner' (user) has access to an API and can delegate access to that API. The resource owner is a person with access to a web browser.
 
-		The 'protected resource' is the component that the resource owner has access to (the photos). For the most part it’s a web API of some kind.
+		The 'protected resource' (photos) is the component that the resource owner (user) has access to. For the most part it’s a web API of some kind.
 
-		The 'client' (photo priting) is the piece of software that accesses the protected resource (photos) on behalf of the resource owner (user). If you’re a web developer, the name “client” might make you  think  this  is  the  web  browser,  but  that’s  not  how  the  term  is  used  here. In OAuth, the client is whatever software consumes the API that makes up the protected resource. 
+		The 'client' (photo priting service) is the piece of software that accesses the protected resource (photos) on behalf of the resource owner (user). If you’re a web developer, the name “client” might make you  think  this  is  the  web  browser,  but  that’s  not  how  the  term  is  used  here. In OAuth, the client (photo printing service) is whatever software consumes the API that makes up the protected resource (photos). 
 				Whenever you see “client” in this book, we’re almost certainly talking about this OAuth-specific definition.
 
 We’ve got one goal in this whole setup: getting the client to access the protected resource for the resource owner. 
@@ -44,6 +51,11 @@ In the printing example, storage site’s API is the resource and the printing s
 
 We’ll see how this problem could be solved imperfectly without OAuth, and then we’ll look at how OAuth can solve it in a better way. 
 
+*************************************************************
+*************************************************************
+The entire point of an authentication protocol is to know whether the user is present.
+*************************************************************
+*************************************************************
 1.2  The bad old days: credential sharing (and credential theft) pg11
 
 One approach, popular in the enterprise space, is to 'copy the user’s credentials and replay them on another service'. In this case, the photo printer assumes that the user is using the same credentials as the storage site. The printer replays the user’s username and password, pretending to be the user.
@@ -88,10 +100,10 @@ What if there were a network based  protocol  that  allowed  the  generation  an
 
 1.3 Delegating access pg15
 
-In OAuth, the end user delegates some part of their authority to access the protected resource to the client application to act on their behalf.
+In OAuth, the end user (resource owner) delegates some part of their authority to access the protected resource (photos) to the client (photo printing service) application to act on their behalf.
 
-To make that happen, OAuth introduces another component into the system: the 'authorization server'. The authorization server (AS) is trusted by the protected resource to issue special-purpose  security  credentials—called  OAuth  access  tokens—to  clients. 
-		To acquire a token, the client (application) first sends the resource owner (user) to the authorization server in order to request that  the resource  owner  authorize  this  client.
+To make that happen, OAuth introduces another component into the system: the 'authorization server'. The authorization server (AS) is trusted by the protected resource (photos) to issue special-purpose  security  credentials—called  OAuth  access  tokens — to  clients (photo printing service). 
+		To acquire a token, the client (application / photo printing service) first sends the resource owner (user) to the authorization server in order to request that  the resource  owner  authorize  this  client.
 
 		[client]--(can I authorize?)-->[resource owner]--(allow client access)-->[authorization server]
 
@@ -179,6 +191,11 @@ Instead of requiring the user to generate tokens and paste them into clients, th
 			With the addition of the TOFU method, we can allow a graylist in the middle of these two, In which user-based runtime trust decisions can take precedence.
 					By offering the graylist capability, a system can greatly expand the ways it can be used without sacrificing security.
 
+*************************************************************
+*************************************************************
+The entire point of an authentication protocol is to know whether the user is present.
+*************************************************************
+*************************************************************
 1.4  OAuth 2.0: the good, the bad, and the ugly pg20
 	OAuth 2.0  is  very  good  at  capturing  a  user  delegation decisons, allowing  for multiple different parties to be involved in the security decision  process, most notably the end user at runtime. 
 
