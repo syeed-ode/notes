@@ -1,0 +1,253 @@
+*************************************************************
+*							    *
+*							    *
+*							    *
+toc: 19
+pg496 - 560
+*************************************************************
+*****             Chapter 1 - Footprinting              *****
+*************************************************************
+Footprinting isaboutscoping out your target ofinterest, understanding everything thereis to knowabout that targetand howit interrelates with everything around it, oftenwithoutsending a single packet to your target
+
+Because the direct target of your efforts may be tightly shut down, you will want to understand your target’s related or peripheral entities.
+
+Successful cyber attackers must harvest a wealth of infomration to execuate a focues and surgical attact. That is one that owon't be readily caught. 
+
+In the end hackers end up with a unique 'footprint', or profile, of their target's Internet, remote access, intranet / extranet, and buisness partner presence. 
+
+You may be surprised to find out just how much information is readily and publicly available about your organization's security posture to anyone willing to look for it. All a successful attack requires is motivation and opportunity.
+
+What is Footprinting pg63, pg8
+	Footpring enables attackers to create a near coplete profile of an organization's security posture.  Hackers can reduce an organization to a specific range of domain names, network blocks, subnest, routers, and individual IP addressess of systems directly connected to the Internet.
+
+	Footprinting techniques are aimed at discovering information related to Inernate, intranet, remote access, and extranet. 
+			Internet: 	Domain names, Network blocks and subnets, specific IP address of systems reachable via the Internet, TCP and UDP services running on each system identified, System architecutre (for example Spar vs 186), Access control mechanism and related access control lists (ACLs), Intrusion-dection systems (IDSs), System enumeration (user and group names, system banners, routing tables, and SNMP information.) DNS hostnames.
+
+			Intranet: 	Networking protocols in use (for example, IP, IPX, DecNET, and so on), Internet domain names, Network blocks, Specific IP addressess of system reachable via the intranet, TCP and UDP services running on each system identified, ystem architecutre (for example Spar vs 186), Access control mechanism and related access control lists (ACLs), Intrusion-dection sstems (IDSs), System enumeration (user and group names, system banners, routing tables, and SNMP information.)
+
+			Remote access: 	Analog/digtial telephone numbers, remote system type, Authentication mechanisms, VPNs and related protocols (IPSec and PPTP)
+
+			Extranet: 	Domain names, Connection origination and destination, type of connection, access conrol mechanims.
+
+	Why is footprinting necessary?
+		Footprinting gives you a picture of what the hacker sees.  This way ou know what ptential security exposures you have in your envornment.
+
+		Hackers are very good at one thing: getting inside your head, and you don’t even know it. They are systematic and methodical in gathering all pieces of information related to the technologies used in your environment. 
+				Without a sound methodology for performing this type of reconnaissance yourself, you are likely to miss key pieces of information related to a specific technology or organization—but trust us, the hacker won’t.
+
+		Be forewarned, however, footprinting is often the most arduous task in trying to determine the security posture of an entity; and it tends to be the most boring for freshly minted security professionals eager to cut their teeth on some test hacking. 
+				However, footprinting is one of the most important steps, and it must be performed accurately and in a controlled fashion
+
+Internet Footpriting pg66, pg10
+	Providing a step-by-step guide on footprinting is difficult it may lead you down many-tentacled paths. However these are basic steps that should allow you to complete a thorough footprinting analysis.
+
+	Step 1: Determine the scope of your activity
+		Are you going to footprint the entire organization, or limit your activities to certain subsidiaries or locations? What about business partner connections (extranets), or disaster-recovery sites?
+
+		You do not want hackers to knowmore about your security posture than you do, so figure out every potential crack in your armor.
+
+	Step 2: Get Proper Authorization 
+		One thing hackers can disregard that you must pay rattention to is layers 8 and 9 of the seven layer OSI Model—Politics and Funding. 
+
+		It is always a good idea to inform the powers that be at your organization before taking on a footprinting exercise.
+
+	Step 3: Publicly Available Information
+		Publicly Available Information
+			Company website, related organizations, location details, employee information, current evetns, privacy and security policies, and tecnical details indicating the type of security mechanism in place, archived information, search engines and relationships, other information of interest.
+
+		Company Web pages
+			There has been security configuration details and detailed asset inventory spreadsheets directly on their Internet web servers
+
+			View HTML Source and look for comments use tool automation (create a script and use wget). You have BurpSpider, you should also checkout OWASP's DirBuster to help you look for hidden files. Because these tools are noisy you should run these tools in privoxy.
+
+			VPN are common. Look for sites like http://vpn.<comapanyname>.com, https://vpn.<companyname>.com, http://www.<comapnyname>.com/vpn. These sites may even have a phone number to call for assistance if the hacker--er, I mean, employee--has any trouble getting connected.
+
+		Related Organizations
+			Be on the lookout for organizations that outsource their development and design. Sometimes a CSS file has an author name of the outsourced company. This makes the outsourced company a target as well.  
+
+		Location details
+			Location may lead to non-techinical attakcs: social engineering, dumpster-diving, surveillienc, etc.  Physical address may lead to unauthorized access to buildings, wired and wireless networks, computers, mobile devices, and so on. 
+
+			Google earth can be used for this as well as satellite imagery. Google also provides location information based upon MAC address through Google Locations and Skyhook.
+
+		Employee Information pg80, pg18
+			Having a username is a very useful later in the methodology when we try to gain access to system resources. 
+
+			Attackers can use phone numbers to look up your physical address via sites like phonenumber.com, 411.com,and yellowpages.com
+
+			Personal details can be readily found on the Internet using any number of sites. 
+					For example blackbookonline.info/, which links to severalresources, and peoplesearch.com, which can give hackers personal details ranging fromhome phone numbersand addresses to socialsecurity numbers,credit histories, and criminalrecords,among other things.]]
+
+			Publicly available websitescan be pilfered for information on your current or past employees to learn about you and your company’s weaknesses and flaws. 
+					Social and information networking sites (Facebook.com, Myspace.com, Reunion.com, Classmates.com, Twitter.com). 
+
+					Professional networking sites (Linkedin.com, Plaxo.com),career managementsites (Monster.com, Careerbuilder.com, Dice.com),and family ancestry sites (Ancestry.com). 
+
+					Online photo management sites (Flickr.com, Photobucket.com)can be used against you and your company.
+
+			On the paid-for services side, employee directories can be purchased through business directory services such as JigSaw.com(Figure 1-4).
+					Members can acquire and export a single contact or an entire corporate directory with thec lick of a button
+
+					Once employees, contractor, and vendor names are associated with your company, hackers can then turn to these websites and look up boundless information about the peopleand companies they are associated with.
+							Given enough information, they can build a matrix of data points to provide deductive reasoning that can reveal much of the target’s configuration and vulnerabilities.
+
+							Data-mining tools, such as Maltego, are available for sifting through the burgeoning number of information sources and drawing relationship maps between the data points collected. 
+
+			Check the myriad of employee resumes available online. 
+					If the organization is posting for a security professional with, say, five or more years’ experience working with CheckPoint firewalls and Snort IDS, what kind of firewalland IDS do you think they use? 
+
+					What does this say about their current incident detection and responsecapabilities? Could they bein a bit of disarray?
+
+					These kinds of details can help an attacker paint a detailed picture of atarget organization’s security posture—very important when planning an attack!
+
+		Current events pg88, pg18
+			Mergers,acquisitions, scandals, layoffs, rapid hiring, reorganizations, outsourcing,extensive use of temporary contractors,and otherevents may provide clues, opportunities,and situations that didn’texist before.
+					Security is often placed on the back burner in order to expeditetheexchange of data. 
+
+					whenmoraleis low, people may be moreinterested in updating their resumes thanwatching thesecurity logs orapplying thelatest patch. 
+
+					When acompany experiences rapid growth, oftentimes their processesand procedures lag behind. Who’s making surethereisn’tan unauthorized guestat the new-hire orientation?
+
+			If the company is a publicly traded company, two reports arethe 10-Q (quarterly) and the 10-K (annual) reports,and you can search the EDGAR database sec.gov to view them. 
+					When you find one ofthesereports, search for keywords like“merger,”“acquisition,”“acquire,”and “subsequentevent.”With alittle patience, you can build a detailed organizationalchart oftheentire organization and its subsidiaries.
+
+			Check out the message board for any company and youwillfind a wealth of potential dirt — er, I mean information — that could be used to get inside the head of the target company
+
+		Information that provides insight into the target organization’s privacy or security policies or technical details regarding hardwareand software used to protect the organization can be usefulto an attacker for obvious reasons.
+
+		Archived Information pg92, pg19
+			There are sites on the Internet where you can retrieve archived copies of information that may no longer be available from the original source. 
+
+			Some examples of this are the WayBack Machine at archive.org and the cached results you see under Google’s cached results.
+
+	Step 4: WHOIS and DNS Enumeration pg108, pg28
+		The Internet’s appeal stems from its lack ofcentralized control, interoperability, IP conflicts, resolution of geographic and political boundaries must be ensured. All this means is someone is managing a vast amount of information. 
+				If you understand a little about how this is actually done, you can effectively tap into this wealth.
+
+		International Corporation for Assigned Names and Numbers (ICANN), previously performed under U.S. governmentcontract by the Internet Assigned Numbers Authority (IANA, iana.org), coodinates tha assignment of the following:
+				- Internet domain names
+				- IP address numbers 
+				- Protocol parameters and port numbers
+				- the stable operations of the root DNS system
+
+		Although ICANN has many parts, three suborganizations are of particular interest to us at this point:
+				• Address Supporting xOrganization (ASO), .aso.icann.org
+						The ASO allocates IP address blocks to various Regional Internet Registries (RIRs) who manage, distribute, and register public Internet number resources within their respective regions
+
+						These RIRs then allocate IPs to organizations, Internetservice providers (ISPs), or, in somecases, NationalInternet Registries (NIRs) or LocalInternet Registries (LIRs) if particular governments requireit (mostly in communist countries, dictatorships,etc.):
+								• APNIC (apnic.net) Asia-Pacific region
+								• ARIN (arin.net) North and South America, Sub-Sahara Africa regions
+								• LACNIC( lacnic.net) Portions of Latin Americaand the Caribbean
+								• RIPE(ripe.net) Europe, parts of Asia, Africa north of the equator, and the Middle East regions
+								• AfriNIC (afrinic.net, currently in observer status) Eventually both regions of Africa currently handled by ARIN and RIPE
+
+				• Generic Names Supporting Organization (GNSO), gnso.icann.org
+						The GNSO reviewsand develops recommendations on domain-name policy forall generictop-level domains (gTLDs) and advises the ICANN board.
+								(forexample, .com, .net, .edu, .org, and .info)
+
+				• Country Code Domain Name Supporting Organization (CCNSO), ccnso.icann.org
+						The CCNSO reviews and develops recommendations on domain-name policy for all country-codetop-level domains (ccTLDs)and advises the ICANN board
+
+				Here are some other links youmay find useful:
+						• iana.org/assignments/ipv4-address-space IPv4 allocation
+						• iana.org/assignments/ipv6-address-space IPv6 allocation
+						• iana.org/ipaddress/ip-addresses.htmIP   address services 
+						• rfc-editor.org/rfc/rfc3330.txt          Special-useIP addresses
+						• iana.org/assignments/port-numbers.      Registered port numbers
+						• iana.org/assignments/protocol-numbers   Registered protocol numbers
+
+		With all of this centralized management in place, mining for information should beas simpleas querying acentral superserver farm somewhere, right? Not exactly.
+				 The actual datais spread across the globe in numerous WHOIS servers for technical and political reasons.
+
+				 To further complicate matters, the WHOIS query syntax, type of permitted queries, available data, and results formatting can vary widely froms erver to server.
+
+				 Furthermore, many of the registrars are actively restricting queries to combat spammers, hackers, and resource overload; to top itall off, information for .mil and .gov has been pulled from public view entirely due to national security concerns.
+
+				 You may ask, “How do I go about finding the data I’m after?” 
+				 		With a few tools, a little know-how, and some patience, you should be able to mine successfully for domain- or IP- related registrant details for nearly any registered entity on the planet!
+
+ 		Domain-Related Searches pg115, pg29
+			It’s important to note that domain-related items (such as hackingexposed.com) are registered separately from IP-related items (such as IP net-blocks, Border Gateway Protocol (BGP) autonomous system numbers, etc.). For this reason, we have two different paths for finding these details.
+
+			Let's start with domain related searches:
+
+			The first order of business is to determine which one of the many WOIS servers contains the data we're after:
+					The authoritative 'R'egistry for a given TLD, “.com” in this case, contains information about which 'R'egistrar the target entity registered its domain with. 
+
+					Then you query the appropriate 'R'egistrar to find the 'R'egistrant details for the particular domain name you’re after.
+ 
+					We refer to these as the “Three Rs” of WHOIS: Registry, Registrar, and Registrant.
+
+					If we surf to whois.iana.com (Internet Assigned Numbers Authority) we can search for the authoritative registry for all of .com which is Verisign Global Registry sErvices at verisign-grs.com.
+							If we go to that site and click on the WHOIS link, we can search for keyhole.com and find it is registered to whois.markmonitor.com.
+
+							If we got that site (it is no longer active, btw) and click its WHOIS link, voila!
+
+					Here is teh command line version:
+							] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois com -h whois.iana.org | less
+							] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois syeedode.com -h whois.verisign-grs.com | less
+							] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois syeedode.com -h whois.dreamhost.com | less
+							] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois keyhole.com -h whois.verisign-grs.com | less
+							] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois keyhole.com -h whois.markmonitor.com | less
+
+			Several websites also attempt to automate this process with varying degrees ofsuccess:
+					• HYPERLINK “http://www.allwhois.com” allwhois.com
+					• www.uwhois.com
+					• internic.net/whois.html
+
+					Last, but not least, several GUIs are available to assist you in your searches:
+							• SuperScanmcafee.com/us/downloads/freetools/superscan.aspx
+							• NetScanTools Pro netscantools.com
+
+			You may be able to find all the domains that a particular DNS server hosts, for instance, or any domains that contains a certain string.
+
+		IP-Related Searches
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

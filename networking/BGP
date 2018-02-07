@@ -1,0 +1,21 @@
+BGP (Border Gateway Protocol) - 
+BGP is an exterior routing protocol; that is, a protocol that manages traffic among autonomous systems rather than among individual networks. 
+
+There were once several exterior routing protocols in common use, but BGP has outlasted them all. 
+
+BGP is now the standard protocol used for Internet backbone routing. 
+
+As of mid 2010, the Internet routing table contains about 320,000 prefixes. It should be clear from this number that backbone routing has very different scaling requirements from local routing.
+
+Tor Live CD such as Tails
+
+] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois com -h whois.iana.org | less
+] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois syeedode.com -h whois.verisign-grs.com | less
+] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois syeedode.com -h whois.dreamhost.com | less
+] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois keyhole.com -h whois.verisign-grs.com | less
+] $ ~/Downloads/proxychains-3.1/proxychains/proxychains whois keyhole.com -h whois.markmonitor.com | less
+
+
+
+Regional Internet Registries (RIRs) 
+	ARIN (arin.net) North and South America, Sub-Sahara Africa regions

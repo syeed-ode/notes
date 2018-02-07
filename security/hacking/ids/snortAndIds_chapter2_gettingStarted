@@ -1,0 +1,362 @@
+Introduction to Intrusion Dection and Snort
+
+Using IDS you can collect and use information from known types of attacks and find out if someone is trying to attack your network or particular hosts. 
+
+Many vulnerability assessment tools can be used to assess different types of security holes present in your network.
+
+A comprehensive security system consists of multiple tools, including:
+	Firewalls that are used to block unwanted incoming as well as outgoing traffic of data. The most popular Open Source firewall is the Netfilter/Iptables (http://www.netfilter.org)-based firewall.
+
+Intrusion detection systems (IDS) that are used to find out if someone has gotten ito or is trying to get into your network.
+
+Vulnerability assessment tools that are used to find and plug security holes in your network. Information collected are used to set rules on firewalls. Nmap and Nessus.
+
+NIDS is used for scanning data flowing on the network. There are also host=based intrusion detection systems, which are installed on a particular host and detect attacks targetd to that host.
+
+You will learn other products that work with Snort. MySQL and Analysis Control for Intrusion Database (ACID). Snort has the capability to log alerts and other log messages to a database. MySQL is the database engine where all of this data is stored. Apache webs server and ACID can analyze this data.
+
+Chapter 3 provides information about Snort rules, different parts of snort rules and how to write your own rules according to your environment and needs. Wrting good rules is the key to building a detection system.
+
+Chapter 4 is about input and output plugins. Input plugins capture data packets before the actual detection process is applied. Output plugins format output. For example it can convert the data to a SNMP trap. Another output plugin is used to log data to a database.
+
+Chapter 5 is about MySQL database.
+
+Chapter 6 describes ACID. ACID is a very important tool that provides rich data analysis capabilities. You can find frequency of attacks, classifiy different attacks, view the source of these attacks and so on. ACID uses PHP (Pretty Home Page) scripting language, graphic display library (GD library) and PHPLOT, a tool to draw graphs.
+
+1.1 What is Intrusion Detection?
+ID is a set of techniques and methods used to detect suspicious activity both at the network and host level.
+
+IDS fall into two basic categories: 1) signature-based intrusion detection systems and 2) anomaly detection systems.
+
+Intruders have signatures, like computer viruses. You try to find data packets with intrusion-related signatures or anomalies related to Intenet protcols. Based upon signatures and rules, the detection system is able to find and log suspicious activity and generate alerts.
+
+Anomaly-based intrusion detection depends on packet anomalies presentd in protocol header parts. In some cases anomaly-based ID procue better results compared to signature-based IDS.
+
+Usually an IDS capturs data from the network and applies its rules to that data or detwcts anomalies in it. Snort is primary a rule-based IDS. However input plugis are present to detect anomalies.
+
+Rules are grouped in categories. Rules belonging to each category are stored in separate files. Finding signatures and using them in rules is a tricky job. it is important ot implement as many signatures as you can usng as few rules as possible.
+
+	1.1.1 Some Definitons
+	A basic understanding of these terms is necessary to digest other complicated security concepts.
+
+	IDS - Intrusive Dection System is software, hardware or combination of both used to detect intruder activity. 
+
+	Network IDS or NIDS - NIDS capture data packets traveling on the network media (cables, wireless) and match them to a database of signatures. 
+
+	Host IDS or HIDS - HIDS are agents on a host. Some are reactive, they inform you only when something has happened, some HIDS are proactive, they can sniff the network traffic and alert you in real time.
+
+	Signatures - Signature is the pattern you look for inside a data packet. A signatures is used to detect the types of attack. Signatures may be present in different parts of the data packet (IP Header, transport layer header [TCP, UDP], or application layer header) depending upon the nature of the attack. 
+
+	Alerts - Snort alerts are controlled by output plugins. It is possible to send the same alert to a database and generate SNMP traps simultaneously. Some plugins can also modify firewall configuration so the offending hosts are blocked at the firewall or router level.
+
+	Logs - The log messages are saved in file under /var/log/snort directory. Log can be saved in text or binary format. The binary files can be viewed using Snort or tcpdump or a tool called Barnyard.
+
+	False Alarms - False alarms are an indication that is not an intruder activity. Mmisconfigured internal hosts may broadcast messages that trigger a rule resulting in a false alert.
+			Routers, like Linksys home routers, generate lots of UPnP related alerts. To avoid false alarms, modify and tune default rules.
+
+	Sensor - The machine an intrusion detection system is running is called the sensor because it is used to “sense” the network. 
+
+	1.1.2 Where IDS Should be Placed in Network Topology
+	Where you place your IDS depends upon what type of intrusion activities you want to detect: internal, external or both.
+
+	If you want to detect external intrusions and you have only one router, the best place may be inside the router or firewall.
+
+	If you have multiple paths to the internet, pace one IDS box at every entry point.
+
+	If you want to detect internal threats place a box in every network segment.
+
+	More intrusion detection systems mean more work and more maintenance costs. Your decision depends upon your security policy.
+
+	Typically you should place an IDS behind each of your firewalls and routers. In a demilitarized zone (DMZ) an IDS may be placed in that zone as well. Alert policy be as be as strict.
+
+	1.1.3 Honey Pots
+	Honey pots lure hackers by exposing known vulnerabilities deliberately. During this time log hacker activities to find out his/her actions and techniques. Use this information to harden security on your actual servers.
+
+	There are ways to build honey pots: 1) include common services  Telnet server (port 23), Hyper Text Transfer Protocol (HTTP) server (port 80), File Transfer Protocol (FTP) server (port 21) and so on. 
+			Place the honey pot close to your production server the hackers can take it for a real server.
+
+			If your production servers have Internet Protocol (IP) addresses 192.168.10.21 and 192.168.10.23, you can assign an IP address of 192.168.10.22 to the honey pot.
+
+			Configure your firewall and/or router to redirect traffic to a honey pot. 
+
+	Create an alert so when the honey pot is compromised you are notified immediately.
+
+	Install an honey pot based on the following criteria:
+			If your organization has enough resources (hardware and personnel) to track down hackers.
+
+			If you want to prosecute hackers by getting evidence.
+
+	A honey pot should look like a real system. Create fake data files, user accounts so that a hacker thinks this is a real system.
+
+	Tempt the hacker to remain on the honey pot for a longer time to record more activity.
+
+	Go to http://project.honeynet.org/ and  http://www.citi.umich.edu/u/provos/honeyd/ 
+			South Florida Honeynet Project at http://www.sfhn.net
+			Different HOWTOs at http://www.sfhn.net/whites/howtos.html 
+
+	1.1.4 Security Zones and Levels of Trust
+	Typical networks are divided into many different areas and each area may have a different level of security policy and level of trust.
+
+1.3 Components of Snort
+	1.3.1 Packet Decoder
+	Packet decoder takes packets from different network interfaces (Ethernet, SLIP, PPP and so on) and prepares the packets to be preprocessed or sent to the detection engine.
+
+	1.3.2 Preprocessors
+	Preprocessors can arrange or modify data packets before the detection engine finds out if the packet is being used by an intruder, Some preprocessors find anomalies in packet headers and generate alerts.
+			Prepocessors are important because hackers use different techniques to fool an IDS. 
+
+			For example a rule to find a signature "scripts/isadmin".
+
+			If you are matching this string exactly, you can easily be fooled by a hacker who makes slight modifications to this string. For example:
+					• “scripts/./iisadmin”
+					• “scripts/examples/../iisadmin”
+					• “scripts\iisadmin”
+					• “scripts/.\iisadmin”
+
+			Hackers can also insert in the web Uniform Resource Identifier (URI) hexadecimal characters or Unicode characters which are perfectly legal.
+
+			A preprocessor can rearrange the string so that it is detectable by the IDS.
+
+	Preprocessors can be used for packet defragmentation, when  the packet is fragment because a large data chunk is transferred to a host.
+			The default maximum length is 1500 bytes, which is controlled by the Maximum Transfer Unit (MTU) value for the network interface.
+
+			On IDS, before you can apply any rules or try to find a signature, you have to reassemble the packet.
+
+			For example, half of the signature may be present in one segment and the other half in another segment. To detect the signature correctly you have to combine all packet segments.
+
+			Hackers use fragmentation to defeat intrusion detection systems. PHackers use fragmentation to defeat intrusion detection systems.
+
+	Preprocessors in Snort can defragment packets, decode HTTP URI, re-assemble TCP streams and so on. These functions are a very important part of the intrusion detection system.
+
+	1.3.3 The Detection Engine
+	The detection engine detects if any intrusion activity exists in a packet using Snort rules. It is the most important part of Snort. 
+			The rules are read into internal data structures or chains where they are matched against all packets.
+
+			If a packet matches any rule, the packet is logger or an alert is gnereated; otherwise the packet is dropped.
+
+			It may take different amounts of time to respond to different packets depending on how many rules you have defined.
+
+	If traffic is too high when Snort is in NIDS mode, you may drop some packets and may not get a true real-time response.
+			The load depends on the following factors:
+					• Number of rules
+					• Power of the machine on which Snort is running
+					• Speed of internal bus used in the Snort machine
+					• Load on the network
+
+			When designing a Network Intrusion Detection System, you should keep all of these factors in mind. 
+
+	An IDS can apply rules on different parts of the packet. These parts may be:
+			• The IP header of the packet. 
+			• The Transport layer header. This header includes TCP, UDP or other transport layer headers. It may also work on the ICMP header. 
+			• The application layer level header. Application layer headers include, but are not limited to, DNS header, FTP header, SNMP header, and SMTP header. You may have to use some indirect methods for application layer headers, like offset of data to be looked for. 
+			• Packet payload. This means that you can create a rule that is used by the detection engine to find a string inside the data that is present inside the packet.
+
+	The detection engine works in different ways for different versions of Snort. 
+			In 1.x versions of Sort s low priority rule generates a low priority alert, even if a high priority rule meriting a high priority alert is located later in the rule chain.
+
+			This problem is rectified in Snort version 2 where all rules are matched against a packet before generating an alert. The highest priority rule is selected to generate the alert.
+
+	1.3.4 Logging and Alerting System
+	Depending upon what the detection engine finds the packet may be logged or generate an alert. All of the log files are stored under /var/log/ snort folder by default.
+
+	1.3.5 
+	Output modules or plug-ins can do different operations to save output generated by the logging and alerting system of Snort.
+
+	Output modules can do things like the following:
+			• Simply logging to /var/log/snort/alerts file or some other file 
+			• Sending SNMP traps 
+			• Sending messages to syslog facility
+			• Logging to a database like MySQL or Oracle. You will learn more about using MySQL later in this book
+			• Generating eXtensible Markup Language (XML) output
+			• Modifying configuration on routers and firewalls.
+			• Sending Server Message Block (SMB) messages to Microsoft Windows-based machines
+
+	Here is a summary of the different components of an IDS.
+			PPacket Decoder 		Prepares packets for processing.
+			Preprocessors or Input Plugins 		Used to normalize protocol headers, detect anomalies, packet reassembly and TCP stream re-assembly.
+			Detection Engine 		Applies rules to packets.
+			Logging and Alerting System 		Generates alert and log messages.
+			Output Modules 			Process alerts and logs and generate final output.
+
+1.4 Dealing with Switches 
+Depending upon the type of switches used, you can use Snort on a switch port.
+
+Some switches, like Cisco, allow you to replicate all ports traffic on one port where you can attach the Snort machine.
+		These ports are usually referred to as spanning ports.
+
+The best place to install Snort is right behind the firewall or router so that all of the Internet traffic is visible to Snort before it enters any switch or hub.
+
+A typical connection setup is like below
+		T1 Connection to interent -> Firewall -> switch
+				-> server used for company presence on interent
+				-> server used for company presence on internet
+				-> server used for company precence on internet
+
+If the switch has a spanning port you can connect the IDS to the spanning port as demonstrated below
+		T1 Connection to interent -> Firewall -> switch
+				-> IDS connected to spanning port of the Swtich
+				-> server used for company presence on interent
+				-> server used for company presence on internet
+				-> server used for company precence on internet
+
+All network traffic, including internal data flowing among company servers and the Internet data, will be visible to the IDS.
+
+You can also connect the IDS to a small HUB or a Network TAP right behind the firewall, i.e., between firewall and the switch. 
+		All incoming and outgoing traffic is visible to the IDS.
+
+		T1 Connection to interent -> Firewall -> hub 
+				-> IDS connected to hub so taht all incoming and outgoing traffic is visible to IDS
+				-> switch
+					-> server used for company presence on interent
+					-> server used for company presence on internet
+					-> server used for company precence on internet
+
+		In this configuration, data flowing among the company servers is not visible to the IDS. It can only see data coming from or going to the Internet.
+
+1.5 TCP Stream Follow Up
+Stream4 has been added to Snort. This preprocessor is capable
+of dealing with thousands of simultaneous streams. 
+
+It allows TCP stream reassembly and stateful inspection of TCP packets. 
+		This means that you can assemble packets in a particular TCP session to find anomalies and attacks that use multiple TCP packets. 
+
+		You can also look for packets coming to and/or originating from a particular server port.
+
+1.7 How to Protect IDS Itself
+One major issue is how to protect the system on which your intrusion detection software is running. 
+
+If security of the IDS is compromised, you may start getting false alarms or no alarms at all. 
+		The intruder may disable IDS before actually performing an attack. 
+
+There are different ways to protect your system, starting from very general recommendations to some sophisticated methods. 
+		• The first thing that you can do is not to run any  service on your IDS sensor itself. 
+				Network servers are the most common method of exploiting a system. 
+		• New threats are discovered and patches are released by vendors. This is almost a continuous and non-stop process. 
+				The platform on which you are running IDS should be patched with the latest releases from your vendor. 
+
+				For example, if Snort is running on a Microsoft Windows machine, you should have all the latest security patches from Microsoft installed. 
+		• Configure the IDS machine so that it does not respond to ping (ICMP Echotype) packets. 
+		• If you are running Snort on a Linux machine, use netfilter iptable to block any unwanted data. Snort will still be able to see all of the data. 
+		• You should use IDS only for the purpose of intrusion detection. It should not be used for other activities and user accounts should not be created except those that are absolutely necessary.
+
+Snort can be used in special cases as well.
+
+	1.1.7 Snort on Stealth Interface 
+	You can run Snort on a stealth interface which only listens to the incoming traffic but does not send any data packets out. 
+
+	A special cable is used on the stealth interface. 
+			On the host where Snort is running, you have to short pins 1 and 2. Pins 3 and 6 are connected to same pins on the other side. 
+
+			Please see Snort FAQ at http:/ www.snort.org/ docs/faq.html for more information on this arrangement.
+
+	1.7.2 Snort with no IP Address Interface
+	You can also use Snort on an interface where no IP address is assigned. 
+			For example, on a Linux machine, you can bring up interface eth0 using command “ifconfig eth0 up” without assigning an actual IP address. 
+
+			The advantage is that when the Snort host doesn’t have an IP address itself, nobody can access it. 
+
+	You can configure an IP address on eth1 that can be used to access the sensor itself.
+
+			Network through which intruders are coming. Usually connected to the internet -> Snort sensor
+					-> eth0 (has no ip address which makes it invisible)
+					-> eth1 (has an IP address so other host on your private network can access the sensor) 
+							-> management workstation
+
+			The above describes a Snort sensor with two interfaces. One of these has no IP address assigned.
+
+	On Microsoft Windows systems, you can use an interface without binding TCP/IP to the interface, in which case no IP address will be assigned to the interface.
+			Don't forget to disable other protocols and services on the interface as well.
+
+			In some cases it has been noted that winpcap (library used on Microsoft Windows machines to capture packets) does not work well when no IP address is assigned on the interface.
+					In such a case, you can use the following method.
+							• Enable TCP/IP on the network interface that you want to use in the stealth mode. Disable everything other than TCP/IP. 
+							• Enable DHCP client. 
+							• Disable DHCP service
+
+					This will cause no address to be assigned to the interface while the interface is still bound to TCP/IP networking.
+
+
+1.8 References
+		1. Intrusion detection FAQ at http://www.sans.org/newlook/resources/IDFAQ/
+		ID_FAQ.htm
+		2. Honey Pot Project at http://project.honeynet.org/
+		3. Snort FAQ at http://www.snort.org/docs/faq.html
+		4. Honeyd Honey Pot at http://www.citi.umich.edu/u/provos/honeyd/
+		5. Winpcap at http://winpcap.polito.it/
+		6. Cisco systems at http://www.cisco.com
+		7. Checkpoint web site at http://www.checkpoint.com
+		8. Netscreen at http://www.netscreen.com
+		9. Netfilter at http://www.netfilter.org
+		10. Snort at http://www.snort.org
+		11. The Nmap tool at http://www.nmap.org
+		12. Nessus at http://www.nessus.org
+		13. MySQL database at http://www.mysql.org
+		14. ACID at http://www.cert.org/kb/acid
+		15. Apache web server at http://www.apache.org
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
