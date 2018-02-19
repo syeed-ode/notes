@@ -1,0 +1,90 @@
+*************************************************************
+*************************************************************
+The entire point of an authentication protocol is to know whether the user is present.
+*************************************************************
+*************************************************************
+The client is the piece of software that accesses the protected resource on behalf of the resource owner.
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 208 - 
+*************************************************************
+***               Chapter 11 - Oauth Tokens               ***
+*************************************************************
+It’s not always practical to share a database between the authorization server and protected resource, especially when a single authorization server is protecting several different protected resources downstream.
+
+What then can we do instead? We’re going to look at two other common options in this chapter: structured tokens and token introspection.
+
+11.2 Structured tokens: JSON Web Token (JWT)
+		Instead of requiring a lookup into a shared database, what if we could create a token that had all of the necessary information inside of it? This way, an authorization server can communicate to a protected resource indirectly through the token itself.
+
+		The token remains opaque to the client in all OAuth 2.0 systems. The protected resource does need to understand the token and makes its authorization decisions based on that.
+
+	11.2.1 The structure of a JWT
+			The JSON Web Token1 format, or JWT, (Commonly pronounced “jot.”) provides a simple way to carry the kinds of information that we’d need to send with a token.
+
+			The JWT looks something like this:
+					eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.
+
+			Notice that there are two sections of characters separated by single periods. Each of these is a different part of the token, and if we split the token string on the dot character, we can process the sections separately. (A third section is implied after that last dot in our example, but we’ll cover that in section 11.3.)
+					eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0
+					.
+					eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9
+					.
+
+			Each value between the dots isn’t random but is a Base64URL-encoded JSON object.3 If we decode the Base64 and parse the JSON object inside the first section, we get a simple object.
+					{
+					 "typ": "JWT",
+					 "alg": "none"
+					}
+
+					Why Base64? using the Base64URL encoding JWT can be used without any additional encoding. Furthermore, they’re less likely to be reserialized by middleware which is important. 
+
+					This header is always a JSON object and it’s used to describe information about the rest of the token. The typ header tells the application what to expect in the payload.
+
+					This also includes the alg header with the special value none to indicate that this is an unsigned token.
+
+					The second section is the payload of the token itself.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
