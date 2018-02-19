@@ -1,3 +1,4 @@
+	                                                                   |
 Add 51 to the page to get the pdf location. A page references are in PDF pages.
 *************************************************************
 *************************************************************
@@ -125,33 +126,59 @@ To make that happen, OAuth introduces another component into the system: the 'au
 
 At no time in this process are the resource owner’s credentials exposed to the client. The resource owner authenticates to the authorization server separately from anything used to communicate with the client. Neither  does  the  client  have  a  high-powered developer key: the client is unable to access anything on its own and instead must be authorized by a valid resource owner.
 
-Instead of requiring the user to generate tokens and paste them into clients, the OAuth protocol facilitates this process and makes it relatively simple for the client to request a token and the user to authorize the client.
-		Clients can then manage the tokens, and users can manage the client applications. There are several ways to get an access token using OAuth.
+Instead of requiring the user to generate tokens and paste them into 
+	clients, the OAuth protocol facilitates this process and makes it 
+	simple for the client to request a token and the user to authorize 
+	the client.
+		Clients can then manage the tokens, and users can manage the 
+			client applications. There are several ways to get 
+			an access token using OAuth.
 
 	1.3.1 Beyond HTTP Basic and the password-sharing antipattern pg17
 
-	Many of the more “traditional” approaches listed in the previous section are examples of  the  password  antipattern,  in  which  a  shared  secret  (the  password)  directly  represents  the  party  in  question  (the  user).  
-
-	A user in a browser is able to authenticate to a web page using a username and password over a protocol known as HTTP Basic Auth. There is also a slightly more secure version of this, known as HTTP Digest Auth. Both assume the presence of a user and require anusername and password presented to the HTTP server. 
-
-	Because HTTP is a stateless protocol, it’s assumed that these credentials will be presented again on every single transaction. HTTP  as  a  protocol  makes  no  distinction  between  transactions  with  a  browser in which the user is present and transactions with another piece of software without an intermediary browser.
-
-	ZThis fundamental flexibility has been key to the success the HTTP protocol. When HTTP started to be used for direct-access APIs its existing security mechanisms were quickly adopted. This has contributed to the misuse of continuously-presented passwords  for  both  APIs  and  user-facing  pages. 
-
-	Whereas browsers have cookies and other session-management techniques at their disposal, the types of HTTP clients that access a web API do not.
-
-	OAuth was designed from the outset as a protocol for use with APIs, wherein the main interaction is outside of the browser.
-
-	It usually has an end user in a browser to start the process, and indeed this is where the flexibility and power in the delegation model comes from, but the final steps of receiving the token and using it at a protected resource lie outside the view of the user. 
-
-	In fact, some of the key use cases of OAuth occur when the user is no longer present at the client, yet the client is still able to act on the user’s behalf. Using OAuth allows us to move past the notions and assumptions of the HTTP Basic protocol in a way that’s powerful, secure, and designed to work with today’s API-based economy.
+	Many of the more “traditional” approaches listed in the previous 
+		section are examples of  the  password  antipattern,  in  
+		which  a  shared  secret  (the  password)  directly  
+		represents  the  party  in  question  (the  user).  
+	A user in a browser is able to authenticate to a web page using a 
+		username and password over a protocol known as HTTP Basic 
+		Auth. There is also a slightly more secure version of this, 
+		known as HTTP Digest Auth. Both assume the presence of a 
+		user and require anusername and password presented to the 
+		HTTP server. 
+	Because HTTP is a stateless protocol, these credentials will be 
+		presented on every single transaction. HTTP makes  no  
+		distinction between  transactions where the user is present 
+		(with  a  browser) and transactions with another piece of 
+		software without an intermediary browser.
+	This fundamental flexibility has been key to the success the HTTP 
+		protocol. When HTTP started to be used for direct-access 
+		APIs its existing security mechanisms were quickly adopted. 
+		This has contributed to the misuse of continuously-presented 
+		passwords for both APIs and user-facing pages. 
+	Whereas browsers have cookies and other session-management at their 
+		disposal, the types of HTTP clients that access a web API do 
+		not.
+	OAuth was designed from the outset as a protocol for use with APIs. 
+		The main interaction is outside of the browser.
+	It usually has an end user in a browser to start the process, and 
+		indeed this is where the flexibility and power in the 
+		delegation model comes from, but the final steps of 
+		receiving the token and using it at a protected resource 
+		lie outside the view of the user. 
+	In fact, some of the key use cases of OAuth occur when the user is 
+		no longer present at the client, yet the client is still 
+		able to act on the user’s behalf. Using OAuth allows us to 
+		move past the notions and assumptions of the HTTP Basic 
+		protocol in a way that’s powerful, secure, and designed to 
+		work with today’s API-based economy.
 
 	1.3.2 Authorization delegation: why it matters and how it’s used pg18
 
 	Fundamental to  the  power  of  OAuth  is  the  notion  of  delegation. Although  OAuth is often called an authorization protocol it is a delegation protocol. a subset of a user’s authorization is delegated, but OAuth itself doesn’t carry or convey the authorizations. 
-
+	                                                                   |
 	Instead, a  client  can  request  that  a  user  delegate  some  of  their authority to it. The user can then approve this request, and the client can then act on it with the results of that approval.
-
+	                                                                   |
 	The  distinction  between  a  delegation  and  an  authorization  protocol is important here because the authorizations being carried by the OAuth token are opaque to most of the system.  Only  the  protected  resource needs  to  know  the  authorization. 
 
 	As long as it’s able to find out from the token and its presentation context (either by looking at the token directly or by using a service of some type to obtain this information), it can serve the API as required.
