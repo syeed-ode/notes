@@ -1,0 +1,21 @@
+Chapter 1: Understanding Microservices 8
+Origins of Service-Oriented Architecture 9
+The monolithic approach 10
+The microservice approach 14
+Microservice benefits 16
+Separation of concerns 16
+Smaller projects 16
+Scaling and deployment 17
+Microservices pitfalls 18
+Illogical splitting 18
+More network interactions 19
+Data storing and sharing 19
+Compatibility issues 20
+Testing 20
+Implementing microservices with Python 21
+The WSGI standard 22
+Greenlet and Gevent 23
+Twisted and Tornado 25
+asyncio 26
+Language performances 29
+Summary 31
