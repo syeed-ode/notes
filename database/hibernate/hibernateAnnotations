@@ -1,3 +1,4 @@
+	                                                                   |
 I was trying to get the MySql to start from "System Preferences" -> "mysql" -> 
 	"start MySql Server". I ran into this issue: Warning the 
 	/user/local/mysql/data directory is not owned by the mysql user. So, I 
@@ -47,7 +48,7 @@ Create a text file containing the password-assignment statement on a single line
 *
 *
 *				Dirty Reads:		Nonrepeatable (Fuzzy) Reads:	Phantom Reads:
-				TxA reads data that	TxA reads datq once. When it	TxA reads data once. When it
+				TxA reads data that	TxA reads data once. When it	TxA reads data once. When it
 				TxB put there but has	rereads the same data, TxB has	rereads the same data, TxB has
 				not yet commited.	removed the data or modified 	has commited more rows to the 
 							it (via commits).		data
@@ -60,34 +61,57 @@ Repeatable Reads:		Not possible 		Not possible 			Possible
 
 Seralizable:			Not possible 		Not possible 			Not possible
 
-Optimistic Locking
-	Optimistic Locking is a strategy where you read a record, take note of a version number (other methods to do this involve dates, timestamps or checksums/hashes) and check that the version hasn't changed before you write the record back. 
-
-	When you write the record back you filter the update on the version to make sure it's atomic. (i.e. hasn't been updated between when you check the version and write the record to the disk) and update the version in one hit.
-
-	If the record is dirty (i.e. different version to yours) you abort the transaction and the user can re-start it.
-
-	This strategy is most applicable to high-volume systems and three-tier architectures where you do not necessarily maintain a connection to the database for your session. 
-
-	A three-tier architecture is the most widespread use of multitier architecture. Multilayered architecture is a client–server architecture in which presentation, application processing, and data management functions are physically separated
-
-	In this situation the client cannot actually maintain database locks as the connections are taken from a pool and you may not be using the same connection from one access to the next.
-
+	                                                                   |
+Optimistic Locking (system versioning)
+	Optimistic Locking is a strategy where you read a record, take note 
+		of a version number (other methods to do this involve dates, 
+		timestamps or checksums/hashes) and check that the version 
+		hasn't changed before you write the record back. 
+	When you write the record back you filter the update on the version 
+		to make sure it's atomic. (i.e. hasn't been updated between 
+		when you check the version and write the record to the disk) 
+		and update the version in one hit.
+	If the record is dirty (i.e. different version to yours) you abort 
+		the transaction and the user can re-start it.
+	This strategy is most applicable to high-volume systems and 
+		three-tier architectures (MVC) where you do not necessarily 
+		maintain a connection to the database for your session. 
+	A three-tier architecture is the most widespread use of multitier 
+		architecture. Multilayered architecture is a client–server 
+		architecture in which presentation, application processing, 
+		and data management functions are physically separated
+	In this situation the client cannot actually maintain database locks 
+		as the connections are taken from a pool and you may not be 
+		using the same connection from one access to the next.
 Pessimistic Locking
-	Pessimistic Locking is when you lock the record for your exclusive use until you have finished with it. It has much better integrity than optimistic locking but requires you to be careful with your application design to avoid Deadlocks. 
-
-	To use pessimistic locking you need either a direct connection to the database (as would typically be the case in a two tier client server application) or an externally available transaction ID that can be used independently of the connection.
-
-	When using an externally available transaction ID, you open the transaction with the TxID and then reconnect using that ID. The DBMS maintains the locks and allows you to pick the session back up through the TxID. 
-
-	This is how distributed transactions using two-phase commit protocols (such as XA or COM+ Transactions) work.
-
-	The two phase commit protocol is a distributed algorithm which lets all sites in a distributed system agree to commit a transaction. The protocol results in either all nodes committing the transaction or aborting, even in the case of site failures and message losses.
+	Pessimistic Locking is when you lock the record for your exclusive 
+		use until you have finished with it. It has much better 
+		integrity than optimistic locking but requires you to be 
+		careful with your application design to avoid Deadlocks. 
+	To use pessimistic locking you need either a direct connection to 
+		the database (as would typically be the case in a two tier 
+		client server application) or an externally available 
+		transaction ID that can be used independently of the 
+		connection.
+	When using an externally available transaction ID, you open the 
+		transaction with the TxID and then reconnect using that ID. 
+		The DBMS maintains the locks and allows you to pick the 
+		session back up through the TxID. 
+	This is how distributed transactions using two-phase commit 
+		protocols (such as XA or COM+ Transactions) work.
+	The two phase commit protocol is a distributed algorithm which lets 
+		all sites in a distributed system agree to commit a 
+		transaction. The protocol results in either all nodes 
+		committing the transaction or aborting, even in the case of 
+		site failures and message losses.
 *
 *
 *
 *
-This information was gather from reading the Spring Framework Reference Documentation: Data access and transaction management section.  The focus of the notes is only on Transaction Management.  It a collection of notes, broken down by section.
+This information was gather from reading the Spring Framework Reference 
+	Documentation: Data access and transaction management section.  The 
+	focus of the notes is only on Transaction Management.  It a 
+	collection of notes, broken down by section.
 
 https://docs.spring.io/spring/docs/current/spring-framework-reference/data-access.html#spring-data-tier
 *
@@ -377,12 +401,16 @@ This information was gathered from reading Hibernate's Annotations Documention, 
 *							    *
 *							    *
 ******            Preface                                                 ******
-Metadata governs the transformation of data from one representation to the other. Hibernate Annotations provides annotation-based metadata.
-
-The JPA specification standardizes the basic APIs and the metadata needed for any object/relational persistence mechanism.
-
-Hibernate EntityManager together with Hibernate Annotations offers a complete (and standalone) JPA persistence solution on top of the Hibernate Core.  You may use a combination of all three together or at all time you can fall back to Hibernate native APIs, or if required, even to native JDBC and SQL.
-
+Metadata governs the transformation of data from one representation to the 
+	other. Hibernate Annotations provides annotation-based metadata.
+The JPA specification standardizes the basic APIs and the metadata needed 
+	for any object/relational persistence mechanism.
+Hibernate EntityManager together with Hibernate Annotations offers a 
+	complete (and standalone) JPA persistence solution on top of the 
+	Hibernate Core.  You may use a combination of all three together or 
+	at all time you can fall back to Hibernate native APIs, or if 
+	required, even to native JDBC and SQL.
+	                                                                   |
 Hibernate Annotations is based on the JPA 2 specification. 
 *
 *
@@ -400,20 +428,25 @@ Hibernate Annotations is based on the JPA 2 specification.
 *							    *
 *							    *
 *** Chapter 2.2 - Mapping with JPA (Java Persistence Annotations) [pg1 - 25] ***
-JPA entities are plain POJOs. Actually, they are Hibernate persistent entities. Their mappings are defined through JDK 5.0 annotations instead of hbm.xml files.
-
+JPA entities are plain POJOs. Actually, they are Hibernate persistent 
+	entities. Their mappings are defined through JDK 5.0 annotations 
+	instead of hbm.xml files.
 Annotations can be split in two categories.
 
-The logical mapping annotations (describing the object model, the association between two entities etc.)
-
-The physical mapping annotations (describing the physical schema, tables, columns, indexes, etc)
-
-JPA annotations are in the javax.persistence.* package. JPA annotations are plain JDK 5 annotations.
-
-A good and complete set of working examples can be found in the Hibernate Annotations test suite itself: most of the unit tests have been designed to represent a concrete example and be a source of inspiration for you. You can get the test suite sources in the distribution.
-
+The logical mapping annotations (describing the object model, the 
+	association between two entities etc.)
+The physical mapping annotations (describing the physical schema, tables, 
+	columns, indexes, etc)
+JPA annotations are in the javax.persistence.* package. JPA annotations are 
+	plain JDK 5 annotations.
+A good and complete set of working examples can be found in the Hibernate 
+	Annotations test suite itself: most of the unit tests have been 
+	designed to represent a concrete example and be a source of 
+	inspiration for you. You can get the test suite sources in the 
+	distribution.
 2.2.1. Marking a POJO as persistent entity
-	Every persistent POJO class is an entity and is declared using the @Entity annotation (at the class level):
+	Every persistent POJO class is an entity and is declared using the 
+		@Entity annotation (at the class level):
 				@Entity
 				public class Flight implements Serializable {
 				    Long id;
@@ -423,25 +456,41 @@ A good and complete set of working examples can be found in the Hibernate Annota
 
 				    public void setId(Long id) { this.id = id; }
 				}         
-
-	@Entity declares the class as an entity (i.e. a persistent POJO class). The other mapping declarations are implicit. The class Flight is mapped to the Flight table, using the column id as its primary key column.
-
-	The concept of configuration by exception is central to the JPA specification.  
+	@Entity declares the class as an entity (i.e. a persistent POJO 
+		class). The other mapping declarations are implicit. The 
+		class Flight is mapped to the Flight table, using the 
+		column id as its primary key column.
+	The concept of configuration by exception is central to the JPA 
+		specification.  
 			See https://stackoverflow.com/questions/34125441/what-is-exactely-a-configuration-by-exception-in-jpa.
 
-			So, configuration by exception is the concept that only the places that require something out of the ordinary need to receive additional configuration.
-
-			For example, when you annotate a JPA entity with @Access( AccessType.FIELD ) you are saying that the default access mechanism to be used by JPA throughout this entity should be field access.
-
-			But if at some point within your class you have a getter that you would like JPA to use instead of a field, then you can specify an additional @Access( AccessType.PROPERTY ) annotation on just that one getter, and JPA will use that getter. 
-
-			You always have the freedom to override the default behaviour by supplying an extra annotation on a case by case basis.
-
-	
-	Mixing annotations in both fields and methods should be avoided. Hibernate will guess the access type from the position of @Id or @EmbeddedId.
-
+			So, configuration by exception is the concept that 
+				only the places that require something out 
+				of the ordinary need to receive additional 
+				configuration.
+			For example, when you annotate a JPA entity with 
+				@Access( AccessType.FIELD ) you are saying 
+				that the default access mechanism to be used 
+				by JPA throughout this entity should be 
+				field access.
+			But if at some point within your class you have a 
+				getter that you would like JPA to use 
+				instead of a field, then you can specify an 
+				additional @Access( AccessType.PROPERTY ) 
+				annotation on just that one getter, and JPA 
+				will use that getter. 
+			You always have the freedom to override the default 
+				behaviour by supplying an extra annotation 
+				on a case by case basis.
+	Mixing annotations in both fields and methods should be avoided. 
+		Hibernate will guess the access type from the position 
+		of @Id or @EmbeddedId.
 	Field-based access vs. Property-based access - https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/domain/access.html
-			By default, the placement of the @Id annotation gives the default access strategy. When placed on a field, Hibernate will assume field-based access. 
+			By default, the placement of the @Id annotation 
+				gives the default access strategy. When 
+				placed on a field, Hibernate will assume 
+				field-based access. 
+	                                                                   |
 					@Entity
 					public class Simple {
 					    @Id
