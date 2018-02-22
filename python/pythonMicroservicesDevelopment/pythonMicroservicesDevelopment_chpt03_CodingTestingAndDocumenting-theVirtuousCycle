@@ -1,0 +1,73 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 79 - 
+*******************************************************************
+*Chapter 3 - Coding, Testing, and Documenting - the Virtuous Cycle*
+*******************************************************************
+Using a Test-Driven Development (TDD) approach, where you write tests alongside the code you are creating, will not always improve the quality of your project, but it will make your team more agile.
+
+This means that the developers who need to fix a bug, or refactor a part of an application, will be able to do a faster and better job when relying on a battery of tests. If they break a feature, the tests should warn them about it.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

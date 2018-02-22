@@ -1,21 +1,298 @@
-Chapter 1: Understanding Microservices 8
-Origins of Service-Oriented Architecture 9
-The monolithic approach 10
-The microservice approach 14
-Microservice benefits 16
-Separation of concerns 16
-Smaller projects 16
-Scaling and deployment 17
-Microservices pitfalls 18
-Illogical splitting 18
-More network interactions 19
-Data storing and sharing 19
-Compatibility issues 20
-Testing 20
-Implementing microservices with Python 21
-The WSGI standard 22
-Greenlet and Gevent 23
-Twisted and Tornado 25
-asyncio 26
-Language performances 29
-Summary 31
+	                                                                   |
+	                                                                   |
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 22 - 46
+*************************************************************
+*****      Chapter 1 - Understanding Microservices      *****
+*************************************************************
+If thousands, or even millions, of customers use your service, pushing in production an experimental feature, and removing it if it does not work, is considered good practice rather than baking it for months before you publish it.
+
+Netflix developed tools such as Spinnaker (http://www.spinnaker.io/) to automate as many steps as possible to update production, and ship their features in the cloud as independent microservices, to test on a small subset of the users.
+
+Origins of Service-Oriented Architecture
+	SOA is the idea that you organize applications into a discrete unit of functionality that can be accessed remotely and acted upon and updated independently.
+
+	SOA stays quite vague about how you deploy and organize your application. The SOA Manifesto doesn't even mention if the services interact via the network.
+			SOA services could communicate via Inter-Process Communication (IPC) using sockets on the same machine, through shared memory, through indirect message queues, or even with Remote Procedure Calls (RPC).
+
+	It is common to say that microservices are one specialization of SOA, because they fulfill some of the SOA goals which are to build apps with standalone components that interact with each other.
+
+The monolithic approach
+	Let's take a very simple example of a traditional monolithic application: a hotel booking website. The application goes through the following steps:
+			1. It runs a couple of SQL queries against its hotels' database.
+			2. An HTTP request to a partner's service is made to add more hotels to the list.
+			3. An HTML results page is generated using an HTML template engine.
+
+	Once the user has found the perfect hotel and clicked on it to book it, the application performs these steps:
+			1. The customer gets created in the database if needed, and has to authenticate.
+			2. Payment is carried out by interacting with the bank web service.
+			3. The app saves the payment details in the database for legal reasons.
+			4. A receipt is generated using a PDF generator.
+			5. A recap email is sent to the user using the email service.
+			6. A reservation email is forwarded to the third-party hotel using the email service.
+			7. A database entry is added to keep track of the reservation.
+
+	In the good old LAMP (Linux-Apache-MySQL-Perl/PHP/Python) architecture, every incoming request generates a cascade of SQL queries on the database, and a few network calls to external services, and then the server generates the HTML response using a template engine.
+
+					LAMP Model
+						WWW --> Booking App 
+									--> e-mail service
+									--> Bank
+									--> 3rd Party Hotesl
+									--> Database 
+										-- Users
+										-- Hotels
+										-- Bills
+										-- Reservatioins
+	This application is a typical monolith, and it has a lot of obvious benefits. The biggest one is that the whole application is in a single code base. The deployment is also a no brainer: we can tag the code base, build a package, and run it somewhere. To scale it, we can run several instances of the booking app, and run several databases with some replication mechanism in place.
+			If your application stays small, this model works well and is easy to maintain for a single team.
+
+
+	But projects are usually growing. If you need to make a sweeping change that is large in scope such as changing your banking service or your database layer, the whole application gets into a very unstable state
+
+	Small changes can also generate collateral damage because different parts of the system have different uptime and stability requirements. Putting the billing and reservation processes at risk because the function that creates the PDF crashes the server is a bit of a problem.
+
+	The application is bound to get new features, and with developers leaving and joining the project, the code organization might start to get messy, the tests a bit slower. This growth usually ends up with a spaghetti code base that's hard to maintain, with a hairy database that needs complicated migration plans every time some developer refactors the data model.
+
+	The following points summarize the pros and cons of the monolithic approach:
+			- Starting a project as a monolith is easy, and probably the best approach.
+			- A centralized database simplifies the design and organization of the data.
+			- Deploying one application is simple.
+			- Any change in the code can impact unrelated features. When something breaks, the whole application may break.
+			- Solutions to scale your application are limited: you can deploy several instances, but if one particular feature inside the app takes all the resources, it impacts everything.
+			-As the code base grows, it's hard to keep it clean and under control.
+
+	The obvious solution is to split the application into separate pieces, even if the resulting code is still going to run in a single process, by building their apps with external libraries and frameworks. 
+			For instance, the PDF generator described in the hotel booking app could be a separate Python package that uses Reportlab and some templates to do the work.
+					Chances are this package can be reused in some other apps, and maybe, even published to the Python Package Index (PyPI) for the community.
+
+	Let's now look at how the same application would look like if we were to use microservices to build it.
+
+The microservice approach
+	If we were to build the same application using microservices, we would organize the code into several separate components that run in separate processes.
+			WWW --> Booking UI
+						--> Authentication
+								--> Tokens DB
+						--> Search
+								--> Hotels DB
+								--> 3rd Party Hotels
+						--> Users 
+								--> Users DB
+								--> Email Service
+						--> Payments
+								--> Email Service
+								--> Bank
+								--> Bill DB
+						--> Reservations
+								--> Reservations DB
+						--> PDF Reporting
+								<-- Reservations
+
+	We've shifted some of the complexity and ended up with these seven standalone components:.
+			1. Booking UI: A frontend service, which generates the web user interface, and interacts with all the other microservices.
+			2. PDF reporting service: A very simple service that would create PDFs for the receipts or any other document given a template and some data.
+			3. Search: A service that can be queried to get a list of hotels given a city name. This service has its own database.
+			4. Payments: A service that interacts with the third-party bank service, and manages a billing database. It also sends e-mails on successful payments.
+			5. Reservations: Stores reservations, and generates PDFs.
+			6. Users: Stores the user information, and interacts with users via emails.
+			7. Authentication: An OAuth 2-based service that returns authentication tokens, which each microservice can use to authenticate when calling others
+
+	In that context, microservices are logical units that focus on a very particular task. Here's a full definition attempt:
+			A microservice is a lightweight application, which provides a narrowed list of features with a well-defined contract. It's a component with a single responsibility, which can be developed and deployed independently.
+
+Microservice benefits
+		While the microservices architecture looks more complicated than its monolithic counterpart, its advantages are multiple. It offers the following:
+				- Separation of concerns
+				- Smaller projects to deal with
+				- More scaling and deployment options
+
+		Separation of concerns
+			First of all, each microservice can be developed independently by a separate team. The team in charge can make it in whatever programming language and database, as long as it has a welldocumented HTTP API.
+
+			That also means the evolution of the app is more under control than with monoliths.  For example, if the payment system changes its underlying interactions with the bank, the impact is localized inside that service, and the rest of the application stays stable and is probably unaffected.
+
+			We apply the single responsibility principle. It means that we want to make sure that each microservice focuses on a single role.
+
+		Smaller projects
+			The second benefit is breaking the complexity of the project. When you add a feature to an application such as PDF reporting, even if you do it cleanly, you make the base code bigger, more complicated, and sometimes, slower.
+					Building that feature in a separate application avoids this problem, and makes it easier to write it with whatever tools you want.
+
+			You can refactor it often, shorten your release cycles, and stay on top of things. The growth of the application remains under your control.
+
+			If a team wants to try out the latest programming language or framework, they can iterate quickly on a prototype that implements the same microservice API, try it out, and decide whether or not to stick with it.
+
+		Scaling and deployment
+			Makes it easier to scale depending on your constraints. Let's say you start getting a lot of customers who book hotels daily, and the PDF generation starts to heat up the CPUs. You can deploy that specific microservice in some servers that have bigger CPUs.
+
+			Another example are RAM-consuming microservices like the ones that interact with memory databases like Redis or Memcache. You could tweak your deployments, consequently, by deploying them on servers with less CPU and a lot more RAM.
+
+			We can, thus, summarize the benefits of microservices as follows:
+					- A team can develop each microservice independently, and use whatever technological stack makes sense. They can define a custom release cycle. All they need to define is a language-agnostic HTTP API.
+					- Developers break the application complexity into logical components. Each microservice focuses on doing one thing well.
+					- Since microservices are standalone applications, there's a finer control on deployments, which makes scaling easier.
+
+Microservices pitfalls
+		You need to be aware of these main problems you might have to deal with when coding microservices:
+				- Illogical splitting
+				- More network interactions
+				- Data storing and sharing
+				- Compatibility issues
+				- Testing
+
+		Illogical splitting
+				There's no way a team can come up with the perfect microservice architecture in the first shot. But as soon as you deal with the business logic, there are good chances that your code will move around before you get a good grasp of how to split things into the right set of microservices.
+						You can mitigate this problem by avoiding splitting your app in microservices if the split is not evident.
+
+				Premature splitting is the root of all evil. (I don't know if I believe this.)
+						If there's any doubt that the split makes sense, keeping the code in the same app is the safe bet.
+
+						It's always easier to split apart some of the code into a new microservice later than to merge back to two microservices in the same code base because the decision turned out to be wrong.
+
+		More network interactions
+				That requires extra attention on how each backend service is called, and raises a lot of questions like the following:
+						- What happens when the Booking UI cannot reach the PDF reporting service because of a network split or a laggy service?
+						- Does the Booking UI call the other services synchronously or asynchronously?
+						- How will that impact the response time?
+
+				We will need to have a solid strategy to be able to answer all those questions, and we will address those in Chapter 5, Interacting with Other Services.
+
+		Data storing and sharing
+				An effective microservice needs to be independent of other microservices, and ideally, should not share a database.
+
+				Again, that raises a lot of questions such as the following:
+						- Do we use the same users' IDs across all databases, or do we have independent IDs in each service and keep it as a hidden implementation detail?
+						- Once a user is added to the system, do we replicate some of her information in other services databases via strategies like data pumping, or is that overkill?
+						- How do we deal with data removal?
+
+				Avoiding data duplication as much as possible while keeping microservices in isolation is one of the biggest challenges in designing microservices-based applications.
+
+		Compatibility issues
+				Another problem happens when a feature change impacts several microservices. If a change affects in a backward incompatible way the data that travels between services, you're in for some trouble.
+
+				Can you deploy your new service, and will it work with older versions of other services? Or do you need to change and deploy several services at once? Does it mean you've just stumbled on some services that should probably be merged back together?
+
+		Testing
+				You need to have a robust and agile deployment process to be efficient. You need to be able to play with your whole application when you develop it.  You can't fully test things out with just one piece of the puzzle.
+
+				There are now many tools to facilitate deployments of applications that are built with several components, as we will learn about throughout this book. And all those tools probably helped in the success and adoption of microservices and vice versa.
+
+				Microservices-style architecture boosts deployment tools innovation, and deployment tools lower the bar for the approval of microservices-style architecture.
+
+		Pitfalls Summarized
+				The pitfalls of using microservices can be summarized as follows:
+						- Premature splitting of an application into microservices can lead to architectural problems
+						- Network interactions between microservices add weaknesses spots and additional overhead
+						- Testing and deploying microservices can be complex
+						- And the biggest challenge--data sharing between microservices is hard
+
+Implementing microservices with Python
+		Python is an amazingly versatile language -- from simple system scripts that perform tasks on a server to large object-oriented applications that run services for millions of users.
+
+		Python is slow, and this is undeniable. But it still is a language of choice for building microservices, and many major companies are happily using it.
+
+		The WSGI standard
+				The Python web community has created a standard (inspired by the Common Gateway Interface or CGI) called Web Server Gateway Interface (WSGI). When your code uses that standard, your project can be executed by standard web servers like Apache or nginx, using WSGI extensions like uwsgi or mod_wsgi.
+						Your application just has to deal with incoming requests and send back JSON responses, and Python includes all that goodness in its standard library.
+
+				Since its introduction, the WSGI protocol became an essential standard, and the Python web community widely adopted it. Developers wrote middlewares, which are functions you can hook before or after the WSGI application function itself, to do something within the environment.
+
+				Some web frameworks, like Bottle (http://bottlepy.org), were created specifically around that standard, and soon enough, every framework out there could be used through WSGI in one way or another.
+
+				** WSGI is synchronouss **
+
+				That's one of the reasons why non-WSGI frameworks like Twisted and Tornado, and in JavaScript land, Node.js, became very successful--it's fully async.
+
+				There's, however, one trick to boost synchronous web applications--Greenlet, which is explained in the following section.
+
+		Greenlet and Gevent
+				The general principle of asynchronous programming is that the process deals with several concurrent execution contexts to simulate parallelism. 
+
+				Asynchronous applications use an event loop that pauses and resumes execution contexts when an event is triggered--only one context is active, and they take turns.
+
+				The Greenlet project (https://github.com/python-greenlet/greenlet) is a package based on the Stackless project, a particular CPython implementation, and provides greenlets. 
+
+				Greenlets are pseudo-threads that are very cheap to instantiate, unlike real threads, and that can be used to call Python functions. Within those functions, you can switch, and give back the control to another function.
+						The switching is done with an event loop, and allows you to write an asynchronous application using a thread-like interface paradigm.
+
+				Here's an example from the Greenlet documentation:
+						from greenlet import greenlet
+
+						def test1(x, y): 
+							z = gr2.switch(x+y)
+							print(z)
+
+
+						def test2(u):
+							print (u)
+							gr1.switch(42)
+							gr1 = greenlet(test1)
+							gr2 = greenlet(test2)
+							gr1.switch("hello", " world")
+
+				Switching from one greenlet to another has to be done explicitly, and the resulting code can quickly become messy and hard to understand. That's where Gevent can become very useful.
+
+				The Gevent project (http://www.gevent.org/) is built on top of Greenlet, and offers an implicit and automatic way of switching between greenlets, among many other things.
+
+				
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
