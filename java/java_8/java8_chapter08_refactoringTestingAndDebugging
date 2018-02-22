@@ -1,0 +1,157 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 111 - 
+*******************************************************************
+****      Chapter 8 - Refactoring, testing, and debugging      ****
+*******************************************************************
+Dealing with an existing codebase written in an older version of Java is the purpose of this chapter. It presents several recipes showing how you can refactor existing code to make use of lambda expressions and gain more readability and flexibility.
+
+In addition, we discuss how several object-oriented design patterns including strategy, template method, observer, chain of responsibility, and factory can be made more concise thanks to lambda expressions.
+
+Finally, we explore how you can test and debug code that uses lambda expressions and the Streams API.
+
+8.1 Refactoring for improved readability and flexibility 
+	Lambda expressions are more concise because lambda expressions let you represent a piece of behavior in a more compact form in comparison to using anonymous classes. 
+			 We also showed in chapter 3 that method references let you write even more concise code when all you want to do is pass an existing method as argument to another method.
+
+	 Your code is more flexible because of behavior parameterization that we introduced in chapter 2. Your code can use and execute multiple behaviors passed as arguments to cope with requirement changes.
+
+	 In this section, we show simple steps to refactor code to gain readability and flexibility, using: lambdas, method references, and streams.
+
+	 8.1.1 Improving code readability
+	 	 Java 8 features can also help improve code readability compared to previous versions:
+				■ You can reduce the verbosity of your code, making it easier to understand.
+				■ You can improve the intent of your code by using method references and the Streams API.
+
+		We describe three simple refactorings that use lambdas, method references, and streams, which you can apply to your code to improve its readability:
+				■ Refactoring anonymous classes to lambda expressions
+				■ Refactoring lambda expressions to method references
+				■ Refactoring imperative-style data processing to streams
+
+	8.1.2 From anonymous classes to lambda expressions
+		1. 'this' has a different meaning
+			a) anonymous classes refer to 'this' refers to the anonymous class
+			b) in lamdas it refers to the enclosing class
+		2. shadowing variables is not allowed for lamdas; but it's allowed for anonymous classes
+		3. 
+			The first simple refactoring you should consider is converting uses of anonymous classes implementing one single abstract method to lambda expressions.
+					Anonymous classes are extremely verbose and error-prone.
+
+			By adopting lambda expressions, you produce code that is more succinct and readable. For example:
+					// Before, using an anonymous class
+					Runnable r1 = new Runnable(){
+						public void run(){
+							System.out.println("Hello");
+						}
+					};
+
+					// After, using a lamda expression
+					Runnable r2 = () -> System.out.println("Hello");
+
+			Converting anonymous classes to lambda expressions can be a difficult process in certain situations (see the paper describes the process in more detail: http://dig.cs.illinois.edu/papers/lambdaRefactoring.pdf).
+					First, the meanings of this and super are different for anonymous classes and lambda expressions. Inside an anonymous class, this refers to the anonymous class itself, but inside a lambda it refers to the enclosing class.
+
+					Second, anonymous classes are allowed to **shadow variables** from the enclosing class. Lambda expressions can’t (they’ll cause a compile error), as shown in the following code:
+							
+							int a = 10;
+
+							// this causes a compile time 
+							// error
+							Runnable r1 = () -> {
+								int a = 2;  // not allowed error
+								System.out.println(a);
+							};
+
+							// everthing is fine here anonymous classes
+							// can shadow variables
+							Runnable r2 = new Runnable(){
+								public void run(){
+									int a = 2;
+									System.out.println(a);
+								}
+							};
+
+					Finally, converting an anonymous class to a lambda expression can make the resulting code ambiguous in the context of overloading. The type of anonymous class is explicit at instantiation, but the type of the lambda depends on its context.
+							Let’s say you’ve declared a functional interface with the same signature as Runnable, here called Task (this might occur when you need interface names that are more meaningful in your domain model):
+									interface Task{
+										public void execute();
+									}
+									public static void doSomething(Runnable r){ r.run(); }
+									public static void doSomething(Task a){ r.execute(); }
+
+							You can now pass an anonymous class implementing Task without a problem:
+									doSomething(new Task() {
+										public void execute() {
+											System.out.println("Danger danger!!");
+										}
+									});
+
+							But converting this anonymous class to a lambda expression results in an ambiguous method call, because both Runnable and Task are valid target types:
+									// Problem; both doSomething(Runnable) and doSomething(Task) match.
+									doSomething(() -> System.out.println("Danger danger!!"));
+
+							You can solve the ambiguity by providing an explicit cast (Task):
+									// Resolve problem by casting the lamda expression
+									doSomething((Task)() -> System.out.println("Danger danger!!"));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
