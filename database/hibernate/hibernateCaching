@@ -1,0 +1,193 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+****              Chapter 13 - Hibernate Caching               ****
+*******************************************************************
+https://dzone.com/articles/all-about-hibernate-second
+Caching in hibernate
+	Caching functionality is designed to reduce the amount of necessary database access. When the objects that are cached reside in memory. You have the flexibility to limit the usage of memory and store the items in disk storage.
+
+	There are various  flavors of caching available, but it is better to cache non-transactional and read-only data.
+
+	Hibernate provides 3 types of caching: 1) Session Cache, 2) Second Level Cache, 3) Query Cache
+
+	Session Cache
+			The session cache caches objects within the current session. It is enabled by default in Hibernate. Objects in the session cache reside in the same memory location.
+
+	Second Level Cache
+			The second level cache is responsible for caching objects across sessions. When this is turned on, objects will first be searched in the cache and if they are not found, a database query will be fired.
+
+			Second level cache will be used when the objects are loaded using their primary key. This includes fetching of associations. Second level cache objects are constructed and reside in different memory locations.
+
+	Query Cache
+			Query Cache is used to cache the results of a query. When the query cache is turned on, the results of the query are stored against the combination query and parameters.
+					Every time the query is fired the cache manager  checks for the combination of parameters and query.
+
+					 If the results are found in the cache, they are returned, otherwise a database transaction is initiated.
+
+			 As you can see, it is not a good idea to cache a query if it has a number of parameters, because then a single parameter can take a number of values.
+			 		For each of these combinations the results are stored in the memory. This  can lead to extensive memory usage. 
+
+https://www.dynatrace.com/news/blog/understanding-caching-in-hibernate-part-one-the-session-cache/ 
+https://www.dynatrace.com/news/blog/understanding-caching-in-hibernate-part-two-the-query-cache/
+https://www.dynatrace.com/news/blog/understanding-caching-in-hibernate-part-three-the-second-level-cache/
+Understanding Caching in Hibernate – Part One : The Session Cache
+	Hibernate offers caching functionality which is designed to reduces the amount of necessary database access.
+
+	Hibernate uses different types of caches. Each type of cache is used for different purposes. Let us first have a look at this cache types.
+			- The first cache type is the session cache. The session cache caches object within the current session.
+			- The second cache type is the query Cache. The query cache is responsible for caching queries and their results.
+			- The third cache type is the second level cache. The second level cache is responsible for caching objects across sessions.
+
+	The Session Cache
+			The session cache caches values within the current session.  This cache is enabled by default. 
+
+			Hibernate internally always uses the session cache transparently.  We have also seen that Hibernate requires a key to load object from the session cache. So in case we have a key available it is prefered to use load and a key instead of a HQL query.
+
+	The Second Level Cache
+			The key characteristic of the second-level cache is that is is used across sessions, which also differentiates it from the session cache, which only – as the name says – has session scope. 
+
+			Hibernate provides a flexible concept to exchange cache providers for the second-level cache. By default Ehcache is used as caching provider. However more sophisticated caching implementation can be used like the distributed JBoss Cache or Oracle Coherence.
+
+			Activating the second level cache requires us change to Hibernate configuration file and enable second-level caching by adding and additionally specify the cache provider as shown below.
+					<property name="hibernate.cache.use_second_level_cache">true</property>
+					<property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
+
+			In order to enable caching of our Person objects if have to specify the caching configuration in the ehcache.xml file. The actual cache configuration depends on the caching provider.
+					For Ehcache the configuartion is defined as follows. The configuration for the Person class used in the example is boiler-plate Ehcache configuration. It can be adopted to specific needs. Describing all possible configurations options like using multiple cache regions etc. is beyond scope of this post.
+							<cache name="com.dynatrace.samples.database.Person"
+							   maxElementsInMemory="300"
+							   eternal="true"
+							   overflowToDisk="false"
+							   timeToIdleSeconds="12000"
+							   timeToLiveSeconds="12000"
+							   diskPersistent="false"
+							   diskExpiryThreadIntervalSeconds="120"
+							   memoryStoreEvictionPolicy="LRU"       
+							/>
+
+			Finally we have to configure caching also at Hibernate level. Finally we have to configure caching also at Hibernate level. Hibernate for sure supports  read-write cache as well and also transactional caches in case this is supported by the cache provider
+
+			The following liine in the hibernate configuration enable read-only caching for Person objects
+					<cache usage=”read-only” />
+
+
+
+
+
+
+https://stackoverflow.com/questions/7058843/when-and-how-to-use-hibernate-second-level-cache
+First of all, let's talk about process level cache (or 2nd level cache as they call it in Hibernate). To make it work, you should
+
+configure cache provider
+tell hibernate what entities to cache (right in hbm.xml file if you use this kind of mapping).
+You tell to the cache provider how many objects it should store and when/why they should be invalidated. So let's say you have a Book and an Author entities, each time you're getting them from the DB, only those that are not in cache will be selected from actually DB. This increases performance significantly. It's useful when:
+
+You write to the database only via Hibernate (because it needs a way to know when to change or invalidate entities in the cache)
+You read objects often
+You have a single node, and you don't have replication. Otherwise you'll need to replicate the cache itself (use distributed caches like JGroups) which adds more complexity, and it doesn't scale as good as share-nothing apps.
+So when does cache work?
+
+When you session.get() or session.load() the object that was previously selected and resides in cache. Cache is a storage where ID is the key and the properties are the values. So only when there is a possibility to search by ID you could eliminate hitting the DB.
+When your associations are lazy-loaded (or eager-loaded with selects instead of joins)
+But it doesn't work when:
+
+If you don't select by ID. Again - 2nd level cache stores a map of entities' IDs to other properties (it doesn't actually store objects, but the data itself), so if your lookup looks like this: from Authors where name = :name, then you don't hit cache.
+When you use HQL (even if you use where id = ?).
+If in your mapping you set fetch="join", this means that to load associations joins will be used everywhere instead of separate select statements. Process level cache works on children objects only if fetch="select" is used.
+Even if you have fetch="select" but then in HQL you use joins to select associations - those joins will be issued right away and they will overwrite whatever you specified in hbm.xml or annotations.
+Now, about Query Cache. You should note that it's not a separate cache, it's an addition to the process level cache. Let's say you have a Country entity. It's static, so you know that each time there will be the same result set when you say from Country. This is a perfect candidate for query cache, it will store a list of IDs in itself and when you next time select all countries, it will return this list to the process level cache and the latter, in turn, will return objects for each ID as these objects are stored already in the 2nd level cache. Query cache is invalidated each time anything related to the entity changes. So let's say you configured from Authors to be placed into a Query Cache. It won't be effective as Author changes often. So you should use Query Cache only for more or less static data.
+
+
+At runtime, Hibernate handles moving data into and out of the second-level cache in response to the operations performed by the Session, which acts as a transaction-level cache of persistent data.
+
+Once an entity becomes managed, that object is added to the internal cache of the current persistence context (EntityManager or Session). The persistence context is also called the first-level cache, and it’s enabled by default.
+
+It is possible to configure a JVM-level (SessionFactory-level) or even a cluster cache on a class-by-class and collection-by-collection basis.
+
+13.1. Configuring second-level caching
+	Hibernate can integrate with various caching providers for the purpose of caching data outside the context of a particular Session. This section defines the settings which control this behavior.
+
+	13.1.1. RegionFactory
+		org.hibernate.cache.spi.RegionFactory defines the integration between Hibernate and a pluggable caching provider.
+				JCache
+				Ehcache
+				Ifinispan
+
+	13.1.2. Caching configuration properties
+		Besides specific provider configuration, there are a number of configurations options on the Hibernate side of the integration that control various caching behaviors:
+				ibernate.cache.use_second_level_cache - Enable or disable second level caching overall. Default is true, although the default region factory is NoCachingRegionFactory.
+
+				hibernate.cache.use_query_cache - Enable or disable second level caching of query results. Default is false.
+
+				hibernate.cache.query_cache_factory - Query result caching is handled by a special contract that deals with staleness-based invalidation of the results. The default implementation does not allow stale results at all. Use this for applications that would like to relax that. Names an implementation of org.hibernate.cache.spi.QueryCacheFactory
+
+				hibernate.cache.default_cache_concurrency_strategy - In Hibernate second-level caching, all regions can be configured differently including the concurrency strategy to use when accessing that particular region. This setting is very rarely required. read-only, read-write, nonstrict-read-write, transactional
+
+				hibernate.cache.use_structured_entries - If true, forces Hibernate to store data in the second-level cache in a more human-friendly format. Can be useful if you’d like to be able to "browse" the data directly in your cache, but does have a performance impact.
+
+13.2. Configuring second-level cache mappings
+	The cache mappings can be configured via JPA annotations or XML descriptors or using the Hibernate-specific mapping files. By default, entities are not part of the second level cache and we recommend you to stick to this setting. However, you can override this by setting the shared-cache-mode element in your persistence.xml file or by using the javax.persistence.sharedCache.mode property in your configuration file.
+
+	ENABLE_SELECTIVE (Default and recommended value) - Entities are not cached unless explicitly marked as cacheable (with the @Cacheable annotation).
+
+	DISABLE_SELECTIVE - Entities are cached unless explicitly marked as non-cacheable.
+
+13.3. Entity inheritance and second-level cache mapping
+	Hibernate requires that a given entity hierarchy share the same caching semantics.
+
+	The reasons why Hibernate requires that all entities belonging to an inheritance tree share the same caching definition can be summed as follows:
+			- from a performance perspective, adding an additional check on a per entity type level would slow the bootstrap process.
+			- providing different caching semantics for subclasses would violate the Liskov substitution principle.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
