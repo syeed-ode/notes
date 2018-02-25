@@ -1,0 +1,205 @@
+	                                                                   |
+	                                                                   |
+************************************************************************
+** Note that a nonzero-length array is always mutable, so it is wrong **
+**    for a class to have a public static final array field, or an    **
+**               accessor that returns such a field.                  **
+************************************************************************
+************************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 111 - 
+************************************************************************
+*Chapter 4 - Item 13: Minimize the accessibility of classes and members*
+************************************************************************
+CLASSES and interfaces lie at the heart of the Java programming language. They are its basic units of abstraction. 
+
+The language provides many powerful elements that you can use to design classes and interfaces. 
+
+This chapter contains guidelines to help you make the best use of these elements so that your classes and interfaces are usable, robust, and flexible.
+
+
+
+
+Item 13: Minimize the accessibility of classes and members
+
+The single most important factor that distinguishes a well-designed module from a poorly designed one is the degree to which the module hides its internal data and other implementation details from other modules.
+		A well-designed module hides all of its implementation details, cleanly separating its API from its implementation.
+
+		Modules then communicate only through their APIs and are oblivious to each others’ inner workings.
+
+This concept, known as information hiding or encapsulation, is one of the fundamental tenets of software design.
+
+Information hiding is important for many reasons.
+		Most of which stem from the fact that it decouples the modules that comprise a system, 
+
+		Allowing them to be developed, tested, optimized, used, understood, and modified in isolation.
+				This speeds up system development because modules can be developed in parallel.
+
+				It eases the burden of maintenance because modules can be understood more quickly and debugged with little fear of harming other modules.
+
+		While information hiding does not, in and of itself, cause good performance, it enables effective performance tuning: once a system is complete and profiling has determined which modules are causing performance problems (Item 55: Optimize judiciously), those modules can be optimized without affecting the correctness of other modules.
+
+		Information hiding increases software reuse because modules that aren’t tightly coupled often prove useful in other contexts besides the ones for which they were developed.
+
+		Information hiding decreases the risk in building large systems, because individual modules may prove successful even if the system does not.
+
+Java has many facilities to aid in information hiding.
+		The access control mechanism [JLS, 6.6] specifies the accessibility of classes, interfaces, and members.
+				The accessibility of an entity is determined by the location of its declaration and by which, if any, of the access modifiers (private, protected, and public) is present on the declaration.
+
+		The rule of thumb is simple: 'make each class or member as inaccessible as possible'. 
+				In other words, use the lowest possible access level consistent with the proper functioning of the software that you are writing. 
+
+				For top-level (non-nested) classes and interfaces:
+						There are only two possible access levels: package-private and public. 
+								If a top-level class or interface can be made package-private, it should be.
+
+								By making it package-private, you make it part of the implementation rather than the exported API, and you can modify it, replace it, or eliminate it in a subsequent release without fear of harming existing clients.
+
+								If you make it public, you are obligated to support it forever to maintain compatibility.
+
+						If a package-private top-level class (or interface) is used by only one class, consider making the top-level class a private nested class of the sole class that uses it (Item 22: Favor static member classes over nonstatic).
+								This reduces its accessibility from all the classes in its package to the one class that uses it.
+
+								But it is far more important to reduce the accessibility of a gratuitously public class than of a package-private top-level class: the public class is part of the package’s API, while the package-private top-level class is already part of its implementation.
+
+		For members (fields, methods, nested classes, and nested interfaces), there are four possible access levels, listed here in order of increasing accessibility:
+				After carefully designing your class’s public API, your reflex should be to make all other members private.
+
+				Only if another class in the same package really needs to access a member should you remove the private modifier, making the member package-private. 
+						If you find yourself doing this often, you should reexamine the design of your system to see if another decomposition might yield classes that are better decoupled from one another.
+
+						That said, both private and package-private members are part of a class’s implementation and do not normally impact its exported API.
+
+				For members of public classes, a huge increase in accessibility occurs when the access level goes from package-private to protected.
+						A protected member is part of the class’s exported API and must be supported forever.
+
+						A protected member of an exported class represents a public commitment to an implementation detail (Item 17: Design and document for inheritance or else prohibit it). The need for protected members should be relatively rare.
+
+		There is one rule that restricts your ability to reduce the accessibility of methods.
+				If a method overrides a superclass method, it is not permitted to have a lower access level in the subclass than it does in the superclass [JLS, 8.4.8.3]. This is necessary to ensure that an instance of the subclass is usable anywhere that an instance of the superclass is usable.
+						If you violate this rule, the compiler will generate an error message when you try to compile the subclass.
+
+				A special case of this rule is that if a class implements an interface, all of the class methods that are also present in the interface must be declared public. This is so because all members of an interface are implicitly public [JLS, 9.1.5].
+
+		To facilitate testing, you may be tempted to make a class, interface, or member more accessible. This is fine up to a point. 
+				It is acceptable to make a private member of a public class package-private in order to test it, but it is not acceptable to raise the accessibility any higher than that.
+
+				In other words, it is not acceptable to make a class, interface, or member a part of a package’s exported API to facilitate testing.
+
+		Instance fields should never be public (Item 14: In public classes, use accessor methods, not public fields).
+				If an instance field is nonfinal, or is a final reference to a mutable object, then by making the field public, you give up the ability to limit the values that can be stored in the field. 
+
+				This means you also give up the ability to enforce invariants involving the field. 
+
+				Also, you give up the ability to take any action when the field is modified, so classes with public mutable fields are not thread-safe. 
+
+				Even if a field is final and refers to an immutable object, by making the field public you give up the flexibility to switch to a new internal data representation in which the field does not exist.
+
+		The same advice applies to static fields, with the one exception.
+				You can expose constants via public static final fields, assuming the constants form an integral part of the abstraction provided by the class.
+
+				It is critical that these fields contain either primitive values or references to immutable objects (Item 15: Minimize mutability).
+						A final field containing a reference to a mutable object has all the disadvantages of a nonfinal field.
+
+						While the reference cannot be modified, the referenced object can be modified—with disastrous results.
+************************************************************************
+****Note that a nonzero-length array is always mutable, so it is wrong for a class to have a public static final array field, or an accessor that returns such a field.****
+************************************************************************
+************************************************************************
+** Note that a nonzero-length array is always mutable, so it is wrong **
+**    for a class to have a public static final array field, or an    **
+**               accessor that returns such a field.                  **
+************************************************************************
+		If a class has such a field or accessor, clients will be able to modify the contents of the array. This is a frequent source of security holes:
+				// Potential security hole! 
+				public static final Thing[] VALUES = { ... };
+
+				Beware of the fact that many IDEs generate accessors that return references to private array fields, resulting in exactly this problem.
+
+		There are two ways to fix the problem. 
+				You can make the public array private and add a public immutable list:
+						private static final Thing[] PRIVATE_VALUES = { ... };
+						public static final List<Thing> VALUES = Collections.unmodifiableList(Arrays.asList(PRIVATE_VALUES));
+
+				Alternatively, you can make the array private and add a public method that returns a copy of a private array:
+						private static final Thing[] PRIVATE_VALUES = { ... };
+
+						public static final Thing[] values() {
+							return PRIVATE_VALUES.clone();
+						}
+
+				To choose between these alternatives, think about what the client is likely to do with the result. Which return type will be more convenient? Which will give better performance?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

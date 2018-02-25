@@ -32,9 +32,148 @@ Advantages:
 
 				The ability of static factory methods to return the same object from repeated invocations allows classes to maintain strict control over what instances exist at any time.
 
-	-->>		Classes that do this are said to be 'instance-controlled'. Instance control allows a class to guarantee that it is a singleton (Item 3) or noninstantiable (Item 
-				4).
-						It allows an immutable class (Item 15) to make the guarantee that no two equal instances exist: a.equals(b) if and only if a==b. If a class makes this guarantee, then its clients can use the == operator instead of the equals(Object) method, which may result in improved performance.
+	-->>		Classes that do this are said to be 'instance-controlled'. Instance control allows a class to guarantee that it is a singleton (Item 3: Enforce the singleton
+				property with a private constructor or an enum type) or noninstantiable (Item 4: Enforce noninstantiability with a private constructor).
+						It allows an immutable class (Item 15: Minimize mutability) to make the guarantee that no two equal instances exist: a.equals(b) if and only if a==b. If a class makes this guarantee, then its clients can use the == operator instead of the equals(Object) method, which may result in improved performance.
+
+						Enum types (Item 30: Use enums instead of int constants) provide this guarantee.
+
+		A third advantage of static factory methods is that, unlike constructors, they can return an object of any subtype of their return type. This gives you great flexibility in choosing the class of the returned object.
+				One application of this flexibility is that an API can return objects without making their classes public. 
+						Hiding implementation classes in this fashion leads to a very compact API.
+
+						This technique lends itself to interface-based frameworks (Item 18: Prefer interfaces to abstract classes), where interfaces provide natural return types for static factory methods.
+
+						Interfaces can’t have static methods, so by convention, static factory methods for an interface named Type are put in a noninstantiable class (Item 4: Enforce noninstantiability with a private constructor) named Types.
+								For example, the Java Collections Framework has thirty-two convenience implementations of its collection interfaces, providing unmodifiable collections, synchronized collections, and the like.
+
+								Nearly all of these implementations are exported via static factory methods in one noninstantiable class (java.util.Collections).
+
+								The classes of the returned objects are all nonpublic.
+										The Collections Framework API is much smaller than it would have been had it exported thirty-two separate public classes, one for each convenience implementation.
+
+						It is not just the bulk of the API that is reduced, but the 'conceptual weight'.
+								The user knows that the returned object has precisely the API specified by its interface, so there is no need to read additional class documentation for the implementation classes.
+
+								Furthermore, using such a static factory method requires the client to refer to the returned object by its interface rather than its implementation class, which is generally good practice (Item 52: Refer to objects by their interfaces).
+
+		Not only can the class of an object returned by a public static factory method be nonpublic, but the class can vary from invocation to invocation depending on the values of the parameters to the static factory.
+				Any class that is a subtype of the declared return type is permissible. The class of the returned object can also vary from release to release for enhanced software maintainability and performance.
+
+				The class java.util.EnumSet (Item 32: Use EnumSet instead of bit fields), introduced in release 1.5, has no public constructors, only static factories. They return one of two implementations, depending on the size of the underlying enum type: 
+						If it has sixty-four or fewer elements, as most enum types do, the static factories return a RegularEnumSet instance, which is backed by a single long. 
+
+						If the enum type has sixty-five or more elements, the factories return a JumboEnumSet instance, backed by a long array.
+
+				The existence of these two implementation classes is invisible to clients. If RegularEnumSet ceased to offer performance advantages for small enum types, it could be eliminated from a future release with no ill effects.
+
+				Similarly, a future release could add a third or fourth implementation of EnumSet if it proved beneficial for performance.
+
+				Clients neither know nor care about the class of the object they get back from the factory; they care only that it is some subclass of EnumSet.
+
+		A fourth advantage of static factory methods is that they reduce the verbosity of creating parameterized type instances.
+				Unfortunately, you must specify the type parameters when you invoke the constructor of a parameterized class even if they’re obvious from context. This typically requires you to provide the type parameters twice in quick succession:
+						Map<String, List<String>> m = new HashMap<String, List<String>>();
+
+				With static factories, however, the compiler can figure out the type parameters for you with 'type inference':
+						public static <K, V> HashMap<K, V> newInstance() {
+							return new HashMap<K, V>();
+						}
+
+						Then you could replace the wordy declaration above with this succinct alternative:
+								Map<String, List<String>> m = HashMap.newInstance();
+
+				Unfortunately, the standard collection implementations such as HashMap do not have factory methods as of release 1.6, but you can put these methods in your own utility class. 
+						More importantly, you can provide such static factories in your own parameterized classes.
+
+Service Provider Framework
+		The class of the object returned by a static factory method need not even exist at the time the class containing the method is written.
+				Such flexible static factory methods form the basis of service provider frameworks, such as the Java Database Connectivity API (JDBC).
+
+		A service provider framework is a system in which multiple service providers implement a service.
+				The system makes the implementations available to its clients, decoupling them from the implementations.
+
+		There are three essential components of a service provider framework:
+				// The example code is taken from com.syeedode.security.keys.generation; where the Security Provider provides various SPI's for the Provider's themselves (the specific Engine Algorithms), KeyGeneration (both secret and KeyPairGenerator), KeyManagerFactory, KeyStores, and TrustStores. See https://github.com/syeed-ode/generic-java-playground/tree/master/src/main/java/com/syeedode/security for more detail.
+
+				1. service interface - which providers implement
+						// java.security.KeyPairGenerator (abstract class)
+						// java.security.KeyPairGeneratorSpi (abstract class)
+						// com.syeedode.security.keys.generation.SyeedsKeyPairGenerator (concrete class)
+
+						// JDBC: java.sql.Connection
+								// Connection.createStatement()
+								// Connection.close()
+								// Connection.rollback()
+								// Connection.commit()
+
+				2. provider registration API - which the system uses to register implementations, giving clients access to them
+						// java.security.Provider (abstract class)
+						// com.syeedode.security.proivders.SyeedsProvider (concrete class)
+								//public class SyeedsProvider extends Provider {
+								//    /**
+								//     * Constructs a provider with the specified name, version number,
+								//     * and information.
+								//     *
+								//     */
+								//    public SyeedsProvider() {
+								//        super("SyeedOde", 1.0, "Syeed Ode's Security Provider v1.0");
+								//        put("KeyPairGenerator.SYEED_ODE"
+								//                , "com.syeedode.security.keys.generation.SyeedsKeyPairGenerator");
+								//        put("KeyManagerFactory.SYEED_ODE"
+								//                , "com.syeedode.security.keys.keymanager.SSLKeyManagerFactory");
+								//    }
+								//}
+						// You can also register provides via config file with this implementation
+
+						// JDBC: java.sql.DriverManager
+								// DriverManager.registerDriver
+
+				3. service access API - which clients use to obtain an instance of the service. 
+						// java.security.KeyPairGenerator.getInstance("SYEED_ODE");
+
+						// JDBC: DriverManager
+								// DriverManager.getConnection
+
+						The service access API typically allows but does not require the client to specify some criteria for choosing a provider. In the absence of such a specification, the API returns an instance of a default implementation. 
+
+						The service access API is the “flexible static factory” that forms the basis of the service provider framework.
+
+				4. (optional) service provider interface - which providers implement to create instances of their service implementation
+						In the absence of a service provider interface, implementations are registered by class name and instantiated reflectively (Item 53). 
+
+Disadvantages:
+		The main disadvantage of providing only static factory methods is that classes without public or protected constructors cannot be subclassed.
+
+		A second disadvantage of static factory methods is that they are not readily distinguishable from other static methods.
+				They do not stand out in API documentation in the way that constructors do, so it can be difficult to figure out how to instantiate a class that provides static factory methods instead of constructors.
+
+				You can reduce this disadvantage by drawing attention to static factories in class or interface comments.
+
+	-->			You can reduce this disadvantage by drawing attention to static factories by adhering to common naming conventions.
+						• valueOf—Returns an instance that has, loosely speaking, the same value as its parameters. Such static factories are effectively type-conversion methods.
+						• getInstance—Returns an instance that is described by the parameters but cannot be said to have the same value. In the case of a singleton, getInstance takes no parameters and returns the sole instance.
+						• newInstance—Like getInstance, except that newInstance guarantees that each instance returned is distinct from all others.
+						• getType—Like getInstance, but used when the factory method is in a different class. Type indicates the type of object returned by the factory method.
+						• newType—Like newInstance, but used when the factory method is in a different class. Type indicates the type of object returned by the factory method.
+
+
+Avoid the reflex to provide public constructors without first considering static factories.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

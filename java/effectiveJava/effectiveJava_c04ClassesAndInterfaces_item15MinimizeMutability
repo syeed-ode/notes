@@ -1,14 +1,25 @@
 	                                                                   |
 	                                                                   |
-*******************************************************************
+************************************************************************
 *							    *
 *							    *
 *							    *
 toc: 
 pg 111 - 
-*******************************************************************************
-*******           Chapter 2 - Item 15: Minimize mutability              *******
-*******************************************************************************
+************************************************************************
+*******        Chapter 4 - Item 15: Minimize mutability          *******
+************************************************************************
+CLASSES and interfaces lie at the heart of the Java programming language. They are its basic units of abstraction. 
+
+The language provides many powerful elements that you can use to design classes and interfaces. 
+
+This chapter contains guidelines to help you make the best use of these elements so that your classes and interfaces are usable, robust, and flexible.
+
+
+
+
+Item 15: Minimize mutability
+
 An immutable class is simply a class whose instances cannot be modified. All of the information contained in each instance is provided when it is created and is fixed for the lifetime of the object.
 
 Immutable classes are easier to design, implement, and use than mutable classes. They are less prone to error and are more secure.
@@ -27,7 +38,9 @@ To make a class immutable, follow these five rules:
 				This is necessary to ensure correct behavior if a reference to a newly created instance is passed from one thread to another without synchronization, as spelled out in the memory model
 
 		4. Make all fields private.
-				This prevents clients from obtaining access to mutable objects referred to by fields and modifying these objects directly.
+				This prevents clients from obtaining access to mutable objects referred to by fields and modifying these objects directly. 
+
+				While it is technically permissible for immutable classes to have public final fields containing primitive values or references to immutable objects, it is not recommended because it precludes changing the internal representation in a later release (Item 13).
 
 				
 
