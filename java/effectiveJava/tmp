@@ -1,0 +1,96 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 111 - 
+*******************************************************************************
+* Chapter 2 - Item 1: Consider static factory methods instead of constructors *
+*******************************************************************************
+THIS chapter concerns creating and destroying objects: when and how to create them, when and how to avoid creating them, how to ensure they are destroyed in a timely manner, and how to manage any cleanup actions that must precede their destruction.
+
+Item 1: Consider static factory methods instead of constructors
+
+The normal way for a class to allow a client to obtain an instance of itself is to provide a public constructor. A class can provide a public static factory method, which is simply a static method that returns an instance of the class.
+
+A class can provide its clients with static factory instead of a public constructor doing so has both advantages and disadvantages.
+
+Advantages:
+		One advantage of static factory methods is that, unlike constructors, they have names.  A static factory with a well-chosen name describe the object being returned and is easier to use and the resulting client code easier to read.
+				For example, the constructor BigInteger(int, int, Random), which returns a BigInteger that is probably prime, would have been better expressed as a static factory method named BigInteger.probablePrime. (This method was eventually added in the 1.4 release.)
+
+				A class can have only a single constructor with a given signature. Programmers have been known to get around this restriction by providing two constructors whose parameter lists differ only in the order of their parameter types.
+						This is a really bad idea.
+
+						Because they have names, static factory methods don’t share this restriction. In cases where a class seems to require multiple constructors with the same signature, replace the constructors with static factory methods and carefully chosen names to highlight their differences.
+
+		A second advantage of static factory methods is that, unlike constructors, they are not required to create a new object each time they’re invoked. 
+				This allows immutable classes (Item 15) to use preconstructed instances, or to cache instances as they’re constructed, and dispense them repeatedly to avoid creating unnecessary duplicate objects.
+						It can greatly improve performance if equivalent objects are requested often, especially if they are expensive to create.
+
+				The ability of static factory methods to return the same object from repeated invocations allows classes to maintain strict control over what instances exist at any time.
+
+	-->>		Classes that do this are said to be 'instance-controlled'. Instance control allows a class to guarantee that it is a singleton (Item 3) or noninstantiable (Item 
+				4).
+						It allows an immutable class (Item 15) to make the guarantee that no two equal instances exist: a.equals(b) if and only if a==b. If a class makes this guarantee, then its clients can use the == operator instead of the equals(Object) method, which may result in improved performance.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

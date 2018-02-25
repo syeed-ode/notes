@@ -1,0 +1,252 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 111 - 
+*******************************************************************
+* Chapter 1 - Intro to Design Patterns: Welcom to Design Patterns *
+*******************************************************************
+The best way to use patterns is to load your brain with them and recognize places in your designs and existing application where you can apply them. Instead of 'code' resue with patterns you get 'experience' reuse.
+
+Problem space:
+		When adding new behavior (the 'fly()' method) to the 'Duck' superclass, you may also add behavior that was not appropriate for some Duck subclasses. He now has flying inanimate objects in teh SumUDuck Program. 
+				A localized update to the code caused a nonlocal side effect (flying rubber ducks)!
+
+				What he thought was a great use of inheritance for the purpose of reuse hasn't turned out so well when it comes to maintenance.
+
+		He could always just override the fly() method in rubber duck, the way that he overrode the quack method. But then what happens when we add wooden decoy ducs to the program? They aren't supposed to fly or quack.
+
+Inheritance proably wasn't the answer. The spec will keep changing and we'll be forced to look at and possibly override fly() and quack() for every new Duck subclass. 
+
+Possible solution:
+		Make a Flyable() interface with a fly() method. That way, only the ducsk that are supposed to fly will implement that interface and have a fly() method. This same principle can be applied to Quackable, too, since not all ducks can quack.
+				If you thought having to override a few method was bad, how are you gonna feel when you need to make a little change to the flying behavior...in all 48 of the flying Duck subclasses.
+
+		While having subclasses implement Flyable and/or Quackable solves 'part' of the problem (no inappropriately flying rubber ducks), it destroyes code reuse for those behaviors, so it just creates a 'different' maintenance nightmare. 
+				And of course there might be more than one kind of lfying behavior even among the ducs that do fly...
+
+We need:
+		Our objective is to always build software so that when we need to change it, we could do so with the least possible impact on the existing code. We would spend less time 'reworking' code and more making the program do cooler things...
+
+The one thing you can count on in software development is: C H A N G E
+
+There is a design principle that addresses this situation:
+		*** Take what varies and "encapsulate" it so it won't affect the rest of your code. This whay wyou can extend the prats that vary.
+				This will produce fuer unitended consequences from code changes and more flexibility in your systems.
+
+		Design principle: *** Identify the aspects of your application that vary and separate them from what stays the same ***
+
+		In other words, if you've got some aspect of your code that is changing, then you know you've got a behavior that needs to be pulled out and separated from all the stuff that doesn't change. 
+
+Separating what changes from what stays the same
+		We are going to create two 'sets' of classes (totally apart from Duck), one for 'fly' and one for 'quack'. Each set of classes will hold all fthe implementations fo their respective behavior. For instance, we might have one class that implements 'quacking', 'anather' that implements 'squeaking', and 'another' that implments silence.
+
+		So how are we going to design the set of classes that implement the fly and quack behaviors?
+				We would like to keep things flexible, we also want to 'assign' behaviors to the instances of Duck. For example, we want to instantiate a new MallardDuck instance and intialize it with a specific 'type' of flying behavior. 
+
+				Finally, we want to be able to change the behavior at runtime. Setter methods allow you to set the flying type at runtime.
+
+		Design principle: ***    Program to an intervace, not an implementation   ***
+
+		We'll use an interface to represent each behavior -- for instnace, FlyBehavior and QuackBehavior -- and each implementation of a 'behavior' will implement one of those interfaces.
+				From now on, the Duck behaviors will live in a separate class -- a class that implements a particular heavior intereface. That way the Duck classes won't need to know any of the implementation details for their own behaviors.
+
+		The point is to exploit polymorphism by programing to a supertype so taht the actual runtime object isn't locked int the code. Imagine an ablstract class Animal, with two concrete implementations, Dog and Cat.
+				Programming to an implementation would be:
+						// Declaring the vairable "d" as type Dog (a concreate implementation of Animal) forces us to code to a concrete implementation
+						Dog d = new Dog();
+						d.bark();
+
+				But programming to an interface/supertype would be:
+						// We know it's a Dog, but we can now use the animal reference polymorphically 
+						Animal animal = new Dog();
+						animal.makeSound();
+
+				Even better, rather than hard-coding the instantiation of the subtype (like new Dog()) into the code, assign the concreate implementation object at runtime:
+						// We don't know WHAT the actual animal subtype is...all we care about is taht it knows how to respond to makeSound()
+						Animal animal = getAnimal();
+						animal.makeSound();
+
+		With the design below, other types of objects can reuse our fly and quack behaviors because these behavoirs are no long hidden away in our duck classes. And we can hadd hevaiors without modifying any of our existing behavior classess or touch any of the Duck classes that use flying behaviors.
+				public class FlyWithWing imeplements FlyBehavior;   public class FlyNoWay implements FlyBehavior;   
+				public class Quack imeplements QuackBehavior;   public class Squeak implements QuackBehavior;   public class MuteQuack imeplements QuackBehavior;
+
+Integrating the Duck Behavior
+		The key is that a Duck will now 'Delegate' its flying and quacking behavior, instead of using quacking and flying methods defined in the Duck class (or subclass).
+
+		Here's how:
+				1. First we add to instance variables to the Duck class, 'flyBehavior' and 'quackBehavior'. These delagations are declared as the interface type (not a concrete class implementation type).  
+						Each duck object will set these vairables polymorphically to reference the 'specific' behavior type it would liek at runtime (FlyWithWinds, Squek, etc.)
+
+						We also replace the fly() and quack() methods with two similar methods called performFly() and performQuack().
+
+				2. Now implement new methods
+						public class Duck {
+							QuackBehavior quackBehavior;
+
+							public void performQuack() {
+								quackBehavior.quack();
+							}
+
+							// this method allows us to change behavior at runtime
+							public void setQuackBehavoir(QuackBehavior qb) {
+								quackBehavior = qb;
+							}
+						}
+
+
+Remeber Design principle: ***    Favor composition over inheritance    ***
+		Creating systems using composition gives you a lot more flexiblity. not only does it give you the ability to ENCAPSULATE A FAMILY OF ALGORITHMS INTO THEIR OWN ***SET*** OF CLASSES. But it lets you change behavior at runtime. 
+
+STRATEGY Object Behavioral
+		Intent
+				Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from clients that use it.
+
+		Also Known As
+				Policy
+
+		Motivation
+				Many algorithms existfor breaking a streamoftextintolines. Hard-wiring allsuch algorithms into the classes that require them isn't desirable for several reasons:
+						• Clients that need linebreaking get more complex if they include the linebreaking code. That makes clients bigger and harder to maintain, especially if they support multiple linebreaking algorithms. 
+						• Different algorithms will be appropriate at different times. Wedon't want to support multiple linebreaking algorithms if we don't use them all.
+						• It's difficult toadd newalgorithms and vary existing ones when linebreaking is an integral part of a client.
+
+				We can avoid these problems by defining classes that encapsulate different linebreaking algorithms. An algorithm that's encapsulated in this way is called a 'strategy'.
+
+				Suppose a Composition class is responsible for maintaining and updating the linebreaks of text displayed in a text viewer.  Linebreaking strategies aren't implemented by the class Composition. 
+
+				Instead, they are implemented separately by subclasses ofthe abstract Compositor class. Compositor subclasses implement different strategies:
+						• SimpleCompositor - implements a simple strategy that determines linebreaks one at a time.
+						• TeXCompositor implements the TgX algorithm for finding linebreaks. This strategy triesto optimize linebreaks globally,that is, one paragraph at a time.
+						• ArrayCompositor implements a strategy that selects breaks sothat eachrow has a fixed number of items. It's useful for breaking a collection of icons into rows, for example.
+
+		Applicability
+				Use the Strategy pattern when
+						• many related classes differ only in their behavior. Strategies provide a way to configure a class with one of many behaviors. 
+						• you need different variants of an algorithm. For example, you might define algorithms reflecting different space/time trade-offs. Strategies can be used when these variants are implemented as a class hierarchy of algorithms [HO87]. 
+						• an algorithm uses data that clients shouldn't know about. Use the Strategy pattern to avoid exposing complex, algorithm-specific data structures. 
+						• a class defines many behaviors, and these appear as multiple conditional statements in its operations. Instead of many conditionals, move related conditional branches into their own Strategy class.
+
+		Participants
+				• Strategy (Compositor)
+						- declares an interface common to all supported algorithms. Context uses this interface to call the algorithm defined by a ConcreteStrategy.
+				• ConcreteStrategy (SimpleCompositor, TeXCompositor, ArrayCompositor) 
+						- implements the algorithm using the Strategy interface.
+				• Context (Composition) 
+						- is configured with a ConcreteStrategy object.
+						- maintains a reference to a Strategy object.
+						- may define an interface that lets Strategy access its data.
+
+		Collaborations
+				• Strategy and Context interact to implement the chosen algorithm. A context may pass all data required by the algorithm to the strategy when the algorithm is called. Alternatively, the context can pass itself as an argument to Strategy operations. That lets the strategy call back on the context as required. 
+				• A context forwards requests from its clients to its strategy. Clients usually create and pass a ConcreteStrategy object to the context; thereafter, clients interact with the contextexclusively.There is often a family ofConcreteStrategy classes for a client to choose from.
+
+		Consequences
+				The Strategy pattern has the following benefits and drawbacks:
+
+					Benefits
+							1. Families of related algorithms. 
+									Hierarchies of Strategy classes define a family of algorithms or behaviors for contextsto reuse. Inheritance can help factor out common functionality of the algorithms. 
+							2. An alternative to subclassing. 
+									Inheritance offers another way to support a variety of algorithms or behaviors. 
+											You can subclass a Context class directly to give it different behaviors. 
+											
+											But this hard-wires the behavior into Context. 
+
+											It mixes the algorithm implementation with Context's, making Context harder to understand, maintain, and extend. And you can't vary the algorithm dynamically. 
+													You wind up with many related classes whose only difference is the algorithm or behavior they employ. 
+
+									Encapsulating the algorithm in separate Strategy classes lets you vary the algorithm independently of its context, making it easier to switch, understand, and extend.
+
+							3. Strategies eliminate conditional statements. 
+									When different behaviors are lumped into one class, it's hard to avoid using conditional statements to select the right behavior. Encapsulating the behavior in separate Strategy classes eliminates these conditional statements.
+											Without strategies, the code for breaking text into lines could look like:
+													void Composition::Repair () {
+														switch (_breakingStrategy) {
+															case SimpleStrategy:
+																ComposeWithSimpleCompositor();
+																break;
+															case TeXStrategy:
+																ComposeWithTeXCompositor();
+																break;
+																// . . .
+															}
+															// merge results with existing composition, if necessary
+													}
+
+											The Strategy pattern eliminates this case statement by delegating the linebreaking task to a Strategy object:
+													void Composition::Repair () {
+														_compositor->Compose();
+														// merge results with existing composition, if necessary
+													}
+
+							4. A choice of implementations.
+									Strategies can provide different implementations of the same behavior. The client can choose among strategies with different time and space trade-offs.
+
+					Limitations
+							5. Clients must be aware of different Strategies
+									The pattern has a potential drawback in that a client must understand how Strategies differ before it can select the appropriate one.
+
+							6. Communication overhead between Strategy and Context.
+									Hence it's likely that some ConcreteStrategies won't use all the information passed to them through this interface; simple ConcreteStrategies may use none of it!That means there will be times when the context creates and initializes parameters that never get used. If this is an issue, then you'll need tighter coupling between Strategy and Context.
+
+							7. Increased number of objects
+									Sometimes you can reduce this overhead by implementing strategies as stateless objects that contexts can share. Any residual state is maintained by the context, which passes it in each request to the Strategy object. Shared strategies should not maintain state across invocations. The Flyweight (195) pattern describes this approach in more detail.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -99,6 +99,198 @@ Finally, we explore how you can test and debug code that uses lambda expressions
 									// Resolve problem by casting the lamda expression
 									doSomething((Task)() -> System.out.println("Danger danger!!"));
 
+					Most integrated development environments (IDEs) such as NetBeans and IntelliJ support this refactoring and will automatically ensure these gotchas don’t arise.
+
+	8.1.3 From lambda expressions to method references
+		Consider using method references when possible to improve code readability. A method name states more clearly the intent of your code. 
+				Map<CaloricLevel, List<Dish>> dishesByCaloricLevel = menu.stream()
+																		.collect(
+																			groupingBy(dish -> {
+																				if (dish.getCalories() <= 400) 
+																					return CaloricLevel.DIET;
+																				else if (dish.getCalories() <= 700)
+																					return CaloricLevel.NORMAL;
+																				else 
+																					return CaloricLevel.FAT;
+																			})
+																		);
+
+		You can extract the lambda expression into a separate method and pass it as argument to groupingBy. The code becomes more concise and its intent is now more explicit:
+				Map<CaloricLevel, List<Dish>> dishesByCaloricLevel = menu.stream().collect(groupingBy(Dish::getCaloricLevel));
+
+		You need to add the method getCaloricLevel inside the Dish class itself for this to work:
+				public class Dish{					
+					…
+					
+					public CaloricLevel getCaloricLevel() {
+						if (this.getCalories() <= 400) 
+							return CaloricLevel.DIET;
+						else if (this.getCalories() <= 700) 
+							return CaloricLevel.NORMAL;
+						else 
+							return CaloricLevel.FAT;
+					}
+				}
+
+		In addition, consider making use of helper static methods such as comparing and maxBy when possible. These methods were designed for use with method references!
+				// You need to think about the implementation of comparison.
+				inventory.sort((Apple a1, Apple a2) -> a1.getWeight().compareTo(a2.getWeight())); 		
+
+				// Reads like the problem statement.
+				inventory.sort(comparing(Apple::getWeight));
+
+		For many common reduction operations such as sum, maximum there are built-in helper methods that can be combined with method references. For example:
+				Instead of the following to find teh sum with lamdas
+						int totalCalories = menu.stream().map(Dish::getCalories).reduce(0, (c1, c2) -> c1 + c2);
+
+				Consider the below instead use the collector summingInt (names go a long way in documenting your code):
+						int totalCalories = menu.stream().collect(summingInt(Dish::getCalories));
+
+	8.1.4 From imperative data processing to Streams
+		Ideally, you should try to convert all code that processes a collection with typical data processing patterns with an iterator to use the Streams API instead. Why?
+				Streams can be optimized behind the scenes making use of short-circuiting and laziness, as well as leveraging your multicore architecture, as we explained in chapter 7.
+
+		For example, the following imperative code expresses two patterns (filtering and extracting) that are mangled together, which forces the programmer to carefully understand the whole implementation before figuring out what the code does.
+		 		In addition, an implementation that executes in parallel would be a lot more difficult to write (see section 7.2 in the previous chapter about the fork/join framework to get an idea):
+		 				List<String> dishNames = new ArrayList<>();
+
+						for(Dish dish: menu) {
+							if(dish.getCalories() > 300) {
+								dishNames.add(dish.getName());
+							}
+						}
+
+				The alternative using the Streams API reads more like the problem statement, and it can be easily parallelized:
+						menu.parallelStream()
+							.filter(d -> d.getCalories() > 300)
+							.map(Dish::getName)
+							.collect(toList());
+
+		Unfortunately, converting imperative code to the Streams API can be a difficult task, because you need to think about control-flow statements such as 'break', 'continue', and 'return' and infer the right stream operations to use. The good news is that some tools can help you with this task as well (See http://refactoring.info/tools/LambdaFicator/).
+
+	8.1.5 Improving code flexibility
+		We argued in chapters 2 and 3 that lambda expressions encourage the style of 'behavior parameterization'. You can represent multiple different behaviors with different lambdas that you can then pass around to execute. 
+
+		This style lets you cope with requirement changes (for example, creating multiple different ways of filtering with a Predicate or comparing with a Comparator).
+
+		We now look at a couple of patterns that you can apply to your codebase to immediately benefit from lambda expressions.
+
+		ADOPTING FUNCTIONAL INTERFACES
+			First, you can’t use lambda expressions without functional interfaces. You should therefore start introducing them in your codebase.
+
+			We discuss two common code patterns that can be refactored to leverage lambda expressions: 'conditional deferred execution' and 'execute around'.
+
+			CONDITIONAL DEFERRED EXECUTION
+				It’s common to see control-flow statements mangled inside business logic code. Typical scenarios include security checks and logging. Consider the following code:
+						if (logger.isLoggable(Log.FINER)) {
+							logger.finer("Problem: " + generateDiagnostic());
+						} 
+
+				What’s wrong with it? A couple of things:
+						■ The state of the logger (what level it supports) is exposed in the client code through the method isLoggable.
+						■ Why should you have to query the state of the logger object every time before you can log a message? It just clutters your code.
+
+				A better alternative is to make use of the log method, which internally checks to see if the logger object is set to the right level before logging the message:
+						logger.log(Level.FINER, "Problem: " + generateDiagnostic());
+
+				This is a better approach because your code isn’t cluttered with if checks, and the state of the logger is no longer exposed. Unfortunately, there’s still an issue with this code.
+						The logging message is always evaluated, even if the logger isn’t enabled for the message level passed as argument.
+
+				This is where lambda expressions can help. What you need is a way to defer the construction of the message so it can be generated only under a given condition (here, when the logger level is set to FINER).
+						It turns out that the Java 8 API designers knew about this problem and introduced an overloaded alternative to log that takes a Supplier as argument.
+
+						This alternative log method has the following signature:
+								public void log(Level level, Supplier<String> msgSupplier)
+
+						You can now call it as follows:
+								logger.log(Level.FINER, () -> "Problem: " + generateDiagnostic());
+
+						The log method will internally execute the lambda passed as argument only if the logger is of the right level. The internal implementation of the log method is along the lines of this:
+								public void log(Level level, Supplier<String> msgSupplier){
+									if(logger.isLoggable(level)) {
+										log(level, msgSupplier.get());
+									}
+								}
+
+				If you see yourself querying the state of an object many times in client code (for example, the state of the logger), only to call some method on this object with arguments (for example, log a message), then consider introducing a new method that calls that method (passed as a lambda or method reference) only after internally checking the state of the object.
+
+				Your code will be more readable (less clutter) and better encapsulated (the state of the object isn’t exposed in client code)!
+
+			EXECUTE AROUND
+				In chapter 3 we discussed another pattern that you can adopt: execute around. If you find yourself surrounding different code with the same preparation and cleanup phases, you can often pull that code into a lambda. 
+						Remember behavior parameterization
+								The setup and cleanup phases are always similar and surround the important code doing the processing.
+
+								This is called the 'execute around' pattern, as illustrated in figure 3.2.
+
+								Note also that you use Java 7’s try-with-resources statement, which already simplifies the code, because you don’t have to close the resource explicitly:
+										public static String processFile() throws IOException {
+											try (BufferedReader br = new BufferedReader(new FileReader("data.txt"))) {
+												// This is the line that does useful work.
+												return br.readLine();
+											}
+										}
+
+								Ideally, you’d like to reuse the code doing setup and cleanup and tell the processFile method to perform different actions on the file. You need a way to pass behavior to processFile so it can execute different behaviors using a BufferedReader. 
+										So what should the new processFile method look like if you wanted to read two lines at once? You basically need a lambda that takes a BufferedReader and returns a String. 
+
+						Use a functional interface to pass behaviors
+								Remeber, lambdas can be used only in the context of a functional interface. You need to create one that matches the signature BufferedReader -> String and that may throw an IOException. Let’s call this interface BufferedReaderProcessor:
+
+										@FunctionalInterface
+										public interface BufferedReaderProcessor{
+
+											String process(BufferedReader b) throws IOException;
+										
+										}
+
+				To refresh, here’s the code you saw in chapter 3. It reuses the same logic to open and close a file but can be parameterized with different lambdas to process the file:
+						
+						String oneLine = processFile((BufferedReader b) -> b.readLine());
+						String twoLines = processFile((BufferedReader b) -> b.readLine() + b.readLine());
+
+						public static String processFile(BufferedReaderProcessor p) throws IOException {
+							try(BufferedReader br = new BufferedReader(new FileReader("java8inaction/chap8/data.txt"))) {
+								return p.process(br);
+							}
+						}
+
+				This was made possible by introducing the functional interface BufferedReaderProcessor, which lets you pass different lambdas to work with a BufferedReader object.
+
+8.2 Refactoring object-oriented design patterns with lambdas
+	New language features often make existing code patterns or idioms less popular. For example, the 'for-each loop' in Java 5. The diamond operator <> in Java 7 has reduced the use of explicit generics at instance creation (and slowly pushed Java programmers toward embracing type inference).
+
+	The visitor design pattern is a common solution for separating an algorithm from a structure on which it needs to operate. The singleton pattern is a common solution to restrict the instantiation of a class to only one object. 
+
+	Lambda expressions provide yet another new tool in the programmer’s toolbox. They can provide alternative solutions to the problems the design patterns are tackling but often with less work and in a simpler way. 
+			■ Strategy 
+			■ Template method 
+			■ Observer 
+			■ Chain of responsibility 
+			■ Factory
+
+	8.2.1 Strategy
+		The strategy pattern is a common solution for representing a family of algorithms and letting you choose among them at runtime. You can apply this pattern to a multitude of scenarios, such as validating an input with different criteria, using different ways of parsing, or formatting an input.
+
+		The strategy pattern consists of three parts: 
+				■ An interface to represent some algorithm (the interface Strategy) 
+				■ One or more concrete implementations of that interface to represent multiple algorithms (the concrete classes ConcreteStrategyA, ConcreteStrategyB) 
+				■ One or more clients that use the strategy objects
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
