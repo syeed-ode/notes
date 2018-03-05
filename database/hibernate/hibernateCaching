@@ -11,11 +11,11 @@ https://dzone.com/articles/all-about-hibernate-second
 Caching in hibernate
 	Caching functionality is designed to reduce the amount of necessary database access. When the objects that are cached reside in memory. You have the flexibility to limit the usage of memory and store the items in disk storage.
 
-	There are various  flavors of caching available, but it is better to cache non-transactional and read-only data.
+	There are various flavors of caching available, but it is better to cache non-transactional and read-only data.
 
 	Hibernate provides 3 types of caching: 1) Session Cache, 2) Second Level Cache, 3) Query Cache
 
-	Session Cache
+	Session Cache 
 			The session cache caches objects within the current session. It is enabled by default in Hibernate. Objects in the session cache reside in the same memory location.
 
 	Second Level Cache
@@ -25,7 +25,7 @@ Caching in hibernate
 
 	Query Cache
 			Query Cache is used to cache the results of a query. When the query cache is turned on, the results of the query are stored against the combination query and parameters.
-					Every time the query is fired the cache manager  checks for the combination of parameters and query.
+					Every time the query is fired the cache manager checks for the combination of parameters and query.
 
 					 If the results are found in the cache, they are returned, otherwise a database transaction is initiated.
 
