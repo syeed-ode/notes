@@ -1,3 +1,6 @@
+The source code for this flow is in:
+	oauth/protectedResource/importantLogging_makingAuthDecisionBasedUponTokens
+
 1) Click get access token. 
 	Client log says:
 			1) Calls client's /authorize enpoint
