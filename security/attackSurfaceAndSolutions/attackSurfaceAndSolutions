@@ -2,3 +2,7 @@ strategic_living/books/software/oauth2/oauth2InAction_fullBook.pdf pg 102
 
 Let’s review: why shouldn’t you use this pattern? It’s certainly simpler to program than dealing with all of the back-and-forth redirects. But with that simplicity comes significantly increased security risk and decreased flexibility and functionality. The resource owner’s credentials are exposed in plain text to the client, which could cache them or replay them whenever it sees fit. The credentials are presented in plain text (though over a TLS encrypted connection) to the authorization server, which then needs to verify them, leaving another potential attack surface. 
 
+This grant type is intended for clients that would normally be prompting for the resource owner’s username and password anyway, and then replaying those credentials to every protected resource. To do this without bothering the user, such a client would likely want to store the username and password so that they can be replayed in the future. The protected resources would need to see and verify the user’s password on every request, creating an enormous attack surface for sensitive materials.
+
+		This grant type, then, can act as a stepping-stone toward a more modern security architecture that uses OAuth’s other, more secure grant types.
+
