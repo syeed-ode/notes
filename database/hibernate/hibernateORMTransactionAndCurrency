@@ -1,31 +1,40 @@
-This information was gather from reading the Hibernate Documentation: Transactions and Concurrency section.  It a collection of notes, broken down by section.
+	                                                                   |
+This information was gather from reading the Hibernate Documentation: 
+	Transactions and Concurrency section.  It a collection of notes, 
+	broken down by section.
 
 https://docs.jboss.org/hibernate/orm/3.3/reference/en-US/html/transactions.html#transactions-optimistic
 
 
 Chapter 11. Transactions and Concurrency
-	The most important point about Hibernate and concurrency control is that it is easy to understand.
-
-	Hibernate directly uses JDBC connections and JTA resources without adding any additional locking behavior.
-
-	It is recommended that you spend some time with the JDBC, ANSI, and transaction isolation specification of your database management system.
-
+	The most important point about Hibernate and concurrency control is 
+		that it is easy to understand.
+	Hibernate directly uses JDBC connections and JTA resources without 
+		adding any additional locking behavior.
+	It is recommended that you spend some time with the JDBC, ANSI, and 
+		transaction isolation specification of your database 
+		management system.
 	Hibernate does not lock objects in memory.
-			Your application can expect the behavior as defined by the isolation level of your database transactions.
-
-			Through Session, which is also a transaction-scoped cache,
-					Hibernate provides repeatable reads for lookup by identifier and entity queries
-
-					Hibernate does not provide reporting queries that return scalar values.
-
-	Hibernate offers versioning for automatic optimistic concurrency control.
-
+			Your application can expect the behavior as defined 
+				by the isolation level of your database 
+				transactions.
+			Through Session, which is also a transaction-scoped 
+				cache,
+					Hibernate provides repeatable reads 
+						for lookup by identifier 
+						and entity queries
+					Hibernate does not provide reporting 
+						queries that return scalar 
+						values.
+	Hibernate offers versioning for automatic optimistic concurrency 
+		control.
 	Hibernate also offers: 
 			using the SELECT FOR UPDATE syntax
 
 			a (minor) API for pessimistic locking of rows
 
-	The discussion of concurrency control in Hibernate begins with the granularity of 
+	The discussion of concurrency control in Hibernate begins with the 
+		granularity of 
 			Configuration
 
 			SessionFactory
@@ -37,44 +46,58 @@ Chapter 11. Transactions and Concurrency
 			long conversations.
 
 11.1. Session and transaction scopes
-	A SessionFactory is an expensive-to-create, threadsafe object, intended to be shared by all application threads.
-			It is created once, usually on application startup, from a Configuration instance.
-
-	A Session is an inexpensive, non-threadsafe object that should be used once and then discarded for: 
+	A SessionFactory is an expensive-to-create, threadsafe object, 
+		intended to be shared by all application threads.
+			It is created once, usually on application startup, 
+				from a Configuration instance.
+	A Session is an inexpensive, non-threadsafe object that should be 
+		used once and then discarded for: 
 			a single request
 
 			a conversation or 
 
 			a single unit of work.
 
-			A Session will not obtain a JDBC Connection, or a Datasource, unless it is needed.
+			A Session will not obtain a JDBC Connection, or a 
+				Datasource, unless it is needed.
 
 			It will not consume any resources until used.
 
-	A database transaction has to be as short as possible in order to reduce lock contention in the database.
-			Long database transactions will prevent your application from scaling to a highly concurrent load.
-
-			It is not recommended that you hold a database transaction open during user think time until the unit of work is complete.
-
-					What is the scope of a unit of work?
-
-					Can a single Hibernate Session span several database transactions, or is this a one-to-one relationship of scopes?
-
-					When should you open and close a Session and how do you demarcate the database transaction boundaries?
-
-					These questions are addressed in the following sections.
-
+	A database transaction has to be as short as possible in order to 
+		reduce lock contention in the database.
+			Long database transactions will prevent your 
+				application from scaling to a highly 
+				concurrent load.
+			It is not recommended that you hold a database 
+				transaction open during user think time 
+				until the unit of work is complete.
+					What is the scope of a unit of 
+						work?
+					Can a single Hibernate Session span 
+						several database 
+						transactions, or is this a 
+						one-to-one relationship of 
+						scopes?
+					When should you open and close a 
+						Session and how do you 
+						demarcate the database 
+						transaction boundaries?
+					These questions are addressed in 
+						the following sections.
 
 
 11.1.1. Unit of work - or, business transaction
-	A unit of work is a design pattern which is a series of operations we wish to carry out against the database together.
-
-	A unit of work is a design pattern described by Martin Fowler as “[maintaining] a list of objects affected by a business transaction and coordinates the writing out of changes and the resolution of concurrency problems.”
-
-	Basically, a unit of work is a it is a transaction.
-
-	Keep in mind fulfilling a unit of work will often span multiple physical database transactions. So really we are talking about a more abstract notion of a transaction.
-
+	A unit of work is a design pattern which is a series of operations 
+		we wish to carry out against the database together.
+	A unit of work is a design pattern described by Martin Fowler as 
+		“[maintaining] a list of objects affected by a business 
+		transaction and coordinates the writing out of changes and 
+		the resolution of concurrency problems.”
+	Basically, a unit of work is a it is a 
+		transaction.
+	Keep in mind fulfilling a unit of work will often span multiple 
+		physical database transactions. So really we are talking about a more abstract notion of a transaction.
+	                                                                   |
 	The term "business transaction" is also sometimes used in lieu of unit of work.
 
 	Do not use the 'session-per-operation' antipattern':
