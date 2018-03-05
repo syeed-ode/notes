@@ -1,0 +1,76 @@
+	                                                                   |
+	                                                                   |
+************************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 111 - 
+************************************************************************
+****    Chapter 6 - Item 30: Use enums instaed of int constants     ****
+************************************************************************
+IN release 1.5, two families of reference types were added to the language: a new kind of class called an enum type, and a new kind of interface called an annotation type. This chapter discusses best practices for using these new type families.
+
+
+
+Item 30: Use enums instead of int constants
+
+
+				
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
