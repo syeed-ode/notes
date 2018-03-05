@@ -13,9 +13,68 @@ Using a Test-Driven Development (TDD) approach, where you write tests alongside 
 
 This means that the developers who need to fix a bug, or refactor a part of an application, will be able to do a faster and better job when relying on a battery of tests. If they break a feature, the tests should warn them about it.
 
+Writing tests is time-consuming at first, but in the long run, it's often the best approach to make a project grow. Of course, it's always possible to write bad tests and end up with poor results, or create a test suite that's horrible to maintain and takes too long to run.
 
+Writing tests is also a good way to get some perspective on your code. Does the API you've designed make sense? Do things fit well together? And when the team grows or changes, tests are the best source of information. Unlike documentation, they should reflect what the current version of the code does.
 
+But documentation is still an important part of a project even though it's hard and timeconsuming to maintain. After a while, it's pretty rare to see a project's documentation fully up-to-date with what the code has become unless some dedicated people work on it.
+		 But there are ways to mitigate these issues; for instance, code extracts in the documentation could be part of the test suite to make sure they work.
 
+In any case, no matter how much energy you spend on tests and documentation, there's one golden rule: 'testing, documenting, and coding your projects should be done continuously'. 
+
+After providing a few general tips on how to test in Python, this chapter focuses on what testing and documentation tools can be used in the context of building microservices with Flask, and how to set up continuous integration with some popular online services.
+
+It's organized into five parts:
+		- The different kind of tests
+		- Using WebTest against your microservice
+		- Using pytest and Tox
+		- Developer documentation
+		- Continuous integration
+
+Different kinds of tests
+		In the microservice land, we can classify tests into these five distinct goals:
+				- Unit tests: Make sure a class or a function works as expected in isolation
+				- Functional tests: Verify that the microservice does what it says from the consumer's point of view, and behaves correctly even on bad requests
+				- Integration tests: Verify how a microservice integrates with all its network dependencies
+				- Load tests: Measure the microservice performances
+				- End-to-end tests: Verify that the whole system works with an end-to-end test
+
+		Unit tests
+				Unit tests are the simplest tests to add to a project, and the standard library comes with everything needed to write some. In a project based on Flask, there usually are, alongside the views, some functions and classes, which can be unit-tested in isolation.
+
+				However, the concept of 'separation' is quite vague for a Python project, because we don't use contracts or interfaces like in other languages, where the implementation of the class is separated from its definition. 
+						Testing in isolation in Python usually means that you instantiate a class or call a function with specific arguments, and verify that you get the expected result. 
+
+				When the class or function calls another piece of code that's not built in Python or its standard library, it's not in isolation anymore.
+
+				In some cases, it will be useful to mock those calls to achieve isolation. 
+						But mocking is often a dangerous exercise, because it's easy to implement a different behavior in your mocks and end up with some code that works with your mocks but not the real thing.
+
+						That problem often occurs when you update your project's dependencies, and your mocks are not updated to reflect the new behaviors, which might have been introduced in some library.
+
+				So, limiting the usage of mocks to the three following use cases is good practice:
+						- I/O operations: When the code performs calls to third-party services or a resource (socket, files, and so on), and you can't run them from within your tests
+						- CPU intensive operations: When the call computes something that would make the test suite too slow
+						- Specific behaviors to reproduce: When you want to write a test to try out your code under specific behaviors (for example, a network error or changing the date or time by mocking the date time and time modules)
+						
+				You should keep an eye on all your mocks as the project grows, and make sure they are not the only kind of tests that cover a particular feature.
+						If the Bugzilla project comes up with a new structure for its REST API, and the server your project uses is updated, your tests will happily pass with your broken code until the mocks reflect the new behavior.
+
+				In a microservice project, unit tests are not a priority, and aiming at 100% test coverage (where every line of your code is called somewhere in your tests) in your unit tests will add a lot of maintenance work for little benefits.
+
+				It's better to focus on building a robust set of functional tests.
+
+		Functional tests
+				Functional tests for a microservice project are all the tests that interact with the published API by sending HTTP requests and asserting the HTTP responses.
+						This definition is broad enough to include any test that can call the app, from fuzzing tests (you send gibberish to your app and see what happens) to penetration tests (you try to break the app security).
+
+				As developers, the two most important kinds of functional tests we should focus on are these:
+						- Tests that verify that the application does what it was built for
+						- Tests that ensure an abnormal behavior that was fixed is not happening anymore
+
+				The network layer is not used, and the application is called directly by the tests, but the same request-response cycle happens, so it's realistic enough. However, we would still mock out any network calls happening within the application.
+
+				Flask includes a FlaskClient class to build requests, which can be instantiated directly from the app object via its test_client() method. pg85
 
 
 

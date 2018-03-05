@@ -22,10 +22,11 @@ Item 13: Take advantage of Each Block in try/except/else/finally
 			runs.
 		Note: open() runs prior to the try: block.  If open throws and exception, we do not 
 			want handle.close() to run at all.
-	'Else' Blocks
+	'Except' Blocks
 		Use 'try/except/else' to make it clear which exceptions will be handled by your code 
 			and which exceptions will propagate up.  When the 'try' block doesn't raise an 
 			exception, the 'else' block will run. 
+	'Else' Blocks
 		The 'else' block helps you minimize the amount of code in the 'try' block and visually 
 			distinguish the success case from the 'try/except' blocks. It improves 
 			readability (think, KeyManager code in java).

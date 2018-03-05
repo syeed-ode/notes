@@ -1,0 +1,83 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 79 - 
+*******************************************************************
+*This is a quick reminder of some python conepts and references*
+*******************************************************************
+HFPY - Head First Python
+EPY  - Effective Python
+
+List, dictionaies, sets (mutable objects; uses pass by reference). Strings, integers, tuples (immutable; pass by value). [HFPY186]
+		Remember to set immutable objects to None when passing them as arguments. (Please check documenation and update this information.) I think HFPY or EF Item: 20 provide better context and guidelines for this.
+
+Nested Function (closure) conecpts:
+	Python supports 'closures', funcitons that refer to variables from within the scope in which the functions were defined.
+
+	Functions are objects (everything in Python is an object).
+
+Tuples:
+	Python has specific rules for comparing tuples. It first compares items in index zero, then index one, then index two, and so on. 
+			def sort_prioirty(values, group): 
+				def helper(x):
+					if x in group:
+						return (0, x)
+					return (1, x)
+				values.sort(key=helper)
+
+			numbers = [8, 3, 1, 2, 5, 4, 7, 6]
+			group   = {2, 3, 5, 7}
+
+			print(numbers)
+			>>>>
+			[2, 3, 5, 7, 1, 4, 6, 8]
+
+
+** - kwargs: [HFPY394]
+	Use ** to accept arbitrary keyword arguments. Look at the function below which accepts any number of keyword arguments:
+				def myfunc2(**kwargs):
+					for k, v in kwargs.items():
+						print(k, v, sep='->', end=' ')
+					if kwargs:
+						print()
+
+			The code within 'myfunc2' suite takes the dictionary of arguments and processes them, displaying all the key/value pairings on a single line.  Now matter how many key/value parings are provided (including none), 'myfunc2' doe the right thing:
+					>>>> from keywordargs.hfkwarg_myfunct2 import myfunc2
+					>>>> myfunc2(a=10, b=20)
+					a->10 b->20 
+					>>>> myfunc2()
+					>>>> myfunc2(a=10, b=20, c=30, d=40, e=50, f=60)
+					a->10 b->20 c->30 d->40 e->50 f->60 
+
+			It is also possible to use ** when invoking a funciotion. You can define a dictionary of connection characteristics like this:
+					dbconfig = {
+								 'host': '127.0.0.1'
+							   , 'user': 'vsearch'
+							   , 'password': 'vsearchpasswd'
+							   , 'database': 'vsearchlogDB'
+							   }
+
+		   You can call the connect function as follows:
+		   			conn = mysql.connector.connect(**dbconfig)
+
+   			Which is in effect like:
+   					con = mysql.connectorconnect('host'='127.0.0.1', 'user'='vsearch', 'password'='vsearchpasswd', 'database'='vsearchlogDB')
+
+	Accepting any number and type of Function Argument
+
+
+
+Installing a third party library from the command line [HFPY202]
+		[20180227-11:24:47 syeedode:~/ad-campaign-services master] $ sudo -H python3 -m pip install requests_mock
+		Password:
+		Collecting requests_mock
+		  Downloading requests_mock-1.4.0-py2.py3-none-any.whl
+		Requirement already satisfied: requests>=1.1 in /anaconda/lib/python3.6/site-packages (from requests_mock)
+		Requirement already satisfied: six in /anaconda/lib/python3.6/site-packages (from requests_mock)
+		Installing collected packages: requests-mock
+		Successfully installed requests-mock-1.4.0
+
