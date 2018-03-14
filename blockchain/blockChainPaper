@@ -1,0 +1,136 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+When you decorate a function with it, it becomes a view, and it's 
+registered into Werkzeug's routing system.
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 285 - 310
+*******************************************************************
+*******           Chapter 11 - Deploying on AWS             *******
+*******************************************************************
+distributed consensus model
+distributed consensus​
+Smart contracts
+
+
+
+Our all online transactions rely on trusting someone to tell us the truth—it can be an email service provider telling us that our email has been delivered; it can be a certification authority telling us that a certain digital certificate is trustworthy; or it can be a social network such as Facebook telling us that our posts regarding our life events have been shared only with our friends or it can be a bank telling us that our money has been delivered reliably to our dear ones in a remote country.
+
+The fact is that we live our life precariously in the digital world by relying on a third entity for the security and privacy of our digital assets. The fact remains that these third party sources can be hacked, manipulated or compromised.
+		This is where the blockchain technology comes handy. 
+
+A distributed consensus​ is ​where each and every online transaction, past and present, involving digital assets can be verified at any time in the future. 
+		It does this without compromising the privacy of the digital assets and parties involved. 
+
+The distributed consensus​ and anonymity​ are two important characteristics of blockchain technology
+
+Smart contracts are computer programs that can automatically execute the terms of a contract. The parties involved in a contractual agreement can be automatically made payments as per the contract in a transparent manner.
+
+Smart Property​is another related concept which is regarding controlling the ownership of a property or asset via blockchain using Smart Contracts. The property can be physical such as car, house, smartphone etc. or it can be non-physical such as shares of a company.
+
+It should be noted here that even Bitcoin is not really a currency- Bitcoin is all about controlling the ownership of money.
+
+We can envision putting proof of existence of all legal documents, health records, and loyalty payments in the music industry, notary, private securities and marriage licenses in the blockchain.
+
+In this report, we focus on the disruption that every industry in today’s digital economy is facing today due to the emergence of blockchain technology.
+
+
+Section I: BlockChain Technology
+	1. Short History of Bitcoin
+		“Bitcoin: A Peer-To-Peer Electronic Cash System” described a peer-to-peer version of the electronic cash that would allow online payments to be sent directly from one party to another without going through a financial institution.
+
+		Cryptocurrencies is the label that is used to describe all networks and mediums of exchange that uses cryptography to secure transactions-as against.
+
+		An open source program implementing the new protocol was released that began with the Genesis block of 50 coins. Anyone can install this open source program and become part of the bitcoin peer-to-peer network.
+
+	2. Blockchain Technology: How does it work?
+		The blockchain technology is applicable to any digital asset transaction exchanged online. 
+
+		Internet commerce is exclusively tied to the financial institutions serving as the trusted third party who process and mediate any electronic transaction. The role of trusted third party is to validate, safeguard and preserve transactions. 
+
+		A certain percentage of fraud is unavoidable in online transactions and that needs mediation by financial transactions. This results in high transaction costs.
+
+		Bitcoin uses cryptographic proof instead of the trust in the third party for two willing parties to execute an online transaction over the Internet.
+				Each transaction is protected through a digital signature. 
+
+				Each transaction is sent to the “public key” of the receiver digitally signed using the “private key” of the sender. 
+
+				The sender uses the "private key" to sign the transaction. The receiver uses the "public key".
+
+				In order to spend money, owner of the cryptocurrency needs to prove the ownership of the “private key”. 
+
+				The entity receiving the digital currency verifies the digital signature –thus ownership of corresponding “private key”--on the transaction using the “public key” of the sender.
+
+		Each transaction is broadcast to every node in the Bitcoin network and is then recorded in a public ledger after verification.
+				Every single transaction needs to be verified for validity before it is recorded in the public ledger. 
+
+				The verifying node needs to ensure two things before recording any transaction:
+						1. Spender owns the cryptocurrency—digital signature verification on the transaction.
+						2. Spender has sufficient cryptocurrency in his/her account: checking every transaction against spender’s account (“public key”) in the ledger to make sure that he/she has sufficient balance in his/her account.
+
+				
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			pg 126 Splitting the monolith (Chapter 4, skip)
+
+			pg 132 More splitting (Chapter 4, skip)
+
+			pg 158 RPC over AMQP <Sucks!!>
+
+			pg 161 Mocking Celery (Chapter 5, Interacting with other services)
+
+			pg 165 ****Chapter 6: Monitoring Your Services****
+
+			pg 183 **** Chapter 7: Securing your Services ****
+
+			pg 285 ****   Chapter 11: Deploying to AWS    ****
+
+
+
+
+
+
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
