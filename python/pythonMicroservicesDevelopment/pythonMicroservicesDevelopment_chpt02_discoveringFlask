@@ -9,7 +9,7 @@ registered into Werkzeug's routing system.
 *							    *
 *							    *
 toc: 
-pg 63 - 
+pg 47 - 79
 *******************************************************************
 *******            Chapter 2 - Discovering Flask            *******
 *******************************************************************
@@ -316,218 +316,218 @@ Response
 	    These four steps are roughly all you need to know to start building apps using Flask. 
 
 Flask built-in features
-		The previous section gave us a good understanding of how Flask processes a request, and that's good enough to get you started. But Flask comes with more helpers, which are quite useful. We'll discover the following main ones in this section:
-				- The session object: Cookie-based data
-				- Globals: Storing data in the request context
-				- Signals: Sending and intercepting events
-				- Extensions and middlewares: Adding features
-				- Templates: Building text-based content
-				- Configuring: Grouping your running options in a config file
-				- Blueprints: Organizing your code in namespaces
-				- Error handling and debugging: Dealing with errors in your app
+	The previous section gave us a good understanding of how Flask processes a request, and that's good enough to get you started. But Flask comes with more helpers, which are quite useful. We'll discover the following main ones in this section:
+			- The session object: Cookie-based data
+			- Globals: Storing data in the request context
+			- Signals: Sending and intercepting events
+			- Extensions and middlewares: Adding features
+			- Templates: Building text-based content
+			- Configuring: Grouping your running options in a config file
+			- Blueprints: Organizing your code in namespaces
+			- Error handling and debugging: Dealing with errors in your app
 
-		The session object
-				Like the request object, Flask creates a session object, which is unique to the request context. 
+	The session object
+			Like the request object, Flask creates a session object, which is unique to the request context. 
 
-				It's a dict-like object, which Flask serializes into a cookie on the user side. 
-						The data contained into the session mapping is dumped into a JSON mapping, then compressed using zlib when that makes it smaller, and finally encoded in base64.
+			It's a dict-like object, which Flask serializes into a cookie on the user side. 
+					The data contained into the session mapping is dumped into a JSON mapping, then compressed using zlib when that makes it smaller, and finally encoded in base64.
 
-						When the session gets serialized, the itsdangerous (https://pythonhosted.org/itsdange rous/) library signs the content using the secret_key value defined at the application level. The signing uses HMAC (https://en.wikipedia.org/wiki/Hash-based_message_a uthentication_code) and SHA1.
-								This signature, which is added as a suffix in the data, ensures that the client cannot tamper with the data that is stored in a cookie unless they know the secret key to sign the data. Note that the data itself is not encrypted.
+					When the session gets serialized, the itsdangerous (https://pythonhosted.org/itsdange rous/) library signs the content using the secret_key value defined at the application level. The signing uses HMAC (https://en.wikipedia.org/wiki/Hash-based_message_a uthentication_code) and SHA1.
+							This signature, which is added as a suffix in the data, ensures that the client cannot tamper with the data that is stored in a cookie unless they know the secret key to sign the data. Note that the data itself is not encrypted.
 
-								Flask will let you customize the signing algorithm.
+							Flask will let you customize the signing algorithm.
 
-				However, when you're building microservices that are not producing HTML, you rarely rely on cookies since they are specific to web browsers. 
+			However, when you're building microservices that are not producing HTML, you rarely rely on cookies since they are specific to web browsers. 
 
-				But the idea of keeping a volatile key-value storage per user can be extremely useful to speed up some of the server-side work. 
-						For instance, if you need to perform some database look-ups to get some information about a user every time they connect, caching this information in a session-like object on the server side makes a lot of sense.
+			But the idea of keeping a volatile key-value storage per user can be extremely useful to speed up some of the server-side work. 
+					For instance, if you need to perform some database look-ups to get some information about a user every time they connect, caching this information in a session-like object on the server side makes a lot of sense.
 
-		Globals
-				Flask provides a mechanism to store global variables that are unique to a particular thread and request context. That [mechanism] is used for request and session, but is also available to store any custom object.
+	Globals
+			Flask provides a mechanism to store global variables that are unique to a particular thread and request context. That [mechanism] is used for request and session, but is also available to store any custom object.
 
-				The 'flask.g' variable contains all globals, and you can set whatever attributes you want on it.
+			The 'flask.g' variable contains all globals, and you can set whatever attributes you want on it.
 
-				In Flask, the @app.before_request decorator can be used to point a function that the app will call every time a request is made just before it dispatches the request to a view.
-						It's a typical pattern in Flask to use before_request to set values in the globals. That way, all the functions that are called within the request context can interact with g and get the data. 
-								from flask import Flask, jsonify, g, request
+			In Flask, the @app.before_request decorator can be used to point a function that the app will call every time a request is made just before it dispatches the request to a view.
+					It's a typical pattern in Flask to use before_request to set values in the globals. That way, all the functions that are called within the request context can interact with g and get the data. 
+							from flask import Flask, jsonify, g, request
 
-								app = Flask(__name__)
+							app = Flask(__name__)
 
-								@app.before_request
-								def authenticate():
-								    """
-								        This function acts as a preprocessing filter
-								        it demontstrates two fuctions:
-								        1. Flask's pre-refquest processing (filter)
-								        2. The ability to assign thread safe global 
-								           variables, within a request context, using
-								           "g"
-								           
-								    :return: 
-								    """
-								    if request.authorization:
-								        g.user = request.authorization['username']
-								    else:
-								        g.user = 'Anaonymous'
-
-
-								@app.route('/api')
-								def my_microservice():
-								    return jsonify({'Hello': g.user})
+							@app.before_request
+							def authenticate():
+							    """
+							        This function acts as a preprocessing filter
+							        it demontstrates two fuctions:
+							        1. Flask's pre-refquest processing (filter)
+							        2. The ability to assign thread safe global 
+							           variables, within a request context, using
+							           "g"
+							           
+							    :return: 
+							    """
+							    if request.authorization:
+							        g.user = request.authorization['username']
+							    else:
+							        g.user = 'Anaonymous'
 
 
-								if __name__ == "__main__":
-								    app.run()
-
-		Signals
-				Flask integrates with Blinker (https://pythonhosted.org/blinker/), which is a signal library that lets you subscribe a function to an event. 
-
-				Events are instances of the blinker.signal class created with a unique label, and Flask instantiates ten of them in 0.12. 
-						Flask triggers signals at critical moments during the processing of a request. 
-
-						Refer to http://flask.pocoo.org/docs/latest/api/#core-sign als-listfor the full list.
-
-				Registering to a particular event is done by calling the signal's connect method. Signals are triggered when some code calls the signal's send method. The send method accepts extra arguments to pass data to all the registered functions.
-
-				In the following example, we register the 'finished' function to the 'request_finished' signal. That function will receive the 'response' object:
-						from flask import Flask, jsonify, g, request_finished
-						from flask.signals import signals_available
+							@app.route('/api')
+							def my_microservice():
+							    return jsonify({'Hello': g.user})
 
 
-						if not signals_available:
-						    """
-						        Signal feature only works if install blinker
-						    """
-						    raise RuntimeError("pip install blinker")
+							if __name__ == "__main__":
+							    app.run()
+
+	Signals
+			Flask integrates with Blinker (https://pythonhosted.org/blinker/), which is a signal library that lets you subscribe a function to an event. 
+
+			Events are instances of the blinker.signal class created with a unique label, and Flask instantiates ten of them in 0.12. 
+					Flask triggers signals at critical moments during the processing of a request. 
+
+					Refer to http://flask.pocoo.org/docs/latest/api/#core-sign als-listfor the full list.
+
+			Registering to a particular event is done by calling the signal's connect method. Signals are triggered when some code calls the signal's send method. The send method accepts extra arguments to pass data to all the registered functions.
+
+			In the following example, we register the 'finished' function to the 'request_finished' signal. That function will receive the 'response' object:
+					from flask import Flask, jsonify, g, request_finished
+					from flask.signals import signals_available
 
 
-						app = Flask(__name__)
+					if not signals_available:
+					    """
+					        Signal feature only works if install blinker
+					    """
+					    raise RuntimeError("pip install blinker")
 
 
-						def finished(sender, response, **extra):
-						    print('About to send a response')
-						    print(response)
+					app = Flask(__name__)
 
 
-						request_finished.connect(finished)
+					def finished(sender, response, **extra):
+					    print('About to send a response')
+					    print(response)
 
 
-						@app.route('/api')
-						def my_microservice():
-						    return jsonify({'Hello': 'World'})
+					request_finished.connect(finished)
 
 
-						if __name__ == "__main__":
-						    app.run()
-
-				For instance, the got_request_exception signal is triggered when an exception occurs before the framework does something with it.
-						That's how Sentry's (https://sentry.io) Python client (Raven) hooks itself onto Flask to log exceptions.
-
-						It can also be interesting to implement custom signals in your apps when you want to trigger some of your features with events and decouple the code. If your microservice produces PDF reports, and you want to have the reports cryptographically signed, you could trigger a report_ready signal, and have a signer register to that event.
-
-				If your application starts to use a lot of signals, all the triggering could become an important part of the time spent processing a request, and create bottlenecks.
-
-				If you need to do work that doesn't impact the response, consider using a queue like RabbitMQ (https://www.rabbitmq.com/) to queue up the task and have a separate service do that work.
-
-		Extensions and middlewares
-				Flask extensions are simply Python projects that, once installed, provide a package or a module named flask_something. In previous versions, it was flask.ext.something.
-
-				Flask has a curated list of extensions maintained at http://flask.pocoo.org/extensions/, which is a good first stop when you are looking for extra features.
-
-				The other mechanism to extend Flask is to use WSGI middlewares. A WSGI middleware is a pattern to extend WSGI apps by wrapping the calls made to the WSGI endpoint.
-
-				In the example that follows, the middleware fakes a X-Forwarded-For header, so the Flask application thinks it's behind a proxy like nginx. 
-						This is a useful middleware in a testing environment when you want to make sure your application behaves properly when it tries to get the remote IP address, since the remote_addr attribute will get the IP of the proxy, not the real client:
-								"""
-								     This module demonstrates the ability to extend Flask to
-								     provide enhanced or alternate functionality. This module
-								     utilizes WSGI middleware by wrapping the calls made to
-								     WSGI endpoints. We are extending WSGI apps here.
-
-								     This middleware is useful in a testing environment.
-								"""
-								from flask import Flask, jsonify, request
-								import json
+					@app.route('/api')
+					def my_microservice():
+					    return jsonify({'Hello': 'World'})
 
 
-								class XFFMiddleware(object):
-								    def __init__(self, app, real_ip='10.1.1.1'):
-								        self.app = app
-								        self.real_ip = real_ip
+					if __name__ == "__main__":
+					    app.run()
 
-								    def __call__(self, environ, start_response):
-								        """
-								            This middleware fakes the 'HTTP_X_FORWARDED_FOR'
-								            header so that Flask thinks it's behind a proxy.
+			For instance, the got_request_exception signal is triggered when an exception occurs before the framework does something with it.
+					That's how Sentry's (https://sentry.io) Python client (Raven) hooks itself onto Flask to log exceptions.
 
-								            It assures the header is not already set.
+					It can also be interesting to implement custom signals in your apps when you want to trigger some of your features with events and decouple the code. If your microservice produces PDF reports, and you want to have the reports cryptographically signed, you could trigger a report_ready signal, and have a signer register to that event.
 
-								            Flask uses the incoming WSGI environment data to
-								            create the request object (PYMsDEv58).
+			If your application starts to use a lot of signals, all the triggering could become an important part of the time spent processing a request, and create bottlenecks.
 
-								            :param environ:
-								            :param start_response:
-								            :return:
-								        """
-								        if 'HTTP_X_FORWARDED_FOR' not in environ:
-								            values = '%s, 10.3.4.5, 127.0.0.1' % self.real_ip
-								            environ['HTTP_X_FORWARDED_FOR'] = values
-								        return self.app(environ, start_response)
+			If you need to do work that doesn't impact the response, consider using a queue like RabbitMQ (https://www.rabbitmq.com/) to queue up the task and have a separate service do that work.
 
-								app = Flask(__name__)
+	Extensions and middlewares
+			Flask extensions are simply Python projects that, once installed, provide a package or a module named flask_something. In previous versions, it was flask.ext.something.
 
-								# Notice we wrap the WSGI app. In Flask the app object
-								# is not the WSGI application itself as we've seen earlier
-								app.wsgi_app = XFFMiddleware(app.wsgi_app)
+			Flask has a curated list of extensions maintained at http://flask.pocoo.org/extensions/, which is a good first stop when you are looking for extra features.
 
+			The other mechanism to extend Flask is to use WSGI middlewares. A WSGI middleware is a pattern to extend WSGI apps by wrapping the calls made to the WSGI endpoint.
 
-								@app.route('/api')
-								def my_microservice():
-								    """
-								        Whent the application tries to get the remote IP
-								        address, this method assure the application behaves
-								        properly.
+			In the example that follows, the middleware fakes a X-Forwarded-For header, so the Flask application thinks it's behind a proxy like nginx. 
+					This is a useful middleware in a testing environment when you want to make sure your application behaves properly when it tries to get the remote IP address, since the remote_addr attribute will get the IP of the proxy, not the real client:
+							"""
+							     This module demonstrates the ability to extend Flask to
+							     provide enhanced or alternate functionality. This module
+							     utilizes WSGI middleware by wrapping the calls made to
+							     WSGI endpoints. We are extending WSGI apps here.
 
-								        The remote_addr will get the IP of the proxy and not
-								        the real client.
-
-								        ####################################################
-								        ###              CAUTION     CAUTION             ###
-								        ###That text was lifted from the book. I don't have
-								        ###confidence in what this logic is doing. I'm not
-								        ###100% sure of it's applicability.
-								        ####################################################
-
-								        The overall point here is valid however: You can intercept
-								        and augment request data by overriding the WSGI application
-								        (as shown here) or by intercepting signals (module:
-								        flask_signal_events) or by utilizing filters (module:
-								        flask_request_filter).
-
-								        :return:
-								    """
-								    if "X-Forwarded-For" in request.headers:
-								        ips = [forip.strip() for forip in request.headers['X-Forwarded-For'].split(',')]
-								        ip = ips[0]
-								    else:
-								        ip = request.remote_addr
-								    return jsonify({"Hello": ip})
+							     This middleware is useful in a testing environment.
+							"""
+							from flask import Flask, jsonify, request
+							import json
 
 
-								if __name__ == "__main__":
-								    app.run()
+							class XFFMiddleware(object):
+							    def __init__(self, app, real_ip='10.1.1.1'):
+							        self.app = app
+							        self.real_ip = real_ip
 
-		    Tampering with the WSGI environ before your application gets it is fine, but if you want to implement anything that will impact the response, doing it inside a WSGI middleware is going to make your work very painful.
-		    		The WSGI protocol requires that the start_response function gets called with the response status code, and headers before the app sends back the actual body content.
+							    def __call__(self, environ, start_response):
+							        """
+							            This middleware fakes the 'HTTP_X_FORWARDED_FOR'
+							            header so that Flask thinks it's behind a proxy.
 
-		    		Unfortunately, a single function call on your application triggers this two-step mechanism. 
+							            It assures the header is not already set.
 
-		    		So, changing the results on the fly from outside the app requires some callback magic to work.
+							            Flask uses the incoming WSGI environment data to
+							            create the request object (PYMsDEv58).
 
-		    		A good example is when you want to modify the response body. That impacts the Content-Length header, so your middleware will need to intercept the headers sent by the app, and rewrite them after the body has been modified.
+							            :param environ:
+							            :param start_response:
+							            :return:
+							        """
+							        if 'HTTP_X_FORWARDED_FOR' not in environ:
+							            values = '%s, 10.3.4.5, 127.0.0.1' % self.real_ip
+							            environ['HTTP_X_FORWARDED_FOR'] = values
+							        return self.app(environ, start_response)
 
-    		****** CHECK THIS NEXT LINE ---- ITS OFFICIAL THIS BOOK SUCKS!!!!!!! **********
-    		Unless you want your functionality to work for other WSGI frameworks, there are no good reasons to extend your apps with WSGI middlewares. It's much better to write a Flask extension that will interact from within the Flask application.
+							app = Flask(__name__)
+
+							# Notice we wrap the WSGI app. In Flask the app object
+							# is not the WSGI application itself as we've seen earlier
+							app.wsgi_app = XFFMiddleware(app.wsgi_app)
+
+
+							@app.route('/api')
+							def my_microservice():
+							    """
+							        Whent the application tries to get the remote IP
+							        address, this method assure the application behaves
+							        properly.
+
+							        The remote_addr will get the IP of the proxy and not
+							        the real client.
+
+							        ####################################################
+							        ###              CAUTION     CAUTION             ###
+							        ###That text was lifted from the book. I don't have
+							        ###confidence in what this logic is doing. I'm not
+							        ###100% sure of it's applicability.
+							        ####################################################
+
+							        The overall point here is valid however: You can intercept
+							        and augment request data by overriding the WSGI application
+							        (as shown here) or by intercepting signals (module:
+							        flask_signal_events) or by utilizing filters (module:
+							        flask_request_filter).
+
+							        :return:
+							    """
+							    if "X-Forwarded-For" in request.headers:
+							        ips = [forip.strip() for forip in request.headers['X-Forwarded-For'].split(',')]
+							        ip = ips[0]
+							    else:
+							        ip = request.remote_addr
+							    return jsonify({"Hello": ip})
+
+
+							if __name__ == "__main__":
+							    app.run()
+
+	    Tampering with the WSGI environ before your application gets it is fine, but if you want to implement anything that will impact the response, doing it inside a WSGI middleware is going to make your work very painful.
+	    		The WSGI protocol requires that the start_response function gets called with the response status code, and headers before the app sends back the actual body content.
+
+	    		Unfortunately, a single function call on your application triggers this two-step mechanism. 
+
+	    		So, changing the results on the fly from outside the app requires some callback magic to work.
+
+	    		A good example is when you want to modify the response body. That impacts the Content-Length header, so your middleware will need to intercept the headers sent by the app, and rewrite them after the body has been modified.
+
+		****** CHECK THIS NEXT LINE ---- ITS OFFICIAL THIS BOOK SUCKS!!!!!!! **********
+		Unless you want your functionality to work for other WSGI frameworks, there are no good reasons to extend your apps with WSGI middlewares. It's much better to write a Flask extension that will interact from within the Flask application.
 
 	Templates
 			In some cases, we might need to create documents with some layout--whether it's an HTML page, or a PDF report, or an email.
@@ -555,7 +555,130 @@ Flask built-in features
 			You can also use Python's if and for blocks directly in your templates with the {% for x in y % }... {% endfor %} and {% if x %}...{% endif %} notations.
 
 			The following is a Python script that uses the email template to produce an entirely valid RFC 822 message, which you can send via SMTP:
-			pg  68
+
+	Configuration
+			When building applications, you will need to expose options to run them, like the information to connect to a database or any other variable that is specific to a deployment.
+
+			Flask uses a mechanism similar to Django in its configuration approach. The Flask object comes with an object called config, which contains some built-in variables, and which can be updated when you start your Flask app via your configuration objects.
+
+			For example, you can define a Config class in a prod_settings.py file as follows:
+					class Config:
+				    """
+				        There are two significant drawbacks when using Python
+				        modules as configuration files.
+
+				        1) Assuring the configuration files are managed separately
+				           from the code.
+				        2) If another team is in charge of managing the
+				           configuration file of your application, they will need
+				           to edit the Python code to do so. For instance, it's
+				           harder to make Puppet templates out of Python modules
+				           rather than flat, static configuration files.
+				    """
+				    DEBUG = False
+				    SQLURI = 'postgres://tarek:xxx@localhost/db'
+
+		    And then, load it from your app object using app.config.from_object :
+		    		from flask import Flask
+					from konfig import Config
+
+					'''
+					    Adds prod_settings configuration to Flask's 
+					    configuration object. The values have been 
+					    stored in app.config.py.json
+					'''
+					app = Flask(__name__)
+					app.config.from_object('prod_settings.Config')
+					print(app.config)
+
+					'''
+					        Since Flask exposes its configuration via app.config, it's 
+					        pretty simple to load additional options from a YAML file, 
+					        or any other text-based file. (see prod_settings.ini)
+					        
+					        Many Flask extensions exist to load the configuration from 
+					        an INI file, but using the standard library ConfigParser is 
+					        trivial. 
+					        
+					        There's one major caveat from using INI files: variables 
+					        values are all strings, and your application needs to 
+					        take care of converting them to the right type.
+					'''
+					c = Config('prod_setting.ini')
+					app.config.update(c.get_map('flask'))
+					print(app.config)
+
+	Blueprints
+			When you write microservices that have more than a single endpoint, you will end up with a handful of decorated functions--maybe, a few per endpoint. The first logical step to organize your code is to have one module per endpoint, and when you create your app instance, to make sure they get imported so that Flask registers the views.
+
+			For example, if your microservice manages a company employees database, you could have one endpoint to interact with all employees, and one with teams. You could organize your application in these three modules:
+					- app.py: To contain the Flask app object, and to run the app
+					- employees.py: To provide all the views related to employees
+					- teams.py: To provide all the views related to teams
+
+			Blueprints take that logic a step further by providing a way to group your views into namespaces. 
+
+			You can create a Blueprint object which looks like a Flask app object, and then use it to arrange some views. 
+
+			The initialization process can then register blueprints with app.register_blueprint. That call will make sure that all the views defined in the blueprint are part of the app.
+
+			A possible implementation of the employee's blueprint could be as follows:
+
+Error handling and debugging
+	In HTML web apps, you usually get specific HTML pages when you encounter a 404 or a 50x error, and that's how Flask works out of the box. But when building microservices, you need to have more control on what should be sent back to the client--that's where custom error handlers come in handy.
+
+	The other important feature is the ability to debug what's wrong with your code when an unexpected error occurs.
+
+	And Flask comes with a built-in debugger we'll discover in this section, which can be activated when your app runs in the debug mode.
+
+	Custom error handler
+			When your code does not handle an exception, Flask returns an HTTP 500 response without providing any specific information, like the traceback.
+
+			When implementing microservices using JSON, it's a good practice to make sure that every response sent to the clients, including any exception, is JSON formatted. 
+
+			Flask lets you customize the app error handling via the @app.errorhandler decorator, which works like @app.route. But instead of providing an endpoint, the decorator links a function to a specific error code.
+
+	The debug mode
+			The Flask application run method has a debug option, which, when used, runs it in the debug mode:
+					app.run(debug=True)
+
+			The debug mode is a special mode, where the built-in debugger takes precedence on any error, and allows you to interact with the app from a browser:
+					The console in the web-debugger will let you interact with the current app, and inspect variables or execute any Python code that is in the current execution frame.
+
+			Since the debug mode allows remote code execution, it's a security hazard even though you need to provide a PIN to access the console. The Bandit security linter (https://wiki.openstack.org/wiki/Security/Projects /Bandit) tracks Flask applications that are executed with a plain debug flag, and can be used to prevent deploying an application with that flag.
+
+A microservice skeleton
+	Since we will want to release and deploy the code, it's better to have it inside a Python package so that we can use standard packaging tools like Pip and Setuptools.
+
+	It's also a good idea to organize views into blueprints, and have one module per blueprint. 
+
+	Lastly, the run() call can be removed from the code, since Flask provides a generic runner that looks for an app variable given a module pointed by the FLASK_APP environment variable. 
+			Using that runner offers extra options like the ability to configure the host and port that will be used to run the app.
+
+	The microservice project skeleton contains the following structure:
+			- setup.py: Distutils' setup file, which is used to install and release the project (https://github.com/Runnerly/flakon/blob/master/setup.py)
+			- Makefile: A Makefile that contains a few useful targets to make, build, and run the project
+			- settings.ini: The application default settings in the INI file
+			- requirements.txt: The project dependencies following the pip format
+			- myservices/: The actual package
+				- __init__.py
+				- app.py: The app module, which contains the app itself
+				- views/: A directory containing the views organized in blueprints
+					- __init__.py
+					- home.py: The home blueprint, which serves the rootendpoint
+			- tests: The directory containing all the tests
+				- __init__.py
+				- test_home.py: Tests for the home blueprint views
+
+Summary
+	- Flask wraps a simple request-response mechanism around the WSGI protocol, which lets you write your applications in almost vanilla Python.
+	- Flask is easy to extend, and it works with Python 3.
+	- Flask comes with nice built-in features: blueprints, globals, signals, a template engine, error handlers, and a debugger.
+
+
+
+
+
 
 			pg 126 Splitting the monolith (Chapter 4, skip)
 
@@ -569,7 +692,7 @@ Flask built-in features
 
 			pg 183 **** Chapter 7: Securing your Services ****
 
-			
+			pg 285 ****   Chapter 11: Deploying to AWS    ****
 
 
 

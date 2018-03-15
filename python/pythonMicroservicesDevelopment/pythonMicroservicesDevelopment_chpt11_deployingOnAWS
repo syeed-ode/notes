@@ -1,0 +1,182 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+When you decorate a function with it, it becomes a view, and it's 
+registered into Werkzeug's routing system.
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 285 - 310
+*******************************************************************
+*******           Chapter 11 - Deploying on AWS             *******
+*******************************************************************
+Cloud providers offer to host a solution that is often cheaper than deploying and maintaining your infrastructure. Amazon Web Services (AWS) and others have numerous services that let you manage virtual machines from a web console, and they add new features every year.
+
+For example, is Amazon Lambda. Lambda lets you trigger a Python script when something happens in your deployments. 
+		With Lambda, you do not have to worry about setting up a server and a cron job, or some form of messaging. AWS takes care of executing your script in a VM automatically, and you only pay for execution time.
+
+Combined with what Docker has to offer, this kind of feature really changes how applications can be deployed in the cloud, and provide a fair amount of flexibility.
+
+You do not have to spend too much money to set up a service that might see a peak in activity and then slow down. You can deploy a world-class infrastructure that can hold an enormous amount of requests, and it stays, in most cases, cheaper than running your hardware.
+
+AWS overview
+	 Amazon Elastic Compute Cloud (Amazon EC2) 
+
+	 The AWS services we are interested in can be organized into four main groups:
+	 		- Routing: Services that redirect requests to the right place, such as DNS services and load balancers
+	 				- Route 53
+	 				- ELB
+	 				- Auto Scaling
+			- Execution: Services that execute your code, such as EC2 or Lambda
+					- EC2 
+					- Cloud Frount
+					- Lamda
+			- Storage: Services that store data-storage volumes, caching, regular databases, long-term storage, or CDN
+					- S3 (Simple Storage Service)
+					- ESB (Elastic Block Store)
+					- RDS (Relational Database Service)
+					- Elastic Cache 
+					- Glacier
+			- Messaging: Services that send notifications, emails, and so on
+					- SES (Simple Email Service)
+					- SQS (Simple Queue Service)
+					- SNS (Simple Notification Service)
+
+	Routing - Route53, ELB, and AutoScaling
+			Route53 (https://aws.amazon.com/route53/) refers to the TCP port 53 that's used for DNS servers, and is Amazon's DNS service. 
+					Similar to what you would do with BIND (http://www.isc.org/downloads/bind/), you can define DNS entries in Route53, and set up the service to automatically route the requests to specific AWS services that host applications or files.
+
+					DNS is a critical part of a deployment. It needs to be highly available, and to route each incoming request as fast as possible.
+
+			Elastic Load Balancing (ELB) (https://aws.amazon.com/elasticloadbalancing/), which is a load balancer that can be configured to distribute incoming requests to several backends, can work in close cooperation with Route53. 
+			 		If you are deploying several VMs for the same microservice to create a cluster, ELB can be used to distribute the load among them.
+
+			 		ELB monitors all instances through health checks and unhealthy nodes can automatically get taken out of rotation.
+
+	 		AutoScaling (https://aws.amazon.com/autoscaling/) can add instances automatically depending on some events. 
+	 				For instance, if one node is unresponsive or has crashed, it is detected by an ELB Health Check event that can be picked up by AutoScaling. From there, the incriminated VM can be automatically terminated and a new one started.
+
+	Execution - EC2 and Lambda
+			Amazon Elastic Compute Cloud (Amazon EC2) is the core of AWS and lets you create Virtual Machines.
+
+			Xen hypervisor runs the Virtual Machines for Amazon Web Services.
+
+			Amazon Machine Images (AMIs) installs them. AWS has a huge list of AMIs you can choose from; you can also create your own AMIs by tweaking an existing AMI.
+					Once you have picked an AMI from the Amazon console, you can launch an instance, and, after it has booted, you can use SSH into it and start working.
+
+					An EC2 instance comes in different series (https://aws.amazon.com/ec2/instancetypes/). The T2, M3, and M4 series are for a general purpose.
+
+					The C3 and C4 series are for CPU-intensive applications (up to 32 Xeon CPUs), and the X1 and R4 ones have a lot of RAM (up to 1,952 GiB).
+
+					Avoid the t2.nano or t2.micro though, which are fine for running some testing, but too limited for running anything in production.
+
+			Since we are deploying our microservices as Docker images, we do not need to run a fancy Linux distribution. The only feature that matters is to choose an AMI that's tweaked to run Docker containers.
+
+			EC2 Container Service (ECS) (https://aws.amazon.com/ecs) is the built-in way to perform Docker deployments. ECS offers features that are similar to Kubernetes, and integrates well with other services. 
+
+			ECS uses its own Linux AMI to run Docker containers, but you can configure the service to run another AMI.
+
+			CoreOS (https://coreos.com/) is a Linux distribution whose sole purpose is to run Docker containers. If you use CoreOS, that is one part which won't be a locked-in AWS.
+
+			Lambda (https://aws.amazon.com/lambda/) is a service you can use to trigger the execution of a Lambda Function. A Lambda Function is a piece of code that you can write in Node.js, Java, C#, or Python 2.7 or 3.6, and that is deployed as a 'deployment package', which is a ZIP file containing your script and all its dependencies.
+
+			If you use Python, the ZIP file is usually a Virtualenv with all the dependencies needed to run the function.
+
+			Lambda functions can replace Celery workers, since they can be triggered asynchronously via some AWS events. The benefit of running a Lambda function is that you do not have to deploy a Celery microservice that needs to run 24/7 to pick messages from a queue. 
+
+			However, again, using Lambda means you are locked in AWS services.
+
+	Storage - EBS, S3, RDS, ElasticCache, and CloudFront
+			When you create an EC2 instance, it works with one or several Elastic Block Stores (EBS) (https://aws.amazon.com/ebs/). 
+					An EBS is a replicated storage volume EC2 instances can mount to use as their filesystem.
+
+					When you create a new EC2 instance, you can create a new EBS, and decide if it runs on an SSD or an HDD disk, the initial size, and some other options.
+
+			Simple Storage Service (S3) (https://aws.amazon.com/s3/) is a storage service that organizes data into buckets. Buckets are, roughly, namespaces that you can use to organize your data. 
+					A bucket can be seen as a key-value storage, where a value is data you want to store. There is no upper limit for the size of the data, and S3 provides everything needed to stream big files in and out of its buckets. 
+
+					S3 is often used to distribute files, since each entry in a bucket can be exposed as a unique, public URL.
+
+					CloudFront can be configured to use S3 as a backend.
+
+					S3 provides different storage backend depending on how often the files are written or accessed. Glacier (https://aws.amazon.com/glacier/) can be used as a backend when you want to store big files that are rarely accessed. 
+
+			ElasticCache (https://aws.amazon.com/elasticache/) is a cache service that has two backends--Redis and Memcached. 
+					ElasticCache leverages Redis' shard and replication features, and lets you deploy a cluster of Redis nodes. 
+
+					If you host a lot of data in Redis and might go over the RAM capacity, Redis shards can spread the data across several nodes and raise Redis' capacity.
+
+			Relational Database Service (RDS) (https://aws.amazon.com/rds/) is a database service that has many database backends available; in particular, MySQL and PostgreSQL.
+					The big advantage of using RDS over your database deployment is that AWS takes care of managing clusters of nodes, and offers high availability and reliability for your database.
+
+					Amazon Aurora (https://aws.amazon.com/rds/aurora/details/), which implements MySQL 5.x, but is supposed to run much faster (5x faster, according to Amazon).
+
+			CloudFront (https://aws.amazon.com/cloudfront/) is Amazon's Content Delivery Network (CDN). If you have static files you want to serve, this is the best way to do it when your users are spread all over the world. 
+					A CDN is what you need to use to serve video, CSS, and JS files--one thing to look at, though, is the cost.
+
+	Messaging - SES, SQS, and SNS
+			For all messaging needs, AWS provides these three major services:
+					- Simple Email Service (SES): An email service
+					- Simple Queue Service (SQS): A queue system like RabbitMQ
+					- Simple Notification Service (SNS): A pub/sub and push notification system that works with SNS
+
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			pg 126 Splitting the monolith (Chapter 4, skip)
+
+			pg 132 More splitting (Chapter 4, skip)
+
+			pg 158 RPC over AMQP <Sucks!!>
+
+			pg 161 Mocking Celery (Chapter 5, Interacting with other services)
+
+			pg 165 ****Chapter 6: Monitoring Your Services****
+
+			pg 183 **** Chapter 7: Securing your Services ****
+
+			pg 285 ****   Chapter 11: Deploying to AWS    ****
+
+
+
+
+
+
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
