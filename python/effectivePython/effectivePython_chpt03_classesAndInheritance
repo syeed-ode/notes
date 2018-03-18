@@ -1,0 +1,209 @@
+	                                                                   |	                                                                   
+	                                                                   |
+*******************************************************************
+*******************************************************************
+*******************************************************************
+*******************************************************************
+*							          *
+*							          *
+*							          *
+toc: 
+pg 55 - 
+*******************************************************************
+*******        Chapter 03 - Classes and Interitance         *******
+*******************************************************************
+Item 22: Prefer Helper Classes Over Bookkeeping with Dictionaries and Tuples
+		Dynamic bookeeping is for an unexpected amount of identifiers -- utilize dictionary instead of fields.
+				See https://github.com/syeed-ode/python_scratch_work/blob/master/classesandinheritance/unexpectedidentifiersusedict/a_dictinsteadoffieldsfordynamicbookkeeping.py
+
+				Built-in data strucutres such as dictionaries are also a good solution for increasing performance, especially when dealing with algorithmically complex objects.
+
+				Avoiding reimplementation of common functionality will save you time and headaches. 
+
+		Dictionaries have the danger of being over extended which creates brittle code. 
+				For example extending the SimpleGradebook class by changing the __grades dictionary, mapping the student names to another dictionary (the values).
+
+				The innermost dictionary will map subjects (the keys) to grades (the values).
+
+		You can use the underscore variable name, a Python convention for unused variables.
+
+		As soon as you find yourself going longer than a two-tuple, it's time to consider another approach. 
+
+		The 'namedtuple' type lets you define tiny, immutable data classes. The fields are accessible with named attributes, making it easy to move to your won class if you need to add behaviors to the simple data containers.
+
+		It is important to understand when a 'namedtuple' can cause more harm than good.
+				You can't specify default argument values for 'namedtuple' classes. If using more than a handful of attributes, defining your own class may be better.
+
+				The values of 'namedtuple' are accessible using numerical indexes and iteration. 
+						This can lead to unintentional usage taht makes it harder to move to a real class later.
+
+						If you are not in control of all of the usage of your 'namedtuple' instances, it's better to define your own class.
+
+		** Utlize dicionary instead of fields when doing dynamic (an unexpected amount of identifiers) bookkeeping. 
+
+		** Avoid making dictionaries with values that ere other dictionaries or long tuples
+
+		** Use 'namedtuple' for lightweight, immutable data containers before you need the flexibility of a full class
+
+		** Move your bookkeeping code to use multiple helper classes when you internal state dictionaries get complicated.
+
+Item 23: Accept Functions for Simple Interfaces Instead of Classes
+		Many of Python's built-in APIs allow ou to customize behavior by passing in a function. These 'hooks' are used by APIs to call back your code while they execute.
+
+		The 'list' type's 'sort' method takes an optional key argument that's used to determine each index's value for sorting.
+				The example below sorts a list of names based on the their length by providing a lamda expression as the key hook.
+						The lamda operator is a way of creating small anonomous functions, i.e. functions without a name. 
+
+						The general syntax of a lambda function is quite simple:  lambda argument_list: expression
+
+						The argument list consists of a comma separated list of arguments and the expression is an arithmetic expression using these arguments. The following example of a lambda function returns the sum of its two arguments:
+								>>> f = lambda x, y : x + y
+								>>> f(1,1)
+								2
+						The advantage of the lambda operator can be seen when it is used in combination with the map() function. map() is a function with two arguments: r = map(func, seq)
+								where, func is the name of a function
+								and, seq is a sequence (e.g. list) 
+
+						map() applies the function func to all the elements of the sequence seq. It returns a new list with the elements changed by func.
+								def fahrenheit(T):
+									return ((float(9)/5)*T + 32)
+								def celsius(T):
+									return (float(5)/9)*(T-32)
+								temp = (36.5, 37, 37.5,39)
+
+								F = map(fahrenheit, temp)
+								C = map(celsius, F)
+
+						In the example above we haven't used lambda. By using lambda, we wouldn't have had to define and name the functions fahrenheit() and celsius(). You can see this in the following interactive session:
+								>>> Celsius = [39.2, 36.5, 37.3, 37.8]
+								>>> Fahrenheit = map(lambda x: (float(9)/5)*x + 32, Celsius)
+								>>> print Fahrenheit
+								[102.56, 97.700000000000003, 99.140000000000001, 100.03999999999999]
+								>>> C = map(lambda x: (float(5)/9)*(x-32), Fahrenheit)
+								>>> print C
+								[39.200000000000003, 36.5, 37.300000000000004, 37.799999999999997]
+								>>> 
+
+				The example below sorts a list of names based on the their length by providing a lamda expression as the key hook. 
+
+				'sort' operates on each element, passing each element to the 'key' hook. The 'lambda' function takes each element (x) and passes it to the function len(x).
+						names = ['Socrates', 'Archimedes', 'Plato', 'Aristotle']
+						names.sort(key=lamda x: len(x))
+						print(names)
+
+		Many hooks are just stateless functions with well-defined arguments and return values. Functions are idea for hooks because they are easier to describe and simpler to define than classes.
+				Utilizing hooks separate side effects from deterministic behavior. See increment_with_report.
+
+				Another benefit of accepting simple functions for interfaces is it's easy to add functionality later by hiding state in a closure.
+
+				This is the purpose of a closure, to provide state. 
+
+		The problem with defining closures to provide state is that it's harder to read than the stateless function. 
+				
+		An alternative is to utilize a class to provide the state you want to track. Using a helper class is clear than the 'increment_with_report' function. However, in isolation it's not ovious what the purpose of the CountMissing class is.
+				Who constructs a CountMissing object? Who calls the missing method? 
+
+				Will the class need other public methods to be added in the future?
+
+				Until yyou see its usage with defaultdict, the class is a mystery.
+
+		To clarify, Python allows classes to define the (dunder call method)  __call__ allows an object to be called just like a function.
+				It also causes the callable built-in function to return 'True' for such an instance.
+
+		The __call__ method indicates that a class's instance will be used somewhere a function argument would also be suitable (like API hooks).
+				It directs new readers of the code to the entry point that's responsible for the class's primary behavior. 
+
+				It provides a strong hint that the goal of the class is to act as a stateful closure.
+
+		Best of all, the caller of the hook *still* has no idea what is going on when you use __call__.
+
+
+
+		** Stateless function make for good hooks. However if you want to provide state you can utilize a closure (with the nonlocal keyword). Because this affects readability, see next bullet.
+
+		** Clases make for better hooks when state is needed. They are easier to read.	
+
+		** You can improve on the class by making use of the dunder call method. This allows the class to be called as method.	
+
+		** Instead of defining and instantiating classes, functions are often all you need for simple interfaces between components in Python
+
+		** References to functions and methods in Python are first class, meaning they can be used in expressions like any other type
+
+		** The __call__ (dunder call) special method enables instances of a class to be called like plain Pythong functions
+
+		** When you need a function to maintain state, consider defining a class that provides the __call__ method instead of defining a stateful closure (see Item 15: "Know How Closures Interact with Variable Scope")
+
+
+
+
+
+1. Aisa
+2. Africa
+3. Europe
+4. North America
+5. South America
+6. Australia
+7. Antartic 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			pg 126 Splitting the monolith (Chapter 4, skip)
+
+			pg 132 More splitting (Chapter 4, skip)
+
+			pg 158 RPC over AMQP <Sucks!!>
+
+			pg 161 Mocking Celery (Chapter 5, Interacting with other services)
+
+			pg 165 ****Chapter 6: Monitoring Your Services****
+
+			pg 183 **** Chapter 7: Securing your Services ****
+
+			pg 285 ****   Chapter 11: Deploying to AWS    ****
+
+
+
+
+
+
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
