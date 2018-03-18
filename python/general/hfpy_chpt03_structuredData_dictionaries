@@ -1,0 +1,40 @@
+	                                                                   |
+*******************************************************************
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 55 - 
+*******************************************************************
+*******            Chapter 03 - Strictured Data             *******
+*******************************************************************
+Dictonary Overview
+	By default, every dictionary is unordered. Use the 'sorted' built-in function if you need to sort a dictionary.
+
+	The 'items' method allows you to iterate over a dictionary by row -- that is, by key/value pair. 
+
+	Trying to access a nonexistent key in an existing dictionary results in a 'KeyError'.  When a 'KeyError' occurs your program crashes with a runtime error.
+
+	You can avoid a 'KeyError' by ensuring every key in your dictionary has a value associated with it before you try to access it. Although the 'in' and 'not in' operators can help here, the established technique is to use the 'setdefault' method instead.
+
+Ensuring Initialization Before Use
+	This line of code assures 'fruits' dictionary has the 'bananas' key in the dictionary.
+			if 'bananas' in fruits:
+				fruits['bananas'] = +1
+			else:
+				fruits['bananas'] = 1
+
+Substituting "not in" for "in"
+	You can refactor the previous four lines of code to use not in instead of in.
+			if 'pears' not in fruits:
+				fruits['oears'] = 0		# initialize if needed
+
+	The above lines of code are so common in Python, that the language makes this 'if/not in' combination more convenient by using the 'setdefault'. Here's the previous example.
+			fruits.setdefault('pears', 0)  # initializes the 'pears' key with a value of 0
+
+	Any possibility of 'KeyError' exception is negated. The 'setdefault' behavior is guaranteed to initalize a nonexstent key to a default value or to leave any existing value associated with any existing key alone, i.e. do nothing.
+			Using the 'setdefault' method allows you to dynamically grow a dictionary at runtime in the safety of only creating a new key/value pair when you actually need one. 
+
+	The 'setdefault' method returns a list of the current values for the key specified. 
