@@ -13,307 +13,325 @@ pg 47 - 79
 *******************************************************************
 *******            Chapter 2 - Discovering Flask            *******
 *******************************************************************
-Flask, Werkzeug WSGI toolkit  (http://werkzeug.pocoo.org/), Pylons project (http://pylonsproject.org), which is the umbrella organization for projects like Pyramid -- another web framework -- integrated Paste and its various components at some point, with Bottle (http://bottlepy.org/) and a handful of other projects composed the Python microframeworks ecosystem.
-
-All those projects have a similar goal--they want to offer to the Python community simple tools to build web applications faster.
-
-However, the term microframework can be a bit misleading. It does not mean you can only create micro applications. Using those tools, you can build any application--even a large one. The prefix micro here means that the framework tries to freely organize your application code as you want, and use whatever libraries you want.
-
-A microframework acts as the glue code that delivers requests to your system, and sends back responses. It does not enforce any particular paradigm on your project.
-
-A framework like Django is batteries-included, and provides everything you need to build your web app including an Object-Relational Mapper (ORM) to bind objects with database query results.
+Flask, Werkzeug WSGI toolkit  (http://werkzeug.pocoo.org/), Pylons project 
+	(http://pylonsproject.org), which is the umbrella organization for 
+	projects like Pyramid -- another web framework -- integrated Paste 
+	and its various components at some point, with Bottle 
+	(http://bottlepy.org/) and a handful of other projects composed 
+	the Python microframeworks ecosystem.
+All those projects have a similar goal--they want to offer to the Python 
+	community simple tools to build web applications faster.
+A microframework acts as the glue code that delivers requests to your 
+	system, and sends back responses. It does not enforce any particular 
+	paradigm on your project.
+A framework like Django is batteries-included, and provides everything you 
+	need to build your web app including an Object-Relational Mapper 
+	(ORM) to bind objects with database query results.
 		The rest of the framework tightly integrates with the ORM.
-
-If you want to use an alternative ORM like SQLAlchemy (SA) in Django to benefit from some of its great features, you'd not be taking the easiest path, because the whole idea of Django is to provide an entire working system, and let the developer focus on building original features.
-
-Flask, on the other hand, does not care what library you use to interact with your data. Using SQLAlchemy in Flask, and making sure you're doing the right thing with SQL sessions and transactions, will mostly consist of adding a package like Flask-SQLAlchemy in your project.
-		And if you don't like how that particular library integrates SLQAlchemy, you're free to use another one, or to build your integration.
-
-		Of course, that's not a silver bullet. Being completely free in your choices also means it's easier to make poor decisions, and build an application that relies on defective libraries or one that's not well designed.
-
+Flask does not care what library you use to interact with your data. Using 
+	SQLAlchemy in Flask will mostly consist of adding a package like 
+	Flask-SQLAlchemy in your project.
+		And if you don't like how that particular library integrates 
+			SLQAlchemy, you're free to use another one, or to 
+			build your integration.
+			
 How Flask handles requests
 *******************************************************************
 When you decorate a function with it, it becomes a view, and it's 
 registered into Werkzeug's routing system.
 *******************************************************************
-		The framework entry point is the Flask class in the flask.app module. Running a Flask application means running one single instance of this class, which will take care of handling incoming Web Server Gateway Interface (WSGI) requests, dispatch them to the right code, and then return a response.
-				WSGI is a specification that defines the interface between web servers and Python applications. 
+	The framework entry point is the Flask class in the flask.app 
+		module. Running a Flask application means running one single 
+		instance of this class, which will take care of handling 
+		incoming Web Server Gateway Interface (WSGI) requests, 
+		dispatch them to the right code, and then return a response.
+			WSGI is a specification that defines the interface between web servers and Python applications. 
 
-				The Python web community has created a standard (inspired by the Common Gateway Interface or CGI) called Web Server Gateway Interface (WSGI). When your code uses that standard, your project can be executed by standard web servers like Apache or nginx, using WSGI extensions like uwsgi or mod_wsgi.
-						Your application just has to deal with incoming requests and send back JSON responses, and Python includes all that goodness in its standard library.
+			The Python web community has created a standard (inspired by the Common Gateway Interface or CGI) called Web Server Gateway Interface (WSGI). When your code uses that standard, your project can be executed by standard web servers like Apache or nginx, using WSGI extensions like uwsgi or mod_wsgi.
+					Your application just has to deal with incoming requests and send back JSON responses, and Python includes all that goodness in its standard library.
 
-						** WSGI is synchronouss **
+					** WSGI is synchronouss **
 
-						That's one of the reasons why non-WSGI frameworks like Twisted and Tornado, and in JavaScript land, Node.js, became very successful--it's fully async.
+					That's one of the reasons why non-WSGI frameworks like Twisted and Tornado, and in JavaScript land, Node.js, became very successful--it's fully async.
 
-				The incoming request is described in a single mapping, and frameworks such as Flask take care of routing the call to the right callable.
+			The incoming request is described in a single mapping, and frameworks such as Flask take care of routing the call to the right callable.
 
-		The class offers a route method, which can decorate your functions. When you decorate a function with it, it becomes a view, and it's registered into Werkzeug's routing system. 
-				That system uses a small rule engine to match views with incoming requests, and will be described later in this chapter.
+	The class offers a route method, which can decorate your functions. 
+		When you decorate a function with it, it becomes a view, and 
+		it's registered into Werkzeug's routing system. 
+			That system uses a small rule engine to match views with incoming requests, and will be described later in this chapter.
 
-		The __name__ variable, whose value will be __main__ when you run that single Python module, is the name of the application package.
-				It's used by Flask to instantiate a new logger with that name, and to find where the file is located on the disk.
-				
-				Flask will use the directory as the root for helpers like the config that's associated with your app, and to determine default locations for the static and templates directories.
+	The __name__ variable, whose value will be __main__ when you run that single Python module, is the name of the application package.
+			It's used by Flask to instantiate a new logger with that name, and to find where the file is located on the disk.
 
-				With the following code:
-						from flask import Flask, jsonify
+			Flask will use the directory as the root for helpers like the config that's associated with your app, and to determine default locations for the static and templates directories.
 
-
-						app = Flask(__name__)
-
-						@app.route('/api')
-						def my_microservice():
-						    return jsonify({'Hello': 'World!'})
-
-						if __name__ == '__main__':
-						    app.run()
+			With the following code:
+					from flask import Flask, jsonify
 
 
-				You get the following response willing using curl
-						[20180227-19:56:26 syeedode:~/ad-campaign-services master*] $  curl -v http://127.0.0.1:5000/api
-						*   Trying 127.0.0.1...
-						* TCP_NODELAY set
-						* Connected to 127.0.0.1 (127.0.0.1) port 5000 (#0)
-						> GET /api HTTP/1.1
-						> Host: 127.0.0.1:5000
-						> User-Agent: curl/7.52.1
-						> Accept: */*
-						> 
-						* HTTP 1.0, assume close after body
-						< HTTP/1.0 200 OK
-						< Content-Type: application/json
-						< Content-Length: 24
-						< Server: Werkzeug/0.12.2 Python/3.6.1
-						< Date: Wed, 28 Feb 2018 17:19:04 GMT
-						< 
-						{
-						  "Hello": "World!"
-						}
-						* Curl_http_done: called premature == 0
-						* Closing connection 0
+					app = Flask(__name__)
 
-		The 'request' variable is global, but unique, to each incoming request and is thread safe. Flask uses a mechanism called context locals, which we will explain later.  This is a printout of the data.
-				if __name__ == '__main__':
-				    print(app.url_map)
-				    app.run()
+					@app.route('/api')
+					def my_microservice():
+					    return jsonify({'Hello': 'World!'})
 
-			    # yields this:
-			    /Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6 /Users/syeedode/python_projects/python_scratch_work/functional_test/basic_flask_app.py
-				Map([<Rule '/api' (OPTIONS, GET, HEAD) -> my_microservice>,
-				 <Rule '/static/<filename>' (OPTIONS, GET, HEAD) -> static>])
-				 * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit) #this prints out without any special cases
+					if __name__ == '__main__':
+					    app.run()
 
-		 This printsout:
-		 		Here is the request:
-				127.0.0.1 - - [28/Feb/2018 12:55:07] "GET /api HTTP/1.1" 200 -
-				<Request 'http://127.0.0.1:5000/api' [GET]>
 
-				Here is the environment:
-				{'wsgi.version': (1, 0), 'wsgi.url_scheme': 'http', 'wsgi.input': <_io.BufferedReader name=5>, 'wsgi.errors': <_io.TextIOWrapper name='<stderr>' mode='w' encoding='UTF-8'>, 'wsgi.multithread': False, 'wsgi.multiprocess': False, 'wsgi.run_once': False, 'werkzeug.server.shutdown': <function WSGIRequestHandler.make_environ.<locals>.shutdown_server at 0x10e6771e0>, 'SERVER_SOFTWARE': 'Werkzeug/0.12.2', 'REQUEST_METHOD': 'GET', 'SCRIPT_NAME': '', 'PATH_INFO': '/api', 'QUERY_STRING': '', 'REMOTE_ADDR': '127.0.0.1', 'REMOTE_PORT': 56750, 'SERVER_NAME': '127.0.0.1', 'SERVER_PORT': '5000', 'SERVER_PROTOCOL': 'HTTP/1.1', 'HTTP_HOST': '127.0.0.1:5000', 'HTTP_USER_AGENT': 'curl/7.52.1', 'HTTP_ACCEPT': '*/*', 'werkzeug.request': <Request 'http://127.0.0.1:5000/api' [GET]>}
+			You get the following response willing using curl
+					[20180227-19:56:26 syeedode:~/ad-campaign-services master*] $  curl -v http://127.0.0.1:5000/api
+					*   Trying 127.0.0.1...
+					* TCP_NODELAY set
+					* Connected to 127.0.0.1 (127.0.0.1) port 5000 (#0)
+					> GET /api HTTP/1.1
+					> Host: 127.0.0.1:5000
+					> User-Agent: curl/7.52.1
+					> Accept: */*
+					> 
+					* HTTP 1.0, assume close after body
+					< HTTP/1.0 200 OK
+					< Content-Type: application/json
+					< Content-Length: 24
+					< Server: Werkzeug/0.12.2 Python/3.6.1
+					< Date: Wed, 28 Feb 2018 17:19:04 GMT
+					< 
+					{
+					  "Hello": "World!"
+					}
+					* Curl_http_done: called premature == 0
+					* Closing connection 0
 
-				Here is the response
-				<Response 24 bytes [200 OK]>
+	The 'request' variable is global, but unique, to each incoming request and is thread safe. Flask uses a mechanism called context locals, which we will explain later.  This is a printout of the data.
+			if __name__ == '__main__':
+			    print(app.url_map)
+			    app.run()
 
-				Here is the response data
-				b'{\n  "Hello": "World!"\n}\n'
+		    # yields this:
+		    /Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6 /Users/syeedode/python_projects/python_scratch_work/functional_test/basic_flask_app.py
+			Map([<Rule '/api' (OPTIONS, GET, HEAD) -> my_microservice>,
+			 <Rule '/static/<filename>' (OPTIONS, GET, HEAD) -> static>])
+			 * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit) #this prints out without any special cases
 
-		Let's explore what's happening here on the call:
-				Routing: Flask creates the Map class
-				Request: Flask passes a Request object to the view
-				Response: A Response object is sent back with the response content
+	 This printsout:
+			Here is the request:
+			127.0.0.1 - - [28/Feb/2018 12:55:07] "GET /api HTTP/1.1" 200 -
+			<Request 'http://127.0.0.1:5000/api' [GET]>
+
+			Here is the environment:
+			{'wsgi.version': (1, 0), 'wsgi.url_scheme': 'http', 'wsgi.input': <_io.BufferedReader name=5>, 'wsgi.errors': <_io.TextIOWrapper name='<stderr>' mode='w' encoding='UTF-8'>, 'wsgi.multithread': False, 'wsgi.multiprocess': False, 'wsgi.run_once': False, 'werkzeug.server.shutdown': <function WSGIRequestHandler.make_environ.<locals>.shutdown_server at 0x10e6771e0>, 'SERVER_SOFTWARE': 'Werkzeug/0.12.2', 'REQUEST_METHOD': 'GET', 'SCRIPT_NAME': '', 'PATH_INFO': '/api', 'QUERY_STRING': '', 'REMOTE_ADDR': '127.0.0.1', 'REMOTE_PORT': 56750, 'SERVER_NAME': '127.0.0.1', 'SERVER_PORT': '5000', 'SERVER_PROTOCOL': 'HTTP/1.1', 'HTTP_HOST': '127.0.0.1:5000', 'HTTP_USER_AGENT': 'curl/7.52.1', 'HTTP_ACCEPT': '*/*', 'werkzeug.request': <Request 'http://127.0.0.1:5000/api' [GET]>}
+
+			Here is the response
+			<Response 24 bytes [200 OK]>
+
+			Here is the response data
+			b'{\n  "Hello": "World!"\n}\n'
+
+	Let's explore what's happening here on the call:
+			Routing: Flask creates the Map class
+			Request: Flask passes a Request object to the view
+			Response: A Response object is sent back with the response content
 
 Routing
-		The routing happens in app.url_map, which is an instance of Werkzeug's Map class. That class uses regular expressions to determine if a function decorated by @app.route matches the incoming request. 
-				By default, the mapper will only accept GET, OPTIONS, and HEAD calls on a declared route.
+	The routing happens in app.url_map, which is an instance of 
+		Werkzeug's Map class. That class uses regular expressions to 
+		determine if a function decorated by @app.route matches the 
+		incoming request. 
+			By default, the mapper will only accept GET, OPTIONS, and HEAD calls on a declared route.
 
-				If you want to support specific methods, you can pass them to the route decorator with the methods argument as follows:
-						@app.route('/api', methods=['POST', 'DELETE', 'GET'])
-						def my_microservice():
-						return jsonify({'Hello': 'World!'})
+			If you want to support specific methods, you can pass them to the route decorator with the methods argument as follows:
+					@app.route('/api', methods=['POST', 'DELETE', 'GET'])
+					def my_microservice():
+					return jsonify({'Hello': 'World!'})
 
-				Note that the OPTIONS and HEADS methods are implicitly added in all rules, since it is automatically managed by the request handler. You caN deactivate this behavior by setting a provide_automatic_options attribute to False to the function.
+			Note that the OPTIONS and HEADS methods are implicitly added in all rules, since it is automatically managed by the request handler. You caN deactivate this behavior by setting a provide_automatic_options attribute to False to the function.
 
-		Variables and converters
-				Another feature provided by the routing system is variables. if you want to create a function that handles all requests to /person/N, with N being the unique ID of a person, you could use /person/<person_id>. 
-						This notation is pretty standard (Bottle uses the same), and allows you to describe endpoints with dynamic values.
+	Variables and converters
+			Another feature provided by the routing system is variables. if you want to create a function that handles all requests to /person/N, with N being the unique ID of a person, you could use /person/<person_id>. 
+					This notation is pretty standard (Bottle uses the same), and allows you to describe endpoints with dynamic values.
 
-				When Flask calls your function, it converts the value it finds in the URL section as the person_id argument:
-						@app.route('/api/person/<person_id>')
-						def person(person_id):
-							response = jsonify({'Hello': person_id})
-							return response
+			When Flask calls your function, it converts the value it finds in the URL section as the person_id argument:
+					@app.route('/api/person/<person_id>')
+					def person(person_id):
+						response = jsonify({'Hello': person_id})
+						return response
 
-						$ curl localhost:5000/api/person/3
-						{
-							"Hello": "3"
-						}
+					$ curl localhost:5000/api/person/3
+					{
+						"Hello": "3"
+					}
 
-				The rule of thumb is to make sure that every declared route in your app is unique, otherwise, tracking which one gets picked will give you headaches.
-						If you have several routes that match the same URL, the mapper uses a particular set of rules to determine which one it calls.
+			The rule of thumb is to make sure that every declared route in your app is unique, otherwise, tracking which one gets picked will give you headaches.
+					If you have several routes that match the same URL, the mapper uses a particular set of rules to determine which one it calls.
 
-						It boils down to picking views with more variables first, then the others --in order of appearance--when Python imports the different modules.
+					It boils down to picking views with more variables first, then the others --in order of appearance--when Python imports the different modules.
 
-				There's also a basic converter that will convert the variable to a particular type. For instance, if you want an integer, you would use <int:VARIABLE_NAME>. In the person example, that translates to /person/<int:person_id>.
-						Built-in converters are string (the default, a Unicode string), int, float, path, any, and uuid.
+			There's also a basic converter that will convert the variable to a particular type. For instance, if you want an integer, you would use <int:VARIABLE_NAME>. In the person example, that translates to /person/<int:person_id>.
+					Built-in converters are string (the default, a Unicode string), int, float, path, any, and uuid.
 
-				*****If a request matches a route, but a converter fails to change a value, Flask will return a 404 Error unless another route matches the same path.****[Error Watch]
+			*****If a request matches a route, but a converter fails to change a value, Flask will return a 404 Error unless another route matches the same path.****[Error Watch]
 
-				It's quite easy to create your custom converter. For example, if you want to match users' IDs with usernames, you could create a converter that looks up a database, and converts the integer into a username.
-						To do this, you need to create a class derived from the BaseConverter class, which implements two methods: 
-								the to_python() method to convert the value to a Python object for the view, and the 
+			It's quite easy to create your custom converter. For example, if you want to match users' IDs with usernames, you could create a converter that looks up a database, and converts the integer into a username.
+					To do this, you need to create a class derived from the BaseConverter class, which implements two methods: 
+							the to_python() method to convert the value to a Python object for the view, and the 
 
-								to_url() method to go the other way (used by url_for() described in the next section uses to_url()):
-										from flask import Flask, jsonify, request
-										from werkzeug.routing import BaseConverter, ValidationError
+							to_url() method to go the other way (used by url_for() described in the next section uses to_url()):
+									from flask import Flask, jsonify, request
+									from werkzeug.routing import BaseConverter, ValidationError
 
-										_USERS = {'1': 'Tarek', '2': 'Freya'}
-										_IDS = {val: id for id, val in _USERS.items()}
+									_USERS = {'1': 'Tarek', '2': 'Freya'}
+									_IDS = {val: id for id, val in _USERS.items()}
 
-										class RegisteredUser(BaseConverter):
-											def to_python(self, value):
-												if value in _USERS:
-													return _USERS[value]
-												raise ValidationError()
-	
-											def to_url(self, value):
-												return _IDS[value]
-	
-										app = Flask(__name__)
-										app.url_map.converters['registered'] = RegisteredUser
-	
-										@app.route('/api/person/<registered:name>')
-										def person(name):
-											response = jsonify({'Hello hey': name})
-											return response
-										
-										if __name__ == '__main__':
-										app.run()
+									class RegisteredUser(BaseConverter):
+										def to_python(self, value):
+											if value in _USERS:
+												return _USERS[value]
+											raise ValidationError()
 
-						The ValidationError method is raised in case the conversion fails, and the mapper will consider that the route simply does not match that request.
+										def to_url(self, value):
+											return _IDS[value]
 
-				But beware that this was just an example to demonstrate the power of converters. In real applications, we would need to be careful not to rely on too many converters, because it would be painful to change all the routes when the code evolves.
+									app = Flask(__name__)
+									app.url_map.converters['registered'] = RegisteredUser
 
-		The url_for function
-				The last interesting feature of Flask's routing system is the url_for() function. Given any view, it will return its actual URL.
-						Here's an example with the previous app:
-									>>> from flask_converter import app
-									>>> from flask import url_for
-									>>> with app.test_request_context():
-									... print(url_for('person', name='Tarek'))
-									...
-									/api/person/1
+									@app.route('/api/person/<registered:name>')
+									def person(name):
+										response = jsonify({'Hello hey': name})
+										return response
 
-				The previous example uses the Read-Eval-Print Loop (REPL), which you can get by running the Python executable directly.
+									if __name__ == '__main__':
+									app.run()
 
-				This feature is quite useful in templates when you want to display the URLs of some views depending on the execution context. Instead of hardcoding some links, you can just point the function name to url_for to get it.
+					The ValidationError method is raised in case the conversion fails, and the mapper will consider that the route simply does not match that request.
+
+			But beware that this was just an example to demonstrate the power of converters. In real applications, we would need to be careful not to rely on too many converters, because it would be painful to change all the routes when the code evolves.
+
+	The url_for function
+			The last interesting feature of Flask's routing system is the url_for() function. Given any view, it will return its actual URL.
+					Here's an example with the previous app:
+								>>> from flask_converter import app
+								>>> from flask import url_for
+								>>> with app.test_request_context():
+								... print(url_for('person', name='Tarek'))
+								...
+								/api/person/1
+
+			The previous example uses the Read-Eval-Print Loop (REPL), which you can get by running the Python executable directly.
+
+			This feature is quite useful in templates when you want to display the URLs of some views depending on the execution context. Instead of hardcoding some links, you can just point the function name to url_for to get it.
 
 Request
-		When a request comes in, Flask calls the view inside a thread-safe block, and uses Werzeug's local helper (http://werkzeug.pocoo.org/docs/latest/local/). This helper does a job similar to Python's threading.local (https://docs.python.org/3/library/threading.html#thread-local-data), and makes sure that each thread has an isolated environment, specific to that request.
+	When a request comes in, Flask calls the view inside a thread-safe 
+		block, and uses Werzeug's local helper 
+		(http://werkzeug.pocoo.org/docs/latest/local/). This helper 
+		does a job similar to Python's threading.local 
+		(https://docs.python.org/3/library/threading.html#thread-local-data), 
+		and makes sure that each thread has an isolated environment, 
+		specific to that request.
+	A view can introspect the incoming request through the request object attributes without having to deal with some parsing. For instance, the Authorization header is looked at and decomposed automatically when possible.
+			from flask import Flask, request
 
-		A view can introspect the incoming request through the request object attributes without having to deal with some parsing. For instance, the Authorization header is looked at and decomposed automatically when possible.
-				from flask import Flask, request
+			app = Flask(__name__)
 
-				app = Flask(__name__)
+			@app.route('/')
+			def auth() -> None:
+			    """ 
+				This function demonstrates Flask's ability to
+				authomatically decomponse an authorization header
+				To see it execuate a curl statement as such
 
-				@app.route('/')
-				def auth() -> None:
-				    """ 
-				        This function demonstrates Flask's ability to
-				        authomatically decomponse an authorization header
-				        To see it execuate a curl statement as such
-
-				        curl http://localhost:5000/ -u tarek:password
-				    """
-				    print("The raw Auhtorization header")
-				    print(request.environ["HTTP_AUTHORIZATION"])
-				    print("Flask's Authorization header")
-				    print(request.authorization)
-				    return ""
+				curl http://localhost:5000/ -u tarek:password
+			    """
+			    print("The raw Auhtorization header")
+			    print(request.environ["HTTP_AUTHORIZATION"])
+			    print("Flask's Authorization header")
+			    print(request.authorization)
+			    return ""
 
 
-				if __name__ == "__main__":
-				    app.run()
+			if __name__ == "__main__":
+			    app.run()
 
-	    That code returns the following:
-	    		/Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6 /Users/syeedode/python_projects/python_scratch_work/decomposing_flask/flask_auth.py
-				* Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
-				127.0.0.1 - - [28/Feb/2018 20:45:13] "GET / HTTP/1.1" 200 -
-				The raw Auhtorization header
-				Basic dGFyZWs6cGFzc3dvcmQ=
-				Flask's Authorization header
-				{'username': 'tarek', 'password': 'password'}
+	That code returns the following:
+		/Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6 /Users/syeedode/python_projects/python_scratch_work/decomposing_flask/flask_auth.py
+			* Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+			127.0.0.1 - - [28/Feb/2018 20:45:13] "GET / HTTP/1.1" 200 -
+			The raw Auhtorization header
+			Basic dGFyZWs6cGFzc3dvcmQ=
+			Flask's Authorization header
+			{'username': 'tarek', 'password': 'password'}
 
-		This behavior makes it easy to implement a pluggable authentication system on top of the request object.
+	This behavior makes it easy to implement a pluggable authentication system on top of the request object.
 
-		Other common request elements like cookies, files, and so on are all accessible via other attributes, as we will discover throughout the book.
+	Other common request elements like cookies, files, and so on are all accessible via other attributes, as we will discover throughout the book.
 
 Response 
-		In the previous examples, we've used the 'jsonify()' function, which creates a Response object from the mapping returned by the view. 
+	In the previous examples, we've used the 'jsonify()' function, which creates a Response object from the mapping returned by the view. 
 
-		The Response object is wrapped by Flask, and called with the WSGI's environ, and the start_response function is received from the web server.
-				When Flask picks a view via its URL mapper, it expects it to return a callable object that can receive the environ and start_response arguments.
+	The Response object is wrapped by Flask, and called with the WSGI's environ, and the start_response function is received from the web server.
+			When Flask picks a view via its URL mapper, it expects it to return a callable object that can receive the environ and start_response arguments.
 
-				This design may seem a little awkward since the WSGI environ is already parsed into a Request object by the time the Response object is called with the WSGI environ again. But, in practice, this is just an implementation detail. When your code needs to interact with the request, it can use the global Request object, and ignore what's happening inside the Response class.
+			This design may seem a little awkward since the WSGI environ is already parsed into a Request object by the time the Response object is called with the WSGI environ again. But, in practice, this is just an implementation detail. When your code needs to interact with the request, it can use the global Request object, and ignore what's happening inside the Response class.
 
-		In case the returned value is not a callable, Flask will try to convert it into a Response object if it's one of the following cases:
-				- str: The data gets encoded as UTF-8 and used as the HTTP response body.
-				bytes/bytesarray: Used as the body.
-				- A (response, status, headers) tuple: Where response can be a Response object or one of the previous types. status is an integer value that overwrites the response status, and headers is a mapping that extends the response headers.
-				- A (response, status) tuple: Like the previous one, but without specific headers
-				- A (response, headers) tuple: Like the preceding one, but with just extra headers.
+	In case the returned value is not a callable, Flask will try to convert it into a Response object if it's one of the following cases:
+			- str: The data gets encoded as UTF-8 and used as the HTTP response body.
+			bytes/bytesarray: Used as the body.
+			- A (response, status, headers) tuple: Where response can be a Response object or one of the previous types. status is an integer value that overwrites the response status, and headers is a mapping that extends the response headers.
+			- A (response, status) tuple: Like the previous one, but without specific headers
+			- A (response, headers) tuple: Like the preceding one, but with just extra headers.
 
-		Any other case will lead to an exception
+	Any other case will lead to an exception
 
-		You can create your own response type:
-				from flask import Flask
-				import yaml  # requires PyYAML
-
-
-				app = Flask(__name__)
+	You can create your own response type:
+			from flask import Flask
+			import yaml  # requires PyYAML
 
 
-				def yamlify(data, status=200, headers=None):
-				    """
-				        This function proves that a tuple can be returned by a
-				        view by being converted to a Response object by Flask.
-
-				        Typically the Flask expects a callable object that can
-				        recieve the 'environ' and 'start_response' arguments.
-
-				        :param data:
-				        :param status:
-				        :param headers:
-				        :return:
-				    """
-				    _headers = {'Content-Type': 'application/x-yaml'}
-				    if headers is not None:
-				        _headers.update(headers)
-				    return yaml.safe_dump(data), status, _headers
+			app = Flask(__name__)
 
 
-				@app.route('/api')
-				def my_microservice():
-				    """
-				        The way Flask handles requests can be summarized as follows:
-				            1. When the application starts, any function decorated
-				               with @app.route() is registered as a view, and stored
-				               into the app.url_map.
-				            2. A call is dispatched to the right view depending on
-				               its endpoint and method.
-				            3. A Request object is created in a thread-safe
-				               thread-local execution context.
-				            4. A Response object wraps the content to send back.
-				            
-				        :return:
-				    """
-				    return yamlify(['Hello', 'YAML', 'World!'])
+			def yamlify(data, status=200, headers=None):
+			    """
+				This function proves that a tuple can be returned by a
+				view by being converted to a Response object by Flask.
+
+				Typically the Flask expects a callable object that can
+				recieve the 'environ' and 'start_response' arguments.
+
+				:param data:
+				:param status:
+				:param headers:
+				:return:
+			    """
+			    _headers = {'Content-Type': 'application/x-yaml'}
+			    if headers is not None:
+				_headers.update(headers)
+			    return yaml.safe_dump(data), status, _headers
 
 
-				if __name__ == "__main__":
-				    app.run()
+			@app.route('/api')
+			def my_microservice():
+			    """
+				The way Flask handles requests can be summarized as follows:
+				    1. When the application starts, any function decorated
+				       with @app.route() is registered as a view, and stored
+				       into the app.url_map.
+				    2. A call is dispatched to the right view depending on
+				       its endpoint and method.
+				    3. A Request object is created in a thread-safe
+				       thread-local execution context.
+				    4. A Response object wraps the content to send back.
 
-	    These four steps are roughly all you need to know to start building apps using Flask. 
+				:return:
+			    """
+			    return yamlify(['Hello', 'YAML', 'World!'])
+
+
+			if __name__ == "__main__":
+			    app.run()
+
+    These four steps are roughly all you need to know to start building apps using Flask. 
 
 Flask built-in features
 	The previous section gave us a good understanding of how Flask processes a request, and that's good enough to get you started. But Flask comes with more helpers, which are quite useful. We'll discover the following main ones in this section:
@@ -327,195 +345,228 @@ Flask built-in features
 			- Error handling and debugging: Dealing with errors in your app
 
 	The session object
-			Like the request object, Flask creates a session object, which is unique to the request context. 
-
-			It's a dict-like object, which Flask serializes into a cookie on the user side. 
-					The data contained into the session mapping is dumped into a JSON mapping, then compressed using zlib when that makes it smaller, and finally encoded in base64.
-
-					When the session gets serialized, the itsdangerous (https://pythonhosted.org/itsdange rous/) library signs the content using the secret_key value defined at the application level. The signing uses HMAC (https://en.wikipedia.org/wiki/Hash-based_message_a uthentication_code) and SHA1.
-							This signature, which is added as a suffix in the data, ensures that the client cannot tamper with the data that is stored in a cookie unless they know the secret key to sign the data. Note that the data itself is not encrypted.
-
-							Flask will let you customize the signing algorithm.
-
-			However, when you're building microservices that are not producing HTML, you rarely rely on cookies since they are specific to web browsers. 
-
-			But the idea of keeping a volatile key-value storage per user can be extremely useful to speed up some of the server-side work. 
-					For instance, if you need to perform some database look-ups to get some information about a user every time they connect, caching this information in a session-like object on the server side makes a lot of sense.
-
+		Like the request object, Flask creates a session 
+			object, which is unique to the request 
+			context. 
+		It's a dict-like object, which Flask serializes into 
+			a cookie on the user side. 
+				When the session gets serialized, the 
+					'itsdangerous' (https://pythonhosted.org/itsdange rous/) 
+					library signs the content using the 
+					secret_key value defined at the 
+					application level. 
+		However, when you're building microservices that are not 
+			producing HTML, you rarely rely on cookies since 
+			they are specific to web browsers. 
+		But the idea of keeping a volatile key-value storage per 
+			user can be extremely useful to speed up some of 
+			the server-side work. 
+		If you need to perform some database look-ups to get some 
+			information about a user every time they connect, 
+			caching this information in a session-like object 
+			on the server side makes a lot of sense.
 	Globals
-			Flask provides a mechanism to store global variables that are unique to a particular thread and request context. That [mechanism] is used for request and session, but is also available to store any custom object.
+		Flask provides a mechanism to store global variables that 
+			are unique to a particular thread and request 
+			context.
+		The 'flask.g' variable contains all globals, and you can 
+			set whatever attributes you want on it.
+		In Flask, the @app.before_request decorator can be used to 
+			point a function that the app will call every time 
+			a request is made just before it dispatches the 
+			request to a view.
+		It's a typical pattern in Flask to use @app.before_request 
+			to set values in the globals. That way, all the 
+			functions that are called within the request context 
+			can interact with g and get the data. 
+				from flask import Flask, jsonify, g, request
 
-			The 'flask.g' variable contains all globals, and you can set whatever attributes you want on it.
+				app = Flask(__name__)
 
-			In Flask, the @app.before_request decorator can be used to point a function that the app will call every time a request is made just before it dispatches the request to a view.
-					It's a typical pattern in Flask to use before_request to set values in the globals. That way, all the functions that are called within the request context can interact with g and get the data. 
-							from flask import Flask, jsonify, g, request
+				@app.before_request
+				def authenticate():
+				    """
+					This function acts as a preprocessing filter
+					it demontstrates two fuctions:
+					1. Flask's pre-refquest processing (filter)
+					2. The ability to assign thread safe global 
+					   variables, within a request context, using
+					   "g"
 
-							app = Flask(__name__)
-
-							@app.before_request
-							def authenticate():
-							    """
-							        This function acts as a preprocessing filter
-							        it demontstrates two fuctions:
-							        1. Flask's pre-refquest processing (filter)
-							        2. The ability to assign thread safe global 
-							           variables, within a request context, using
-							           "g"
-							           
-							    :return: 
-							    """
-							    if request.authorization:
-							        g.user = request.authorization['username']
-							    else:
-							        g.user = 'Anaonymous'
+				    :return: 
+				    """
+				    if request.authorization:
+					g.user = request.authorization['username']
+				    else:
+					g.user = 'Anaonymous'
 
 
-							@app.route('/api')
-							def my_microservice():
-							    return jsonify({'Hello': g.user})
+				@app.route('/api')
+				def my_microservice():
+				    return jsonify({'Hello': g.user})
 
 
-							if __name__ == "__main__":
-							    app.run()
+				if __name__ == "__main__":
+				    app.run()
 
 	Signals
-			Flask integrates with Blinker (https://pythonhosted.org/blinker/), which is a signal library that lets you subscribe a function to an event. 
-
-			Events are instances of the blinker.signal class created with a unique label, and Flask instantiates ten of them in 0.12. 
-					Flask triggers signals at critical moments during the processing of a request. 
-
-					Refer to http://flask.pocoo.org/docs/latest/api/#core-sign als-listfor the full list.
-
-			Registering to a particular event is done by calling the signal's connect method. Signals are triggered when some code calls the signal's send method. The send method accepts extra arguments to pass data to all the registered functions.
-
-			In the following example, we register the 'finished' function to the 'request_finished' signal. That function will receive the 'response' object:
-					from flask import Flask, jsonify, g, request_finished
-					from flask.signals import signals_available
-
-
-					if not signals_available:
-					    """
-					        Signal feature only works if install blinker
-					    """
-					    raise RuntimeError("pip install blinker")
+		Flask integrates with Blinker (https://pythonhosted.org/blinker/), 
+			which is a signal library that lets you subscribe a 
+			function to an event. 
+		Events are instances of the blinker.signal class created 
+			with a unique label, and Flask instantiates ten of 
+			them in 0.12. 
+				Refer to http://flask.pocoo.org/docs/latest/api/#core-signals-list for the full list.
+		Registering to a particular event is done by calling the 
+			signal's connect method. Signals are triggered when 
+			some code calls the signal's send method. The send 
+			method accepts extra arguments to pass data to all 
+			the registered functions.
+		In the following example, we register the 'finished' 
+			function to the 'request_finished' signal. That 
+			function will receive the 'response' object:
+				from flask import Flask, jsonify, g, request_finished
+				from flask.signals import signals_available
 
 
-					app = Flask(__name__)
+				if not signals_available:
+				    """
+					Signal feature only works if install blinker
+				    """
+				    raise RuntimeError("pip install blinker")
 
 
-					def finished(sender, response, **extra):
-					    print('About to send a response')
-					    print(response)
+				app = Flask(__name__)
 
 
-					request_finished.connect(finished)
+				def finished(sender, response, **extra):
+				    print('About to send a response')
+				    print(response)
 
 
-					@app.route('/api')
-					def my_microservice():
-					    return jsonify({'Hello': 'World'})
+				request_finished.connect(finished)
 
 
-					if __name__ == "__main__":
-					    app.run()
+				@app.route('/api')
+				def my_microservice():
+				    return jsonify({'Hello': 'World'})
 
-			For instance, the got_request_exception signal is triggered when an exception occurs before the framework does something with it.
-					That's how Sentry's (https://sentry.io) Python client (Raven) hooks itself onto Flask to log exceptions.
 
-					It can also be interesting to implement custom signals in your apps when you want to trigger some of your features with events and decouple the code. If your microservice produces PDF reports, and you want to have the reports cryptographically signed, you could trigger a report_ready signal, and have a signer register to that event.
+				if __name__ == "__main__":
+				    app.run()
 
-			If your application starts to use a lot of signals, all the triggering could become an important part of the time spent processing a request, and create bottlenecks.
-
-			If you need to do work that doesn't impact the response, consider using a queue like RabbitMQ (https://www.rabbitmq.com/) to queue up the task and have a separate service do that work.
-
+		For instance, the got_request_exception signal is triggered 
+			when an exception occurs before the framework does 
+			something with it.
+				That's how Sentry's (https://sentry.io) 
+					Python client (Raven) hooks itself 
+					onto Flask to log exceptions.
+				It can also be interesting to implement 
+					custom signals in your apps when you 
+					want to trigger some of your 
+					features with events and decouple 
+					the code. 
+				If your microservice produces PDF reports, 
+					and you want to have the reports 
+					cryptographically signed, you could 
+					trigger a report_ready signal, and 
+					have a signer register to that event.
+		If your application starts to use a lot of signals, all the 
+			triggering could become an important part of the 
+			time spent processing a request, and create 
+			bottlenecks.
+		If you need to do work that doesn't impact the response, 
+			consider using a queue like RabbitMQ 
+			(https://www.rabbitmq.com/) to queue up the task and 
+			have a separate service do that work.
 	Extensions and middlewares
-			Flask extensions are simply Python projects that, once installed, provide a package or a module named flask_something. In previous versions, it was flask.ext.something.
+		Flask extensions are simply Python projects that provide a 
+			package or a module named flask_something.
+		Flask has a curated list of extensions maintained at 
+			http://flask.pocoo.org/extensions/, which is a good 
+			first stop when you are looking for extra features.
+		A WSGI middleware is a pattern to extend WSGI apps by wrapping the calls made to the WSGI endpoint.
+	                                                                   |
+		In the example that follows, the middleware fakes a X-Forwarded-For header, so the Flask application thinks it's behind a proxy like nginx. 
+				This is a useful middleware in a testing environment when you want to make sure your application behaves properly when it tries to get the remote IP address, since the remote_addr attribute will get the IP of the proxy, not the real client:
+						"""
+						     This module demonstrates the ability to extend Flask to
+						     provide enhanced or alternate functionality. This module
+						     utilizes WSGI middleware by wrapping the calls made to
+						     WSGI endpoints. We are extending WSGI apps here.
 
-			Flask has a curated list of extensions maintained at http://flask.pocoo.org/extensions/, which is a good first stop when you are looking for extra features.
+						     This middleware is useful in a testing environment.
+						"""
+						from flask import Flask, jsonify, request
+						import json
 
-			The other mechanism to extend Flask is to use WSGI middlewares. A WSGI middleware is a pattern to extend WSGI apps by wrapping the calls made to the WSGI endpoint.
 
-			In the example that follows, the middleware fakes a X-Forwarded-For header, so the Flask application thinks it's behind a proxy like nginx. 
-					This is a useful middleware in a testing environment when you want to make sure your application behaves properly when it tries to get the remote IP address, since the remote_addr attribute will get the IP of the proxy, not the real client:
+						class XFFMiddleware(object):
+						    def __init__(self, app, real_ip='10.1.1.1'):
+							self.app = app
+							self.real_ip = real_ip
+
+						    def __call__(self, environ, start_response):
 							"""
-							     This module demonstrates the ability to extend Flask to
-							     provide enhanced or alternate functionality. This module
-							     utilizes WSGI middleware by wrapping the calls made to
-							     WSGI endpoints. We are extending WSGI apps here.
+							    This middleware fakes the 'HTTP_X_FORWARDED_FOR'
+							    header so that Flask thinks it's behind a proxy.
 
-							     This middleware is useful in a testing environment.
+							    It assures the header is not already set.
+
+							    Flask uses the incoming WSGI environment data to
+							    create the request object (PYMsDEv58).
+
+							    :param environ:
+							    :param start_response:
+							    :return:
 							"""
-							from flask import Flask, jsonify, request
-							import json
+							if 'HTTP_X_FORWARDED_FOR' not in environ:
+							    values = '%s, 10.3.4.5, 127.0.0.1' % self.real_ip
+							    environ['HTTP_X_FORWARDED_FOR'] = values
+							return self.app(environ, start_response)
+
+						app = Flask(__name__)
+
+						# Notice we wrap the WSGI app. In Flask the app object
+						# is not the WSGI application itself as we've seen earlier
+						app.wsgi_app = XFFMiddleware(app.wsgi_app)
 
 
-							class XFFMiddleware(object):
-							    def __init__(self, app, real_ip='10.1.1.1'):
-							        self.app = app
-							        self.real_ip = real_ip
+						@app.route('/api')
+						def my_microservice():
+						    """
+							Whent the application tries to get the remote IP
+							address, this method assure the application behaves
+							properly.
 
-							    def __call__(self, environ, start_response):
-							        """
-							            This middleware fakes the 'HTTP_X_FORWARDED_FOR'
-							            header so that Flask thinks it's behind a proxy.
+							The remote_addr will get the IP of the proxy and not
+							the real client.
 
-							            It assures the header is not already set.
+							####################################################
+							###              CAUTION     CAUTION             ###
+							###That text was lifted from the book. I don't have
+							###confidence in what this logic is doing. I'm not
+							###100% sure of it's applicability.
+							####################################################
 
-							            Flask uses the incoming WSGI environment data to
-							            create the request object (PYMsDEv58).
+							The overall point here is valid however: You can intercept
+							and augment request data by overriding the WSGI application
+							(as shown here) or by intercepting signals (module:
+							flask_signal_events) or by utilizing filters (module:
+							flask_request_filter).
 
-							            :param environ:
-							            :param start_response:
-							            :return:
-							        """
-							        if 'HTTP_X_FORWARDED_FOR' not in environ:
-							            values = '%s, 10.3.4.5, 127.0.0.1' % self.real_ip
-							            environ['HTTP_X_FORWARDED_FOR'] = values
-							        return self.app(environ, start_response)
-
-							app = Flask(__name__)
-
-							# Notice we wrap the WSGI app. In Flask the app object
-							# is not the WSGI application itself as we've seen earlier
-							app.wsgi_app = XFFMiddleware(app.wsgi_app)
-
-
-							@app.route('/api')
-							def my_microservice():
-							    """
-							        Whent the application tries to get the remote IP
-							        address, this method assure the application behaves
-							        properly.
-
-							        The remote_addr will get the IP of the proxy and not
-							        the real client.
-
-							        ####################################################
-							        ###              CAUTION     CAUTION             ###
-							        ###That text was lifted from the book. I don't have
-							        ###confidence in what this logic is doing. I'm not
-							        ###100% sure of it's applicability.
-							        ####################################################
-
-							        The overall point here is valid however: You can intercept
-							        and augment request data by overriding the WSGI application
-							        (as shown here) or by intercepting signals (module:
-							        flask_signal_events) or by utilizing filters (module:
-							        flask_request_filter).
-
-							        :return:
-							    """
-							    if "X-Forwarded-For" in request.headers:
-							        ips = [forip.strip() for forip in request.headers['X-Forwarded-For'].split(',')]
-							        ip = ips[0]
-							    else:
-							        ip = request.remote_addr
-							    return jsonify({"Hello": ip})
+							:return:
+						    """
+						    if "X-Forwarded-For" in request.headers:
+							ips = [forip.strip() for forip in request.headers['X-Forwarded-For'].split(',')]
+							ip = ips[0]
+						    else:
+							ip = request.remote_addr
+						    return jsonify({"Hello": ip})
 
 
-							if __name__ == "__main__":
-							    app.run()
+						if __name__ == "__main__":
+						    app.run()
 
 	    Tampering with the WSGI environ before your application gets it is fine, but if you want to implement anything that will impact the response, doing it inside a WSGI middleware is going to make your work very painful.
 	    		The WSGI protocol requires that the start_response function gets called with the response status code, and headers before the app sends back the actual body content.
@@ -557,72 +608,76 @@ Flask built-in features
 			The following is a Python script that uses the email template to produce an entirely valid RFC 822 message, which you can send via SMTP:
 
 	Configuration
-			When building applications, you will need to expose options to run them, like the information to connect to a database or any other variable that is specific to a deployment.
+		When building applications, you will need to expose options to run them, like the information to connect to a database or any other variable that is specific to a deployment.
 
-			Flask uses a mechanism similar to Django in its configuration approach. The Flask object comes with an object called config, which contains some built-in variables, and which can be updated when you start your Flask app via your configuration objects.
+		Flask uses a mechanism similar to Django in its configuration approach. The Flask object comes with an object called config, which contains some built-in variables, and which can be updated when you start your Flask app via your configuration objects.
 
-			For example, you can define a Config class in a prod_settings.py file as follows:
-					class Config:
-				    """
-				        There are two significant drawbacks when using Python
-				        modules as configuration files.
+		For example, you can define a Config class in a prod_settings.py file as follows:
+				class Config:
+			    """
+				There are two significant drawbacks when using Python
+				modules as configuration files.
 
-				        1) Assuring the configuration files are managed separately
-				           from the code.
-				        2) If another team is in charge of managing the
-				           configuration file of your application, they will need
-				           to edit the Python code to do so. For instance, it's
-				           harder to make Puppet templates out of Python modules
-				           rather than flat, static configuration files.
-				    """
-				    DEBUG = False
-				    SQLURI = 'postgres://tarek:xxx@localhost/db'
+				1) Assuring the configuration files are managed separately
+				   from the code.
+				2) If another team is in charge of managing the
+				   configuration file of your application, they will need
+				   to edit the Python code to do so. For instance, it's
+				   harder to make Puppet templates out of Python modules
+				   rather than flat, static configuration files.
+			    """
+			    DEBUG = False
+			    SQLURI = 'postgres://tarek:xxx@localhost/db'
+		And then, load it from your app object using app.config.from_object :
+			from flask import Flask
+			from konfig import Config
 
-		    And then, load it from your app object using app.config.from_object :
-		    		from flask import Flask
-					from konfig import Config
+			'''
+			    Adds prod_settings configuration to Flask's 
+			    configuration object. The values have been 
+			    stored in app.config.py.json
+			'''
+			app = Flask(__name__)
+			app.config.from_object('prod_settings.Config')
+			print(app.config)
 
-					'''
-					    Adds prod_settings configuration to Flask's 
-					    configuration object. The values have been 
-					    stored in app.config.py.json
-					'''
-					app = Flask(__name__)
-					app.config.from_object('prod_settings.Config')
-					print(app.config)
+			'''
+				Since Flask exposes its configuration via app.config, it's 
+				pretty simple to load additional options from a YAML file, 
+				or any other text-based file. (see prod_settings.ini)
 
-					'''
-					        Since Flask exposes its configuration via app.config, it's 
-					        pretty simple to load additional options from a YAML file, 
-					        or any other text-based file. (see prod_settings.ini)
-					        
-					        Many Flask extensions exist to load the configuration from 
-					        an INI file, but using the standard library ConfigParser is 
-					        trivial. 
-					        
-					        There's one major caveat from using INI files: variables 
-					        values are all strings, and your application needs to 
-					        take care of converting them to the right type.
-					'''
-					c = Config('prod_setting.ini')
-					app.config.update(c.get_map('flask'))
-					print(app.config)
+				Many Flask extensions exist to load the configuration from 
+				an INI file, but using the standard library ConfigParser is 
+				trivial. 
+
+				There's one major caveat from using INI files: variables 
+				values are all strings, and your application needs to 
+				take care of converting them to the right type.
+			'''
+			c = Config('prod_setting.ini')
+			app.config.update(c.get_map('flask'))
+			print(app.config)
 
 	Blueprints
-			When you write microservices that have more than a single endpoint, you will end up with a handful of decorated functions--maybe, a few per endpoint. The first logical step to organize your code is to have one module per endpoint, and when you create your app instance, to make sure they get imported so that Flask registers the views.
+		When you write microservices that have more than a single 
+			endpoint, the first logical step to organize your 
+			code is to have one module per endpoint and make 
+			sure they get imported so that Flask registers the 
+			views.
+		For example, if your microservice manages a company 
+			employees database, you could have one endpoint to interact with all employees, and one with teams. You could organize your application in these three modules:
+	                                                                   |
+				- app.py: To contain the Flask app object, and to run the app
+				- employees.py: To provide all the views related to employees
+				- teams.py: To provide all the views related to teams
 
-			For example, if your microservice manages a company employees database, you could have one endpoint to interact with all employees, and one with teams. You could organize your application in these three modules:
-					- app.py: To contain the Flask app object, and to run the app
-					- employees.py: To provide all the views related to employees
-					- teams.py: To provide all the views related to teams
+		Blueprints take that logic a step further by providing a way to group your views into namespaces. 
 
-			Blueprints take that logic a step further by providing a way to group your views into namespaces. 
+		You can create a Blueprint object which looks like a Flask app object, and then use it to arrange some views. 
 
-			You can create a Blueprint object which looks like a Flask app object, and then use it to arrange some views. 
+		The initialization process can then register blueprints with app.register_blueprint. That call will make sure that all the views defined in the blueprint are part of the app.
 
-			The initialization process can then register blueprints with app.register_blueprint. That call will make sure that all the views defined in the blueprint are part of the app.
-
-			A possible implementation of the employee's blueprint could be as follows:
+		A possible implementation of the employee's blueprint could be as follows:
 
 Error handling and debugging
 	In HTML web apps, you usually get specific HTML pages when you encounter a 404 or a 50x error, and that's how Flask works out of the box. But when building microservices, you need to have more control on what should be sent back to the client--that's where custom error handlers come in handy.
