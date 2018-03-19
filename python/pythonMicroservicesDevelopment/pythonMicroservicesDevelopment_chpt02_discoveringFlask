@@ -366,6 +366,7 @@ Flask built-in features
 			caching this information in a session-like object 
 			on the server side makes a lot of sense.
 	Globals with @app.before_request
+	https://github.com/syeed-ode/python_scratch_work/tree/master/decomposing_flask/flask_filtering
 		Flask provides a mechanism to store global variables that 
 			are unique to a particular thread and request 
 			context.
@@ -480,6 +481,7 @@ Flask built-in features
 			(https://www.rabbitmq.com/) to queue up the task and 
 			have a separate service do that work.
 	Extensions and middlewares
+	https://github.com/syeed-ode/python_scratch_work/blob/master/decomposing_flask/flask_filtering/wsgi_middleware.py
 		Flask extensions are simply Python projects that provide a 
 			package or a module named flask_something.
 		Flask has a curated list of extensions maintained at 
@@ -659,6 +661,7 @@ Flask built-in features
 			print(app.config)
 
 	Blueprints
+	https://github.com/syeed-ode/python_scratch_work/tree/master/decomposing_flask/flask_blueprints
 		When you write microservices that have more than a single 
 			endpoint, the first logical step to organize your 
 			code is to have one module per endpoint and make 
@@ -679,51 +682,52 @@ Flask built-in features
 
 		A possible implementation of the employee's blueprint could be as follows:
 
-Error handling and debugging
-	In HTML web apps, you usually get specific HTML pages when you encounter a 404 or a 50x error, and that's how Flask works out of the box. But when building microservices, you need to have more control on what should be sent back to the client--that's where custom error handlers come in handy.
+	Error handling and debugging
+	https://github.com/syeed-ode/python_scratch_work/tree/master/decomposing_flask/flask_error_handling
+		In HTML web apps, you usually get specific HTML pages when you encounter a 404 or a 50x error, and that's how Flask works out of the box. But when building microservices, you need to have more control on what should be sent back to the client--that's where custom error handlers come in handy.
 
-	The other important feature is the ability to debug what's wrong with your code when an unexpected error occurs.
+		The other important feature is the ability to debug what's wrong with your code when an unexpected error occurs.
 
-	And Flask comes with a built-in debugger we'll discover in this section, which can be activated when your app runs in the debug mode.
+		And Flask comes with a built-in debugger we'll discover in this section, which can be activated when your app runs in the debug mode.
 
-	Custom error handler
-			When your code does not handle an exception, Flask returns an HTTP 500 response without providing any specific information, like the traceback.
+		Custom error handler
+				When your code does not handle an exception, Flask returns an HTTP 500 response without providing any specific information, like the traceback.
 
-			When implementing microservices using JSON, it's a good practice to make sure that every response sent to the clients, including any exception, is JSON formatted. 
+				When implementing microservices using JSON, it's a good practice to make sure that every response sent to the clients, including any exception, is JSON formatted. 
 
-			Flask lets you customize the app error handling via the @app.errorhandler decorator, which works like @app.route. But instead of providing an endpoint, the decorator links a function to a specific error code.
+				Flask lets you customize the app error handling via the @app.errorhandler decorator, which works like @app.route. But instead of providing an endpoint, the decorator links a function to a specific error code.
 
-	The debug mode
-			The Flask application run method has a debug option, which, when used, runs it in the debug mode:
-					app.run(debug=True)
+		The debug mode
+				The Flask application run method has a debug option, which, when used, runs it in the debug mode:
+						app.run(debug=True)
 
-			The debug mode is a special mode, where the built-in debugger takes precedence on any error, and allows you to interact with the app from a browser:
-					The console in the web-debugger will let you interact with the current app, and inspect variables or execute any Python code that is in the current execution frame.
+				The debug mode is a special mode, where the built-in debugger takes precedence on any error, and allows you to interact with the app from a browser:
+						The console in the web-debugger will let you interact with the current app, and inspect variables or execute any Python code that is in the current execution frame.
 
-			Since the debug mode allows remote code execution, it's a security hazard even though you need to provide a PIN to access the console. The Bandit security linter (https://wiki.openstack.org/wiki/Security/Projects /Bandit) tracks Flask applications that are executed with a plain debug flag, and can be used to prevent deploying an application with that flag.
+				Since the debug mode allows remote code execution, it's a security hazard even though you need to provide a PIN to access the console. The Bandit security linter (https://wiki.openstack.org/wiki/Security/Projects /Bandit) tracks Flask applications that are executed with a plain debug flag, and can be used to prevent deploying an application with that flag.
 
-A microservice skeleton
-	Since we will want to release and deploy the code, it's better to have it inside a Python package so that we can use standard packaging tools like Pip and Setuptools.
+	A microservice skeleton
+		Since we will want to release and deploy the code, it's better to have it inside a Python package so that we can use standard packaging tools like Pip and Setuptools.
 
-	It's also a good idea to organize views into blueprints, and have one module per blueprint. 
+		It's also a good idea to organize views into blueprints, and have one module per blueprint. 
 
-	Lastly, the run() call can be removed from the code, since Flask provides a generic runner that looks for an app variable given a module pointed by the FLASK_APP environment variable. 
-			Using that runner offers extra options like the ability to configure the host and port that will be used to run the app.
+		Lastly, the run() call can be removed from the code, since Flask provides a generic runner that looks for an app variable given a module pointed by the FLASK_APP environment variable. 
+				Using that runner offers extra options like the ability to configure the host and port that will be used to run the app.
 
-	The microservice project skeleton contains the following structure:
-			- setup.py: Distutils' setup file, which is used to install and release the project (https://github.com/Runnerly/flakon/blob/master/setup.py)
-			- Makefile: A Makefile that contains a few useful targets to make, build, and run the project
-			- settings.ini: The application default settings in the INI file
-			- requirements.txt: The project dependencies following the pip format
-			- myservices/: The actual package
-				- __init__.py
-				- app.py: The app module, which contains the app itself
-				- views/: A directory containing the views organized in blueprints
+		The microservice project skeleton contains the following structure:
+				- setup.py: Distutils' setup file, which is used to install and release the project (https://github.com/Runnerly/flakon/blob/master/setup.py)
+				- Makefile: A Makefile that contains a few useful targets to make, build, and run the project
+				- settings.ini: The application default settings in the INI file
+				- requirements.txt: The project dependencies following the pip format
+				- myservices/: The actual package
 					- __init__.py
-					- home.py: The home blueprint, which serves the rootendpoint
-			- tests: The directory containing all the tests
-				- __init__.py
-				- test_home.py: Tests for the home blueprint views
+					- app.py: The app module, which contains the app itself
+					- views/: A directory containing the views organized in blueprints
+						- __init__.py
+						- home.py: The home blueprint, which serves the rootendpoint
+				- tests: The directory containing all the tests
+					- __init__.py
+					- test_home.py: Tests for the home blueprint views
 
 Summary
 	- Flask wraps a simple request-response mechanism around the WSGI protocol, which lets you write your applications in almost vanilla Python.
