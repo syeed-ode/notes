@@ -365,7 +365,7 @@ Flask built-in features
 			information about a user every time they connect, 
 			caching this information in a session-like object 
 			on the server side makes a lot of sense.
-	Globals
+	Globals with @app.before_request
 		Flask provides a mechanism to store global variables that 
 			are unique to a particular thread and request 
 			context.
