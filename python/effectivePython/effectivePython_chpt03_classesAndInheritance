@@ -133,6 +133,19 @@ Item 23: Accept Functions for Simple Interfaces Instead of Classes
 
 		** When you need a function to maintain state, consider defining a class that provides the __call__ method instead of defining a stateful closure (see Item 15: "Know How Closures Interact with Variable Scope")
 
+Item 24: Use '@classmethod' Polymorphism to Construct Objects Generically 
+		In Python, not only do the objects support polymorphism, but the class do as well.
+
+		Polymorphism is a way for multiple classes in a hierarchy to implent their own unique versions of method. 
+				This allows many classes to fulfill the same interface or abstract base class while providing different functionality (see Item 28: "inherit from 'collections.abc for Customer Container Types")
+
+		Python only allows for the single constructor method __init__, this causes a problem when trying to construct objects polymorphically like other languages do where each subclass has a constructor that can be used generically. 
+
+		This problem can be solved by using '@classmethod' polymorphism. This is exactly instance method polymorphism except it applies to classes instead of objects.~
+
+
+
+
 
 
 
@@ -171,19 +184,6 @@ Item 23: Accept Functions for Simple Interfaces Instead of Classes
 
 
 
-			pg 126 Splitting the monolith (Chapter 4, skip)
-
-			pg 132 More splitting (Chapter 4, skip)
-
-			pg 158 RPC over AMQP <Sucks!!>
-
-			pg 161 Mocking Celery (Chapter 5, Interacting with other services)
-
-			pg 165 ****Chapter 6: Monitoring Your Services****
-
-			pg 183 **** Chapter 7: Securing your Services ****
-
-			pg 285 ****   Chapter 11: Deploying to AWS    ****
 
 
 
