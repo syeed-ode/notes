@@ -1,0 +1,27 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 63 - 
+*******************************************************************
+*******        My personal thoughts on microservices        *******
+*******************************************************************
+In reading "Python Microservic Development" I found a lot of 
+material I did not agree with. It got me thinkint I should develop
+my own material on how to build a good microservice.
+
+Below are some hightlights and guidelines. I give credit to ideas 
+that aren't mine or sparked me thinking about how best to execute 
+a microservice design. (The number represents the PDF pg number/
+followed by the real page number if applicable.)
+*******************************************************************
+PYMD - Python Microservice Development
+
+I found its always better to start with smaller microservices and build them combine them if necessary. This is a stark difference between PYMD and myself. If building the service using spring boot, it's easy as all get out to combine two services. But, I've experienced the nightmare of trying to tear apart a microservice. Once a application is developed, decoupling degrades, cohesion dedgrades over time. Separating functionality is sometimes a tasking responsiblity -- for monoliths and microservices. 
+
+Microservice external configuration is mandatory. A robust CI/CD loop thrives on it. Setting up various environments. 
+
+When implementing microservices using JSON, it's a good practice to make sure that every response sent to the clients, including any exception, is JSON formatted. [PYMD72/58]
