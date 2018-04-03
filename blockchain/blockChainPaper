@@ -73,7 +73,172 @@ Section I: BlockChain Technology
 						1. Spender owns the cryptocurrency—digital signature verification on the transaction.
 						2. Spender has sufficient cryptocurrency in his/her account: checking every transaction against spender’s account (“public key”) in the ledger to make sure that he/she has sufficient balance in his/her account.
 
-				
+				How a blockchain works
+						1) 'A' wants to send money to 'B'
+						2) The transaction is represented online as a 'block'
+						3) The block is broad cast to every part in the network
+						4) Those in the network approve the transaction is valid
+						5) Th block then can be added to teh chain, which provides an delible and transparent record of transactions
+						6) The money moves from 'A' to 'B'
+
+	There is question of maintaining the order of these transactions that are broadcast to every other node in the Bitcoin peer-to-peer network.
+				Considering that the transactions are passed node by node through the Bitcoin network, there is no guarantee that orders in which they are received at a node are the same order in which these transactions were generated.
+
+-->		Bitcoin solved this problem by a mechanism that is now popularly known as Blockchain technology.
+
+		The Bitcoin system orders transactions by placing them in groups called blocks and then linking these blocks through what is called Blockchain.
+
+		Transactions in one block are considered to have happened at the same time. 
+				These blocks are linked to each-other (like a chain) in a proper linear, chronological order with every block containing the hash of the previous block.
+
+	There still remains one problem. Any node in the network can collect unconfirmed transactions and create a block and then broadcasts it to rest of the network as a suggestion as to which block should be the next one in the blockchain.
+
+		How does the network decide which block should be next in the blockchain? 
+
+-->		Bitcoin solves this problem by introducing a mathematical puzzle: each block will be accepted in the blockchain provided it contains an answer to a very special mathematical problem.
+
+		This is also known as “proof of work” —- node generating a block needs to prove that it has put enough computing resources to solve a mathematical puzzle. 
+				For instance, a node can be required to find a “nonce” which when hashed with transactions and hash of previous block produces a hash with certain number of leading zeros. 
+
+				The average effort required is exponential in the number of zero bits required. 
+
+				But verification process is very simple and can be done by executing a single hash.
+
+					The transaction order is procted by a race (condition)
+			finish block --> (start race) find x, such that, f(block + x) < t, (cryptographic hash) --> finish race
+					see http://www.imponderablethings.com/2013/07/how-bitcoin-works-under-hood.html
+
+		This mathematical puzzle, f(block + x), is not trivial to solve and the complexity of the problem can be adjusted so that on average it takes ten minutes for a node in the Bitcoin network to make a right guess and generate a block.
+				There is very small probability that more than one block will be generated in the system at a given time.
+
+				First node, to solve the problem, broadcasts the block to rest of the network.
+
+				Occasionally, however, more than one block will be solved at the same time, leading to several possible branches. 
+						However, the math of solving is very complicated and hence the blockchain quickly stabilizes, meaning that every node is in agreement about the ordering of blocks a few back from the end of the chain.
+
+						The nodes donating their computing resources to solve the puzzle and generate block are called “miner” nodes” and are financially awarded for their efforts.
+
+		The network only accepts the longest blockchain as the valid one. Hence, it is next to impossible for an attacker to introduce a fraudulent transaction. 
+				It would have to generate a block by solving a mathematical puzzle. 
+
+				It would also at the same time have to mathematically race against the good nodes to generate all subsequent blocks in order. 
+						This way it make other nodes accept its transaction & block as the valid one. 
+
+						This job becomes even more difficult since blocks in the blockchain are linked cryptographically together.
+
+Section II: Existing Market
+		Blockchain technology is finding applications in both financial and non-financial areas that traditionally relied on a third trusted online entity to validate and safeguard online transactions of digital assets. 
+
+		Smart Contracts is a great idea to automatically execute contracts between participating parties.
+
+		Now two programs blockchain and smart contract can work together to trigger payments when a preprogrammed condition of a contractual agreement is triggered.
+
+		Smart contracts are contracts which are automatically enforced by computer protocols. 
+				Open source companies like Ethereum (https://www.ethereum.org/) and Codius (https://codius.org/) are enabling Smart Contracts using blockchain technology.
+
+				Many cases where assets are transferred only on meeting certain conditions which require Lawyers to create a contract and Banks to provide Escrow service can be replaced by Smart Contracts.
+
+		Ethereum allows anyone to create their own cryptocurrency and use that to execute, pay for smart contracts. Ethereum itself has its own cryptocurrency (ether) which is used to pay for their services.
+				Ethereum is already powering wide range of early applications in areas such as Governance, autonomous banks, keyless access, crowdfunding, financial derivatives trading and settlement using smart contracts.
+
+		Currently there are three approaches in Industry to support other applications and also to overcome perceived limitations of Bitcoin blockchain:
+				Alternative Blockchains - a system of using the blockchain algorithm to achieve distributed consensus on a particular digital asset.
+						They may share miners with a parent network such as Bitcoin’s -- this is called merged mining. 
+
+						They have been suggested to implement applications such as DNS, SSL certification authority, file storage and voting.
+
+				Colored Coins - an open source protocol that describes methods for developers to create digital assets on top of Bitcoin blockchain by using its functionalities beyond digital currency
+
+				Sidechains - alternative blockchains which are backed by Bitcoins via Bitcoin contract- just as dollars and pounds used to be backed by Gold.
+						One can possibly have a thousands of sidechains “pegged” to Bitcoin. 
+
+						Each sidechain can have with different characteristics and purposes. 
+
+						Each may take advantage of scarcity and resilience guaranteed by the Bitcoin blockchain.
+
+		Nine of the world’s biggest banks including Barclays and Goldman Sachs have recently (Sept.15, 2015) joined forces with the New York based financial technology firm R3 to create a framework for using the blockchain technology in the financial market. 
+				(http://www.reuters.com/article/2015/09/15/us-banks-blockchain-idUSKCN0RF24M20150915) 
+
+				This is the first time banks have come to work together to find applications of blockchain technology. 
+
+				Leading banks like JPMorgan, State Street, UBS, Royal Bank Of Scotland, Credit Suisse, BBVA and Commonwealth Bank of Australia have joined this initiative.
+
+Section III: Applications of Technology­Compelling Use Cases in both Financial and Non­Financial Areas
+		1. Financial Applications:
+		1.1. Private Securities
+			It is very expensive to take a company public. A syndicate of banks must work to underwrite the deal and attract investors. 
+					The stock exchanges list company shares for secondary market to function securely with trades settling and clearing in a timely manner. 
+
+					It is now theoretically possible for companies to directly issue the shares via the blockchain. 
+
+			These shares can then be purchased and sold in a secondary market that sits on top of the blockchain. Here are some examples:
+
+			NASDAQ Private Equity:
+				https://www.nasdaqprivatemarket.com/
+				​NASDAQ launched its Private Equity Exchange in 2014.
+
+				This is meant to provide the key functionalities like Cap table and investor relationship management for the the pre-IPO or private companies.
+						The current process of trading stocks in this exchange is inefficient and slow due to involvement of multiple 3rd parties
+
+				NASDAQ has joined hands with a San Francisco based Start-up called chain.com to implement private equity exchange on top of BlockChain.
+						https://chain.com/
+						https://github.com/chain/chain 
+
+				Chain.com is implementing BlockChain based smart contracts to implement exchange functionality. This product is expected to be fast, traceable and efficient.
+
+			Medici
+				Medici uses the Counterparty implementations of Bitcoin 2.0. The goal here is to create a cutting edge stock market.
+
+		1.2. Insurance
+			Assets which can be uniquely identified by one or more identifiers which are difficult to destroy or replicate can be registered in blockchain. 
+					This can be used to verify ownership of an asset and also trace the transaction history. 
+
+			Any property (physical or digital such as real estate, automobiles, physical assets, laptops, other valuables) can potentially be registered in blockchain and the ownership, transaction history can be validated by anyone, especially insurers.
+
+			Everledger
+			Everledger is a company which creates permanent ledger of diamond certification and the transaction history of the diamond using blockchain.
+
+
+		2. Non­Financial Applications:
+		2.1. Notary Public
+			Verifying authenticity of the document can be done using blockchain and eliminates the need for centralized authority. 
+					The document certification service helps in 
+							Proof of Ownership (who authored it), 
+
+							Proof of Existence (at a certain time) and 
+
+							Proof of Integrity (not tampered) of the documents. 
+
+					Since it is counterfeit-proof and can be verified by independent third parties these services are legally binding. 
+
+					Using blockchain for notarization secures the privacy of the document and those who seek certification. 
+
+					By publishing proof of publication using cryptographic hashes of files into block chain takes the notary timestamping to new level. 
+							It also eliminates the need for expensive notarization fees and ineffective ways of transferring documents.
+
+		2.2. Applications of Blockchain in the Music Industry
+			The rise of the Internet has made music royalties even more complex giving rise to the demand of transparency in the royalty payments by artists and songwriters.
+
+			This is where the blockchain can play a role by maintaining a comprehensive, accurate distributed database of music rights ownership information in a public ledger.
+
+			In addition to rights ownership information, the royalty split for each work, as determined by “smart contracts” could be added to the database.
+					The “smart contracts” would define relationships between different stakeholders (addresses) and automate their interactions (see Appendix for more details).
+
+		2.3. Decentralized proof of existence of documents
+			The blockchain technology provides an alternative model to proof-of-existence and possession of legal documents. By leveraging the blockchain, a user can simply store the signature and timestamp associated with a legal document in the blockchain and validate it anytime using native blockchain mechanisms.
+
+		2.4. Decentralized Storage
+
+		2.5. Decentralized IoT
+
+		2.6. BlockChain based Anti-Counterfeit Solutions
+
+		2.7. Internet Applications
+
+Section IV: Risks for Adoption
+
+Section VI: Conclusions
+	To conclude, Blockchain is the technology backbone of Bitcoin. The distributed ledger functionality coupled with security of BlockChain, makes it very attractive technology to solve the current Financial as well as non-financial business problems.
 
 
 
@@ -84,15 +249,7 @@ Section I: BlockChain Technology
 
 
 
-
-
-
-
-
-
-
-
-
+					
 
 
 
@@ -111,26 +268,3 @@ Section I: BlockChain Technology
 			pg 183 **** Chapter 7: Securing your Services ****
 
 			pg 285 ****   Chapter 11: Deploying to AWS    ****
-
-
-
-
-
-
-					
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
