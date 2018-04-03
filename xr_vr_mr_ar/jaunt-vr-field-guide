@@ -1,0 +1,244 @@
+	                                                                   |	                                                                   
+	                                                                   |
+*******************************************************************
+Stereoscopic 3D - this is one of the more contentious requirements 
+To truly get that sense of presence-of being present-that is the 
+hallmark of VR you really need to shoot in stereoscopic 3D.
+*******************************************************************
+*******************************************************************
+*******************************************************************
+*							          *
+*							          *
+*							          *
+toc: 
+pg 7 - 
+*******************************************************************
+*******        Chapter 03 - Classes and Interitance         *******
+*******************************************************************
+Virtual Reality Basics
+	Virtual reality is a computer technology that replicates an environment, real or imagined, and simulates a user's physical presence and environment to allow for user interaction.
+			On a computer or cell phone this usually means sight and sound
+
+			On a display device and speakers or headphones.
+
+			Devices for touch or force feedback are starting to be introduced.
+
+	The key to any form of virtual reality is presence and immersion.  It’s these qualities that can create an intense emotional connection to the material.
+			Chris Milk one of the early directors in VR has been frequently quoted as calling it the “empathy engine”.
+
+Types of Virtual Reality
+	There are two basic camps of virtual reality-cinematic and game engine based. These differ on the means of 
+			- production, 
+			- playback method, 
+			- realism, and 
+			- amount of interactivity allowed
+
+	What is Game Based Virtual Reality?
+			This is computer graphics generated in realtime typically by a 3D CG gaming engine such as Unity or Unreal.
+
+			Since the world is generated on the fly, using specialized head mounted displays (HMDs) like the Oculus Rift or HTC Vive which include motion tracking, users are able to walk around the environment as if it was real.
+
+			The head mounted displays (HMDs), Oculus Rift or HTC Vive, offers highly interactive content such as tracked hand controls allowing you to pick up and move objects, wield a sword, shoot a gun, and generally interact with the entire environment.
+					It’s very much like being dropped into a video game.
+
+			Just because the first round of HMDs have been heavily targeting gamers does not mean that this type of technology is only for gaming.
+
+			Game engines are just as capable of making an interactive film or music video as they are a game and excel at creating worlds you can visit that are completely unlike real life.
+
+	What is Cinematic Virtual Reality?
+			Jaunt specializes in cinematic virtual reality. This is 360° video filmed using a panoramic video camera system.
+
+			Equirectangular projection (also called the equidistant cylindrical projection, geographic projection) has a forward and reverse projection. The forward projection transforms spherical coordinates into planar coordinates. The reverse projection transforms from the plane back onto the sphere.
+					The projection maps meridians to vertical straight lines of constant spacing and circles of latitude to horizontal straight lines of constant spacing.
+
+			The VR is played back as an equirectangular video file which allows the user to look around the scene as it unfolds. 
+
+			An equirectangular file is a fancy way of saying the image is an unwrapped sphere.
+
+			Monoscopic (flat) scenes can be created depending on the camera and stichting process.
+
+			Stereoscopic (3D) scenes can be created, as well, depending on the camera and stiching process.
+
+			Here you have the advantage of scenes looking completely real and not computer generated as with game engines. 
+
+			Scenes are also usually captured with spatial sound microphones making them sound just as real. 
+					If you hear a dog to your right and turn your head you’ll see the dog in the spot the sound came from. It’s as if you were dropped into a movie.
+
+			Unlike in game engines, however, you cannot move around the scene freely.
+
+			Though not as interactive as full game based environments you can still add interactivity to cinematic VR. 
+					Branching “Choose Your Own Adventure” stories, gaze detection, interactive overlays and interfaces, audio or clip triggers, gestures, and even full CG integration are all possible.
+
+			All of this leads to a completely new form of media. The “killer app” in VR will be some combination of cinema, gaming, and interactive theatre.
+
+Stereoscopic vs. Monoscopic VR
+	Mono footage is flat and has no depth with everything projected back to the same depth of the 360° viewing sphere. While you can still turn your head and look around the scene nothing ever truly gets closer to you, only bigger.
+			This is similar to the difference between a “closeup” in a 2D film versus how something actually gets closer and comes out at you in a 3D film.
+
+	360° stereoscopic 3D you have full 3D in every direction and objects can actually get closer to the viewer. 
+			This leads to a much more naturalistic and immersive feeling as this is how we actually experience things in real life.
+
+	Imagine filming a shark underwater in VR. With stereoscopic 3D you can achieve feel the shark actually getting up close while in mono, although still menacing, the shark won’t actually ever get any closer and you lose that sense of presence and immersion-and fear factor
+
+	Wherever possible you should always strive to shoot in full 360° 3D. Why doesn’t everyone just do that then?
+			The camera rigs are more expensive. The stitching process is much more complicated.
+					It’s difficult to get good results without a lot of post effort and dollars.
+
+	Jaunt’s Jaunt ONE camera and the Jaunt Cloud Services (JCS) are meant to ease this process, greatly automating the entire effort.
+
+	Not every scene or shot necessarily requires shooting in 3D there are very few stereoscopic 360° rigs for shooting underwater and shooting in the confines of a car you usually have a better shot using a smaller GoPro style rig and stitching the material in mono.
+
+	MMost cameras have a minimum distance to subject that you must respect in order to get a quality stitch and these distances are generally greater when stitching in 3D.
+			If you need to get very close to a subject it may be better to go the mono route.
+
+360 Video
+	A note must be made about what we call 360° video. We must be careful however to call this virtual reality.
+
+	Many companies, Facebook and Google’s YouTube in particular, have started promoting 360° video as VR. Companies such as Facebook love 360° video as it allows them to leverage their massive user bases on platforms that everyone is already using.
+
+	We need to make a clear distinction between 360° video and true VR and use the former to activate viewers fully into the latter or risk VR dying an early death similar to what happened with broadcast 3D TV.
+
+	Which leads us to what the requirements to be considered virtual reality actually are.
+
+Minimum VR Requirements
+	As we are looking for maximum immersion and presence-the feeling of actually being there-Jaunt assumes a minimum of four things:
+			360° Equirectangular Images - this is a scene in which you can look around, up, and down a full 360° degrees. 
+					Some camera rigs have instead opted for 180° particularly cameras that are streaming live to reduce bandwidth and stitching complexity.
+
+					As soon as you look behind you you’re pulled right out of the scene. Often times to combat just having a black background behind you a graphic will be inserted such as a poster frame from the show, stat card from a game, etc.
+
+			Stereoscopic 3D - this is one of the more contentious requirements as many people are filming in mono today.
+					Mono is both cheaper and simpler to capture and stitch because of the reduced bandwidth and stitching complexity. 
+
+					To truly get that sense of presence-of being present-that is the hallmark of VR you really need to shoot in stereoscopic 3D.
+
+			Spatial 3D Sound - In VR sound is critical. It is one of the few cues, along with motion and light, to get your viewers attention for an important moment.
+					Capturing spatial audio, helps with immersion and increases your sense of place.
+
+			Viewed in an HMD (head mounted display) - none of the above is any good unless you have a method of actually viewing it. Though 360° video is often created for those without a viewing device and allows you to pan around the image, it doesn’t allow you to see in 3D or provide you with spatial audio playback.
+					For the full experience you really must use a proper HMD.
+
+					The good news is you don’t need an expensive Oculus Rift or HTC Vive.
+
+					There are some very inexpensive or even free options on the market with the selection increasing at a dizzying rate.
+
+Types of HMDs
+	There are many different types of HMDs or head mounted displays that vary drastically in price and capability ranging from the very simple Google Cardboard to the Samsung Gear VR to the Oculus Rift and HTC Vive. (See https://www.wareable.com/vr/best-vr-headsets-2017)
+			- Google Cardboard (simple) ($15) Best mobile VR headsets
+			- Samsung Gear VR (simple) ($129) Best mobile VR headsets
+			- Oculus Rift ($399) Best VR headsets for consoles and PC
+			- HTC Vive ($599) Best VR headsets for consoles and PC
+			- Sony PlayStation VR ($499) Best VR headsets for consoles and PC
+			- Samsung Odyssey/Windows Mixed Reality ($499) Best VR headsets for consoles and PC
+			- Google Daydream View ($99) Best mobile VR headsets 
+			- Merge VR Goggles ($49) Best mobile VR headsets
+
+	It was the cell phone and its suite of miniaturized componentsgyroscopes, accelerometers, small hi-resolution screens-that led to the resurgence of viable virtual reality and allowed Palmer Lucky to create the first Oculus headset. 
+
+	It’s the cellphone that is the basis of all of them, even the high end Oculus Rift and HTC Vive.
+
+	The higher end HMDs provide full body tracking and some also include hand controllers, allowing you to move about and interact with your environment.
+
+	But just using your cellphone with some simple lenses housed in a cardboard or plastic enclosure gets you a pretty amazing experience.
+
+	The list of HMDs is ever growing at a breakneck pace but for a good overall list of the current HMDs on the market or in development see the VR Times (see https://www.wareable.com/vr/best-vr-headsets-2017 or for free hmd https://www.freehmd.com).
+
+Camera
+	In this section we discuss the various types of VR camera rigs you will encounter: 
+			- some of the gotchas to be aware of with VR cinematography and how to avoid them
+			- mounts and rigging solutions
+			- the importance of clean plates, and 
+			- underwater and aerial VR shoots.
+
+	Types of VR Cameras
+		There are many other forms of panoramic cameras but we won’t cover those that don’t allow for video capture such as slit-scan cameras. Where possible, it’s best to research and test each one based on your own needs.
+
+	Panoramic cameras
+		Panoptic Rig (Jaunt ONE, GoPro)
+			Inspired from the visual system of flying insects these cameras consist of many discrete camera modules arranged on a sphere, dome, or other shape.
+
+			The term comes from the Greek “Panoptes” which was a giant with a hundred eyes in Greek mythology.
+					Jaunt’s camera systems, including the Jaunt ONE, are of this variety.
+
+			This is by far the most popular type of VR camera rig and many companies have designed lightweight rigs to support off the shelf camera modules -- usually the GoPro.
+					Being small, lightweight, and relatively inexpensive the GoPro has proved to be the go to camera for snapping together a VR camera rig.
+					
+					In fact, Jaunt’s first production camera, the GP16, consisted of sixteen GoPro cameras in a custom 3D printed enclosure.
+
+					There are numerous problems with a GoPro based system including image quality, heat dissipation, and most importantly lack of sync.
+
+			It is crucial that all of your camera modules are in lockstep so that overlapping images match precisely and can be easily stitched together in post. GoPros have no built-in syncing capability. Even when properly synced in post based on audio/visual cues they can drift over time.
+
+			The number of cameras in any given system is a function of overlap. You need enough cameras to provide sufficient overlap between images of between 15-20% in order to properly stitch adjacent frames together -- more if you want to provide a stereo stitch.
+
+			The more cameras you have in a rig and the more closely spaced they are allows subjects to get much closer before stitching falls apart. See Stitching Approaches and Distance to Subject below for more information.
+
+*******************************************************************
+Stereoscopic 3D - this is one of the more contentious requirements 
+To truly get that sense of presence-of being present-that is the 
+hallmark of VR you really need to shoot in stereoscopic 3D.
+*******************************************************************
+		Mirror Rigs (Fraunhofer OmniCam)
+			Mirror rig is another type of panoramic 360° camera. This type has a number of cameras in a circular configuration shooting up into a collection of mirrors that are facing out into the scene at an angle.
+
+			A good example of this kind of rig is the Fraunhofer OmniCam. These rigs can be either mono or stereo and are generally bigger and heavier than other types of panorama rigs due to the mirrors.
+
+			Stitching is very easy and relatively artifact free because the mirrors allow a virtual nodal point that provide minimal or no parallax in the scene.
+					Because of that many of these rigs allow for realtime stitching and transmission of live 360° imagery. 
+
+					Having two cameras shooting into each mirror creates a seamless stereo stitch.
+							The main drawback again being the size and weight of these rigs and the relatively powerful computer they must be attached to for live stitching.
+
+		Fisheye
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. Aisa
+2. Africa
+3. Europe
+4. North America
+5. South America
+6. Australia
+7. Antartic 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
