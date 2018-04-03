@@ -1,0 +1,105 @@
+*************************************************************
+*************************************************************
+The entire point of an authentication protocol is to know whether the user is present.
+*************************************************************
+*************************************************************
+The client is the piece of software that accesses the protected resource on behalf of the resource owner.
+*************************************************************
+*************************************************************
+Spring references are included in the {} marker
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 120 - 145
+*************************************************************
+***         Chapter 6 - 0Auth 2.0 In the Real World       ***
+*************************************************************
+	*** We’ve got one goal in this whole setup: getting the client to access the protected resource for the resource owner. ***
+
+token  					- represents a delated right of access to the resource for the application (client)
+resource owner  		- someone who controls a resource and is allowing a software (client) application to access that resource on their behalf without impersonating them.
+client 					- a software application (photo printing service) that wants access to a protected resource
+protected resource 		- the component that the resource owner (user) has access to (photos).
+authorization server 	- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
