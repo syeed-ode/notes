@@ -273,39 +273,76 @@ These are the bits that connect the actors in the previous section in a larger p
 	The fallback state for an OAuth client is to do OAuth again.
 
 2.4.4 Authorization grants
-	An 'authorization grant' is the means by which an OAuth client is given access to a protected resource using the OAuth protocol. It the process completes successfully it ultimately results in the client getting a token.
-
-	The entire OAuth process is the 'authorization grant': the client sending the user to the authorization endpoint, then receiving the code, then finally trading the code for the token.
-
-	In other words, the authorization grant is the method for getting a token.
-			Several different kinds of authorization grants exist in OAuth, each with its own characteristics. We’ll be covering these in detail in chapter 6. 
-
-			But most of our examples and exercises, use the authorization code 'authorization grant' type. That is the type used in the cloud-printing example.
-
-2.5 Interactions between OAuth’s actors and components: back channel, front channel, and endpoints
-
-Now that we know the different parts of an OAuth system, let’s take a look at how they communicate with each other. 
-		OAuth is an HTTP-based protocol, but OAuth communication doesn’t always happen through a simple HTTP request and response.
-				Draft standards exist that define how to use OAuth tokens over Generic Security Services Application Program Interface (GSS-API) (see https://tools.ietf.org/html/rfc7628) and Constrained Application Protocol (CoAP) (see https://tools.ietf.org/html/draft-ietf-ace-oauth-authz-09).
-						These can still use HTTP to bootstrap the process and the components translate the same as well.
-
+	An 'authorization grant' is the means by which an OAuth client is 
+		given access to a protected resource using the OAuth 
+		protocol. It the process completes successfully it 
+		ultimately results in the client getting a token.
+	The entire OAuth process is the 'authorization grant': the client 
+		sending the user to the authorization endpoint, then 
+		receiving the code, then finally trading the code for the 
+		token.
+	In other words, the authorization grant is the method for getting a 
+		token.
+			Several different kinds of authorization grants 
+				exist in OAuth, each with its own 
+				characteristics. We’ll be covering these in 
+				detail in chapter 6. 
+			But most of our examples and exercises, use the 
+				authorization code 'authorization grant' 
+				type. That is the type used in the 
+				cloud-printing example.
+2.5 Interactions between OAuth’s actors and components: back channel, front 
+	channel, and endpoints
+Now that we know the different parts of an OAuth system, let’s take a look 
+	at how they communicate with each other. 
+		OAuth is an HTTP-based protocol, but OAuth communication 
+			doesn’t always happen through a simple HTTP request 
+			and response.
+				Draft standards exist that define how to use 
+					OAuth tokens over Generic Security 
+					Services Application Program 
+					Interface (GSS-API) 
+					(see https://tools.ietf.org/html/rfc7628) 
+					and Constrained Application Protocol 
+					(CoAP) (see https://tools.ietf.org/html/draft-ietf-ace-oauth-authz-09).
+						These can still use HTTP to 
+						bootstrap the process and 
+						the components translate 
+						the same as well.
 2.5.1 Back-channel communication
-	Many parts of the OAuth process use a normal HTTP request and response. Since these request and responses generally occur outside the purview of the resource owner and user agent, they are referred to as back-channel communication.
-			This is communication between the client, and, the authorization server and protected resource.
-
-	The client calls a token endpoint provided by the authorization server presenting a form-encoded set of parameters that the authorization server processes. The authorization server then responds with a JSON object, the token.
-
-	Tthe client makes a direct HTTP call in the back channel to the protected resource. The client presents the OAuth token and the protected resource must understand the token and the rights that it represents.
-
+	Many parts of the OAuth process use a normal HTTP request and 
+		response. Since these request and responses generally occur 
+		outside the purview of the resource owner and user agent, 
+		they are referred to as back-channel communication.
+			This is communication between the client, and, the 
+				authorization server and protected resource.
+	The client calls a token endpoint provided by the authorization 
+		server presenting a form-encoded set of parameters that the 
+		authorization server processes. The authorization server 
+		then responds with a JSON object, the token.
+	The client makes a direct HTTP call in the back channel to the 
+		protected resource. The client presents the OAuth token and 
+		the protected resource must understand the token and the 
+		rights that it represents.
 2.5.2 Front-channel communication
-	Front-channel communication is a method of using HTTP requests to communicate indirectly between two systems through an intermediary web browser. 
-			Such as when the client interacts with the authorization endpoint of the authorization server.
-
-	This technique isolates the sessions on either side of the browser, which allows it to work across different security domains.
-			For instance, if the user needs to authenticate to one of the components, they can do so without exposing their credentials to the other system.
-					****  Front channel uses HTTP redirects through the web browser, no direct connections  ****
-
+	Front-channel communication is a method of using HTTP requests to 
+		communicate indirectly between two systems through an 
+		intermediary web browser. 
+			Such as when the client interacts with the 
+				authorization endpoint of the 
+				authorization server.
+	This technique isolates the sessions on either side of the browser, 
+		which allows it to work across different security domains.
+			For instance, if the user needs to authenticate to 
+				one of the components, they can do so 
+				without exposing their credentials to the 
+				other system.
+					****  Front channel uses HTTP 
+						redirects through the web 
+						browser, no direct 
+						connections  ****
 			How can two pieces of software communicate without ever talking to each other?
+	                                                                   |
 					Front-channel communication works by attaching parameters to a URL and indicating that the browser should follow that URL.
 
 					The receiving party can then parse the URL and consume the presented information.
