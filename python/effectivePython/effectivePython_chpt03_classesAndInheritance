@@ -141,8 +141,9 @@ Item 24: Use '@classmethod' Polymorphism to Construct Objects Generically
 
 		Python only allows for the single constructor method __init__, this causes a problem when trying to construct objects polymorphically like other languages do where each subclass has a constructor that can be used generically. 
 
-		This problem can be solved by using '@classmethod' polymorphism. This is exactly instance method polymorphism except it applies to classes instead of objects.~
+		This problem can be solved by using '@classmethod' polymorphism. This is exactly like instance method polymorphism except it applies to classes instead of objects.
 
+		
 
 
 
