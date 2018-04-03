@@ -1,0 +1,176 @@
+*************************************************************
+*							    *
+*							    *
+*							    *
+toc: 19
+pg496 - 560
+*************************************************************
+*****  Chapter 13 - User authentication with OAuth 2.0  *****
+*************************************************************
+The OAuth 2.0 specification defines a 'delegation' protocol useful for conveying 'authorization decisions' across a network of web-enabled applications and APIs. 
+
+	***OAuth 2.0 is not an authentication protocol.***
+
+Much of the confusion comes from the fact that OAuth 2.0 is commonly used 'inside' of authentication protocols. OAuth 2.0 embeds several authentication
+events inside of a regular OAuth 2.0 process. As a consequence, many developers assume they’re performing user authentication. 
+
+13.1 Why OAuth 2.0 is not an authentication protocol pg6
+
+'Authentication', in this context, is what tells an application who the current user is and whether they’re currently using your application. It’s the security architecture that says the user is who they claim to be, by providing credentials (usually a username and password) to prove it.
+
+A practical authentication protocol will tell you identity attributes such as a unique identifier, an email address, and a name.
+
+OAuth 2.0, on its own, says absolutely nothing about the user, nor does it say how the user proved their presence. As far as an OAuth 2.0 client is concerned, it asked for a token, it got a token, and it eventually used that token
+
+It doesn’t know anything about who authorized the application or whether there was even a user there at all. The major use cases for OAuth 2.0 are about obtaining an access token for use when the user isn’t able to interactively authorize the application.
+
+Thinking back to our printing example, the user is in no way directly involved in the connection 'between' the printing service and the storage service. Instead, the OAuth 2.0 access token allowed the printing service to act on the user’s behalf. 
+
+This is a powerful paradigm for delegated client 'authorization', but it’s rather  antithetical to 'authentication'. Remeber with 'authentication' the whole point is figuring out whether the user is there and who they are.
+
+	13.1.1 Authentication vs. authorization: a delicious metaphor pg6
+
+	It may be helpful to think of the difference between authentication and authorization in terms of a metaphor: fudge and chocolate.
+			Vittorio Bertocci for this excellent metaphor, from the blog post “OAuth 2.0 and Sign-In,” available at http://www.cloudidentity.com/blog/2013/01/02/oauth-2-0-and-sign-in-4/
+
+			Chocolate is an ingredient whereas fudge is a confection. You can make chocolate fudge, which is defined by its chocolaty character. It’s tempting—but ultimately incorrect—to say that chocolate and fudge are equivalent. 
+
+			Chocolate can be used to make many different things in many different forms. It’s a versatile and useful component that lends its distinct flavor to everything from cakes and ice creams to pastry fillings.
+
+			Here it’s clear chocolate is the star ingredient of chocolate fudge. 
+
+	OAuth 2.0, in this metaphor, is chocolate. It’s a versatile ingredient fundamental to a number of different security architectures on the web today.
+			It’s always made up of the same roles and actors. OAuth 2.0 can be used to protect RESTful APIs and web resources. 
+
+			It can be used by clients on web servers and native applications. It can be used by end users to delegate limited authority and by trusted applications to transmit back-channel data.
+
+			OAuth 2.0 can even be used to make an identity and authentication API, where it’s clear that OAuth 2.0 is the key enabling technology
+
+	Authentication in our metaphor is more like fudge, a confection that can be made out of many different things and it takes on their flavor: from peanut butter to coconut, from oranges to potatoes. 
+			A few key components and processes must be brought together in the right way to make it work properly and securely, and there is a wide variety of options for those components and processes.
+
+			These systems can use public key infrastructure (PKI) and certificates, federated trust frameworks, browser cookies, or even proprietary hardware and software. 
+
+			OAuth 2.0 can be one of these technology components, but of course it doesn’t have to be. Without other factors, OAuth 2.0 isn’t sufficient to carry user authentication.
+
+13.2 Mapping OAuth to an authentication protocol
+
+How, then, can we build an authentication protocol with OAuth as a base? 
+	First,we need the different OAuth 2.0 parties of an authentication transaction. A resource owner authorizes a client to access a protected resource using a token from an authorization server. 
+
+	The end user logs in to a relying party (RP) using an identity provider (IdP). Designing an authentication protocol like this requires mapping the relying party to the protected resource. The relying party here needs to be protected.
+
+	It may seem sensible to deploy an identity protocol on top of OAuth 2.0 in this way, but the security boundaries don’t line up well.
+			In OAuth 2.0, the client and the resource owner are working together—the client is acting on behalf of the resource owner. 
+
+			The authorization server and protected resource also work together, as the authorization server generates the tokens accepted by the protected resource.
+
+			In other words, there’s a security and trust boundary between the user/client and authorization server/protected resource. 
+
+			OAuth 2.0 is the protocol used to cross that boundary. 
+
+	Deploying the identity protocol on top of OAuth 2.0 by having the end user log into a relying party (RP) using an identity provider (IdP), the boundary is now between the IdP and the protected resource.
+			This forces an unnatural crossing of this security boundary.
+
+			Now, the protected resource is intereacting directly with the user.
+
+			In OAuth 2.0 the resource owner never interacts with the protected resource: it's an API meant to be called by the client application.
+
+			Keep in mind usually the protected resource doesn't have a UI to speak of.
+
+			In this new process of having the end user log into a relying party, using an IdP, the client, which does interact with the user, is nowhere to be found.
+
+	That doesn’t work, and we need to try something else that respects these security boundaries. 
+
+	Let’s try to make the RP (relying party) out of the OAuth 2.0 client, since that’s the component that the end user, our resource owner, is normally interacting with anyway.
+			We’ll also combine the authorization server and protected resource into a single component, the IdP.
+
+			We’re going to have the resource owner delegate their own identity information to the client. The cient is authorizing the RP (relying party) to find out 'who is here right now'.
+
+	Although it may seem somewhat counterintuitive to build authentication on top of authorization, leveraging OAuth 2.0 security delegation gives us a means for connecting systems.
+			We can map all parts of the OAuth 2.0 system into corresponding components of an authorization protocol.
+
+			If the information coming form the authorization server and protected resouce conveys information about the user and their authentication context, we can give the client everything it needs to log the user in securely.
+
+	Now we’ve got an authentication protocol made up of our familiar OAuth 2.0 pieces. Since we’re working in a new protocol space, they get different names.
+			- the client is now the RP (relying party)
+			- we've combined the AS and the protected resource, now we have an identity provider (IdP)
+					- issuing tokens and serving user identity could be by separate servers. But as the RP is concerned, they're functioning as a single unit
+			- We’re going to add a second token alongside the access token. 
+					- This new ID token will carry info about the authentication event itself
+	
+	The RP can now find out who the user is and how they logged in, but why are we using two tokens here?
+			We could provide information about the user directly in the token received from the authorization server
+
+			We could provide a user information API that can be called as an OAuth protected resource
+
+			There is value in doing both, and we’ll look at the way the OpenID Connect protocol does this later in this chapter
+
+13.3 How OAuth 2.0 uses authentication
+	OAuth transaction requires several forms of authentication to take place in order for the authorization delegation process to function.
+			The resource owner authenticates to the authorization server’s authorization endpoint, the
+
+			The client authenticates to the authorization server at the token endpoint
+
+			There may be others depending on the setup.
+
+	We’re building authentication on top of authorization and the authorization protocol itself relies on authentication, isn’t that a bit overcomplicated? 
+			It may seem odd, but note we can leverage the fact that the user is authenticating at the authorization server.
+					At no point are the end user’s original credentials communicated to the client application (our RP).
+
+					Limiting the information each part needs, makes the transaction more secure and able to function across security domains.
+
+					The user authenticates directly to a single party (AS), as does the client (protected resource), and neither needs to impersonate the other
+
+			Another benefit (of authentication on top of authorization) is it allows for end-user consent at runtime. This allows the enduser to decide which applications they release their identity to.
+					An OAuth 2.0–based identity protocol can scale across security domains to the internet at large.
+
+					Each individual user can decide to log in where they choose. This fits the Trust On First Use (TOFU) model of OAuth 2.0 that we first saw in chapter 2.
+
+			Also the user can delegate access to other protected APIs alongside their identity. 
+					With one call, an application can find out whether a user is logged in, what the application should call the user, download photos for printing, and post updates to the user’s message stream.
+
+			If a service is already offering an OAuth 2.0–protected API, it’s not much of a stretch to start offering authentication services as well.
+
+			
+
+	z
+
+	z
+
+	z
+
+	z
+
+	z
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
