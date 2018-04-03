@@ -1,0 +1,179 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 132 - 169
+*******************************************************************************
+*********    Chapter 5 - Item 23: Don't use raw typs in new code    ***********
+*******************************************************************************
+Before generics, you had to cast every object you read from a collection. If someone accidentally inserted an object of the wrong type, casts could fail at runtime. 
+
+With generics, you tell the compiler what types of objects are permitted in each collection. The compiler inserts casts for you automatically and tells you at compile time if you try to insert an object of the wrong type.
+
+Item 23: Don’t use raw types in new code
+	A class or interface whose declaration has one or more 'type parameters' is a 'generic' class or interface. 
+			The List interface has a single type parameter, E, representing the element type of the list. Technically the name of the interface is now List<E> (read “list of E”).
+
+	Generic classes and interfaces are collectively known as 'generic types'.  Each generic type defines a set of 'parameterized types', which consist of the class or interface name followed by an angle-bracketed list of 'actual type parameters' corresponding to the generic type’s formal type parameters.
+
+	List<String> (read “list of string”) is a parameterized type representing a list whose elements are of type String. (String is the actual type parameter corresponding to the formal type parameter E.)
+
+	Each generic type defines a raw type, which is the name of the generic type used without any accompanying actual type parameters [JLS, 4.8]. For example, the raw type corresponding to List<E> is List. Raw types behave as if all of the generic type information were erased from the type declaration.
+
+	Before release 1.5, this would have been an exemplary collection declaration:
+		    // Now a raw collection type - don't do this!
+		    /**
+		     * My stamp collection. Contains only Stamp instances.
+		     */
+		    private final Collection stamps = ... ;
+
+	If you accidentally put a coin into your stamp collection, the erroneous insertion compiles and runs without error:
+			// Erroneous insertion of coin into stamp collection
+			stamps.add(new Coin( ... ));
+
+	You don’t get an error until you retrieve the coin from the stamp collection:
+			// Now a raw iterator type - don't do this!
+			for (Iterator i = stamps.iterator(); i.hasNext(); ) {
+				Stamp s = (Stamp) i.next(); // Throws ClassCastException
+				... // Do something with the stamp
+			}
+
+	As mentioned throughout this book, it pays to discover errors as soon as possible after they are made, ideally at compile time. In this case, you don’t discover the error till runtime, long after it has happened, and in code that is far removed from the code containing the error.
+
+	With generics, you replace the comment with an improved type declaration for the collection that tells the compiler the information that was previously hidden in the comment:
+			// Parameterized collection type - typesafe
+			private final Collection<Stamp> stamps = ... ;
+
+	From this declaration the compiler knows that stamps should contain only Stamp instances and guarantees this to be the case. 
+
+	As an added benefit, you no longer have to cast manually when removing elements from collections.
+
+-->	*** If you use raw types, you lose all the safety and expressiveness benefits of generics. ***
+	
+	While you shouldn’t use raw types such as List in new code, it is fine to use types that are parameterized to allow insertion of arbitrary objects, such as List<Object>.
+			Just what is the difference between the raw type List and the parameterized type List<Object>?
+					
+			Loosely speaking, the former has opted out of generic type checking, while the latter has explicitly told the compiler that it is capable of holding objects of any type.
+
+	While you can pass a List<String> to a parameter of type List, you can’t pass it to a parameter of type List<Object>.
+			There are subtyping rules for generics, and List<String> is a subtype of the raw type List, but not of the parameterized type List<Object> (Item 25).
+
+-->	*** You lose type safety if you use a raw type like List, but not if you use a parameterized type like List<Object>. ***
+
+	To make this concrete, consider the following program:
+			// Uses raw type (List) - fails at runtime!
+			public static void main(String[] args) {
+				List<String> strings = new ArrayList<String>();
+				unsafeAdd(strings, new Integer(42));
+				String s = strings.get(0); // Compiler-generated cast
+			}
+
+			private static void unsafeAdd(List list, Object o) {
+				list.add(o);
+			}
+
+	This program compiles, but because it uses the raw type List, you get a warning:
+			Test.java:10: warning: unchecked call to add(E) in raw type List
+				list.add(o);
+
+	And indeed, if you run the program, you get a ClassCastException when the program tries to cast the result of the invocation strings.get(0) to a String.
+
+	If you replace the raw type List with the parameterized type List<Object> in the unsafeAdd declaration. 
+			private static void unsafeAdd(List<Object> list, Object o) {
+				list.add(o);
+			}
+
+	Try to recompile the program, you’ll find that it no longer compiles. Here is the error message:
+			Test.java:5: unsafeAdd(List<Object>,Object) cannot be applied to (List<String>,Integer)
+					unsafeAdd(strings, new Integer(42));
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
