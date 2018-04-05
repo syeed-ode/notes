@@ -46,7 +46,7 @@ The 'authorization code grant' uses a temporary credential, the authorization co
 
 	First, the resource owner goes to the client application and indicates to the client that they would like it to use a particular protected resource on their behalf.
 			This is where the user would tell the printing service to use a specific photo storage service. This service is an API that the client knows how to process, and the client knows that it needs to use OAuth to do so.
-					OOAuth pushes the way that the client knows how to talk to a given protected resource or how the client finds the authorization server tied to that protected out of scope. Typically the client has been statically configured to talk to both the protected resource and the authorization server.
+					OAuth pushes the way that the client knows how to talk to a given protected resource or how the client finds the authorization server tied to that protected out of scope. Typically the client has been statically configured to talk to both the protected resource and the authorization server.
 
 	When the client realizes that it needs to get a new OAuth access token, it sends the resource owner to the authorization server asking to be delegated authority by that resource owner. 
 			For example, our photo printer could ask the photo-storage service for the ability to read the photos stored there.

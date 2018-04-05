@@ -1,3 +1,4 @@
+	                                                                   |
 *************************************************************
 *************************************************************
 The entire point of an authentication protocol is to know whether the user is present.
@@ -17,12 +18,79 @@ pg 120 - 145
 ***         Chapter 6 - 0Auth 2.0 In the Real World       ***
 *************************************************************
 	*** We’ve got one goal in this whole setup: getting the client to access the protected resource for the resource owner. ***
+	*** See chapter 2 for definitions ***
 
-token  					- represents a delated right of access to the resource for the application (client)
+
+The OAuth transaction consists of the following sequence of events:
+		1.  The Resource Owner indicates to the Client that they would like the Client to act on their behalf (for example, “Go load my photos from that service so I can print them”).
+		2.  The Client requests authorization from the Resource Owner at the Authorization Server.
+		3.  The Resource Owner grants authorization to the Client.
+		4.  The Client receives a Token from the Authorization Server.
+		5.  The Client presents the Token to the Protected Resource.
+
+token  					- represents a delated right of access to the (protected) resource for the application (client)
 resource owner  		- someone who controls a resource and is allowing a software (client) application to access that resource on their behalf without impersonating them.
 client 					- a software application (photo printing service) that wants access to a protected resource
 protected resource 		- the component that the resource owner (user) has access to (photos).
-authorization server 	- 
+authorization server 	- trusted by the protected resource (photos) to issue special-purpose security credentials—called OAuth access tokens —- to clients (photo printing service).
+
+
+Grant Types:
+	authenticationManager 		- Client credentials grant type - no resource owner or resource owner is the client software
+	userDetailsService 			- Resource owner credentials grant type - resource owner username/password gets token for client
+	authorizationCodeServices 	- client calls authorizationServer with this grant type and receives allowed scopes and grant_code which it exchanges for a token
+	implicitGrantService 		- Implicit grant type - used when client is inside browser (JS application)
+	tokenGranter  				- Assertion grant types 
+
+Configuring the Endpoint URLs
+
+
+
+Customizing the UI
+	Most of the Authorization Server endpoints are used primarily by machines (i.e. back-channel communications)
+
+	But there are a couple of resource that need a UI and those are the GET for /oauth/confirm_access and the HTML response from /oauth/error.
+			They are provided using whitelabel implementations in the framework
+
+			Most real-world instances of the Authorization Server will want to provide their own
+					This allows the implementer to control the styling and content. Provide a Spring MVC controller with @RequestMappings for those endpoints.
+
+					The framework defaults will take a lower priority in the dispatcher. 
+
+	In the /oauth/confirm_access endpoint you can expect an AuthorizationRequest bound to the session carrying all the data needed to seek approval from the user.
+			The default implementation is WhitelabelApprovalEndpoint so look there for a starting point to copy.
+
+			You can grab all the data from that request and render it however you like.
+
+	All the user needs to do is POST back to /oauth/authorize with information about approving or denying the grant.
+			The request parameters are passed directly to a 'UserApprovalHandler' in the 'AuthorizationEndpoint'.
+
+			The default 'UserApprovalHandler' depends on whether or not you have supplied an 'ApprovalStore' in your 'AuthorizationServerEndpointsConfigurer'.
+
+	The 'ApprovalStoreUserApprovalHandler' utilizes an 'ApprovalStore'. The 'TokenStoreUserApprovalHandler' is used if there is no 'ApprovalStore' in the  'AuthorizationServerEndpointsConfigurer'. 
+			'TokenStoreUserApprovalHandler' is a simple yes/no decision via 'user_oauth_approval' equals to "true" or "false".
+
+			'ApprovalStoreUserApprovalHandler' is a set of scope.* parameter keys with "*" equal to the scopes being requested.
+					The value of the parameter can be "true" or "approved", else the user is deemed to have rejected that scope.
+
+					A grant is successful if at least one scope is approved.
+
+			NOTE: don't forget to include CSRF protection in your form that you render for the user. Spring Security is expecting a request parameter called "_csrf" by default (and it provides the value in a request attribute). See the Spring Security user guide for more information on that, or look at the whitelabel implementation for guidance.
+
+	Enforcing SSL
+		Plain HTTP is fine for testing but an Authorization Server should only be used over SSL in production. 
+
+		You can run the app in a secure container or behind a proxy and it should work fine. 
+				Setting the container or proxy up has nothing to do with OAuth2.
+
+		You also should secure the endpoints using Spring Security requiresChannel() constraints.
+				For the /authorize endpoint is up to you to do that as part of your normal application security.
+
+				For the /token endpoint there is a flag in the AuthorizationServerEndpointsConfigurer that you can set using the sslOnly() method.
+
+				In both cases the secure channel setting is optional but will cause Spring Security to redirect to what it thinks is a secure channel if it detects a request on an insecure channel.
+
+
 
 
 
