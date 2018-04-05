@@ -10,6 +10,9 @@ The client is the piece of software that accesses the protected resource on beha
 Spring references are included in the {} marker
 *************************************************************
 *************************************************************
+'AuthorizationServerEndpointsConfigurer' defines the authorization and token endpoints and the token services.
+*************************************************************
+*************************************************************
 *							    *
 *							    *
 *							    *
@@ -35,15 +38,57 @@ protected resource 		- the component that the resource owner (user) has access t
 authorization server 	- trusted by the protected resource (photos) to issue special-purpose security credentials—called OAuth access tokens —- to clients (photo printing service).
 
 
-Grant Types:
-	authenticationManager 		- Client credentials grant type - no resource owner or resource owner is the client software
-	userDetailsService 			- Resource owner credentials grant type - resource owner username/password gets token for client
-	authorizationCodeServices 	- client calls authorizationServer with this grant type and receives allowed scopes and grant_code which it exchanges for a token
-	implicitGrantService 		- Implicit grant type - used when client is inside browser (JS application)
-	tokenGranter  				- Assertion grant types 
 
-Configuring the Endpoint URLs
+Authorization Server Configuration
+	As you configure the Authorization Server (AS), you have to consider the grant type that the client is to use to obtain an access token from the end-user. 
+			There are three authorization code, user credentials, refresh token.
 
+	The configuration of the Authorization Server (AS) is used to provide implementations of the client details service and token services.
+			The Authorization Server configuration can also enable or disable certain aspects of the Authorization Server globally.
+
+	Each client can be configured specifically with permissions to be able to use certain authorization mechanisms and access grants.
+			Just because your provider is configured to support the "client credentials" grant type, doesn't mean that a specific client is authorized to use that grant type.
+
+	The '@EnableAuthorizationServer' annotation is used to configure the OAuth 2.0 Authorization Server.
+			You can enable an @Bean that implement AuthorizationServerConfigurer (there is a handy adapter implementation with empty methods).
+
+	The following are delegated to separate configurers that are created by Spring and passed into the AuthorizationServerConfigurer:
+			'ClientDetailsServiceConfigurer' 
+				A configurer that defines the client details service. Client details can be initialized, or you can just refer to an existing store.
+			'AuthorizationServerSecurityConfigurer'
+				Defines the security constraints on the token endpoint.
+			'AuthorizationServerEndpointsConfigurer'
+				Defines the authorization and token endpoints and the token services.
+
+	An important aspect of the provider configuration is the way that an authorization code is supplied to an OAuth client (in the authorization code grant).
+			A authorization code is obtained by the OAuth client by directing the end-user to an authorization page.
+
+			The user can enter her credentials, resulting in a redirection from the provider authorization server back to the OAuth client with the authorization code.
+
+	Configuring Client Details:
+		The ClientDetailsServiceConfigurer (a callback from your AuthorizationServerConfigurer) can be used to define an in-memory or JDBC implementation of the client details service.
+
+		Important attributes of a client are
+				clientId: 
+					(required) the client id.
+				secret: (
+					required for trusted clients) the client secret, if any.
+				scope: 
+					The scope to which the client is limited. If scope is undefined or empty (the default) the client is not limited by scope.
+				authorizedGrantTypes: 
+					Grant types that are authorized for the client to use. Default value is empty.
+				authorities: 
+					Authorities that are granted to the client (regular Spring Security authorities).			
+
+	Grant Types:
+		authenticationManager 		- Client credentials grant type - no resource owner or resource owner is the client software
+		userDetailsService 			- Resource owner credentials grant type - resource owner username/password gets token for client
+		authorizationCodeServices 	- client calls authorizationServer with this grant type and receives allowed scopes and grant_code which it exchanges for a token. The 
+									  'authorization code grant' uses a temporary credential, the authorization code, to represent the resource owner’s delegation to the client
+		implicitGrantService 		- Implicit grant type - used when client is inside browser (JS application)
+		tokenGranter  				- Assertion grant types 
+
+	Configuring the Endpoint URLs:
 
 
 Customizing the UI
@@ -90,14 +135,108 @@ Customizing the UI
 
 				In both cases the secure channel setting is optional but will cause Spring Security to redirect to what it thinks is a secure channel if it detects a request on an insecure channel.
 
+Mapping User Roles to Scopes
+	It is sometimes useful to limit the scope of tokens not only by the scopes assigned to the client, but also according to the user's own permissions.
 
+	If you use a 'DefaultOAuth2RequestFactory' in your 'AuthorizationEndpoint' you can set a flag checkUserScopes=true to restrict permitted scopes to only those that match the user's roles.
 
+	You can also inject an 'OAuth2RequestFactory' into the 'TokenEndpoint' but that only works with password grants, if you also install a 'TokenEndpointAuthenticationFilter'.
+			You just need to add that filter after the HTTP 'BasicAuthenticationFilter'.
 
+	Of course, you can also implement your own rules for mapping scopes to roles and install your own version of the OAuth2RequestFactory.
 
+	The 'AuthorizationServerEndpointsConfigurer' allows you to inject a custom 'OAuth2RequestFactory' so you can use that feature to set up a factory if you use '@EnableAuthorizationServer'.	
+			'AuthorizationServerEndpointsConfigurer' defines the authorization and token endpoints and the token services.
 
+Resource Server Configuration
+	A Resource Server (can be the same as the Authorization Server or a separate application) serves resources that are protected by the OAuth2 token. 
 
+	Spring OAuth provides a Spring Security authentication filter that implements this protection.
+			You can switch it on with '@EnableResourceServer' on an '@Configuration' class, and configure it (as necessary) using a 'ResourceServerConfigurer'.
 
+	The following features can be configured for the Resource Server (protected resource):
+			- tokenServices 	- the bean that defines the token services (instance of ResourceServerTokenServices).
+			- resourceId 		- the id for the resource (optional, but recommended and will be validated by the auth server if present).
+			- other extension points for the resourecs server (e.g. tokenExtractor for extracting the tokens from incoming requests)
+			- request matchers for protected resources (defaults to all)
+			- access rules for protected resources (defaults to plain "authenticated")
+			- other customizations for the protected resources permitted by the HttpSecurity configurer in Spring Security
 
+	The '@EnableResourceServer' annotation adds a filter of type 'OAuth2AuthenticationProcessingFilter' automatically to the Spring Security filter chain.
+
+	Your ResourceServerTokenServices is the other half of a contract with the Authorization Server. 
+			If the Resource Server and Authorization Server are in the same application and you use 'DefaultTokenServices' 
+					Then you don't have to think too hard about this because it implements all the necessary interfaces so it is automatically consistent.
+
+			If your Resource Server is a separate application then you have to make sure you match the capabilities of the Authorization Server. 
+					You have to provide a 'ResourceServerTokenServices' that knows how to decode the tokens correctly.
+
+	As with the Authorization Server, you can often use the DefaultTokenServices and the choices are mostly expressed through the TokenStore (backend storage or local encoding).
+			An alternative is the 'RemoteTokenServices' which is a Spring OAuth features (not part of the spec) allowing Resource Servers to decode tokens through an HTTP resource on the Authorization Server (/oauth/check_token).
+
+			'RemoteTokenServices' are convenient if there is not a huge volume of traffic in the Resource Servers (every request has to be verified with the Authorization Server).
+					You can also use this if you can afford to cache the results.
+
+			To use the /oauth/check_token endpoint you need to expose it by changing its access rule (default is "denyAll()") in the AuthorizationServerSecurityConfigurer, e.g.
+					@Override
+					public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+						oauthServer
+							.tokenKeyAccess("isAnonymous() || hasAuthority('ROLE_TRUSTED_CLIENT')")
+							.checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')"
+					 	);
+					}
+
+			In this example we are configuring two endpoints via the methods specified. 
+					The 'checkTokenAccess()' method creates the /oauth/check_token endpoint
+
+					The 'tokenKeyAccess()' method creates the /oauth/token_key endpoint. This endpoint allows trusted resources to obtain the public key for JWT verification.
+
+			These two endpoints are protected by HTTP Basic authentication using client credentials.
+
+	Configuring An OAuth-Aware Expression Handler:
+		An expression handler will be registered by default in the @EnableResourceServer setup. 
+
+		The expressions include #oauth2.clientHasRole, #oauth2.clientHasAnyRole, and #oath2.denyClient which can be used to provide access based on the role of the oauth client.
+				There is a more exhaustive list at 'OAuth2SecurityExpressionMethods'.
+
+				In XML you can register a oauth-aware expression handler with the expression-handler element of the regular <http/> security configuration.
+
+OAuth 2.0 Client
+	The OAuth 2.0 client mechanism is responsible for access the OAuth 2.0 protected resources of other servers.
+
+	The configuration involves establishing the relevant protected resources to which users might have access.
+
+	The client may also need to be supplied with mechanisms for storing authorization codes and access tokens for users.
+
+	Protected Resource Configuration:
+		Protected resources (or "remote resources") can be defined using bean definitions of type 'OAuth2ProtectedResourceDetails'.
+
+		A protected resource has the following properties:
+			id: 							- The id of the resource. The id is only used by the client to lookup the resource; it's never used in the OAuth protocol. It's also used as the id of the bean.
+			clientId: 						- The OAuth client id. This is the id by which the OAuth provider identifies your client.
+			clientSecret: 					- The secret associated with the resource. By default, no secret is empty.
+			accessTokenUri:  				- The URI of the provider OAuth endpoint that provides the access token.
+			scope: 							- Comma-separted list of strings specifying the scope of the access to the resource. By default, no scope will be specified.
+			clientAuthenticationScheme: 	- The scheme used by your client to authenticate to the access token endpoint. Suggested values: "http_basic" and "form". Default: "http_basic". See section 2.1 of the OAuth 2 spec.
+
+		Different grant types have different concrete implementations of 'OAuth2ProtectedResourceDetails'.
+				For example ClientCredentialsResource is used for the "client_credentials" grant type.
+
+				For grant types that require user authorization there is a further property: 'userAuthorizationUri'.  
+						This is the uri to which the user will be redirected if the user is ever needed to authorize access to the resource. 
+
+						'userAuthorizationUri' is not always required, depending on which OAuth 2 profiles are supported.
+
+Customizations for Clients of External OAuth2 Providers
+	Some external OAuth2 providers (e.g. Facebook) do not quite implement the specification correctly, or else they are just stuck on an older version of the spec than Spring Security OAuth.
+
+	To use Facebook as an example, there is a Facebook feature in the tonr2 application. 
+			You need to change the configuration to add your own, valid, client id and secret - they are easy to generate on the Facebook website).
+
+			Facebook token responses also contain a non-compliant JSON entry for the expiry time of the token.
+					Facebook uses 'expires' instead of 'expires_in'.
+
+					If you want to use the expiry time in your application you will have to decode it manually using a custom OAuth2SerializationService.
 
 
 
