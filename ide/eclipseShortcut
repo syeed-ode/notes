@@ -1,0 +1,102 @@
+	                                                                   |
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 120 - 145
+*************************************************************
+******    Eclipse Shortcut and other eclipsy things    ******
+*************************************************************
+Add static import 	 		- Cmd + Shft + M
+Remove unused imports 		- Cmd + Shft + O 	- To apply it on whole workspace you just have to select the project in the view Package Explorer and then use the key combination
+Extract local variable 		- Cmd + Alt  + L
+Assign a keyboard shortcut 	- Window > Preferences > General > Keys and searching for "Open Implementation"
+
+
+How to remove STS Gradle and install Buildship. How to view hidden files in project/package explorer
+	https://github.com/eclipse/buildship/wiki/Migration-guide-from-STS-Gradle-to-Buildship
+	https://github.com/eclipse/buildship.wiki.git
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
