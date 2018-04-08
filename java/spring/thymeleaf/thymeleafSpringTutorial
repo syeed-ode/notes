@@ -1,0 +1,173 @@
+	                                                                   |
+	                                                                   |
+************************************************************************
+** Note that a nonzero-length array is always mutable, so it is wrong **
+**    for a class to have a public static final array field, or an    **
+**               accessor that returns such a field.                  **
+************************************************************************
+************************************************************************
+**  Executor is the basis for task execution that 1) supports a wide  **
+**     variety of task execution policies, 2) provides a means of     **
+**decoupling task submission from task execution, and 3) provides life**
+**     cycle support for statistics gathering, app management, and    **
+**                             monitoring                             **
+************************************************************************
+************************************************************************
+*							    *
+*							    *
+*							    *
+toc: 
+pg 131 - 
+************************************************************************************
+*******                                Thymelaf                             ********
+******https://www.thymeleaf.org/doc/tutorials/2.1/thymeleafspring.html#preface******
+************************************************************************************
+2 The SpringStandard Dialect
+	Thymeleaf provides a dialect which specifically implements all the needed features for it to work correctly with Spring.
+
+	This specific dialect is based on the Thymeleaf Standard Dialect and is implemented in a class called org.thymeleaf.spring4.dialect.SpringStandardDialect.
+			It extends from org.thymeleaf.standard.StandardDialect.
+
+	The SpringStandard Dialect introduces the following specific features:
+
+	Note that 'you shouldn’t use this dialect directly in a normal TemplateEngine object'. 
+			You should instance a new template engine class that performs all the required configuration steps: 
+
+			org.thymeleaf.spring4.SpringTemplateEngine.
+					<bean id="templateResolver" class="org.thymeleaf.templateresolver.ServletContextTemplateResolver">
+						<property name="prefix" value="/WEB-INF/templates/" />
+						<property name="suffix" value=".html" />
+						<property name="templateMode" value="HTML5" />
+					</bean>
+
+
+3 Views and View Resolvers
+3.1 Views and View Resolvers in Spring MVC
+	There are two interfaces in Spring MVC that conform the core of its templating system:
+			- org.springframework.web.servlet.View
+			- org.springframework.web.servlet.ViewResolver
+
+	'Views' model pages in our applications. 'Views' also allow us to modify and predefine their behaviour by defining them as beans.
+
+	'Views' are in charge of rendering the actual HTML interface, usually by the execution of some template engine like JSP (or Thymeleaf).
+
+	'ViewResolvers' are the objects in charge of obtaining 'View' objects for a specific operation and locale.
+
+	'ViewResolvers' forward to 'Controllers' a view with a specific name (a String returned by the controller method) when the 'Controllers' ask for it.
+			Then all the view resolvers in the application execute in ordered chain until one of them is able to resolve that view.
+
+			Once a view is resolved a 'View' object is returned and control is passed to it for the renderization of HTML.
+					Not all pages in our applications have to be defined as Views. 
+
+					Only the views which behaviour we wish to be non-standard or configured in a specific way, by wiring some special beans to it, for example.
+
+					If a ViewResolver is asked a view that has no corresponding bean -— which is the common case -— a new View object is created ad hoc and returned.
+
+	A typical configuration for a JSP+JSTL ViewResolver in a Spring MVC application looks like this:
+			<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+				<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+				<property name="prefix" value="/WEB-INF/jsps/" />
+				<property name="suffix" value=".jsp" />
+				<property name="order" value="2" />
+				<property name="viewNames" value="*jsp" />
+			</bean>
+
+	A quick look at its properties is enough to know about how it’s configured:
+			'viewClass' - establishes the class of the View instances. This is needed for a JSP resolver, but it will not be needed at all when we’re working with Thymeleaf.
+			'prefix' and 'suffix' - work in a similar way to the attributes of the same names in Thymeleaf’s TemplateResolver objects.
+			'order' - establishes the order in which the ViewResolver will be queried in the chain.
+			'viewNames' - allows the definition (with wildcards) of the view names that will be resolved by this ViewResolver.
+
+3.2 Views and View Resolvers in Thymeleaf
+	Thymeleaf offers implementations for the two interfaces mentioned above:
+		- org.thymeleaf.spring4.view.ThymeleafView
+		- org.thymeleaf.spring4.view.ThymeleafViewResolver
+
+	These two classes will be in charge of processing Thymeleaf templates as a result of the execution of controllers.
+
+	Configuration of the Thymeleaf View Resolver is very similar to that of JSP’s:
+			<bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
+				<property name="templateEngine" ref="templateEngine" />
+				<property name="order" value="1" />
+				<property name="viewNames" value="*.html,*.xhtml" />
+			</bean>
+
+	The 'templateEngine' parameter is, of course, the 'SpringTemplateEngine' object we defined in the previous chapter. 
+
+	The other two ('order' and 'viewNames') are both optional, and have the same meaning as in the JSP 'ViewResolver' we saw before.
+
+	Note that we do not need prefix or suffix parameters, because these are already specified at the Template Resolver (which in turn is passed to the Template Engine).
+
+4 Template Resolution
+4.1 Spring-based Template Resolution
+	When used with Spring, Thymeleaf provides additional implementations of ITemplateResolver and an associated IResourceResolver, fully integrated with Spring’s resource resolution mechanism. These are:
+			- org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver
+				for resolving templates.
+			- org.thymeleaf.spring4.resourceresolver.SpringResourceResourceResolver
+				mostly for internal use.
+
+	This template resolver will allow applications to resolve templates using the standard Spring resource resolution syntax. It can be configured like:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
