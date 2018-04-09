@@ -18,7 +18,7 @@ Spring references are included in the {} marker
 *							    *
 pg 120 - 145
 *************************************************************
-***         Chapter 6 - 0Auth 2.0 In the Real World       ***
+*****          Spring OAuth 2.0 Development Guide       *****
 *************************************************************
 	*** We’ve got one goal in this whole setup: getting the client to access the protected resource for the resource owner. ***
 	*** See chapter 2 for definitions ***
