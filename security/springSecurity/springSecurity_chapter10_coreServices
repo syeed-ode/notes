@@ -1,0 +1,124 @@
+	                                                                   |
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 120 - 145
+*************************************************************
+******            Chapter 10 - Core Services           ******
+*************************************************************
+10. Core Services
+	Chapter 9, Technical Overview, a high-level overview of the Spring Security architecture and its core classes.
+
+	Now let’s take a closer look at one or two of the core interfaces and their implementations, in particular the 'AuthenticationManager', 'UserDetailsService' and the 'AccessDecisionManager'.
+
+	These crop up regularly throughout the remainder of this document so it’s important you know how they are configured and how they operate.
+
+10.1 The 'AuthenticationManager', 'ProviderManager' and 'AuthenticationProvider'
+	The 'AuthenticationManager' is just an interface, so the implementation can be anything we choose, but how does it work in practice?
+
+	What if we need to check multiple authentication databases or a combination of different authentication services such as a database and an LDAP server?
+
+	The default implementation in Spring Security is called 'ProviderManager' and rather than handling the authentication request itself, it delegates to a list of configured 'AuthenticationProvider's.
+
+	Each 'AuthenticationProvider' is queried in turn to see if it can perform the authentication. Each provider will either throw an exception or return a fully populated 'Authentication' object.
+
+	Remember our good friends, 'UserDetails' and 'UserDetailsService'? We need to verify an authentication request. 
+
+	Verify the request load the corresponding 'UserDetails' and check the loaded password against the one that is in the request which has been entered by the user.
+			This is the approach used by the 'DaoAuthenticationProvider' (see below).
+
+			The loaded 'UserDetails' object will be used when building the fully populated 'Authentication' object.
+
+			The 'Authentication' object will also contain the 'GrantedAuthority's of the 'UserDetails'. 
+
+			The 'GrantedAuthority's is returned from a successful authentication and stored in the 'SecurityContext'.
+
+	An instance of 'ProviderManager' is created and maintained internally, and you add providers to it by using the namespace authentication provider elements (see the namespace chapter).
+			https://docs.spring.io/spring-security/site/docs/5.0.2.BUILD-SNAPSHOT/reference/htmlsingle/#ns-auth-manager
+
+	You should not declare a 'ProviderManager' bean in your application context. However, if you are not using the namespace then you would declare it like so:
+			<bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
+				<constructor-arg>
+					<list>
+						<ref local="daoAuthenticationProvider"/>
+						<ref local="anonymousAuthenticationProvider"/>
+						<ref local="ldapAuthenticationProvider"/>
+					</list>
+				</constructor-arg>
+			</bean>
+
+	In the above example we have three providers. They are tried in the order shown (which is implied by the use of a List). 
+
+	With each provider able to attempt authentication, or skip authentication by simply returning 'null'.
+
+	If all implementations return null, the 'ProviderManager' will throw a 'ProviderNotFoundException'.
+
+	'Authentication' mechanisms such as a web form-login processing filter are injected with a reference to the 'ProviderManager' and will call it to handle their authentication requests.
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
