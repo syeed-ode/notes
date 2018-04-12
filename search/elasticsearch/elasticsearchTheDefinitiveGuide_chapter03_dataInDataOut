@@ -1,0 +1,217 @@
+	                                                                   |
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 67 - 
+*************************************************************
+******         Chapter 3 - Data In, Data Out           ******
+*************************************************************
+Whatever program we write, the intention is the same: to organize data in a way that serves our purposes.
+
+In the real world, though, not all entities of the same type look the same. A Spanish person will probably have two last names, while an English person will probably have only one.
+
+The problem comes when we need to store these entities. Traditionally, we have stored our data in columns and rows in a relational database, the equivalent of using a spreadsheet.
+
+All the flexibility gained from using objects is lost because of the inflexibility of our storage medium.
+
+But what if we could store our objects as objects? Instead of modeling our application around the limitations of spreadsheets, we can instead focus on 'using' the data.
+
+JSON is a way of representing objects in human-readable text. It has become the de facto standard for exchanging data in the NoSQL world.
+
+When an object has been serialized into JSON, it is known as a 'JSON document'.
+
+Elasticsearch is a distributed 'document' store. It can store and retrieve complex data structures—serialized as JSON documents —- in 'real time'.
+		In other words, as soon as a document has been stored in Elasticsearch, it can be retrieved from any node in the cluster.
+
+In Elasticsearch, all data in every field is 'indexed by default'. That is, every field has a dedicated inverted index for fast retrieval.
+
+And, unlike most other databases, it can use all of those inverted indices 'in the same query', to return results at breathtaking speed.
+
+In this chapter, we present the APIs that we use to create, retrieve, update, and delete documents
+
+What Is a Document?
+	Often, we use the terms object and document interchangeably. However, there is a distinction. An object is just a JSON object. 
+
+	This is similar to what is known as a hash, hashmap, dictionary, or associative array. Objects may contain other objects. 
+
+	In Elasticsearch, the term 'document' has a specific meaning. It refers to the top-level, or root object that is serialized into JSON. 
+
+	To be an 'Elasticsearch document' this top level is stored in Elasticsearch under a unique ID.
+
+Document Metadata
+	A document doesn’t consist only of its data. It also has metadata—information about the document.
+
+	The three required metadata elements are as follows:
+			__index
+				Where the document lives.
+
+			__type
+				The class of object that the document represents.
+
+			__id
+				The unique identifier for the document
+
+	__index
+		An 'index' is like a database in a relational database; it’s the place we store and index related data.
+
+		Actually, in Elasticsearch, our data is stored and indexed in shards, while an index is just a logical namespace that groups together one or more shards. 
+
+		However, this is an internal detail; our application shouldn’t care about shards at all. 
+
+		As far as our application is concerned, our documents live in an index. Elasticsearch takes care of the details.
+
+		We cover how to create and manage indices ourselves in Chapter 10, but for now we will let Elasticsearch create the index for us. 
+
+		All we have to do is choose an index name. This name must be lowercase, cannot begin with an underscore, and cannot contain commas. 
+
+		Let’s use 'website' as our index name.
+
+	__type 
+		In Elasticsearch we use the same 'type' for documents that represent the same class of 'thing', because they share the same data structure.
+
+		Every 'type' has its own 'mapping' or schema definition, which defines the data structure for documents of that type, much like the columns in a database table.
+
+		Documents of all types can be stored in the same index. 
+
+		The 'mapping' for the type tells Elasticsearch how the data in each document should be indexed.
+
+		For now we will rely on Elasticsearch to detect our document’s data structure automatically.
+				We show how to specify and manage mappings in “Types and Mappings” on page 137. CHAPTER 10, Index Management.
+
+		A __type name can be lowercase or uppercase, but shouldn’t begin with an underscore or contain commas. We will use 'blog' for our type name.
+
+	__id
+		The ID is a string that, when combined with the __index and __type, uniquely identifies a document in Elasticsearch.
+
+Indexing a Document
+	Documents are 'indexed' —- stored and made searchable —- by using the index API. A document’s _index, _type, and _id uniquely identify the document.
+
+	For example, if our 'index' is called 'website', our 'type' is called 'blog', and we choose the ID 123, then the index request looks like this:
+		[20180412-15:30:36 syeedode:~/elasticsearch-6.2.3] $ curl -i -XPUT -H "content-type: application/json; charset=UTF-8" --user elastic:cfu0blVplXHcUnOkX74u 'http://localhost:9200/webiste/blog/123?pretty' -d '{"title":"My first blog entry","text":"Just trying this out...","date":"2014/01/01"}'
+
+	Elasticsearch responds as follows:
+		HTTP/1.1 201 Created
+		Location: /webiste/blog/123
+		content-type: application/json; charset=UTF-8
+		content-length: 223
+
+		{
+		  "_index" : "webiste",
+		  "_type" : "blog",
+		  "_id" : "123",
+		  "_version" : 1,
+		  "result" : "created",
+		  "_shards" : {
+		    "total" : 2,
+		    "successful" : 1,
+		    "failed" : 0
+		  },
+		  "_seq_no" : 0,
+		  "_primary_term" : 1
+		}
+
+Autogenerating IDs
+	We can let Elasticsearch autogenerate one for us. The structure of the request changes. 
+
+	Instead of using the PUT verb (“store this document at this URL”), we use the POST verb (“store this document under this URL”).
+			[20180412-15:43:18 syeedode:~/elasticsearch-6.2.3] $ curl -i -XPOST -H "content-type: application/json; charset=UTF-8" --user elastic:cfu0blVplXHcUnOkX74u 'http://localhost:9200/webiste/blog/?pretty' -d '{"title":"My second blog entry","text":"Still trying this out...","date":"2014/01/01"}'
+
+	The response is similar to what we saw before, except that the _id field has been generated for us
+			HTTP/1.1 201 Created
+			Location: /webiste/blog/EFViu2IBvS3n4VMVkFT0
+			content-type: application/json; charset=UTF-8
+			content-length: 240
+
+			{
+			  "_index" : "webiste",
+			  "_type" : "blog",
+			  "_id" : "EFViu2IBvS3n4VMVkFT0",
+			  "_version" : 1,
+			  "result" : "created",
+			  "_shards" : {
+			    "total" : 2,
+			    "successful" : 1,
+			    "failed" : 0
+			  },
+			  "_seq_no" : 0,
+			  "_primary_term" : 1
+			}
+
+	Autogenerated IDs are 22 character long, URL-safe, Base64-encoded string universally unique identifiers, or UUIDs.
+
+Retrieving a Document
+	Skipped
+
+Retrieving Part of a Document
+	 Individual fields can be requested by using the _source parameter. Multiple fields can be specified in a comma-separated list:
+	 		GET /website/blog/123?_source=title,text
+
+Checking Whether a Document Exists
+	curl -i -XHEAD http://localhost:9200/website/blog/123
+
+Updating a Whole Document
+	Skpped
+
+Creating a New Document
+	The first method uses the op_type query-string parameter:
+			PUT /website/blog/123?op_type=create
+
+	And the second uses the /_create endpoint in the URL:
+			PUT /website/blog/123/_create
+
+Deleting a Document
+	Skipped
+
+
+
+
+stop at pg 74
+then 93 to 101
+then 103 to 107
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
