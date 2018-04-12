@@ -1,0 +1,212 @@
+	                                                                   |
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 57 - 66
+*************************************************************
+******       Chapter 2 - Life Inside a Cluster         ******
+*************************************************************
+We explain commonly used terminology like cluster, node, and shard, the mechanics of how Elasticsearch scales out, and how it deals with hardware failure.
+
+Scale can come from buying bigger servers ('vertical scale', or scaling up) or from buying more servers ('horizontal scale', or 'scaling out').
+
+Vertical scale has its limits. Real scalability comes from horizontal scale—the ability to add more nodes to the cluster and to spread load and reliability between them.
+
+With most databases, scaling horizontally usually requires a major overhaul of your application to take advantage of these extra boxes. In contrast, Elasticsearch is 'distributed' by nature.
+
+In this chapter, we show how you can set up your cluster, nodes, and shards to scale with your needs and to ensure that your data is safe from hardware failure.
+
+An Empty Cluster
+	A 'node' is a running instance of Elasticsearch, while a cluster consists of one or more nodes with the same 'cluster.name'.
+
+	As nodes are added to or removed from the cluster, the cluster reorganizes itself to spread the data evenly.
+
+	One node in the cluster is elected to be the 'primary' node is in charge of managing cluster-wide changes.
+
+	The 'primary' node creates or delates an index, or adds or removes a node from the cluster.
+
+	The primary node does not need to be involved in documentlevel changes or searches, which means that having just one primary node will not become a bottleneck as traffic grows.
+
+	Any node can become the primary. Our example cluster has only one node, so it performs the primary role.
+
+	As users, we can talk to 'any node in the cluster', including the primary node. 
+
+	Every node knows where each document lives and can forward our request directly to the nodes that hold the data we are interested in.
+
+	Whichever node we talk to manages the process of gathering the response from the node or nodes holding the data. 
+
+	Then that node returns the final response to the client. It is all managed transparently by Elasticsearch.
+
+Cluster Health
+	
+
+Add an Index
+	To add data to Elasticsearch, we need an 'index' (database) —- a place to store related data.
+
+	An 'index' is just a logical namespace that points to one or more physical 'shards'.
+
+	A 'shard' is a low-level 'worker unit' that holds just a slice of all the data in the index. 
+
+	A shard is a single instance of Lucene, and is a complete search engine in its own right.
+
+	Our documents are stored and indexed in shards, but our applications don’t talk to them directly. Instead, they talk to an index.
+
+	Shards are how Elasticsearch distributes data around your cluster. Think of shards as containers for data. 
+			Documents are stored in shards, and shards are allocated to nodes in your cluster. 
+
+			As your cluster grows or shrinks, Elasticsearch will automatically migrate shards between nodes so that the cluster remains balanced.
+
+	A shard can be either a 'primary' shard or a 'replica' shard. Each document in your index belongs to a single primary shard. 
+
+	So the number of primary shards that you have determines the maximum amount of data that your index can hold.
+			While there is no theoretical limit to the amount of data that a primary shard can hold, there is a practical limit. 
+
+			What constitutes the maximum shard size depends entirely on your use case: 
+				- the hardware you have, 
+				- the size and complexity of your documents, 
+				- how you index and query your documents, and 
+				- your expected response times.
+
+	A replica shard is just a copy of a primary shard. Replicas are used to provide redundant copies of your data. 
+
+	This redundancy protects against hardware failure. Replicas also serve read requests like searching or retrieving a document.
+
+	The number of primary shards in an index is fixed at the time that an index is created, but the number of replica shards can be changed at any time.
+
+	By default, indices are assigned five primary shards.
+
+	 It doesn’t make sense to store copies of the same data on the same node. If we were to lose that node, we would lose all copies of our data.
+
+	<skipped this section please review and document>
+
+Add Failover
+	Running a single node means that you have a single point of failure—there is no redundancy. 
+
+	Fortunately, all we need to do to protect ourselves from data loss is to start another node.
+
+	Starting a Second Node
+		To test what happens when you add a second node, you can start a new node in exactly the same way as you started the first one.
+
+		You can start this node (see “Running Elasticsearch” on page 5) from the same directory. Multiple nodes can share the same directory.
+
+		As long as the second node has the same cluster.name as the first node (see the ./config/elasticsearch.yml file).
+
+		The second node will automatically discover and join the cluster run by the first node.
+				If it doesn’t, check the logs to find out what went wrong. It may be that multicast is disabled on your network. 
+
+				It also could be hat a firewall is preventing your nodes from communicating.
+
+	The second node has joined the cluster, and three replica shards have been allocated to it —- one for each primary shard.
+
+	That means that we can lose either node, and all of our data will be intact.
+
+	The cluster-health now shows a status of 'green', which means that all six shards (all three primary shards and all three replica shards) are active.
+
+Scale Horizontally
+	What about scaling as the demand for our application grows? If we start a third node, our cluster reorganizes itself.
+
+	One shard each from Node 1 and Node 2 have moved to the new Node 3, and we have two shards per node, instead of three.
+
+	This means that the hardware resources (CPU, RAM, I/O) of each node are being shared among fewer shards, allowing each shard to perform better.
+
+	A shard is a fully fledged search engine in its own right, and is capable of using all of the resources of a single node.
+
+-->	With our total of six shards (three primaries and three replicas), our index is capable of scaling out to a maximum of six nodes, with one shard on each node and each shard having access to 100% of its node’s resources.
+
+	Then Scale Some More
+		But what if we want to scale our  ** search **  to more than six nodes?
+
+		The number of primary shards is fixed at the moment an index is created.
+
+		That number defines the maximum amount of data that can be 'stored' in the index.
+				The actual number depends on your data, your hardware and your use case.
+
+		Read requests—searches or document retrieval—can be handled by a primary or a replica shard, so the more copies of data that you have, the more search throughput you can handle.
+
+-->		The number of replica shards can be changed dynamically on a live cluster, allowing us to scale up or down as demand requires. Let’s increase the number of replicas from the default of 1 to 2:
+
+		The blogs index now has nine shards: three primaries and six replicas (two replicas for each primary). This means that we can scale out to a total of nine nodes, again with one shard per node.
+
+		This would allow us to triple search performance compared to our original three-node cluster.
+
+-->		Of course, just having more replica shards on the same number of nodes doesn’t increase our performance at all because each shard has access to a smaller fraction of its node’s resources. You need to add hardware to increase throughput.
+
+		But these extra replicas do mean that we have more redundancy: with the node configuration above, we can now afford to lose two nodes without losing any data.
+
+Coping with Failure
+	We’ve said that Elasticsearch can cope when nodes fail, so let’s go ahead and try it out. The node we killed was the primary node. 
+
+	A cluster must have a primary node in order to function correctly, so the first thing that happened was that the nodes elected a new primary: Node 2.
+
+	Primary shards 1 and 2 were lost when we killed Node 1, and our index cannot function properly if it is missing primary shards.
+
+-->	If we had checked the cluster health at this point, we would have seen status 'red': not all primary shards are active!
+
+	Fortunately, a complete copy of the two lost primary shards exists on other nodes.
+
+	The first thing that the new primary node did was to promote the replicas of these shards on Node 2 and Node 3 to be primaries, putting us back into cluster health 'yellow'.
+			Yellow: all primary shards are active, but not all replica shards are active.
+
+	This promotion process was instantaneous, like the flick of a switch. So why is our cluster health 'yellow' and not 'green'? 
+
+	We have all three primary shards, but we specified that we wanted two replicas of each primary, and currently only one replica is assigned.
+
+	This prevents us from reaching green, but we’re not too worried here: were we to kill Node 2 as well, our application could still keep running without data loss, because Node 3 contains a copy of every shard.
+
+	If we restart Node 1, the cluster would be able to allocate the missing replica shards, resulting in a state similar to the one described above.
+
+	By now, you should have a reasonable idea of how shards allow Elasticsearch to scale horizontally and to ensure that your data is safe. 
+
+	Later we will examine the life cycle of a shard in more detail.
+
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
