@@ -632,190 +632,82 @@ Analytics
 
 	Search needs to answer the question "Which documents contain this term?", while sorting and aggregations need to answer a different question: "What is the value of this field for this document?".
 
-	Most fields can use index-time, on-disk doc_values for this data access pattern, but text fields do not support doc_values. 
-			Instead, text fields use a query-time in-memory data structure called 'fielddata'. 
+	From what I gather things have changed dramatically between 5.0 and 6.2. I'm now reading about how to aggregate in 6.2: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations.html
 
-			This data structure is built on demand the first time that a field is used for aggregations, sorting, or in a script. 
+	Aggregations
+		The aggregations framework helps provide aggregated data based on a search query. Aggregations can be composed in order to build complex summaries of the data.
 
-			It is built by reading the entire inverted index for each segment from disk.
-					Relational databases add an index, such as a B-tree index, to specific columns in order to improve the speed of data retrieval. 
+		An aggregation can be seen as a unit-of-work that builds analytic information over a set of documents.
+				The context of the execution defines what this document set is.
 
-					Elasticsearch and Lucene use a structure called an 'inverted index' for exactly the same purpose.
+				For example, a top-level aggregation executes within the context of the executed query/filters of the search request.
 
-			The 'fielddata' is built by inverting the term ↔︎ document relationship, and storing the result in memory, in the JVM heap.
+		There are many different types of aggregations, each with its own purpose and output. 
 
-			Fielddata is disabled on text fields by default
-				Fielddata can consume a lot of heap space, especially when loading high cardinality 'text' fields. 
+		To better understand these types, it is often easier to break them into four main families: bucketing, metric, matrix, pipeline.
 
-				Once fielddata has been loaded into the heap, it remains there for the lifetime of the segment.
+				Bucketing
+					A family of aggregations that build buckets, where each bucket is associated with a key and a document criterion.
 
-				Also, loading fielddata is an expensive process which can cause users to experience latency hits
+					When the aggregation is executed, all the buckets criteria are evaluated on every document in the context.
 
-			This is why fielddata is disabled by default.
+					When a criterion matches, the document is considered to "fall in" the relevant bucket.
 
-			If you try to sort, aggregate, or access values from a script on a text field, you will see this exception:
-					Fielddata is disabled on text fields by default. Set fielddata=true on [your_field_name] in order to load fielddata in memory. 
+					By the end of the aggregation process, we’ll end up with a list of buckets.
 
-					You can load fielddata into memory by uninverting the inverted index. Note that this can however use significant memory.
+					Each list has a set of documents that "belong" to it.
 
-			Before enabling fielddata
-				Consider why you are using a text field for aggregations, sorting, or in a script before enabling fielddata. 
-						It usually doesn’t make sense to do so.
+				Metric
+					Aggregations that keep track and compute metrics over a set of documents.
 
-				A text field is analyzed before indexing so that a value like New York can be found by searching for new or for york.
+				Matix
+					A family of aggregations that operate on multiple fields. 
 
-				A 'terms' 'aggregation' on this field will return a 'new' bucket and a 'york' bucket, when you probably want a single bucket called 'New York'.
+					The operation produces a matrix result based on the values extracted from the requested document fields.
 
-				Instead, you should have a 'text' field for full text searches.
+					Unlike metric and bucket aggregations, this aggregation family does not yet support scripting.
 
-				And you should also have an unanalyzed 'keyword' field with 'doc_values' enabled for aggregations, as follows:
-						{
-						    "mappings": {
-						        "_doc": {
-						            "properties": {
-						                "my_field": {    			// m_yfield used for searches
-						                    "type": "text",
-						                    "fields": {  
-						                    	"keyword": {		// keyword used for aggregations, sorting or scripts
-						                    		"type": "keyword"
-					                    		} 
-					                    	}
-						                }
-						            }
-						        }
-						    }
-						}
+				Pipeline
+					Aggregations that aggregate the output of other aggregations and their associated metrics.
 
-			Enabling fielddata on text fields
-				You can enable fielddata on an existing text field using the PUT mapping API.
+		Since each bucket effectively defines a document set one can potentially associate aggregations on the bucket level.
 
-			Mapping - https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
-				Mapping is the process of defining how a document, and the fields it contains, are stored and indexed. For instance, use mappings to define:
-						- which string fields should be treated as full text fields.
-						- which fields contain numbers, dates, or geolocations.
-						- whether the values of all fields in the document should be indexed into the catch-all _all field.
-						- the format of date values.
-						- custom rules to control the mapping for dynamically added fields.
+		This is because each set of documents belongs to a bucket. The aggregations will execute within the context of a particular bucket.
 
-			Mapping type 
-				Each index has one 'mapping type' which determines how the document will be indexed. A mapping type has:
+		This is where the real power of aggregations kicks in: ** aggregations can be nested **!
 
-				Meta-fields - Meta-fields are used to customize how a document’s metadata associated is treated. Examples of meta-fields include the document’s _index, _type, _id, and _source fields.
+	I've skipped this part. There is a major disconnect between the book I'm reading, the 6.2.4 website, and the responses I'm getting.
 
-				Fields or properties - A mapping type contains a list of 'fields' or 'properties' pertinent to the document.
+Distributed Nature
+	Elasticsearch is distributed by nature, and it is designed to hide the complexity that comes with being distributed.
 
-			Field datatypes
-				- a simple type like text, keyword, date, long, double, boolean or ip.
-				- a type which supports the hierarchical nature of JSON such as object or nested.
-				- or a specialised type like geo_point, geo_shape, or completion.
+	It happily ran the tutorial on a single node living inside your laptop, but if you were to run the tutorial on a cluster containing 100 nodes, everything would work in exactly the same way.
 
-				It is often useful to index the same field in different ways for different purposes. 
+	ES partitions your documents into different containers or shards, which can be stored on a single node or on multiple nodes.
 
-				For instance, a string field could be indexed as a 'text' field for full-text search, and as a 'keyword' field for sorting or aggregations.
-						Alternatively, you could index a string field with the 'standard analyzer', the 'english analyzer', and the 'french analyzer'.
+	Balancing these shards across the nodes in your cluster to spread the indexing and search load.
 
-						https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-standard-analyzer.html
+	Duplicating each shard to provide redundant copies of your data, to prevent data loss in case of hardware failure.
 
-						https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-lang-analyzer.html#english-analyzer
+	Routing requests from any node in the cluster to the nodes that hold the data you’re interested in.
 
-						https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-lang-analyzer.html#french-analyzer
+	Seamlessly integrating new nodes as your cluster grows or redistributing shards to recover from node loss.
 
-			Settings to prevent mappings explosione
-				Defining too many fields can lead to a mapping explosion this is quite common with dynamic mappings. 
+	Supplemental chapters will teach you about how the cluster scales and deals with failover (Chapter 2), handles document storage (Chapter 4), executes distributed search (Chapter 9), and what a shard is and how it works (Chapter 11).
 
-				Every time a document contains new fields, those will end up in the index’s mappings. Mapping explosion can become a problem as the mapping grows.
+	They will provide insight that will make your knowledge of Elasticsearch more complete.
 
-			Dynamic mapping
-				Thanks to dynamic mapping, new field names will be added automatically, just by indexing (storing) a document.
+Next steps
+	The best way to learn Elasticsearch is by jumping in: just start indexing and searching! However, the more you know about Elasticsearch, the more productive you can become.
 
-				New fields can be added both to the top-level mapping type, and to inner object and nested fields.
+	Each chapter explains the essentials, but also includes expert-level tips. 
 
-				You know more about your data than Elasticsearch can guess, so while dynamic mapping can be useful to get started, at some point you will want to specify your own explicit mappings.
+	If you’re just getting started, these tips are probably not immediately relevant to you. You can always revisit these chapters later, when you are looking to improve performance by shaving off any wasted milliseconds.
 
-				You can create field mappings when you create an index.
-						https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html
-
-						The create index API allows to instantiate an index. An 'index' is like a database in a traditional relational database.
-
-						Each index created can have specific settings associated with it. 
-
-				The create 'index' API allows to provide a type (type is like a table in a relational database) mapping:
-						PUT test
-						{
-						    "settings" : {
-						        "number_of_shards" : 1
-						    },
-						    "mappings" : {
-						        "type1" : {
-						            "properties" : {
-						                "field1" : { "type" : "text" }
-						            }
-						        }
-						    }
-						}
-
-			Updating existing field mappings
-				Other than where documented, existing field mappings cannot be updated. Changing the mapping would mean invalidating already indexed documents. Instead, you should create a new index (database) with the correct mappings and reindex your data into that index (database).
-
-			Example mapping
-				PUT my_index // Create an index called my_index
-				{
-				  "mappings": {
-				    "doc": { // Add a mapping type called doc.
-				      "properties": {  // Specify fields or properties.
-				        "title":    { "type": "text"  },    // Specify the data type and mapping for each field.
-				        "name":     { "type": "text"  },    // Specify the data type and mapping for each field.
-				        "age":      { "type": "integer" },  // Specify the data type and mapping for each field.
-				        "created":  {
-				          "type":   "date", 
-				          "format": "strict_date_optional_time||epoch_millis"
-				        }
-				      }
-				    }
-				  }
-				}
+	
 
 
 
-
-
-
-
-
-
-
-
-
-curl -XPUT 'localhost:9200/megacorp/employee/_doc?pretty' -H 'Content-Type: application/json' -d'
-{
-  "properties": {
-    "my_field": { 
-      "type":     "text",
-      "fielddata": true
-    }
-  }
-}
-'
-
-curl -i -XPUT -H "content-type: application/json; charset=UTF-8" --user elastic:cfu0blVplXHcUnOkX74u 'http://localhost:9200/megacorp/employee/4?pretty' -d '{"first_name":"Fatima","last_name":"Baraka","age":32,"about":"I like to collect rock albums","interests":["music"]}'
-
-
-
-curl -XPUT 'localhost:9200/twitter?pretty' -H 'Content-Type: application/json' -d'
-{}
-'
-curl -XPUT 'localhost:9200/twitter/_mapping/_doc?pretty' -H 'Content-Type: application/json' -d'
-{
-  "properties": {
-    "email": {
-      "type": "keyword"
-    }
-  }
-}
-'
-
-
-	For example, let’s find the most popular interests enjoyed by our employees:
 
 
 
