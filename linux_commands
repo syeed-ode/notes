@@ -11,3 +11,7 @@ wget -r --no-parent --reject "index.html*" --reject "ch01*" http://python.itcarl
 
 *****CONVERT LOWER CASER TO UPPER CASE (YOU MUST TOGGLE ON [\U] AND OFF [|E])**********
 cat *Resp* | sed -n 's/\(this\..* = \)\(.\)\(.*\);/\1builder\.get\U\2\E\3();/p'
+
+
+*****REMOVE NEW LINES & WHITESPACE**********
+cat ~/junk/junk.json | sed -e ':a;N;$!ba;s/\n//g' | tr -d "[:space:]";echo
