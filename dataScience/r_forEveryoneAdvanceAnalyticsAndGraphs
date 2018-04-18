@@ -1,0 +1,20 @@
+
+*************************************************************
+R for Everyone: Advanced Analytics and Graphi… (Kindle Edition)
+*************************************************************
+******               Preface Quick Notes               ******
+*************************************************************
+With the increasing prevalence of data in our daily lives, new and better tools are needto analyze the deluge.
+
+Traditionally there ahve been two ends of the spectrum: lightweight, individual analysis using tools like Excel or SPSS, and heavy duty, high-performance analysius built with C++ and the like.
+
+Analysis done by an individual on his or her computer is the domain of R, Python and other scripted languages.
+
+R is a high-level language that was originally intented to be run interactively, where the user runs a command, gets a result, and then runs another command. 
+
+It has since evolved int a language that can tackle complex problems.
+
+In addition to transforming and analyziang data, R can produce amazing graphics and reports with ease.
+
+It is now being used as a full stack for data analsysis, extracting and transforming data, fitting models, drawing inferences and making predictions, plotting and reporting results.
+

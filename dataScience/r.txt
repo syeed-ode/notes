@@ -1,0 +1,17 @@
+*************************************************************
+*************************************************************
+*	Relational DB ⇒ Databases ⇒ Tables ⇒ Rows      ⇒ Columns
+*	Elasticsearch ⇒ Indices   ⇒ Types  ⇒ Documents ⇒ Fields
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 111 -  128
+*************************************************************
+R for Everyone: Advanced Analytics and Graphi… (Kindle Edition)
+*************************************************************
+******        Chapter 6 - Mapping and Analysis         ******
+******        Chapter 6 - Mapping and Analysis         ******
+*************************************************************
+Taken from R for Everyone: Advanced Analytics and Graphi… (Kindle Edition)

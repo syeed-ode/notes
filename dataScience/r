@@ -1,0 +1,65 @@
+*************************************************************
+*************************************************************
+*	Relational DB ⇒ Databases ⇒ Tables ⇒ Rows      ⇒ Columns
+*	Elasticsearch ⇒ Indices   ⇒ Types  ⇒ Documents ⇒ Fields
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 111 -  128
+*************************************************************
+https://www.researchgate.net/post/What_is_the_difference_between_SPSS_R_and_STATA_software
+*************************************************************
+*What is the difference between SPSS, R and  STATA software?*
+*************************************************************
+Highlevel comments about R
+	Personally, I prefer R. Learning two frameworks would be too much trouble, and SPSS only would not suffice for me.
+
+	The main drawback of R is the learning curve: you need a few weeks just to be able to import data and create a simple plot.
+
+	To make it worse you will not cease learning basic operations (e.g. for plotting) for many years.
+			You will stumble upon weirdest problems all the time because you have missed the comma. 
+
+			Maybe you'll encoutner a problem because your data frame collapses to a vector if only one row is selected.
+
+	However, once you mastered this, you will have the full arsenal of modern cutting-edge statistical techniques at your disposal. 
+			This includes along with in-depth manuals, references, specialized packages, graphical interface, a helpful community 
+
+			This all comes at no cost.
+
+			Also, you will be able to do stunning graphics.
+
+	That said, learning statistics is way more important than learning R or SPSS or whatever else.
+			An easy to use graphical interface is deceitful, if you do not understand what it really does.
+
+			I have seen people doing complex analyses without really understanding basic concepts of statistics.
+
+			They thought that they got the correct results, but in fact were doing terrible things.
+
+	R is helpful in the sense that it is hard to do something if you don't understand what you want (or need) to do. 
+
+Difference between R and STATA
+	
+
+
+
+*************************************************************
+R for Everyone: Advanced Analytics and Graphi… (Kindle Edition)
+*************************************************************
+******               Preface Quick Notes               ******
+*************************************************************
+With the increasing prevalence of data in our daily lives, new and better tools are needto analyze the deluge.
+
+Traditionally there ahve been two ends of the spectrum: lightweight, individual analysis using tools like Excel or SPSS, and heavy duty, high-performance analysius built with C++ and the like.
+
+Analysis done by an individual on his or her computer is the domain of R, Python and other scripted languages.
+
+R is a high-level language that was originally intented to be run interactively, where the user runs a command, gets a result, and then runs another command. 
+
+It has since evolved int a language that can tackle complex problems.
+
+In addition to transforming and analyziang data, R can produce amazing graphics and reports with ease.
+
+It is now being used as a full stack for data analsysis, extracting and transforming data, fitting models, drawing inferences and making predictions, plotting and reporting results.
+
