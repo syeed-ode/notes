@@ -1,0 +1,215 @@
+	                                                                   |
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 103 -  110
+*************************************************************
+******   Chapter 5 - Searching  -—  The Basic Tools    ******
+*************************************************************
+The real power of Elasticsearch lies in its ability to make sense out of chaos —- to turn Big Data into Big Information.
+
+Elasticsearch not only stores the document, but also indexes the content of the document in order to make it searchable.
+
+'Every field in a document is indexed and can be queried.' A 'search' can be any of the following:
+		• A structured query on concrete fields like gender or age, sorted by a field like join_date, similar to the type of query that you could construct in SQL
+		• A full-text query, which finds all documents matching the search keywords, and returns them sorted by relevance
+		• A combination of the two
+
+While many searches will just work out of the box, to use Elasticsearch to its full potential, you need to understand three subjects:
+		
+Mapping
+	How the data in each field is interpreted
+
+Analysis
+	How full text is processed to make it searchable
+
+Query DSL
+	The flexible, powerful query domain specific language used by Elasticsearch
+
+The chapters in this section introduce the basic concepts of all three -— just enough to help you to get an overall understanding of how search works.
+
+The Empty Search
+	The most basic form of the search API is the empty search, which doesn’t specify any query but simply returns all documents in all indices in the cluster:
+
+hits
+	The most important section of the response is 'hits', which contains the total number of documents that matched our query. 
+
+	There is also a 'hits' array containing the first 10 of those matching documents -— the results.
+
+	Each result in the hits array contains the _index, _type, and _id of the document, plus the _source field. 
+			This means that the whole document is immediately available to us directly from the search results.
+
+	Each element also has a _score. This is the 'relevance score', which is a measure of how well the document matches the query.
+
+	The 'max_score' value is the highest _score of any document that matches our query.
+
+took
+	The took value tells us how many milliseconds the entire search request took to execute.
+
+shards
+	The '_shards' element tells us the 'total' number of shards that were involved in the query and, of them, how many were 'successful' and how many 'failed'.
+
+	If we were to suffer a major disaster in which we lost both the primary and the replica copy of the same shard, there would be no copies of that shard available to respond to search requests.
+
+	Elasticsearch would report the shard as 'failed', but continue to return results from the remaining shards.
+
+timeout
+	The timed_out value tells us whether the query timed out. By default, search requests do not time out. If low response times are more important to you than complete results, you can specify a timeout as 10 or 10ms (10 milliseconds), or 1s (1 second):
+			GET /_search?timeout=10ms
+
+	Use the time-out because it is important to your SLA, not because you want to abort the execution of long-running queries.
+
+Multi-index, Multitype
+	By not limiting our search to a particular index or type, we have searched across all documents in the cluster.
+
+	Elasticsearch forwarded the search request in parallel to a primary or replica of every shard in the cluster. 
+
+	Then it gathered the results to select the overall top 10, and returned them to us.
+
+	Usually, however, you will want to search within one or more specific indices, and probably one or more specific types.
+			/_search
+				Search all types in all indices
+			/gb/_search
+				Search all types in the gb index
+			/gb,us/_search
+				Search all types in the gb and us indices
+			/g*,u*/_search
+				Search all types in any indices beginning with g or beginning with u
+			/gb/user/_search
+				Search type user in the gb index
+			/gb,us/user,tweet/_search
+				Search types user and tweet in the gb and us indices
+			/_all/user,tweet/_search
+				Search types user and tweet in all indices
+	
+	When you search within a single index, Elasticsearch forwards the search request to a primary or replica of every shard in that index.
+
+	Searching one index that has five primary shards is 'exactly equivalent' to searching five indices that have one primary shard each.
+
+Pagination
+	Our preceding empty search told us that 14 documents in the cluster match our (empty) query.
+
+	<Skipped>
+
+Search Lite
+	There are two forms of the search API:
+		a “lite” query-string version that expects all its parameters to be passed in the query string
+
+		the full request body version that expects a JSON request body and uses a rich search language called the query DSL.
+
+	The query-string search is useful for running ad hoc queries from the command line. For instance, this query finds all documents of type tweet that contain the word 'elasticsearch' in the 'tweet' field:
+			GET /_all/tweet/_search?q=tweet:elasticsearch
+
+	The next query looks for john in the name field and mary in the tweet field. The actual query is just
+			+name:john +tweet:mary
+
+	But the 'percent encoding' needed for query-string parameters makes it appear more cryptic than it really is:
+			- GET /_search?q=%2Bname%3Ajohn+%2Btweet%3Amary
+			- https://www.urldecoder.org/
+			- (decoded) _search?q=+name:john++tweet:mary&pretty
+
+	The + prefix indicates conditions that 'must' be satisfied for our query to match. Similarly a - prefix would indicate conditions that 'must not' match.
+			All conditions without a + or - are optional—the more that match, the more relevant the document.
+
+The _all Field
+	This simple search returns all documents that contain the word 'mary':
+			GET /_search?q=mary
+
+	The results from this query mention mary in three fields:
+			• A user whose name is Mary
+			• Six tweets by Mary
+			• One tweet directed at @mary
+
+	How has Elasticsearch managed to find results in three different fields? When you index a document. 
+
+	Elasticsearch takes the string values of all of its fields and concatenates them into one big string.
+			Then it indexes as the special _all field. For example, when we index this document:
+					{
+					 "tweet": "However did I manage before Elasticsearch?",
+					 "date": "2014-09-14",
+					 "name": "Mary Jones",
+					 "user_id": 1
+					}
+
+			It’s as if we had added an extra field called _all with this value:
+					"However did I manage before Elasticsearch? 2014-09-14 Mary Jones 1"
+
+	The query-string search uses the _all field unless another field name has been specified.
+
+	The _all field is a useful feature while you are getting started with a new application. 
+
+	Later, you will find that you have more control over your search results if you query specific fields instead of the _all field. 
+
+	When the _all field is no longer useful to you, you can disable it, as explained in “Metadata: _all Field” on page 142.
+
+More Complicated Queries
+	The next query searches for tweets, using the following criteria:
+		• The name field contains mary or john
+		• The date is greater than 2014-09-10
+		• The _all field contains either of the words aggregations or geo
+				+name:(mary john) +date:>2014-09-10 +(aggregations geo)
+
+		As a properly encoded query string, this looks like the slightly less readable result:
+				?q=%2Bname%3A(mary+john)+%2Bdate%3A%3E2014-09-10+%2B(aggregations+geo)
+
+		As you can see from the preceding examples, this lite query-string search is surprisingly powerful. 
+
+		Its query syntax, which is explained in detail in the Query String Syntax reference docs, allows us to express quite complex queries succinctly.
+
+		However, you can also see that its terseness can make it cryptic and difficult to debug. And it’s fragile—a slight syntax error in the query string, such as a misplaced -, :, /, or ", and it will return an error instead of results.		
+
+		Finally, the query-string search allows any user to run potentially slow, heavy queries on any field in your index, possibly exposing private information or even bringing your cluster to its knees!
+				For these reasons, we don’t recommend exposing query-string searches directly to your users, unless they are power users who can be trusted with your data and with your cluster.
+
+-->		Instead, in production we usually rely on the full-featured request body search API, which does all of this, plus a lot more. 
+
+		Before we get there, though, we first need to take a look at how our data is indexed in Elasticsearch.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
