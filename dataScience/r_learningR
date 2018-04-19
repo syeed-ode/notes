@@ -1,0 +1,380 @@
+	                                                                   |
+*************************************************************
+*************************************************************
+* Relational DB ⇒ Databases ⇒ Tables ⇒ Rows      ⇒ Columns
+* Elasticsearch ⇒ Indices   ⇒ Types  ⇒ Documents ⇒ Fields
+*************************************************************
+*************************************************************
+*							    *
+*							    *
+*							    *
+pg 111 -  128
+*************************************************************
+******            Chapter 1 - Introduction             ******
+*************************************************************
+R is a programming language and a software environment for data analysis and statistics. It is a GNU project, which means that it is free, open source software.
+
+R is used in almost every area where statistics or data analyses are needed. Finance, marketing, pharmaceuticals, genomics, epidemiology, social sciences, and teaching are all covered, as well as dozens of other smaller domains.
+
+Chapter Goals
+	After reading this chapter, you should:
+	• Know some things that you can use R to do
+	• Know how to install R and an IDE to work with it
+	• Be able to write a simple program in R
+	• Know how to get help in R
+
+	What Is R?
+		Just to confuse you, R refers to two things. There is R, the programming language, and R, the piece of software that you use to run programs written in R.
+
+		Fortunately, most of the time it should be clear from the context which R is being referred to.
+
+		R is an interpreted language (sometimes called a scripting language), which means that your code doesn’t need to be compiled before you run it.
+				R supports a mixture of programming paradigms. 
+
+				At its core, it is an imperative language (you write a script that does one calculation after another). 
+
+				But it also supports objectoriented programming (data and functions are combined inside classes). 
+
+				And it supports functional programming (functions are first-class objects; you treat them like any other variable, and you can call them recursively).
+
+Installing R
+	To install R you must first go to http://www.r-project.org. 
+
+	Click the link that says “download R” in the “Getting Started” pane at the bottom of the page.
+
+	Once you’ve chosen a mirror close to you, choose a link in the “Download and Install R” pane at the top of the page that’s appropriate to your operating system.
+
+	After that there are one or two OS-specific clicks that you need to make to get to the download.
+
+	https://cran.cnr.berkeley.edu/
+
+Choosing an IDE
+	If you use R under Windows or Mac OS X, then a graphical user interface (GUI) is available to you.
+
+	If you aren’t already wedded to a particular editor, then I suggest that you’ll get the best experience of R by using an integrated development environment (IDE).
+
+	You get all the facilities of the stock R GUI, but with a better editor, and in some cases things like integrated version control.
+
+Your First Program
+	We’re going to write the simplest statistical program possible. Open up R GUI, or whichever IDE you’ve decided to use, find the command prompt (in the code editor window), and type:
+			> mean(1:5)
+				[1] 3
+			> 
+
+	The colon operator, :, creates a sequence of numbers from the first number, in this case 1, to the second number (5), each separated by 1.
+
+	The resulting sequence is called a 'vector'. The vector that we enclose inside the parentheses is called an argument to the function.
+	
+	'mean' is a function (that calculates the arithmetic mean), Well done! You’ve calculated a statistic using R.
+
+How to Get Help in R
+	There are lots of ways to get help, which is the most important thing to know.
+
+	Firstly, if you want help on a function or a dataset that you know the name of, type '?' followed by the name of the function.
+			> ?mean
+			> ?"+"
+					Arithmetic Operators
+
+					Description
+
+					These unary and binary operators perform arithmetic on numeric or complex vectors (or objects which can be coerced to them).
+			> 
+
+	To find functions, type two question marks (??) followed by a keyword related to the problem to search.
+			> ??plotting
+					Search Results [R logo]
+
+					[Top]
+					Help pages:
+
+					base::expression		Unevaluated Expressions
+					base::jitter		'Jitter' (Add Noise) to Numbers
+					base::pretty		Pretty Breakpoints
+					boot::envelope		Confidence Envelopes for Curves
+			> ??"regression model"
+					Search Results [R logo]
+
+					[Top]
+					Help pages:
+
+					stats::NLSstAsymptotic		Fit the Asymptotic Regression Model
+					stats::SSasymp		Self-Starting Nls Asymptotic Regression Model
+					stats::SSasympOff		Self-Starting Nls Asymptotic Regression Model with an Offset
+					stats::SSasympOrig		Self-Starting Nls Asymptotic Regression Model through the Origin
+					stats::ar		Fit Autoregressive Models to Time Series
+
+	The functions 'help' and 'help.search' do the same things as '?' and '??', respectively, but with these you always need to enclose your arguments in quotes.
+			help("mean")
+			help("+")
+			help("if")
+			help.search("plotting")
+			help.search("regression model")
+
+	The 'apropos' function4 finds variables (including functions) that match its input.
+			'apropos' is Latin for “A Unix program that finds manpages.”
+
+	This is really useful if you can only half-remember the name of a variable that you’ve created, or a function that you want to use. 
+
+	For example, suppose you create a variable a_vector:
+			a_vector <- c(1, 3, 6, 10)
+
+	You can then recall this variable using apropos:
+			apropos("vector")			
+					> apropos("vector")
+						[1] ".rs.formCompletionVector" ".rs.namedVectorAsList"    "a_vector"                
+						[4] "as.data.frame.vector"     "as.vector"                "as.vector.factor"        
+						[7] "is.vector"                "vector"                   "Vectorize"               
+					> 
+
+	The results contain the variable you just created, 'a_vector', and all other variables that contain the string 'vector'. In this case, all the others are functions that are built into R.
+
+	Just finding variables that contain a particular string is fine, but you can also do fancier matching with apropos using regular expressions.
+			Regular expressions are a cross-language syntax for matching strings. 
+
+			The details will only be touched upon in this book, but you need to learn to use them; they’ll change your life. 
+
+			Start at http://www.regular-expressions.info/quickstart.html, and then try Michael Fitzgerald’s Introducing Regular Expressions.
+
+	A simple usage of apropos could, for example, find all variables that end in 'z', or to find all variables containing a number between 4 and 9:
+			> apropos("z$")
+			> apropos("z$")
+				[1] ".rs.disableQuartz" "quartz"            "SSgompertz"        "toeplitz"         
+				[5] "unz"              
+			> apropos("[4-9]")
+
+	Most functions have 'examples' that you can run to get a better idea of how they work. 
+			> example(plot)
+				plot> require(stats) # for lowess, rpois, rnorm
+				plot> plot(cars)
+			Hit <Return> to see next plot: 
+
+	Use the 'example' function to run these. There are also some longer demonstrations of concepts that are accessible with the demo function:
+			> demo()
+			> 
+				# This opens in the demo windo
+				Demos in package ‘base’:
+
+				error.catching               More examples on catching and handling errors
+				is.things                    Explore some properties of R objects and is.FOO()
+				                             functions. Not for newbies!
+				recursion                    Using recursion for adaptive integration
+				scoping                      An illustration of lexical scoping.
+
+				Demos in package ‘graphics’:
+
+				Hershey                      Tables of the characters in the Hershey vector fonts
+				Japanese                     Tables of the Japanese characters in the Hershey vector
+				                             fonts
+				graphics                     A show of some of R's graphics capabilities
+				image                        The image-like graphics builtins of R
+				persp                        Extended persp() examples
+				plotmath                     Examples of the use of mathematics annotation
+
+	Here is another example of how to demo Japanese
+			> demo(Japanese)
+
+
+				demo(Japanese)
+				---- ~~~~~~~~
+
+			Type  <Return>	 to start : 
+					> #  Copyright (C) 2003-2009 The R Core Team
+					> 
+					> require(grDevices); require(graphics)
+					> ## --- Japanese characters in the Hershey Vector Fonts
+					> 
+					> ######
+					> # create tables of Japanese characters
+					> ######
+					> make.table <- function(nr, nc) {
+					+     opar <- par(mar=rep(0, 4), pty="s")
+					+     plot(c(0, nc*(10%/%nc) + 1), c(0, -(nr + 1)),
+					+          type="n", xlab="", ylab="", axes=FALSE)
+					+     invisible(opar)
+					+ }
+					> get.r <- function(i, nr)   i %% nr + 1
+					> get.c <- function(i, nr)   i %/% nr + 1
+					> Esc2 <- function(str)	   paste("\\", str, sep="")
+					> draw.title <- function(title, nc)
+					+     text((nc*(10%/%nc) + 1)/2, 0, title, font=2)
+					> draw.vf.cell <- function(typeface, fontindex, string, i, nr, raw.string=NULL) {
+					+     r <- get.r(i, nr)
+					+     c <- get.c(i, nr)
+					+     x0 <- 2*(c - 1)
+					+     if (is.null(raw.string)) raw.string <- Esc2(string)
+					+     text(x0 + 1.1, -r, raw.string, col="grey")
+					+     text(x0 + 2,   -r, string, vfont=c(typeface, fontindex))
+					+     rect(x0 +  .5, -(r - .5), x0 + 2.5, -(r + .5), border="grey")
+					+ }
+					> draw.vf.cell2 <- function(string, alt, i, nr) {
+					+     r <- get.r(i, nr)
+					+     c <- get.c(i, nr)
+					+     x0 <- 3*(c - 1)
+					+     text(x0 + 1.1, -r, Esc2(string <- Esc2(string)), col="grey")
+					+     text(x0 + 2.2, -r, Esc2(Esc2(alt)), col="grey", cex=.6)
+					+     text(x0 + 3,   -r, string, vfont=c("serif", "plain"))
+					+     rect(x0 +  .5, -(r - .5), x0 + 3.5, -(r + .5), border="grey")
+					+ }
+					> tf <- "serif"
+					> fi <- "plain"
+					> nr <- 25
+					> nc <- 4
+					> oldpar <- make.table(nr, nc)
+
+	R is modular and is split into 'packages' (more on this later), some of which contain 'vignettes'. 
+
+	'Vignettes' are short documents on how to use the packages.
+
+	You can browse all the vignettes on your machine using 'browseVignettes':
+			> browseVignettes()
+			> 
+
+			http://127.0.0.1:24994/session/Rvig.af5b6928c8a8.html
+			Vignettes in package grid
+				Demonstrating move-to and line-to - PDF  source  R code 
+				Display Lists in grid - PDF  source  R code 
+				Editing grid Graphics - PDF  source  R code 
+				Frames and packing grobs - PDF  source  R code 
+				Introduction to grid - PDF  source  R code 
+				Locations versus Dimensions - PDF  source  R code 
+				Writing grid Code - PDF  source  R code 
+			Vignettes in package Matrix
+				2nd Introduction to the Matrix Package - PDF  source  R code 
+				Sparse Model Matrices - PDF  source  R code 
+			Vignettes in package parallel
+				Package 'parallel' - PDF  source  R code 
+			Vignettes in package rpart
+				Introduction to Rpart - PDF  source  R code 
+				User Written Split Functions - PDF  source  R code 
+			Vignettes in package survival
+				Adjusted Survival Curves - PDF  source  R code 
+				Cox models and ``type 3'' Tests - PDF  source  R code 
+				Multi-state example - PDF  source  R code 
+
+	You can also access a specific vignette using the 'vignette' function. 
+			vignette("Sweave", package = "utils")
+			#
+			# opened up /Library/Frameworks/R.framework/Versions/3.4/Resources/library/utils/doc/Sweave.pdf
+					Sweave User Manual
+					Friedrich Leisch and R-core
+					March 15, 2018				
+	Using browseVignettes combined with a page search is easier than trying to remember the name of a vignette and which package it’s in.
+
+	The help search operator '??' and 'browseVignettes' will only find things in packages that you have installed on your machine.
+
+	If you want to look in any package, you can use 'RSiteSearch', which runs a query at http://search.r-project.org. Multiword terms need to be wrapped in braces:
+			> RSiteSearch("{Bayesian regression}")
+				A search query has been submitted to http://search.r-project.org
+				The results page should open in your browser shortly
+				#
+				http://search.r-project.org/cgi-bin/namazu.cgi?query=%7BBayesian%2Bregression%7D&max=20&result=normal&sort=score&idxname=functions&idxname=vignettes&idxname=views
+				R Site Search
+				Query:  {Bayesian+regression} Search: [How to search]
+				Display:  <20> Description:  <normal> Sort: <by score>
+
+				Target: 
+				 	x Functions 
+				 	x Task views
+
+				For problems WITH THIS PAGE (not with R) contact baron@upenn.edu.
+
+				Results:
+					References:
+						• views: [ {Bayesian+regression}: 0 ]
+						• vignettes: [ (can't open the index) ]
+						• functions: [ {Bayesian+regression}: 0 ]
+					
+					No document matching your query.
+
+				Tips on searching
+
+	Learning to help yourself is extremely important. Think of a keyword related to your work and try '?', '??', 'apropos', and 'RSiteSearch' with it.
+
+	There are also lots of R-related resources on the Internet that are worth trying. There are too many to list here, but start with these:
+		• R has a number of mailing lists with archives containing years’ worth of questions on the language. At the very least, it is worth signing up to the general-purpose list, 'R-help'	.
+				• See https://www.r-project.org/posting-guide.html
+				• See https://stat.ethz.ch/mailman/listinfo/r-help
+						• https://www.r-project.org/mail.html
+
+		• RSeek is a web search engine for R that returns functions, posts from the R mailing list archives, and blog posts. 
+				• https://rseek.org/
+		• R-bloggers is the main R blogging community, and the best way to stay up to date with news and tips about R.
+				• https://www.r-bloggers.com/
+		• The programming question and answer site Stack Overflow also has a vibrant R community, providing an alternative to the R-help mailing list. You also get points and badges for answering questions!
+
+Installing Extra Related Software
+	Under Linux, your package manager should be able to retrieve them. 
+
+	Under Windows, you can use the installr add-on package to automatically install these extra pieces of software. 
+
+	None of this software is compulsory, but it’s worth knowing that the package exists when you come to need the additional software.
+
+	Installing and loading packages is discussed in detail in Chapter 10, so don’t worry if you don’t understand the commands yet:
+			• install.packages("installr") #download and install the package named installr
+			• library(installr) #load the installr package
+			• install.RStudio() #download and install the RStudio IDE
+			• install.Rtools() #Rtools is needed for building your own packages
+			• install.git() #git provides version control for your code
+
+Summary
+	• R is a free, open source language for data analysis.
+	• It’s also a piece of software used to run programs written in R.
+	• You can download R from http://www.r-project.org.
+	• You can write R code in any text editor, but there are several IDEs that make development easier.
+	• You can get help on a function by typing ? then its name.
+	• You can find useful functions by typing ?? then a search string, or by calling the apropos function.
+	• There are many online resources for R.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
