@@ -723,11 +723,6 @@ Multilevel Objects
 			   }
 			}
 
-
-929-389-8944
-MLT
-
-
 Mapping for Inner Objects
 	Elasticsearch will detect new object fields dynamically and map them as 'type' object, with each inner field listed under 'properties':
 			{
@@ -804,6 +799,13 @@ Arrays of Inner Objects
 	But we can’t get an accurate answer to this: “'Is there a follower who is 26 years old and who is called Alex Jones'?”
 
 	Correlated inner objects, which are able to answer queries like these, are called 'nested' objects, and we cover them later, in Chapter 41, Nested Objects. 
+
+
+
+
+
+
+
 
 
 
