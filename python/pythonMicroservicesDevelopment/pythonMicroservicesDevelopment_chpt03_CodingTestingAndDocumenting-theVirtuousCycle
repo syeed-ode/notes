@@ -76,6 +76,13 @@ Different kinds of tests
 
 				Flask includes a FlaskClient class to build requests, which can be instantiated directly from the app object via its test_client() method. pg85
 
+		Integration tests
+				Integration tests are functional tests without any mocking, and should be able to run on a real deployment of your application.
+
+		Load Tests
+		
+		End-to-end tests
+
 
 
 
