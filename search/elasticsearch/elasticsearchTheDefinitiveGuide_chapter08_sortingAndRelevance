@@ -296,9 +296,9 @@ String Sorting and Multields (pg114; pg 147, pdf)
 	Sorting on a full-text analyzed field can use a lot of memory. See “Fielddata” on page 119 (Chapter 8, Sorting and Relevance) for more information.
 
 What Is Relevance?
-	The relevance score of each document is represented by a positive floating-point number called the _score. The higher the _score, the more relevant the document.
+	The relevance score of each document is represented by a positive floating-point number called the '_score'. The higher the '_score', the more relevant the document.
 
-	A query clause generates a _score for each document. 
+	A query clause generates a '_score' for each document. 
 			A 'fuzzy' query might determine the '_score' by calculating how similar the spelling of the found word is to the original search term.
 
 			A 'terms' query would incorporate the percentage of terms that were found.
@@ -311,6 +311,11 @@ What Is Relevance?
 
 	Term Frequency / Inverse Document Frequency (TF/IDF)
 		Term frequency
+			How often does the term appear in the field? The more often, the more relevant. 
+
+			A field containing five mentions of the same term is more likely to be relevant than a field containing just one mention.
+
+		Inverse document frequency
 			
 
 
