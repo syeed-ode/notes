@@ -1,17 +1,11 @@
 	                                                                   |
 	                                                                   |
 *******************************************************************
-When you decorate a function with it, it becomes a view, and it's 
-registered into Werkzeug's routing system.
-*******************************************************************
-*******************************************************************
 *							    *
 *							    *
 *							    *
-toc: 
-pg 285 - 310
 *******************************************************************
-*******           Chapter 11 - Deploying on AWS             *******
+*******         Blockchain Technology White Paper           *******
 *******************************************************************
 distributed consensus model
 distributed consensus​
