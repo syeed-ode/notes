@@ -15,3 +15,12 @@ cat *Resp* | sed -n 's/\(this\..* = \)\(.\)\(.*\);/\1builder\.get\U\2\E\3();/p'
 
 *****REMOVE NEW LINES & WHITESPACE**********
 cat ~/junk/junk.json | sed -e ':a;N;$!ba;s/\n//g' | tr -d "[:space:]";echo
+
+
+*****START UBUNTU******
+docker run -it ubuntu bash
+
+
+
+*****MAKE ******
+1. Running the 'configure' script. 2. Running the 'make' command. 3. Running the 'make install' command.

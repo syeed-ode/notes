@@ -1,0 +1,207 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+- Lambda Functions: Building Lambda Functions: Programming Mode (60)
+- Lambda Functions: Building Lambda Functions: Creating Functions Using the AWS Lambda Console Editor (25)
+- Use Case: AWS S3 (16)
+- Use Case: AWS CloudTrail (15)
+- Use Case: Amazon API Gateway: (14)
+- Use Case: Amazon API Gateway: Using AWS Lambda with Amazon API Gateway (On-Demand Over HTTPS): (13)
+- Use Case: Amazon DynamoDB (11)
+- Administering Lambda-based Applications (first page)
+- Advanced Topics
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 3 - 6
+pg 24 - 84
+*******************************************************************
+*******            AWS Lambda - Getting Started             *******
+*******************************************************************
+In this section, we introduce you to the fundamental concepts of a typical Lambda-based application.
+
+We also list the options available to create and test your applications, which are Lambda-based.
+
+We include instructions on installing the necessary tools to complete the tutorials included in this guide and create your first Lambda function.
+
+Building Blocks of a Lambda-based Application
+	• Lambda function
+		The foundation, it is comprised of your custom code and any dependent libraries. For more information, see Lambda Functions (p. 15).
+	• Event source
+		An AWS service, such as Amazon SNS, or a custom service, that triggers your function and executes its logic. For more information, see Event Source Mapping (p. 150).
+	• Downstream resources
+		An AWS service, such DynamoDB tables or Amazon S3 buckets, that your Lambda function calls once it is triggered.
+	• Log streams
+		While Lambda automatically monitors your function invocations and reports metrics to CloudWatch, you can annotate your function code with custom logging statements that allow you to analyze the execution flow and performance of your Lambda function to ensure it's working properly.
+	• AWS SAM
+		A model to define serverless applications. AWS SAM is natively supported by AWS CloudFormation and defines simplified syntax for expressing serverless resources. For more information, see Using the AWS Serverless Application Model (AWS SAM) (p. 299)
+
+Tools to Create and Test Lambda-based Applications
+	There are three key tools that you use to interact with the AWS Lambda service.
+		• Lambda Console: Provides a way for you to graphically design your Lambda-based application, author or update your Lambda function code, and configure event, downstream resources and IAM permissions that your function requires. It also includes advanced configuration options, outlined in Advanced Topics (p. 379).
+		• AWS CLI: A command-line interface you can use to leverage Lambda's API operations, such as creating functions and mapping event sources. For a full list of Lambda's API operations, see Actions (p. 399).
+		• SAM CLI: A command-line interface you can use to develop, test, and analyze your serverless applications locally before uploading them to the Lambda runtime. For more information, see Test Your Serverless Applications Locally Using SAM CLI (Public Beta) (p. 100).
+
+Set Up an AWS Account
+
+Create an IAM User
+	Services in AWS, such as AWS Lambda, require that you provide credentials when you access them.
+
+	This is so the service can determine whether you have permissions to access the resources owned by that service.
+
+	The console requires your password. 
+		You can create access keys for your AWS account to access the AWS CLI or API.
+
+		However, we don't recommend that you access AWS using the credentials for your AWS account.
+
+		Instead, we recommend that you use AWS Identity and Access Management (IAM) to access AWS.
+
+		Create an IAM user, add the user to an IAM group with administrative permissions, and then grant administrative permissions to the IAM user that you created. 
+
+		You can then access AWS using a special URL and that IAM user's credentials.Identity and Access Management (IAM) - Amazon Web Services (AWS)
+
+		Creating an Administrator IAM User and Group (Console)
+			This procedure describes how to use the AWS Management Console to create an IAM user for yourself. 
+
+			Afterward it shows how to add that user to a group that has administrative permissions from an attached managed policy.
+
+			To create an administrator user for yourself and add the user to an administrators group (console)
+					4. Select the check box next to AWS Management Console access, select Custom password, and then type your new password in the text box. If you're creating the user for someone other than yourself, you can optionally select Require password reset to force the user to create a new password when first signing in.
+					5. Choose Next: Permissions.
+					6. On the Set permissions for user page, choose Add user to group.
+					7. Choose Create group.
+					9. In the policy list, select the check box next to AdministratorAccess. Then choose Create group.
+					10. Back in the list of groups, select the check box for your new group. Choose Refresh if necessary to see the group in the list. 
+					11. Choose Next: Review to see the list of group memberships to be added to the new user. When you are ready to proceed, choose Create user.
+
+			You can use this same process to create more groups and users and to give your users access to your AWS account resources.
+
+			To learn about using policies that restrict user permissions to specific AWS resources, see Access Management (p. 279) and Example Policies (p. 300).
+
+			To add additional users to the group after it's created, see Adding and Removing Users in an IAM Group (p. 132).
+
+		To sign in as the new IAM user
+			1. Sign out of the AWS Management Console.
+			2. Use the following URL format to log in to the console: https://aws_account_number.signin.aws.amazon.com/console/
+				The aws_account_number is your AWS account ID without hyphen. 
+
+				If your AWS account ID is 1234-5678-9012, your AWS account number is 123456789012. 
+
+				For information about how to find your account number, see Your AWS Account ID and Its Alias in the IAM User Guide.
+			3. Enter the IAM user name and password that you just created. When you're signed in, the navigation bar displays your_user_name @ your_aws_account_id.
+
+		If you don't want the URL for your sign-in page to contain your AWS account ID, you can create an account alias.
+
+		To create or remove an account alias
+			1. Sign in to the AWS Management Console and open the IAM console at https://console.aws.amazon.com/iam/.
+			2. On the navigation pane, choose Dashboard.
+			3. Find the IAM users sign-in link.
+			4. To create the alias, click Customize, enter the name you want to use for your alias, and then choose Yes, Create.
+			5. To remove the alias, choose Customize, and then choose Yes, Delete. The sign-in URL reverts to using your AWS account ID.
+
+			To sign in after you create an account alias, use the following URL: https://your_account_alias.signin.aws.amazon.com/console/
+
+			To verify the sign-in link for IAM users for your account, open the IAM console and check under IAM users sign-in link: on the dashboard.
+
+			For more information about IAM, see the following:
+			• AWS Identity and Access Management (IAM)
+			• Getting Started
+			• IAM User Guide
+
+Set Up the AWS Command Line Interface (AWS CLI)
+	All the exercises in this guide assume that you are using administrator user credentials (adminuser) in your account to perform the operations.
+	
+Install SAM CLI
+	SAM CLI is a tool that also allows faster, iterative development of your Lambda function code.
+
+	To use SAM CLI, you first need to install Docker.
+
+	Installing Docker
+		Docker is an open-source software container platform that allows you to build, manage and test applications, whether you're running on Linux, Mac or Windows.
+
+		Once you have Docker installed, SAM CLI automatically provides a customized Docker image called 'docker-lambda'.
+				This image is designed specifically by an AWS partner to simulate the live AWS Lambda execution environment.
+
+				This environment includes installed software, libraries, security permissions, environment variables, and other features outlined at Lambda Execution Environment and Available Libraries (p. 393).
+
+				Using 'docker-lambda', you can invoke your Lambda function locally.
+
+				In this environment, your serverless applications execute and perform much as in the AWS Lambda runtime, without your having to redeploy the runtime. 
+
+	Installing SAM CLI
+		You can run SAM CLI on Linux, Mac, and Windows environments. The easiest way to install SAM CLI is to use 'pip' (Package Installer for Python).
+				[20180530-16:05:40 syeedode:~] $ pip install aws-sam-cli
+
+		Then verify that the installation succeeded.
+				[20180530-16:08:54 syeedode:~] $ sam --version
+
+Create a Simple Lambda Function and Explore the Console
+	In this Getting Started exercise you first create a Lambda function using the AWS Lambda console. 
+
+	Then, you manually invoke the Lambda function using sample event data. AWS Lambda executes the Lambda function and returns results. You then verify execution results, including the logs that your Lambda function created and various CloudWatch metrics.
+
+	As you follow the steps, you will also familiarize yourself with the AWS Lambda console including:
+		• Explore the blueprints. Each blueprint provides sample code and sample configurations that enable you to create Lambda functions with just a few clicks.
+		• View and update configuration information of your Lambda function.
+		• Invoke a Lambda function manually and explore results in the Execution results section.
+		• Monitor CloudWatch metrics in the console.
+
+Create a Simple Lambda Function
+	1. Sign in to the AWS Management Console and open the AWS Lambda console.
+			Note that AWS Lambda offers a simple Hello World function upon introduction under the 'How it works' label. 
+
+			It includes a Run option, allowing you to invoke the function as a general introduction.
+
+			This tutorial introduces additonal options you have to create, test and update your Lambda functions.
+
+			
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

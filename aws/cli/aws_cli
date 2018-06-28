@@ -1,0 +1,171 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+- Advanced Topics
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 3 - 6
+pg 24 - 84
+*******************************************************************
+****    AWS Command Line Interface (CLI) - Getting Started     ****
+*******************************************************************
+What Is the AWS CLI?
+	The AWS CLI is an open source tool built on top of the AWS SDK for Python (Boto) that provides commands for interacting with AWS services.
+
+	• Linux shells – Use common shell programs such as Bash, Zsh, and tsch to run commands in Linux, macOS, or Unix.
+	• Windows command line – On Microsoft Windows, run commands in either PowerShell or the Windows Command Processor.
+	• Remotely – Run commands on Amazon EC2 instances through a remote terminal such as PuTTY or SSH, or with Amazon EC2 systems manager.
+
+	The AWS CLI provides direct access to AWS services' public APIs.
+
+	Explore a service's capabilities with the AWS CLI, and develop shell scripts to manage your resources.
+
+	Or take what you've learned to develop programs in other languages with the AWS SDK.
+
+	The AWS CLI provides low level, API equivalent commands.
+
+	The AWS CLI provides customizations for several services. Customizations are higher level commands that simplify using a service with a complex API.
+			For example, the aws s3 set of commands provide a familiar syntax for managing files in Amazon S3.
+
+	Example Upload a file to Amazon S3
+		'aws s3 cp' provides a shell-like copy command, and automatically performs a multipart upload to transfer large files quickly and resiliently:
+				~$ aws s3 cp myvideo.mp4 s3://mybucket/
+
+		Performing the same task with the low level commands (available under 'aws s3api') would take a lot more effort.
+
+About Amazon Web Services
+	Amazon Web Services (AWS) is a collection of digital infrastructure services that developers can leverage when developing their applications.
+
+	The services include computing, storage, database, and application synchronization (messaging and queuing).
+
+Installing the AWS Command Line Interface
+	The primary distribution method for the AWS CLI on Linux, Windows, and macOS is 'pip'. (Package Installer for Python)
+
+	If you already have pip and a supported version of Python, you can install the AWS CLI with the following command:
+			$ pip install awscli --upgrade --user
+
+	The '--upgrade' option tells 'pip' to upgrade any requirements that are already installed.
+
+	The '--user' option tells pip to install the program to a subdirectory of your user directory to avoid modifying libraries used by your operating system.
+
+Configuring the AWS CLI
+	This section explains how to configure settings that the AWS Command Line Interface uses when interacting with AWS. 
+
+	These include your security credentials and the default region.
+
+	Quick Configuration
+		For general use, the 'aws configure' command is the fastest way to set up your AWS CLI installation.
+
+		$ aws configure
+		AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
+		AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+		Default region name [None]: us-west-2
+		Default output format [None]: json 
+
+		To get the access key ID and secret access key for an IAM user
+			The access key ID and secret access key are used to sign programmatic requests that you make to AWS.
+
+			If you don't have access keys, you can create them from the AWS Management Console.
+
+			We recommend that you use IAM access keys instead of AWS account root user access keys.
+
+			IAM lets you securely control access to AWS services and resources in your AWS account.
+
+			You can create new access keys at any time. You must also have permissions to perform the required IAM actions.
+					1. Open the IAM console.
+					2. In the navigation pane of the console, choose Users.
+					3. Choose your IAM user name (not the check box).
+					4. Choose the Security credentials tab and then choose Create access key.
+					5. To see the new access key, choose Show. Your credentials will look something like this:
+						• Access key ID: AKIAIOSFODNN7EXAMPLE
+						• Secret access key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+					6. To download the key pair, choose Download .csv file. Store the keys in a secure location.
+
+			Keep the keys confidential in order to protect your AWS account, and never email them.
+
+		To update any of your settings, simply run 'aws configure' again and enter new values as appropriate.
+
+	Configuration Settings and Precedence
+		The AWS CLI uses a 'provider chain' to look for AWS credentials in a number of different places, including system or user environment variables and local AWS configuration files.
+
+		The AWS CLI looks for credentials and configuration settings in the following order:
+			1. Command line options – region, output format and profile can be specified as command options to override default settings.
+			2. Environment variables (p. 22) – AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN.
+			3. The AWS credentials file – located at ~/.aws/credentials on Linux, macOS, or Unix, or at C:\Users\USERNAME\.aws\credentials on Windows. This file can contain multiple named profiles in addition to a 'default' profile.
+
+			[20180530-14:04:29 syeedode:~] $ cat ~/.aws/config 
+			[default]
+			output = json
+			region = us-east-1
+
+			[profile user2]
+			region=us-east-1
+			output=text
+
+			[20180530-14:04:29 syeedode:~] $ cat ~/.aws/credentials 
+			[default]
+			aws_access_key_id=AKIAIOSFODNN7EXAMPLE
+			aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+			[user2]
+			aws_access_key_id=AKIAI44QH8DHBEXAMPLE
+			aws_secret_access_key=je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY
+
+		Important - Do not include the 'profile ' prefix when configuring a named profile in the AWS credentials file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

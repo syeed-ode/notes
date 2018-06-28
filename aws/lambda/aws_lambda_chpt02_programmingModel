@@ -1,0 +1,325 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+- Lambda Functions: Building Lambda Functions: Programming Mode (60)
+- Lambda Functions: Building Lambda Functions: Creating Functions Using the AWS Lambda Console Editor (25)
+- Use Case: AWS S3 (16)
+- Use Case: AWS CloudTrail (15)
+- Use Case: Amazon API Gateway: (14)
+- Use Case: Amazon API Gateway: Using AWS Lambda with Amazon API Gateway (On-Demand Over HTTPS): (13)
+- Use Case: Amazon DynamoDB (11)
+- Administering Lambda-based Applications (first page)
+- Advanced Topics
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+toc: 3 - 6
++ 6
+pg 24 - 84
+*******************************************************************
+*******            AWS Lambda: Programming Model            *******
+*******************************************************************
+You write code for your Lambda function in one of the languages AWS Lambda supports.
+	
+There is a common pattern to writing code for a Lambda function that includes the following core concepts
+	• Handler 
+		Handler is the function AWS Lambda calls to start execution of your Lambda function
+
+		You identify the handler when you create your Lambda function.
+
+		AWS Lambda passes any event data to this handler as the first parameter.
+
+		Your handler should process the incoming event data and may invoke any other functions/methods in your code.
+
+	• Context object
+		This concept includes how the context object interacts with Lambda at runtime.
+
+		AWS Lambda also passes a context object to the handler function, as the second parameter.
+
+		Via this context object your code can interact with AWS Lambda. For example, your code can find the execution time remaining before AWS Lambda terminates your Lambda function.
+
+		For languages such as Node.js, there is an asynchronous platform that uses callbacks.
+
+		AWS Lambda provides additional methods on this context object. You use these context object methods to tell AWS Lambda to terminate your Lambda function and optionally return values to the caller.
+
+	• Logging
+		Your Lambda function can contain logging statements. AWS Lambda writes these logs to CloudWatch Logs. 
+
+	• Exceptions
+		Your Lambda function needs to communicate the result of the function execution to AWS Lambda. 
+
+		There are different ways to end a request successfully or to notify AWS Lambda an error occurred during execution. 
+
+		If you invoke the function synchronously, then AWS Lambda forwards the result back to the client.
+
+Your Lambda function code must be written in a stateless style, and have no affinity with the underlying compute infrastructure.
+		Your code should expect local file system access, child processes, and similar artifacts to be limited to the lifetime of the request.
+
+		Persistent state should be stored in Amazon S3, Amazon DynamoDB, or another cloud storage service.
+
+Requiring functions to be stateless enables AWS Lambda to launch as many copies of a function as needed to scale to the incoming rate of events and requests. 
+		These functions may not always run on the same compute instance from request to request.
+
+		A given instance of your Lambda function may be used more than once by AWS Lambda.
+
+		For more information, see Best Practices for Working with AWS Lambda Functions (p. 388)
+
+Programming Model for Authoring Lambda Functions in Java
+	• Lambda Function Handler (Java) (p. 30) 
+	• The Context Object (Java) (p. 40)
+	• Logging (Java) (p. 42)
+	• Function Errors (Java) (p. 46)
+	• Using Earlier Custom Appender for Log4j™ 1.2 (Not Recommended) (p. 48)
+	• (Optional) Create a Lambda Function Authored in Java (p. 50)
+
+	Additionally, note that AWS Lambda provides the following libraries:
+	• aws-lambda-java-core
+		This library provides the Context object, RequestStreamHandler, and the RequestHandler interfaces.	
+
+		The Context object (The Context Object (Java) (p. 40)) provides runtime information about your Lambda function.
+
+		The predefined interfaces provide one way of defining your Lambda function handler. 
+				See Leveraging Predefined Interfaces for Creating Handler (Java) (p. 36).
+
+	• aws-lambda-java-events
+		This library provides predefined types to process events published by Amazon S3, Kinesis, Amazon SNS, and Amazon Cognito.	
+
+	• Custom Appender for Log4j2.8
+		You can use the custom Log4j (see Apache Log4j 2) appender for logging from your lambda functions.
+
+		Every call to Log4j methods, such as log.debug() or log.error(), will result in a CloudWatch Logs event.
+
+		The custom appender is called LambdaAppender and must be used in the log4j2.xml file.
+
+		You must include the aws-lambda-javalog4j2 artifact (artifactId:aws-lambda-java-log4j2) in the deployment package (.jar file).For more information, see Logging (Java) (p. 42).
+
+	• Custom Appender for Log4j1.2 
+		You can use the custom Log4j (see Apache Log4j 1.2) appender provided by AWS Lambda for logging from your lambda functions. For more information, see Logging (Java) (p. 42).
+
+		Support for the Log4j v1.2 custom appender is marked for End-Of-Life. It will not receive ongoing updates and is not recommended for use.
+
+Lambda Function Handler (Java)
+	At the time you create a Lambda function you specify a handler that AWS Lambda can invoke when the service executes the Lambda function on your behalf.
+
+	Lambda supports two approaches for creating a handler:
+
+	• Loading the handler method directly without having to implement an interface. This section describes this approach.
+
+	• Implementing standard interfaces provided as part of aws-lambda-java-core library (interface approach). 
+			For more information, see Leveraging Predefined Interfaces for Creating Handler (Java) (p. 36).
+
+	The general syntax for the handler is as follows:
+		outputType handler-name(inputType input, Context context) {
+			 ...
+		}
+
+		In order for AWS Lambda to successfully invoke a handler it must be invoked with input data that can be serialized into the data type of the input parameter.
+
+		• inputType
+			The first handler parameter is the input to the handler, which can be 
+				- event data (published by an event source) or 
+				- custom input that you provide such as a string or 
+				- any custom data object.
+
+		• outputType
+			If you plan to invoke the Lambda function synchronously (using the RequestResponse invocation type),
+					You can return the output of your function using any of the supported data types.
+
+			If you plan to invoke the Lambda function asynchronously (using the Event invocation type)
+					The outputType should be 'void'. 
+
+					For example, if you use AWS Lambda with event sources such as Amazon S3 or Amazon SNS
+							These event sources invoke the Lambda function using the Event invocation type.
+
+		• The inputType and outputType can be one of the following:
+			• Primitive Java types (such as String or int).
+			• Predefined AWS event types defined in the aws-lambda-java-events library. 
+					For example S3Event is one of the POJOs predefined in the library that provides methods for you to easily read information from the incoming Amazon S3 event.
+			• You can also write your own POJO class. AWS Lambda will automatically serialize and deserialize input and output JSON based on the POJO type.
+
+	Consider the following Java example code.
+		package example;
+
+		import com.amazonaws.services.lambda.runtime.Context;
+		import com.amazonaws.services.lambda.runtime.RequestHandler;
+		
+		public class Hello implements RequestHandler<Integer, String>{
+			public String myHandler(int myCount, Context context) {
+				return String.valueOf(myCount);
+			}
+		}
+
+	In this example input is of type Integer and output is of type String.
+
+	If you package this code and dependencies, and create your Lambda function, you specify example.Hello::myHandler (package.class::method-reference) as the handler.
+
+	The first handler parameter is the input to the handler (myHandler), which can be 
+			- event data (published by an event source such as Amazon S3) or 
+			- custom input you provide such as an Integer object (as in this example) or 
+			- any custom data object.
+
+	For instructions to create a Lambda function using this Java code, see (Optional) Create a Lambda Function Authored in Java (p. 50).
+
+	Handler Overload Resolution
+		If your Java code contains multiple methods with same name as the handler name, then AWS Lambda uses the following rules to pick a method to invoke:
+				1. Select the method with the largest number of parameters.
+				2. If two or more methods have the same number of parameters, AWS Lambda selects the method that has the Context as the last parameter.
+						If none or all of these methods have the Context parameter, then the behavior is undefined.
+
+	Additional Information
+		• For more information about the handler input and output types, see Handler Input/Output Types (Java) (p. 32).
+		• For information about using predefined interfaces to create a handler, see Leveraging Predefined Interfaces for Creating Handler (Java) (p. 36).
+				If you implement these interfaces, you can validate your handler method signature at compile time.
+		• If your Lambda function throws an exception, AWS Lambda records metrics in CloudWatch indicating that an error occurred. For more information, see Function Errors (Java) (p. 46).
+
+	Handler Input/Output Types (Java)
+		When AWS Lambda executes the Lambda function, it invokes the handler. The first parameter is the input to the handler which can be event data (published by an event source) or custom input you provide such as a string or any custom data object.
+
+		AWS Lambda supports the following input/output types for a handler:
+			• Simple Java types (AWS Lambda supports the String, Integer, Boolean, Map, and List types)
+			• POJO (Plain Old Java Object) type
+			• Stream type (If you do not want to use POJOs or if Lambda's serialization approach does not meet your needs you can use the byte stream implementation. 
+					For more information, see Example: Using Stream for Handler Input/Output (Java) (p. 35).)		
+
+		When you invoke a Lambda function asynchronously, any return value by your Lambda function will be ignored. 
+
+		Therefore you might want to set the return type to void to make this clear in your code. For more information, see Invoke (p. 452).
+
+		AWS Lambda serializes based on standard bean naming conventions (see The Java EE 6 Tutorial). You should use mutable POJOs with public getters and setters.
+
+		You shouldn't rely on any other features of serialization frameworks such as annotations. If you need to customize the serialization behavior, you can use the raw byte stream to use your own serialization.
+
+		If you use POJOs for input and output, you need to provide implementation of the RequestClass and ResponseClass types. For an example, see Example: Using POJOs for Handler Input/Output (Java) (p. 33).
+
+	Example: Using POJOs for Handler Input/Output (Java)
+		Suppose your application events generate data that includes first name and last name as shown:
+				{ "firstName": "John", "lastName": "Doe" } 
+
+		For this example, the handler receives this JSON and returns the string "Hello John Doe".
+				public static ResponseClass handleRequest(RequestClass request, Context context){
+					String greetingString = 
+						String.format("Hello %s, %s.", request.firstName, request.lastName);
+					return new ResponseClass(greetingString);
+				}
+
+		To create a Lambda function with this handler, you must provide implementation of the input and output types. 
+
+		This is shown in the following Java example. The HelloPojo class defines the handler method.
+				package example;
+				import com.amazonaws.services.lambda.runtime.Context;
+				import com.amazonaws.services.lambda.runtime.RequestHandler;
+
+				public class HelloPojo implements RequestHandler<RequestClass, ResponseClass>{
+					public ResponseClass handleRequest(RequestClass request, Context context){
+						String greetingString = 
+							String.format("Hello %s, %s.", request.firstName, request.lastName);
+						return new ResponseClass(greetingString);
+					}
+				}
+
+		In order to implement the input type, add the following code to a separate file and name it RequestClass.java. 
+
+		Place it next to the HelloPojo.java class in your directory structure:
+				package example;
+
+				public class RequestClass {
+					String firstName;
+					String lastName;
+					public String getFirstName() {
+						return firstName;
+					}
+					public void setFirstName(String firstName) {
+						this.firstName = firstName;
+					}
+					public String getLastName() {
+						return lastName;
+					}
+					public void setLastName(String lastName) {
+						this.lastName = lastName;
+					}
+					public RequestClass(String firstName, String lastName) {
+						this.firstName = firstName;
+						this.lastName = lastName;
+					}
+					public RequestClass() {
+					}
+				}
+
+		In order to implement the output type, add the following code to a separate file and name it ResponseClass.java. 
+
+		Place it next to the HelloPojo.java class in your directory structure:
+				package example;
+
+				public class ResponseClass {
+					String greetings;
+					public String getGreetings() {
+					return greetings;
+					}
+					public void setGreetings(String greetings) {
+					this.greetings = greetings;
+					}
+					public ResponseClass(String greetings) {
+					this.greetings = greetings;
+					}
+					public ResponseClass() {
+					}
+				}
+
+		The get and set methods are required in order for the POJOs to work with AWS Lambda's built in JSON serializer. 
+
+		The constructors that take no arguments are usually not required, however. 
+
+		In this example we provided other constructors and therefore we need to explicitly provide the zero argument constructors.
+
+		You can upload this code as your Lambda function and test as follows:
+		• Using the preceding code files, create a deployment package.
+		• Upload the deployment package to AWS Lambda and create your Lambda function. You can do this using the console or AWS CLI.
+		• Invoke the Lambda function manually using the console or the CLI. You can use provide sample JSON event data when you manually invoke your Lambda function. For example:
+
+
+
+
+
+Programming Model: (p. 18)
+	Programming Model (Node.js): 
+	Programming Model for Authoring Lambda Functions in Java: 36 - 56
+		• Lambda Function Handler (Java) (p. 30)
+			- Handler Overload Resolution (p. 32)
+			- Handler Input/Output Types (Java)
+			- Handler Input/Output: String Type
+			- Handler Input/Output: POJO Type
+			- Example: Using POJOs for Handler Input/Output (Java) (p. 33)
+				+ Leveraging Predefined Interfaces for Creating Handler (Java) (p. 36).
+			- Example: Using Stream for Handler Input/Output (Java) (p. 35)
+			- Example 1: Creating Handler with Custom POJO Input/Output (Leverage the RequestHandler Interface) (p. 37)
+		• The Context Object (Java) (p. 40)
+		• Logging (Java) (p. 42)
+		• Function Errors (Java) (p. 46)
+		• Using Earlier Custom Appender for Log4j™ 1.2 (Not Recommended) (p. 48)
+		• (Optional) Create a Lambda Function Authored in Java (p. 50)
+	Programming Model for Authoring Lambda Functions in Python: 57 - 64
+		• Lambda Function Handler (Python) (p. 51)
+		• The Context Object (Python) (p. 52)
+		• Logging (Python) (p. 55)
+		• Function Errors (Python) (p. 57)
+	Programming Model for Authoring Lambda Functions in Go: 65 - 74
+		• Lambda Function Handler (Go) (p. 59)
+			- Lambda Function Handler Using Structured Types
+			- Using Global State
+		• The Context Object (Go) (p. 63)
+		• Logging (Go) (p. 65)
+		• Function Errors (Go) (p. 66)
+		• Using Environment Variables (Go) (p. 68)
+	Programming Model for Authoring Lambda Functions in C#: 74 - 84
+		Lambda Function Handler (C#): 75 - 79
+			Handling Streams
+			Handler Signatures
+			Lambda Function Handler Restrictions
+			Using Async in C# Functions with AWS Lambda: 
+		The Context Object (C#): 79 - 80
+		Logging (C#): 80 - 81
+		Function Errors (C#): 81 - 84
+
+
