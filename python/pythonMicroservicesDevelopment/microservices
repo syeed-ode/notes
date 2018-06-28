@@ -20,7 +20,15 @@ followed by the real page number if applicable.)
 *******************************************************************
 PYMD - Python Microservice Development
 
-I found its always better to start with smaller microservices and build them combine them if necessary. This is a stark difference between PYMD and myself. If building the service using spring boot, it's easy as all get out to combine two services. But, I've experienced the nightmare of trying to tear apart a microservice. Once a application is developed, decoupling degrades, cohesion dedgrades over time. Separating functionality is sometimes a tasking responsiblity -- for monoliths and microservices. 
+I found its always better to start with smaller microservices and build them 
+	combine them if necessary. This is a stark difference between PYMD 
+	and myself. If building the service using spring boot, it's easy as 
+	all get out to combine two services. But, I've experienced the 
+	nightmare of trying to tear apart a microservice. Once a application 
+	is developed, decoupling degrades, cohesion dedgrades over time. 
+	Separating functionality is sometimes a tasking responsiblity -- for 
+	monoliths and microservices. 
+	                                                                   |
 
 Microservice external configuration is mandatory. A robust CI/CD loop thrives on it. Setting up various environments. 
 

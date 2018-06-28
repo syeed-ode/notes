@@ -9,28 +9,43 @@
 *******************************************************************
 https://dzone.com/articles/all-about-hibernate-second
 Caching in hibernate
-	Caching functionality is designed to reduce the amount of necessary database access. When the objects that are cached reside in memory. You have the flexibility to limit the usage of memory and store the items in disk storage.
-
-	There are various flavors of caching available, but it is better to cache non-transactional and read-only data.
-
-	Hibernate provides 3 types of caching: 1) Session Cache, 2) Second Level Cache, 3) Query Cache
-
+	Caching functionality is designed to reduce the amount of necessary 
+		database access. When the objects that are cached reside in 
+		memory. You have the flexibility to limit the usage of 
+		memory and store the items in disk storage.
+	There are various flavors of caching available, but it is better to 
+		cache non-transactional and read-only data.
+	Hibernate provides 3 types of caching: 
+		1) Session Cache, 
+		2) Second Level Cache, 
+		3) Query Cache
 	Session Cache 
-			The session cache caches objects within the current session. It is enabled by default in Hibernate. Objects in the session cache reside in the same memory location.
-
+		The session cache caches objects within the current session. 
+			It is enabled by default in Hibernate. Objects in 
+			the session cache reside in the same memory location.
 	Second Level Cache
-			The second level cache is responsible for caching objects across sessions. When this is turned on, objects will first be searched in the cache and if they are not found, a database query will be fired.
-
-			Second level cache will be used when the objects are loaded using their primary key. This includes fetching of associations. Second level cache objects are constructed and reside in different memory locations.
-
+		The second level cache is responsible for caching 
+			objects across sessions. When this is turned 
+			on, objects will first be searched in the 
+			cache and if they are not found, a database 
+			query will be fired.
+		Second level cache will be used when the objects are 
+			loaded using their primary key. This 
+			includes fetching of associations. Second 
+			level cache objects are constructed and 
+			reside in different memory locations.
 	Query Cache
-			Query Cache is used to cache the results of a query. When the query cache is turned on, the results of the query are stored against the combination query and parameters.
-					Every time the query is fired the cache manager checks for the combination of parameters and query.
+		Query Cache is used to cache the results of a query. When 
+			the query cache is turned on, the results of the 
+			query are stored against the combination query and 
+			parameters.
+				Every time the query is fired the cache 
+					manager checks for the combination 
+					of parameters and query.
+				 If the results are found in the cache, they are returned, otherwise a database transaction is initiated.
 
-					 If the results are found in the cache, they are returned, otherwise a database transaction is initiated.
-
-			 As you can see, it is not a good idea to cache a query if it has a number of parameters, because then a single parameter can take a number of values.
-			 		For each of these combinations the results are stored in the memory. This  can lead to extensive memory usage. 
+		 As you can see, it is not a good idea to cache a query if it has a number of parameters, because then a single parameter can take a number of values.
+				For each of these combinations the results are stored in the memory. This  can lead to extensive memory usage. 
 
 https://www.dynatrace.com/news/blog/understanding-caching-in-hibernate-part-one-the-session-cache/ 
 https://www.dynatrace.com/news/blog/understanding-caching-in-hibernate-part-two-the-query-cache/
@@ -38,16 +53,27 @@ https://www.dynatrace.com/news/blog/understanding-caching-in-hibernate-part-thre
 Understanding Caching in Hibernate – Part One : The Session Cache
 	Hibernate offers caching functionality which is designed to reduces the amount of necessary database access.
 
-	Hibernate uses different types of caches. Each type of cache is used for different purposes. Let us first have a look at this cache types.
-			- The first cache type is the session cache. The session cache caches object within the current session.
-			- The second cache type is the query Cache. The query cache is responsible for caching queries and their results.
-			- The third cache type is the second level cache. The second level cache is responsible for caching objects across sessions.
-
+	Hibernate uses different types of caches. Each type of cache is used 
+		for different purposes. Let us first have a look at this 
+		cache types.
+			- The first cache type is the session cache. The 
+				session cache caches object within the 
+				current session.
+			- The second cache type is the query Cache. The 
+				query cache is responsible for caching 
+				queries and their results.
+			- The third cache type is the second level cache. 
+				The second level cache is responsible for 
+				caching objects across sessions.
 	The Session Cache
-			The session cache caches values within the current session.  This cache is enabled by default. 
-
-			Hibernate internally always uses the session cache transparently.  We have also seen that Hibernate requires a key to load object from the session cache. So in case we have a key available it is prefered to use load and a key instead of a HQL query.
-
+		The session cache caches values within the current session.  
+			This cache is enabled by default. 
+		Hibernate internally always uses the session cache 
+			transparently.  We have also seen that Hibernate 
+			requires a key to load object from the session cache. 
+			So in case we have a key available it is prefered to 
+			use load and a key instead of a HQL query.
+	                                                                   |
 	The Second Level Cache
 			The key characteristic of the second-level cache is that is is used across sessions, which also differentiates it from the session cache, which only – as the name says – has session scope. 
 
