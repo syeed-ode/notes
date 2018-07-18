@@ -1,5 +1,7 @@
 Installing Snort and Getting Started
 
+/usr/local/Cellar/snort/2.9.11/lib/
+
 A Snort installation may consist of only a working Snort daemon or of a complete Snort system with many other tools. 
 	If you install only Snort, you can capture intrusion data in text or binary files and then view these files later on with the help of a text editor or some other tool like Barnyard. 
 
@@ -55,8 +57,205 @@ MySQL is used with Snort to log alert data. Apache acts as a web server. PHP is 
 	The ultimate objective of this book is to help you install Snort and to make all of these packages work with each other.
 	
 
-1. Running the 'configure' script. 2. Running the 'make' command. 3. Running the 'make install' command.
+	1. Running the 'configure' script. 2. Running the 'make' command. 3. Running the 'make install' command.
 
+	The following command just displays the basic help message of the newly built snort and command line options.
+			[root@conformix snort]# /opt/snort/bin/snort -? 
+			Initializing Output Plugins!
+
+	2.2.2.3 After Installation Processes
+		Now that you have built Snort binary, you have to do few things before you can start using Snort. These include:
+		1. Create directory /var/log/snort where Snort creates log files by default.
+		2. Create a directory to save configuration files. I have created /opt/snort/ etc. You can create a directory of your own.
+		3. Create or copy the Snort configuration file in /opt/snort/etc directory.
+		4. Create a directory /opt/snort/rules and copy default rule files to /opt/snort/etc directory. The path of this directory is mentioned in the main snort.conf file and you can create a directory of your own choice if you like.
+
+		First, create a directory /var/log/snort where Snort will keep its log files. If you want to use any other directory, you have to use command line option '-l' when starting Snort.
+
+		When Snort starts, it can read its configuration, which is snort.conf, 
+
+				from the current directory or 
+				
+				from .snortrc in the home directory of the user who launched Snort.
+
+				If this file is present in some other directory, you can also use the -c option on the command line to specify the name of the rules file.
+
+				As a starting point, create a directory /opt/snort/etc directory and copy the snort.conf file that came with the Snort source code files.
+
+				Copy classification.config and reference.config files to /opt/ snort/etc directory.
+
+				These files are included in the main snort.conf file
+						mkdir /opt/snort/etc
+						
+						cp /opt/snort-1.9.0/etc/snort.conf /opt/snort/etc
+						
+						cp /opt/snort-1.9.0/etc/classification.config /opt/snort/etc
+						
+						cp /opt/snort-1.9.0/etc/reference.config /opt/snort/etc
+						mkdir /opt/snort/rules
+						
+						cp /opt/snort-1.9.0/rules/* /opt/snort/rules
+
+		Files in the rules directory end with '.rules' and contain different rules. 
+
+		The location of these rule files is controlled by the 'RULE_PATH' variable defined in snort.conf file. A typical definition of this variable in the snort.conf file is as follows:
+				var RULE_PATH ../rules
+
+pg 50
+		This means that rule files are located in a directory named “rules”. The path ../ rules is with reference to the location of snort.conf file. 
+
+		For example, if snort.conf file is located in the /opt/snort/etc directory, all rule files should be present in the /opt/snort/rules directory.
+
+		As another example, if snort.conf file is present in the /var/snort directory, rules files must be present in the /var/rules directory.
+
+		You can keep all rule files and snort.conf file in the same directory if you set the value of this variable to ./ instead of ../ rules in the snort.conf file using the following line:
+				var RULE_PATH ./
+
+		The classification.config file contains information about Snort rules classification and more information about this file is found in the next chapter.
+
+		The reference.config file lists URLs for different reference web sites where more information can be found for alerts.
+
+		/usr/local/Cellar/snort/2.9.11/lib/
+
+		Note that both 'classification.config' and 'reference.config' files are included in the main 'snort.conf' file.
+
+		Now you can start Snort using the following command. The command displays startup messages and then starts listening to interface 'eth0'.
+
+		Note the command line option where 'snort.conf' is specified with its full path. I would recommend always using the full path for 'snort.conf' on the command line to avoid any confusion.
+
+				[root@conformix snort]# /opt/snort/bin/snort -c /opt/snort/
+				etc/snort.conf
+						Initializing Output Plugins!
+						Log directory = /var/log/snort
+						
+						Initializing Network Interface eth0
+						
+						 --== Initializing Snort ==--
+						Decoding Ethernet on interface eth0
+						Initializing Preprocessors!
+						Initializing Plug-ins!
+						Parsing Rules file /opt/snort/etc/snort.conf
+						+++++++++++++++++++++++++++++++++++++++++++++++++++
+						Initializing rule chains...
+						No arguments to frag2 directive, setting defaults to:
+						 Fragment timeout: 60 seconds
+						 Fragment memory cap: 4194304 bytes
+						 Fragment min_ttl: 0
+						 Fragment ttl_limit: 5
+						 Fragment Problems: 0
+						Stream4 config:
+						 Stateful inspection: ACTIVE
+						 Session statistics: INACTIVE
+						 Session timeout: 30 seconds
+						 Session memory cap: 8388608 bytes
+						 State alerts: INACTIVE
+						 Evasion alerts: INACTIVE
+						 Scan alerts: ACTIVE
+						 Log Flushed Streams: INACTIVE
+						 MinTTL: 1
+						 TTL Limit: 5
+						 Async Link: 0
+						No arguments to stream4_reassemble, setting defaults:
+						 Reassemble client: ACTIVE
+						 Reassemble server: INACTIVE
+						 Reassemble ports: 21 23 25 53 80 143 110 111 513
+						 Reassembly alerts: ACTIVE
+						 Reassembly method: FAVOR_OLD
+						http_decode arguments:
+						 Unicode decoding
+						 IIS alternate Unicode decoding
+						 IIS double encoding vuln
+						 Flip backslash to slash
+						 Include additional whitespace separators
+						 Ports to decode http on: 80
+						rpc_decode arguments:
+						 Ports to decode RPC on: 111 32771
+						telnet_decode arguments:
+						 Ports to decode telnet on: 21 23 25 119
+						Conversation Config:
+						 KeepStats: 0
+						 Conv Count: 32000
+						 Timeout : 60
+						 Alert Odd?: 0
+						 Allowed IP Protocols: All
+						Portscan2 config:
+						 log: /var/log/snort/scan.log
+						 scanners_max: 3200
+						 targets_max: 5000
+						 target_limit: 5
+						 port_limit: 20
+						 timeout: 60
+						1273 Snort rules read...
+						1273 Option Chains linked into 133 Chain Headers
+						0 Dynamic rules
+						+++++++++++++++++++++++++++++++++++++++++++++++++++
+						Rule application order: ->activation->dynamic->alert->pass-
+						>log
+						 --== Initialization Complete ==--
+						-*> Snort! <*-
+						Version 1.9.0 (Build 209)
+						By Martin Roesch (roesch@sourcefire.com, www.snort.org)
+		
+			Alerts that you will see with this basic setup are logged in '/var/log/snort/alerts' file.
+
+			You can terminate the Snort session any time by pressing the 'Ctrl' and 'C' keys simultaneously. At this point, Snort will display a summary of its activity and then quit. A typical summary is as follows:
+					==========================================================
+					Snort analyzed 65 out of 65 packets, dropping 0(0.000%)
+					packets
+					Breakdown by protocol: Action Stats:
+					 TCP: 55 (84.615%) ALERTS: 10
+					 UDP: 10 (15.385%) LOGGED: 10
+					 ICMP: 0 (0.000%) PASSED: 0
+					 ARP: 0 (0.000%)
+					 EAPOL: 0 (0.000%)
+					 IPv6: 0 (0.000%)
+					 IPX: 0 (0.000%)
+					 OTHER: 0 (0.000%)
+					DISCARD: 0 (0.000%)
+					==========================================================
+					Wireless Stats:
+					Breakdown by type:
+					 Management Packets: 0 (0.000%)
+					 Control Packets: 0 (0.000%)
+					 Data Packets: 0 (0.000%)
+					==========================================================
+					Fragmentation Stats:
+					Fragmented IP Packets: 0 (0.000%)
+					 Fragment Trackers: 0
+					 Rebuilt IP Packets: 0
+					 Frag elements used: 0
+					Discarded(incomplete): 0
+					 Discarded(timeout): 0
+					 Frag2 memory faults: 0
+					==========================================================
+					TCP Stream Reassembly Stats:
+					 TCP Packets Used: 55 (84.615%)
+					 Stream Trackers: 1
+					 Stream flushes: 0
+					 Segments used: 0
+					 Stream4 Memory Faults: 0
+					==========================================================
+					Snort received signal 2, exiting
+					[root@conformix snort]# 
+			
+			After starting Snort, you need to know if it is actually capturing data and logging intruder activity. 
+
+			If you started Snort in the foreground with the “-A console” command line option, you will start seeing alerts on the screen when this script is running.
+
+			However, if you have started Snort in the daemon mode and did not use the command line option mentioned above, alerts will be logged to the /var/log/snort/alert file.
+
+	2.2.4.1 Generating Test Alerts
+		The following script name is snort-test.sh and it is available on the website (http://authors.phptr.com/rehman/) that accompanies the book. Basically it uses the same command as mentioned above but is useful when Snort is running in the daemon mode.
+
+		
+
+
+
+
+
+
+
+		
 
 
 
