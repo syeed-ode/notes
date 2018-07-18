@@ -1,0 +1,114 @@
+	                                                                   |	                                                                   
+	                                                                   |
+*******************************************************************
+*******************************************************************
+*******************************************************************
+*******************************************************************
+*							          *
+*							          *
+*							          *
+toc: 
+pg 141 - 
+*******************************************************************
+*******      Chapter 05 - Concurrency and Parallelism       *******
+*******************************************************************
+Item 41: Consider concurrent.futures for True Parallelism
+	On modern computers that have an increasing number of CPU cores, it’s reasonable to assume that one solution would be parallelism. What if you could split your code’s computation into independent pieces of work that run simultaneously across multiple CPU cores?
+
+	Python’s global interpreter lock (GIL) prevents true parallelism in threads (see Item 37: “Use Threads for Blocking I/O, Avoid for Parallelism”), so that option is out.
+
+	C gets you closer to the bare metal and can run faster than Python, eliminating the need for parallelism. C-extensions can also start native threads that run in parallel and utilize multiple CPU cores.
+			Python’s API for C-extensions is well documented and a good choice for an escape hatch.
+
+			But rewriting your code in C has a high cost. Code that is short and understandable in Python can become verbose and complicated in C.
+
+			Sometimes it’s worth it, there are even open source tools such as Cython (http://cython.org/) and Numba (http://numba.pydata.org/) that can ease the transition to C.
+
+			Optimized Python programs usually don’t have one major source of slowness, but rather, there are often many significant contributors.
+
+	The multiprocessing built-in module, easily accessed via the concurrent.futures built-in module, may be exactly what you need. 
+			It enables Python to utilize multiple CPU cores in parallel by running additional interpreters as child processes. 
+
+			These child processes are separate from the main interpreter, so their global interpreter locks are also separate. 
+					Each child can fully utilize one CPU core. Each child has a link to the main process where it receives instructions to do computation and returns results.
+
+	For example, say you want to do something computationally intensive with Python and utilize multiple CPU cores. 
+			I’ll use an implementation of finding the greatest common divisor of two numbers as a proxy for a more computationally intense algorithm, like simulating fluid dynamics with the Navier-Stokes equation.
+					def gcd(pair):
+						a, b = pair
+						low = min(a, b)
+						
+						for i in range(low, 0, -1):
+							if a % i == 0 and b % i == 0:
+								return i
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+1. Aisa
+2. Africa
+3. Europe
+4. North America
+5. South America
+6. Australia
+7. Antartic 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
