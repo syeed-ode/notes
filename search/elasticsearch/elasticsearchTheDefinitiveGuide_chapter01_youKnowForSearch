@@ -86,6 +86,8 @@ Installing Marvel
 Running Elasticsearch
 	Elasticsearch is now ready to run. You can start it up in the foreground with this:
 			./bin/elasticsearch
+			/Users/syeedode/elasticsearch-6.2.3/bin/elasticsearch
+			/Users/syeedode/elasticsearch-2.4.6/bin/elasticsearch
 	
 	Add -d if you want to run it in the background as a daemon.
 			[20180411-13:47:17 syeedode:~/elasticsearch-6.2.3] $ curl --user elastic:password 'http://localhost:9200/?pretty'

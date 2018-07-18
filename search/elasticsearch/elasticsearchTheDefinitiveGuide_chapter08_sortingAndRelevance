@@ -316,7 +316,136 @@ What Is Relevance?
 			A field containing five mentions of the same term is more likely to be relevant than a field containing just one mention.
 
 		Inverse document frequency
+			How often does each term appear in the index? The more often, the 'less' relevant. Terms that appear in many documents have a lower 'weight' than moreuncommon terms.
+
+		Field-length norm
+			How long is the field? The longer it is, the less likely it is that words in the field will be relevant. A term appearing in a short 'title' field carries more weight than the same term appearing in a long 'content' field.
 			
+	Individual queries may combine the TF/IDF score with other factors such as the term proximity in phrase queries, or term similarity in fuzzy queries.
+
+	Relevance is not just about full-text search, though. It can equally be applied to yes/no clauses, where the more clauses that match, the higher the '_score'.
+
+	When multiple query clauses are combined using a compound query like the 'bool' query, the '_score' from each of these query clauses is combined to calculate the overall '_score' for the document.
+
+	We have a whole chapter dedicated to relevance calculations and how to bend them to your will: Chapter 17.
+
+Understanding the Score
+	When debugging a complex query, it can be difficult to understand exactly how a '_score' has been calculated.
+
+			HTTP/1.1 200 OK
+			content-type: application/json; charset=UTF-8
+			content-length: 563
+
+			{
+			  "took" : 31,
+			  "timed_out" : false,
+			  "_shards" : {
+			    "total" : 64,
+			    "successful" : 64,
+			    "skipped" : 0,
+			    "failed" : 0
+			  },
+			  "hits" : {
+			    "total" : 1,
+			    "max_score" : 0.6580346,
+			    "hits" : [
+			      {
+			        "_index" : "use",
+			        "_type" : "tweet",
+			        "_id" : "12",
+			        "_score" : 0.6580346,
+			        "_source" : {
+			          "date" : "2014-09-22",
+			          "name" : "John Smith",
+			          "tweet" : "Elasticsearch and I have left the honeymoon stage, and I still love her.",
+			          "user_id" : 1
+			        }
+			      }
+			    ]
+			  }
+			}
+
+			curl -i -XGET -H "content-type: application/json; charset=UTF-8" --user elastic:cfu0blVplXHcUnOkX74u 'http://localhost:9623/_search?explain&pretty' -d '{"query" : { "match" : { "tweet" : "honeymoon" }}
+			}'
+
+			/Users/syeedode/junk/latest_2.4.6Output
+			2.4.6
+
+			HTTP/1.1 200 OK
+			Content-Type: application/json; charset=UTF-8
+			Content-Length: 1382
+
+			{
+			  "took" : 47,
+			  "timed_out" : false,
+			  "_shards" : {
+			    "total" : 18,
+			    "successful" : 18,
+			    "failed" : 0
+			  },
+			  "hits" : {
+			    "total" : 1,
+			    "max_score" : 0.35136628,
+			    "hits" : [ {
+			      "_shard" : 1,
+			      "_node" : "keH5OjpGScWZZXoNnZPecQ",
+			      "_index" : "us",
+			      "_type" : "tweet",
+			      "_id" : "12",
+			      "_score" : 0.35136628,
+			      "_source" : {
+			        "date" : "2014-09-22",
+			        "name" : "John Smith",
+			        "tweet" : "Elasticsearch and I have left the honeymoon stage, and I still love her.",
+			        "user_id" : 1
+			      },
+			      "_explanation" : {
+			        "value" : 0.35136628,
+			        "description" : "weight(tweet:honeymoon in 2) [PerFieldSimilarity], result of:",
+			        "details" : [ {
+			          "value" : 0.35136628,
+			          "description" : "fieldWeight in 2, product of:",
+			          "details" : [ {
+			            "value" : 1.0,
+			            "description" : "tf(freq=1.0), with freq of:",
+			            "details" : [ {
+			              "value" : 1.0,
+			              "description" : "termFreq=1.0",
+			              "details" : [ ]
+			            } ]
+			          }, {
+			            "value" : 1.4054651,
+			            "description" : "idf(docFreq=1, maxDocs=3)",
+			            "details" : [ ]
+			          }, {
+			            "value" : 0.25,
+			            "description" : "fieldNorm(doc=2)",
+			            "details" : [ ]
+			          } ]
+			        } ]
+			      }
+			    } ]
+			  }
+			}
+
+			curl -i -XGET  'http://localhost:9200/_search?explain&pretty' -d '{"query" : { "match" : { "tweet" : "honeymoon" }}
+			}'
+			/Users/syeedode/junk/latest_2.4.6Output
+			2.4.6
+
+	The 'explain' parameter adds an explanation of how the '_score' was calculated to every result.
+			Adding explain produces a lot of output for every hit, which can look overwhelming, but it is worth taking the time to understand what it all means. 
+
+	First, we have the metadata that is returned on normal search requests:
+			{
+				"_index" : "use",
+				"_type" : "tweet",
+				"_id" : "12",
+				"_score" : 0.6580346,
+				"_source" : {			}
+			}
+
+
 
 
 
