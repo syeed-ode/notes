@@ -1,0 +1,68 @@
+Add 51 to the page to get the pdf location. A page references are in PDF pages.
+*************************************************************
+*							    *
+*							    *
+*							    *
+toc: 20
+pg560 - 580
+*************************************************************
+****               Chapter 15 - Routing               *******
+*************************************************************
+Routing protocols lessen the day-to-day administrative burden of maintaining routing information.
+
+It’s important to distinguish between the process of actually forwarding IP packets and the management of the routing table that drives this process, both of which are commonly called “routing.”
+
+Route computation is tricky. This chapter describes only unicast routing.
+
+Multicast routing (sending packets to groups of subscribers) involves an array of very different problems.
+
+TCP/IP Networking, is all you need to know about routing.
+
+If the appropriate network infrastructure is already in place, you can set up a single static route (as described in the Routing section starting on page 465) and voilà, you have enough information to reach just about anywhere on the Internet.
+
+
+
+
+		Z
+
+		Z
+
+				Z
+
+				Z
+
+				Z
+
+				Z
+
+						Z
+
+						Z
+
+	Z
+
+	Z
+
+	Z
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+
+
+
+

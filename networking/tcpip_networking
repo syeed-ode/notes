@@ -43,7 +43,7 @@ TCP/IP and its relationship to the Internet
 
 
 Networking road map pg499
-	TCP/IP is a protocol “suite,” a set of network protocols designed to work smoothly together. It includes several components, each defined by a standardstrack RFC or series of RFCs:
+	TCP/IP is a protocol “suite,” a set of network protocols designed to work smoothly together. It includes several components, each defined by a standards track RFC or series of RFCs:
 			IP, the Internet Protocol, which routes data packets from one machine to another (RFC791)
 
 			ICMP, the Internet Control Message Protocol, which provides support for IP, including error messages, routing assistance, and debugging help (RFC792)
@@ -96,7 +96,7 @@ Networking road map pg499
 
 				The payload is the data to be transferred.
 
-				The layer of the protocol dtermins the data unit:
+				The layer of the protocol determins the data unit:
 						TCP Layer:  		Segment
 						IP Layer:  		Packet
 						Link Layer:  		Frame
@@ -167,7 +167,7 @@ Networking road map pg499
 
 				Consult the 'ifconfig' man page to see how to set an interface’s MTU.
 
-Packet addressing pg503
+14.3 PACKET ADDRESSING pg503
 	Network packets must be properly addressed in order to reach their destinations several addressing schemes are used in combination:
 			MAC (media access control) addresses for use by hardware
 
@@ -202,7 +202,7 @@ Packet addressing pg503
 								Spoofable MAC addresses are also helpful if you need to infiltrate a wireless network that uses MAC-based access control.
 
 	IP addressing pg504
-		At the next level up from the hardware, Internet addressing (more commonly known as IP addressing) is used. IP addresses are globally unique5 and hardware independent.
+		At the next level up from the hardware, Internet addressing (more commonly known as IP addressing) is used. IP addresses are globally unique and hardware independent.
 				In general, an IP address identifies a specific and unique destination.
 
 				However, NAT (page 462) uses one interface’s IP address to handle traffic for multiple machines. 
@@ -254,7 +254,7 @@ Packet addressing pg503
 
 				Anycast addressing is formally described for IPv6, but the same tricks can be applied to IPv4, too—for example, as is done for root DNS name servers.
 
-IP addresses: the gory details pg506
+14.4 IP ADDRESSES: THE GORY DETAILS pg506
 	With the exception of multicast addresses, Internet addresses consist of a network portion and a host portion.
 			The network portion identifies a logical network.
 
@@ -491,6 +491,7 @@ IP addresses: the gory details pg506
 
 		To allow hosts that use these private addresses to talk to the Internet, the site’s border router runs a system called NAT (Network Address Translation).
 
+		pg 511
 		NAT intercepts packets addressed with these internal addresses and rewrites their source addresses, using a real external IP address and perhaps a different source port number.
 
 		It also maintains a table of the mappings it has made between internal and external address/port pairs so that the translation can be performed in reverse when answering packets arrive from the Internet.
@@ -515,7 +516,7 @@ IP addresses: the gory details pg506
 				To get around this limitation, NAT implementations let you preconfigure externally visible “tunnels” that connect to specific internal hosts and ports.
 
 				Many routers also support the Universal Plug and Play (UPnP) standards promoted by Microsoft. This allows interior hosts to set up their own dynamic NAT tunnels. 
-						ZThis can be either a godsend or a security risk, depending on your perspective. The feature is easily disabled at the router if you wish to do so.
+						This can be either a godsend or a security risk, depending on your perspective. The feature is easily disabled at the router if you wish to do so.
 
 		Another issue is that some applications embed IP addresses in the data portion of packets; these applications are foiled or confused by NAT.
 				Examples include some media streaming systems, routing protocols, and FTP commands. NAT sometimes breaks VPNs (virtual private networks), too. 
@@ -538,6 +539,258 @@ IP addresses: the gory details pg506
 
 				The standard for converting 48-bit MAC addresses into 64-bit IP host numbers is known as EUI-64.
 
+				This scheme allows for automatic host numbering, which is a nice feature for sysadmins since only the subnet needs to be managed.
+
+		The fact that the MAC address can be seen at the IP layer has both good and bad implications. 
+				The good part is that host number configuration can be completely automatic.
+
+				The bad part is that the brand and model of interface card are encoded in the first half of the MAC address, so prying eyes and hackers with code for a particular architecture will be helped along.
+
+				The IPv6 standards point out that sites are not required to use MAC addresses to derive host IDs; they can use whatever numbering system they want.
+
+14.5 ROUTING
+	Routing is the process of directing a packet through the maze of networks that stand between its source and its destination.
+			In the TCP/IP system, it is similar to asking for directions in an unfamiliar country. 
+
+			The first person you talk to might point you toward the right city. Once you were a bit closer to your destination, the next person might be able to tell you how to get to the right street. Eventually, you get close enough that someone can identify the building you’re looking for.
+
+	Routing information takes the form of rules (“routes”), such as “To reach network A, send packets through machine C.”
+			There can also be a default route that tells what to do with packets bound for a network to which there is no explicit route.
+
+	Routing information is stored in a table in the kernel. Each table entry has several parameters, including a mask for each listed network.
+			To route a packet to a particular address, the kernel picks the most specific of the matching routes—that is, the one with the longest mask.
+
+			If the kernel finds no relevant route and no default route, then it returns a “network unreachable” ICMP error to the sender.
+
+	The word “routing” is commonly used to mean two distinct things:
+			• Looking up a network address in the routing table to forward a packet toward its destination
+			• Building the routing table in the first place
+
+	In this section we examine the forwarding function and look at how routes can be manually added to or deleted from the routing table. 
+
+	We defer the more complicated topic of routing protocols that build and maintain the routing table until Chapter 15.
+
+	Routing tables
+		You can examine a machine’s routing table with netstat -r.
+				$ netstat -r
+				Routing tables
+
+				Internet:
+				Destination        Gateway            Flags        Refs      Use   Netif Expire
+				default            172.16.0.1         UGSc          279        0     en0
+				127                localhost          UCS             0        0     lo0
+				localhost          localhost          UH              1     1306     lo0
+				169.254            link#5             UCS             1        0     en0
+				169.254.209.137    28:e0:2c:5b:ff:29  UHLSW           0        0     en0   1071
+				172.16             link#5             UCS            40        0     en0
+				172.16.0.1/32      link#5             UCS             1        0     en0
+				172.16.0.1         fc:5b:39:19:8c:e1  UHLWIir       226       16     en0   1020
+
+		Use netstat -rn to avoid DNS lookups and present all the information numerically, which is generally more useful.
+
+		We discuss netstat in more detail starting on page 917 (868), but here is a short example to give you a better idea of what routes look like:
+				redhat$ netstat -rn
+				Kernel IP routing table
+				
+				Destination 	Genmask 		Gateway 		Fl 	MSS 	Iface
+				
+			***	132.236.227.0	255.255.255.0 	132.236.227.93 	U 	1500 	eth0***
+				default 		0.0.0.0 		132.236.227.1 	UG 	1500 	eth0
+			***	132.236.212.0 	255.255.255.192	132.236.212.1 	U 	1500 	eth1***
+				132.236.220.64	255.255.255.192	132.236.212.6	UG 	1500 	eth1
+				127.0.0.1 		255.255.255.255	127.0.0.1 		U 	3584 	lo
+
+		This host has two network interfaces: 
+				132.236.227.93 (eth0) on the network 132.236.227.0/24 and 
+				132.236.212.1 (eth1) on the network 132.236.212.0/26.
+
+		The destination field is usually a network address, although you can also add host-specific routes (their genmask is 255.255.255.255 since all bits are consulted).
+
+		An entry’s gateway field must contain the full IP address of a local network interface or adjacent host; on Linux kernels it can be 0.0.0.0 to invoke the default gateway.
+				For example, the fourth route in the table above says that to reach the network 132.236.220.64/26, packets must be sent to the gateway 132.236.212.6 through interface eth1.
+
+				The second entry is a default route; 
+					packets not explicitly addressed to any of the three networks listed (or to the machine itself) are sent to the default gateway host, 132.236.227.1.
+
+		A host can only route packets to gateway machines that are reachable through a directly connected network. 
+				The local host’s job is limited to moving packets one hop closer to their destinations, so it is pointless to include information about nonadjacent gateways in the local routing table.
+
+				Each gateway that a packet visits makes a fresh next-hop routing decision based on its own local routing database.
+
+				The IP source routing feature is an exception to this rule; see page 522 (473).
+
+		Routing tables can be configured statically, dynamically, or with a combination of the two approaches. 
+				A static route is one that you enter explicitly with the route command.
+						# route add -net 132.236.220.64 netmask 255.255.255.192
+						   gw 132.236.212.6 eth1
+						# route add default gw 132.236.227.1 eth0
+				Static routes remain in the routing table as long as the system is up; they are often set up at boot time from one of the system startup scripts.
+
+				Linux commands add the fourth and second routes displayed by 'netstat -rn' above. 
+
+				The first and third routes in that display were added by 'ifconfig' when the eth0 and eth1 interfaces were configured.
+
+		The final route is also added at boot time. It configures the loopback interface, which prevents packets sent from the host to itself from going out on the network.
+				Instead, they are transferred directly from the network output queue to the network input queue inside the kernel. 
+
+		In a stable local network, static routing is an efficient solution. However, it requires that the system administrator know the topology of the network accurately at boot time and that the topology not change often.
+				Most machines on a local area network have only one way to get out to the rest of the network, so the routing problem is easy.
+
+				A default route added at boot time suffices to point toward the way out. Hosts that use DHCP (see page 518 (469) to get their IP addresses can also obtain a default route with DHCP.
+
+		For more complicated network topologies, dynamic routing is required. Dynamic routing is implemented by a daemon process that maintains and modifies the routing table.
+				Routing daemons on different hosts communicate to discover the topology of the network and to figure out how to reach distant destinations.
+
+				Sev-eral routing daemons are available. See Chapter 15, Routing, for details.
+
+ICMP redirects
+	Although IP generally does not concern itself with the management of routing information, it does define a naive damage control feature called an ICMP redirect.
+
+	When a router forwards a packet to a machine on the same network from which the packet was originally received, something is clearly wrong.
+			Since the sender, the router, and the next-hop router are all on the same network, the packet could have been forwarded in one hop rather than two.
+
+			The router can conclude that the sender’s routing tables are inaccurate or incomplete.
+					In this situation, the router can notify the sender of its problem by sending an ICMP redirect packet.
+
+					In effect, a redirect says, “You should not be sending packets for host xxx to me; you should send them to host yyy instead.”
+
+			In theory, the recipient of a redirect can adjust its routing table to fix the problem.
+
+			In practice, redirects contain no authentication information and are therefore untrustworthy.
+					Dedicated routers usually ignore redirects, but most UNIX and Linux systems accept them and act on them by default.
+
+					You’ll need to consider the possible sources of redirects in your network and disable their acceptance if they could pose a problem.
+
+			Under Linux, the variable 'accept_redirects' in the /proc hierarchy controls the acceptance of ICMP redirects. 
+					See page 553 (504) for instructions on examining and resetting this variable.
+
+			On Solaris, use ndd -set /dev/ip ip_ignore_redirect 1 to disregard ICMP redirects. See page 498 for more details.
+
+			Although HP-UX also uses the ndd command to control its IP protocol stack, the underlying IP implementation lacks the ability to ignore ICMP redirects. 
+					However, you can arrange to have the routes that result from these redirects deleted from the routing table a second later with
+
+							ndd -set /dev/ip ip_ire_redirect_interval 1000
+
+					Some versions of HP-UX have enforced minima of 5 or 60 seconds on this parameter (which is expressed in milliseconds), but HP-UX 11 appears to accept smaller values without complaint.
+
+14.6 ARP: THE ADDRESS RESOLUTION PROTOCOL
+	Although IP addresses are hardware-independent, hardware addresses must still be used to actually transport data across a network’s link layer.
+			Except on point-to-point links, on which the identity of the destination is sometimes implicit.
+
+	ARP, the Address Resolution Protocol, discovers the hardware address associated with a particular IP address.
+
+	It can be used on any kind of network that supports broadcasting but is most commonly described in terms of Ethernet.
+
+	If host A wants to send a packet to host B on the same Ethernet, it uses ARP to discover B’s hardware address.
+			If B is not on the same network as A, host A uses the routing system to determine the next-hop router along the route to B. 
+
+			Then uses ARP to find that router’s hardware address.
+
+			Since ARP uses broadcast packets, which cannot cross networks.
+
+			It can only be used to find the hardware addresses of machines directly connected to the sending host’s local network.
+					Routers can in fact be configured to flood broadcast packets to other networks, but this is generally a bad idea. 
+
+					If you find yourself wanting to forward broadcasts, there is most likely something amiss with your network or server architecture.
+
+	Every machine maintains a table in memory called the ARP cache, which contains the results of recent ARP queries.
+
+	Under normal circumstances, many of the addresses a host needs are discovered soon after booting, so ARP does not account for a lot of network traffic.
+
+	ARP works by broadcasting a packet of the form “Does anyone know the hardware address for 128.138.116.4?”
+			The machine being searched for recognizes its own IP address and replies, “Yes, that’s the IP address assigned to one of my network interfaces, and the corresponding Ethernet address is 8:0:20:0:fb:6a.”
+
+			The original query includes the IP and Ethernet addresses of the requestor so that the machine being sought can reply without issuing an ARP query of its own.
+					Thus, the two machines learn each other’s ARP mappings with only one exchange of packets. 
+
+					Other machines that overhear the requestor’s initial broadcast can record its address mapping, too.
+
+	The 'arp' command examines and manipulates the kernel’s ARP cache, adds or deletes entries, and flushes or shows the table. 
+
+	'arp -a' displays the contents of the ARP cache; output formats vary.
+
+	The arp command is generally useful only for debugging and for situations that involve special hardware. 
+			For example, if two hosts on a network are using the same IP address, one has the right ARP table entry and one is wrong. 
+
+			You can use the arp command to track down the offending machine.
+
+14.7 DHCP: THE DYNAMIC HOST CONFIGURATION PROTOCOL
+	When you plug a device or computer into a network 
+			it usually obtains an IP address for itself on the local network, 
+
+			sets up an appropriate default route, and 
+
+			connects itself to a local DNS server
+
+	The Dynamic Host Configuration Protocol (DHCP) is the hidden Svengali that makes this magic happen.
+
+	The protocol lets a DHCP client “lease” a variety of network and administrative parameters from a central server that is authorized to distribute them.
+			The leasing paradigm is particularly convenient for PCs that are turned off when not in use and for networks that must support transient guests such as laptops.
+
+	Leasable parameters include:
+			• IP addresses and netmasks
+			• Gateways (default routes)
+			• DNS name servers
+			• Syslog hosts
+			• WINS servers, X font servers, proxy servers, NTP servers
+			• TFTP servers (for loading a boot image)
+
+	Clients must report back to the DHCP server periodically to renew their leases.
+			If a lease is not renewed, it eventually expires. The DHCP server is then free to assign the address (or whatever was being leased) to a different client. 
+
+			The lease period is configurable, but it’s usually quite long (hours or days).
+
+	Even if you want each host to have its own permanent IP address, DHCP can save you time and suffering.
+			Once the server is up and running, clients can use it to obtain their network configuration at boot time. 
+
+			No fuss, no mess, and most importantly, a minimum of local configuration on the client machines.
+
+DHCP software
+	ISC, the Internet Systems Consortium, maintains a very nice open source reference implementation of DHCP.
+
+	Non-Linux systems often have their own home-grown DCHP implementations, and unfortunately all our example UNIX systems fall into this category.
+
+	It’s best not to tamper with the client side of DHCP. In the next few sections, we briefly 
+			discuss the DHCP protocol, 
+
+			explain how to set up the ISC server that implements it, and 
+
+			review some client configuration issues.
+
+How DHCP works
+	DHCP is a backward-compatible extension of BOOTP, a protocol originally devised to help diskless UNIX workstations boot.
+
+	DHCP adds the concept of a lease period for assigned values.
+
+	A DHCP client begins its interaction with a DHCP server by broadcasting a “Help! Who am I?” message. 
+			Clients initiate conversations with the DHCP server by using the generic all-ones broadcast address. 
+
+			The clients don’t yet know their subnet masks and therefore can’t use the subnet broadcast address.
+
+	If a DHCP server is present on the local network, it negotiates with the client to provide an IP address and other networking parameters.
+			If there is no DHCP server on the local net, servers on different subnets can receive the initial broadcast message through a separate piece of DHCP software that acts as a relay agent.
+
+	When the client’s lease time is half over, it attempts to renew its lease. The server is obliged to keep track of the addresses it has handed out, and this information must persist across reboots.
+
+ISC’s DHCP software
+	ISC’s server daemon is called 'dhcpd', and its configuration file is 'dhcpd.conf', usually found in '/etc' or '/etc/dhcp3'.
+			The format of the config file is a bit fragile; leave out a semicolon and you may receive a cryptic, unhelpful error message.
+
+	When setting up a new DHCP server, you must also make sure that an empty lease database file has been created.
+			Check the summary at the end of the man page for dhcpd to find the correct location for the lease file on your system. It’s usually somewhere underneath /var.
+
+	To set up the dhcpd.conf file, you need the following information:
+			• The subnets for which dhcpd should manage IP addresses, and the ranges of addresses to dole out
+			• A list of static IP address assignments you want to make (if any), along with the MAC (hardware) addresses of the recipients
+			• The initial and maximum lease durations, in seconds
+			• Any other options the server should pass to DHCP clients: netmask, default route, DNS domain, name servers, etc.
+
+	The 'dhcpd' man page outlines the configuration process, and the 'dhcpd.conf' man page covers the exact syntax of the config file.
+
+	In addition to setting up your configuration, make sure dhcpd is started automatically at boot time. (See Chapter 3, Booting and Shutting Down, for instructions.)
+			It’s helpful to make startup of the daemon conditional on the existence of the dhcpd.conf file if your system doesn’t do this for you automatically
+			
+519
 		Z
 
 		Z
