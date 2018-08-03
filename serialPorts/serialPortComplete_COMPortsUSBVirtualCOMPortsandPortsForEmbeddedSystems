@@ -1,0 +1,178 @@
+
+serialPortComplete_COMPortsUSBVirtualCOMPortsandPortsForEmbeddedSystems
+
+Applications that use Microsoft’s .NET Framework class library can use the SerialPort class to access COM ports.
+
+Serial ports are ideal for many communications between embedded systems or between embedded systems and PCs. Serial ports can also be a good choice when you need very long cables or a basic network among PCs, embedded systems, or a combination.
+
+The serial communications described in this book use an asynchronous protocol. In an asynchronous protocol, the interface doesn’t include a clock line.
+		Instead, each computer provides its own clock to use as a timing reference.
+
+		A transmitted Start bit synchronizes the transmitter’s and receiver’s clocks. 
+
+In contrast, in a synchronous protocol, the interface includes a clock line typically controlled by one of the computers, and all transmitted bits synchronize to that clock.
+
+
+Word Formats
+	A UART transmits data in chunks often called words. Each word contains a
+			Start bit, 
+			data bits, 
+			an optional parity bit, and 
+			one or more Stop bits
+
+	Most UARTs support multiple word formats.
+
+	A common format is 8-N-1
+			The transmitter sends each word as one Start bit, followed by eight data bits and one Stop bit.
+
+			The data bits transmit beginning with bit 0 (the least significant bit, or LSb). Figure 2-1 illustrates.
+
+			The N in 8-N-1 indicates that the words don’t contain a parity bit.
+
+	Formats that use the parity bit can use a parity type of even, odd, mark, or space.
+
+	An example format using parity is 7-E-1 where the transmitter sends one Start bit, seven data bits, an even parity bit, and one Stop bit.
+
+	The parity bit can provide a basic form of error detecting.
+			With even parity, the data bits and parity bit in each word contain an even number of 1s.
+
+			With odd parity, the data bits and parity bit in each word contain an odd number of 1s. pg 33.
+
+			Mark and space parity are forms of stick parity. With mark parity, the parity bit is always 1, and with space parity, the parity bit is always zero. pg 33.
+
+
+Data Formats
+Binary Data
+	With binary data, each transmitted byte is a value from 00h to FFh, and the serial-port software assumes nothing about the meaning of the information being transmitted.
+
+	Higher-level software can interpret and use the data in any way.
+
+	The bits in each byte are numbered 0 through 7
+			Each bit representing the bit’s value (0 or 1) multiplied by a power of 2.
+		
+	->	In asynchronous links, bit zero, the least-significant bit (LSb), arrives first
+			If you’re looking at the data on an oscilloscope or logic analyzer, remember to reverse the order when translating to a notation with most-significant-bit (MSb) first.
+
+Text Data
+	Some software treats data as text, with each text character expressed as a code.
+
+	Most programming languages enable storing text in two ways: as strings, which can contain one or more characters, and as arrays of individual characters.
+			Source code can request to transmit a string such as “hello”, and the compiler or interpreter generates code that causes the individual character codes to transmit.
+
+			Or the source code can request to transmit an array, with each item in the array containing a character code.
+
+			At the receiving computer, software can store received character codes in a string or array.
+
+	For applications that send and receive only basic U.S. English text, encoding usually isn’t an issue.
+			When sending or receiving special characters or characters in other alphabets or scripts, the computers must agree on an encoding method.
+
+			The .NET Framework and other recent software use encoding methods defined in The Unicode Standard, a publication of the Unicode Consortium (www.unicode.org).
+
+			Unicode’s encoding methods support over a million characters in dozens of alphabets and other scripts, plus punctuation marks, math and technical symbols, geometric shapes, and other symbols. 
+
+************************************************************************
+** code point - Unicode code charts assign a code point to each       **
+**              character. notation for code points for “A” is U+0041.**
+**              That is 'U+code_ point', where 'code_point' is a      **
+**              hexadecimal value.                                    **
+**            - This value never changes.                             **
+** The code point and encoded character can have the same value or    **
+**              different values depending on the encoding method.    **
+** code units - values of an encoded character represented in software**
+**              Code units differ depending upon coding method.       **
+************************************************************************
+
+	Unicode encodes text using 'code points' and 'code units'. A code point is a value that identifies a character.
+			Unicode code charts assign a code point to each character.
+
+			The conventional notation for code points is the form 'U+code_ point', where 'code_point' is a hexadecimal value. 
+
+			For example, the code point for “A” is U+0041. Code points range from U+0000 to U+10FFFF. Each character has one and only one code point.
+
+	Software uses the code point to obtain the encoded character, which represents a character using a specific coding method.
+
+	The code point and encoded character can have the same value or different values depending on the encoding method.
+
+	An encoded character that represents a character in software consists of one or more values called code units.
+			A character’s code point never changes, but the code unit(s) that make up an encoded character vary with the encoding method.
+
+			The number of code units that represent a character, their value(s), and the number of bits in the code units vary with the character and encoding method.
+
+	The three basic Unicode encoding methods are UTF-8, UTF-16, and UTF-32 (Table 2-1).
+
+	Table 2-1: Unicode encoded characters can use any of three encoding methods
+	Encoding Method 	Bits per Code Unit 	Code units per Character 
+	UTF-8				8 					1, 2, 3, or 4
+	UTF-16 				16 					1 or 2 
+	UTF-32 				32 					1
+
+			Each can encode any character that has a defined code point.
+
+			The encoding methods use different algorithms to convert code points into code units.
+************************************************************************
+** code point - Unicode code charts assign a code point to each       **
+**              character. Notation for code points for “A” is U+0041.**
+**              That is 'U+code_point', where 'code_point' is a       **
+**              hexadecimal value.                                    **
+**            - This value never changes.                             **
+** The code point and encoded character can have the same value or    **
+**              different values depending on the encoding method.    **
+** code units - values of an encoded character represented in software**
+**              Code units differ depending upon coding method.       **
+**                                                                    **
+** UTF-8 encoding is thus backwards compatible with ASCII encoding.   **
+************************************************************************
+
+	UTF-8 encoding uses 8-bit code units. A UTF-8 encoded character is 1 to 4 code units wide.
+			Basic U.S. English text can use UTF-8 encoding with each character encoded as a single code unit whose value equals the lower byte of the character’s code point.
+
+			The character “A” has a UTF-8 encoding of 41h. The encodings are identical to the ASCII encoding that has been in use for many years.
+
+	UTF-8 encoding is thus backwards compatible with ASCII encoding.
+			Basic U.S. English text includes upper- and lower-case Latin letters, the ten digits, and common punctuation. 
+
+	Other values often transmitted are control codes that specify actions such as carriage return (CR), line feed (LF), escape, delete, and so on.
+			The code points for these characters and control codes are in the range U+0000–U+007F. The codes are defined in the Unicode code chart 'C0 Controls and Basic Latin'.
+
+			For characters with code points of 80h and higher, UTF-8 uses multi-byte encodings of 2 to 4 code units each.
+
+	If a code unit in a UTF-8 encoded character has bit 7 set to 1, the code unit is part of a multi-byte encoding. 
+			UTF-8 thus has no single-byte encoded characters in the range 80h–FFh.
+
+			Instead, characters with code points in this range use encodings with multiple code units.
+
+			For example, the © character has a code point of A9h and a 2-byte UTF-8 encoding of C2h A9h.
+
+	The chart that defines code points U+0080–U+00FF is 'C1 Controls and Latin-1 Supplement'.
+			Many of these code points are assigned to accented characters for European languages and additional control codes.
+
+			UTF-8 is not backwards compatible with ANSI encoding, which uses single-byte values in the range 80h–FFh.
+
+see pg 42 for UTF16 and UTF32
+
+see pg 43 for ASCII
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+41
+
+
+
+
+
+
+
+

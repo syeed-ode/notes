@@ -1,0 +1,171 @@
+serialPortComplete_COMPortsUSBVirtualCOMPortsandPortsForEmbeddedSystems_ManagingPortsAndTransfersInNET
+
+Managing Ports and Transfers In .NET
+	The .NET Framework and its SerialPort class provide many properties, methods, and events that are useful in managing transfers.
+
+	Applications can define buffers to hold data, implement flow control to prevent lost data, and use timers or DataReceived events to detect received data.
+
+	Parity bits can enable detecting errors in received data. This chapter demonstrates how to use these capabilities to transfer data efficiently and without errors.
+
+	The code in this chapter uses resources in the following namespaces:
+			VC#	using System.IO.Ports;
+				using System.Runtime.Remoting.Messaging; // used with asynchronous delegates
+
+	Several of the examples in this chapter use delegates to perform event-driven or asynchronous (non-blocking) operations.
+			A delegate is an object that defines the number and type(s) of parameters a method accepts and the type of value the method returns, if any.
+
+			A delegate enables application code to invoke a method indirectly and safely.
+
+			Delegates specify routines to handle events that receive data, detect serial-port errors, and detect changes on RS-232 status pins.
+
+			Delegates also enable passing received data to a form and performing write operations without blocking user input or other operations performed by the application’s main thread.
+
+Receiving Data
+	Many applications need to detect COM-port data that arrives at unpredictable times.
+
+	Some applications need to collect and manage data that arrives over a period of time. 
+
+	This section shows strategies for accomplishing these tasks.
+
+Setting Timeouts
+	When ReadTimeout is greater than zero, all of the read methods except ReadExisting will block the thread that called the method until data is available or a timeout.
+
+	A thread that calls a blocking method can do no other work, including responding to user input, until the method returns.
+
+	On a timeout when transmitting data, the application might want to set a variable that tells the application to retry.
+
+	On a timeout when waiting to receive expected data, the application might want to send a message to notify the transmitting computer of the problem.
+
+Detecting Received Data
+	To detect received data, applications can poll the port or use the DataReceived event.
+
+Polling
+	An application can poll a port at specific times when the application expects to receive data or at defined intervals.
+
+	If no data is available, a blocking read method will wait for data or a timeout.
+
+	To avoid waits and timeouts, an application can read the BytesToRead property and attempt to read data from the port only if data is available:
+			int receivedData;
+
+			if (myComPort.BytesToRead > 0)
+			{
+				receivedData = myComPort.ReadByte();
+				Console.WriteLine((char)receivedData);
+			}
+			else
+			{
+				Console.WriteLine("No data available.");
+			}
+
+	If using a method such as BinaryReader’s ReadInt32, which reads multi-byte values, 
+			be sure to check for the needed number of bytes in the buffer.
+
+	For reading strings, the ReadExisting method always returns immediately, returning an empty string if the buffer is empty. 
+
+	For the blocking read methods, setting the ReadTimeout property determines how long the method waits if no data is available.
+
+	An example of an application that expects to receive data at specific times is a computer that sends commands and expects a response after each command. 
+			If the remote computer typically responds quickly, the application might wait for the response:
+					String receivedData;
+
+					// Send a command.
+					myComPort.WriteLine("CMD1");
+
+					// Wait for a response.
+					receivedData = myComPort.ReadLine();
+
+					Console.WriteLine(receivedData);
+
+	Another option for polling is to use a Timer component to trigger periodic reads of the port. 
+			Drag a Timer component from Visual Studio’s Toolbox onto a form. Set the interval in milliseconds for polling the port.
+					tmrPollForReceivedData.Interval = 1000;
+					tmrPollForReceivedData.Stop();
+			When the port has been opened, start the timer:
+					tmrPollForReceivedData.Start();
+
+	The timer’s Tick routine executes when the timer is running and the specified interval has elapsed.
+
+	The routine should do whatever is needed with any received data:
+			private void tmrPollForReceivedData_Tick(object sender, EventArgs e)
+			{
+				String receivedData;
+
+				// Read and display any received data.
+				receivedData = myComPort.ReadExisting();
+				
+				if (!(receivedData == "") )
+				{
+					Console.WriteLine(receivedData);
+				}
+			}
+
+	On closing the port, stop the timer.
+			tmrPollForReceivedData.Stop()
+
+Using the DataReceived Event
+	The DataReceived event provides an efficient way to detect received data.
+
+	To use the event, create a delegate for a routine that will execute when a DataReceived event occurs on an open port.
+			// Define a delegate class to handle DataReceived events.
+			internal delegate void SerialDataReceivedEventHandlerDelegate(object sender, SerialDataReceivedEventArgs e);
+
+			// Create an instance of the delegate.
+			private static SerialDataReceivedEventHandler SerialDataReceivedEventHandler1 = new SerialDataReceivedEventHandler( ComPort.DataReceived );
+
+	Assign the delegate as the handler routine to execute when a DataReceived event occurs on a port:
+			myComPort.DataReceived += SerialDataReceivedEventHandler1; 
+
+	The DataReceived routine can then read and process received data as needed.
+			internal void DataReceived( object sender, SerialDataReceivedEventArgs e )
+			{
+					' Place code to read and process data here.
+			}
+
+	The code in the routine can be identical to the code in the 'tmrPollForReceivedData_Tick' routine above or whatever the application requires
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
