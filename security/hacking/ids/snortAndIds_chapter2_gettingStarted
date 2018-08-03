@@ -68,6 +68,9 @@ MySQL is used with Snort to log alert data. Apache acts as a web server. PHP is 
 		1. Create directory /var/log/snort where Snort creates log files by default.
 		2. Create a directory to save configuration files. I have created /opt/snort/ etc. You can create a directory of your own.
 		3. Create or copy the Snort configuration file in /opt/snort/etc directory.
+				/usr/local/Cellar/snort/2.9.11/.bottle/etc/snort/snort.conf
+				/usr/local/Cellar/snort/2.9.11/.bottle/etc/snort/classification.config
+				/usr/local/Cellar/snort/2.9.11/.bottle/etc/snort/reference.config
 		4. Create a directory /opt/snort/rules and copy default rule files to /opt/snort/etc directory. The path of this directory is mentioned in the main snort.conf file and you can create a directory of your own choice if you like.
 
 		First, create a directory /var/log/snort where Snort will keep its log files. If you want to use any other directory, you have to use command line option '-l' when starting Snort.
@@ -75,6 +78,7 @@ MySQL is used with Snort to log alert data. Apache acts as a web server. PHP is 
 		When Snort starts, it can read its configuration, which is snort.conf, 
 
 				from the current directory or 
+						/usr/local/Cellar/snort/2.9.11/.bottle/etc/snort/snort.conf
 				
 				from .snortrc in the home directory of the user who launched Snort.
 
