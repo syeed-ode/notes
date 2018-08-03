@@ -1,0 +1,250 @@
+
+Wireshark:
+
+
+Frame
+When referring to the message at the OSI layer 2 (thedata link layer,where theMAC addressis used), the whole message is called a frame. 
+
+
+Packet
+When referring to the message at OSI model layer 3 (the network layer, for example, using the IP address), then the message is called a packet.
+		Packets are usually numbered based on the time they are received, although this isn’t guaranteed. The packet capture (pcap) library determines how to order the packets.
+
+Packets Bytes Pane
+The first, left most column simply counts incrementally: 0000, 0010, 0020, and so on. 
+		That’s the offset (in hexadecimal) of the selected packet.
+
+		Here, offset simply means the number of bits off from the beginning—again, counting in hexadecimal (where 0x0010=16 in decimal).
+
+The middle column shows information, in hexadecimal, at that offset.
+
+The right-hand column shows the same information, but in ASCII.
+
+For example, the total amount of information from the very beginning (offset 0000)to offset 0010is16 bytes.
+		Themiddle column shows each of the 16 bytesin hex.
+
+		The right-hand column shows each of the 16 bytes in ASCII characters.
+
+		When a hexadecimal value doesn’t translate to a printable ASCII character, only a “.” (period), is shown.
+
+So the Packet Bytes pane is actually the raw packet data as seen by Wireshark. By default, it is displayed in hex bytes.
+
+Filters
+	You use capture filters when you want to limit the amount of network data that goes into processing and is getting saved.
+
+	You use display filters to drill down into only the packets you want to analyze once the data has been processed.
+
+	Capture filters use a low-levelsyntax called the Berkeley Packet Filter (BPF).
+
+Capture Filters
+	Wireshark allows you to filter traffic in the capture phase. 
+
+	This is some what similar to the display filters, but there are fewer fields that can be used to filter on, and the syntax is different.
+
+	It’s most important to understand that a capture filter screens packets before they are captured.
+
+	A display filter, however, screens what saved packets are displayed.
+
+	Therefore, a restrictive capture filter means your capture file will be small (and thus a smaller number of displayed packets, too). But using no capture filter means capturing every packet, and thus a large capture file, on which display filters can be used to narrow the list of packets shown.
+
+	The building blocks of a capture filter are the 
+		protocol, 
+		direction, and 
+		type. 
+
+	For example, 'tcp dst port 22' captures only TCP packetswith a destination port of 22. 
+
+	Types
+		The possible types are:
+			- host
+			- port
+			- net
+			- portrange
+
+		If a type is notspecified, a 'host' type will be assumed.
+
+		Note that youn eed to specify atl east one object to compare to.
+
+		The host modifier will not be assumed if you would only specify an IP address as filter and will result in a syntax error.
+
+	Direction
+		Direction can be set using 'src' or 'dst'. If it is not specified, both will bem atched. 
+
+		In addition to specifying one direction, the following combined direction modifiers can be used: 'src or dst' and 'src and dst'.
+
+		The direction and protocol can be omitted to match a type in both source and destination across all protocols.
+				For example, 'dst host 192.168.1.1' would only
+				show traffic going to the specified IP.
+
+				If 'dst' is omitted, itwould show traffic to and from that IP address.
+
+		The following are themostcommonly used BPF (Berkley Packet Filter) protocols:
+				- ether (filtering Ethernet protocols)
+				- tcp (filtering TCP traffic)
+				- ip (filtering IP traffic)
+				- ip6 (filtering IPv6 traffic)
+				- arp (filtering ARP traffic)
+
+		In addition to the standard components, there is a set of primitives that do not fit in one of the categories:
+				- gateway (matchesif a packet used the specified host as gateway)
+				- broadcast (for broadcast, not unicast, traffic)
+				- less (lessthan, followed by a length)
+				- greater (greaterthan, followed by a length)
+
+		These primitives can be combined with the other components. For example, 'ether broadcast' will match all Ethernet broadcast traffic.
+
+		Capture filter expressionscan be strung together using logical operators. Again, with both the English and the logical notation:
+				- and (&&)
+				- or (||)
+				- not(!)
+
+		Examples
+				- 'host beta' (captures all packetsto and from the alpha system)
+				- 'ip6 host alpha and not beta' (captures allIP packets between alpha and any host except beta)
+				- 'tcp port 80' (captures all TCP traffic across port 80)
+
+Debugging Capture Filters
+	Capture filters operate on a lowlevel of the captured network data. They are compiled to processor opcodes(processorlanguage) in orderto ensurehigh performance.
+
+	The compiled BPF can be shown by using the '-d' operator on tcpdump, Dumpcap, or TShark, and in the Capture Options menu in the GUI. 
+
+	This is useful when debugging a problem where your filter is not doing exactly what youwere expecting. The following is an example output of a BPF filter:
+		localhost:~$ dumpcap -f "ether host 00:01:02:03:04:05" -d
+		Capturing on 'eth0'
+		(000) ld [8]
+		(001) jeq #0x2030405 jt 2 jf 4
+		(002) ldh [6]
+		(003) jeq #0x1 jt 8 jf 4
+		(004) ld [2]
+		(005) jeq #0x2030405 jt 6 jf 9
+		(006) ldh [0]
+		(007) jeq #0x1 jt 8 jf 9
+		(008) ret #65535
+		(009) ret #0
+
+	As previously mentioned, using the -d operator will show the BPF code for the capture filter.
+
+	And, used in the example above, the -f operatorwillshowthe libpcap filter syntax.
+
+	Following is a line-by-line explanation of the BPF:
+			- Line 0 loadsthe offsetforthe second part of the source address.
+			- Line 1comparesthe packet atthe offsetto 2030405 and jumpsto line 2 if it matches, orline 4 if it doesn’t match.
+			- Lines 2 and 3 load the offsetforthe first part of the source address and compare itto 0001. If this also matches, itcan return 65535 to capture this packet.
+			- Lines 4 through 7 do the same aslines 0through 3 but for the destination address.
+			- Lines 8 and 9 are instructionsto return.
+
+	Youcan use this method of analyzing the filterstep by step to verifywhere the filteris goingwrong.
+
+Capture Filters for Pentesting
+	The following snippetwould capture all your outgoing trafficto serve as a logbook for your actions on thenetwork. 
+
+	It captures only trafficcoming from your network card identified by theMAC address and savesitsplit up in multiple timestamped files prefixed by pentest.
+			dumpcap -f "ether src host 00:0c:29:57:b3:ff" -w pentest -b filesize:10000		
+
+	Youcan run thissnippetin thebackground, asrunning an entire instance of Wireshark would tieup too much of the system resources.
+
+	To capture alltraffic going to and from yourtesting machine combined with broadcast traffic, use the following snippet:
+			dumpcap -f "ether host 00:0c:29:57:b3:ff or broadcast" -w pentest -b filesize:10000	
+
+	As youcan see, only the src directivewas dropped, and a broadcast expression was combined with the Ethernet expression using the or statement.
+
+	This applies to cases where you are using multiple virtual machines and thus MAC addresses, but youwantto be able to log all relevant traffic.
+			dumpcap -f "ip host 192.168.0.1 or ip host 192.168.0.5"
+	The list of hostscould get a little large to typeby hand,so itis more practical to store your in-scope targets in a 'hosts.txt' file and use itinstead.
+
+	To generate the filter itself, use the following one-liner and strip the last 'or':
+			cat hosts.txt | xargs -I% echo -n "ip host % or "
+
+Display Filters
+	Thedisplay filtersyntax is based on expressionsreturning true or falseby using operators for comparison.
+			ENGLISH 	C-LIKE 		DESCRIPTION
+			eq 			== 			Equal
+			ne 			!= 			Not equal
+			gt 			> 			Greater than
+			lt 			< 			Less than
+			ge 			>= 			Greater than or equal to
+			le 			<= 			Less than or equal to
+			Contains 				Tests if the filter field contains a given value
+			Matches 				Tests a field against a Perlstyle regular expression
+			
+			Source: http://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html
+
+	To make a useful expression, youhave to match these operators against variablesin the packet.
+			Thisis possible in Wireshark by accessing variables grouped by protocol.
+
+	The following statementfilters allthe trafficcoming from or going to the supplied IP address: 'ip.addr == 1.2.3.4'. 
+
+	If you were to try to compare the same variable to 'google.com', Wiresharkwould present an error message because the variable is not an IP address.
+
+	The language expects an object of a certain type to be compared only to a variable of the same type.
+			In practice, you can also see the values Wireshark expectsfor each elementin the packet by inspecting the packet using thePacketDetails pane.
+
+			The variable name scan be found on the bottom left of the screen in the status bar or looked up in the reference.
+
+	Itis easier to see the differentiating markers between packets you do want to seeby comparing fields in the Packet Details pane.
+
+	Ech field in theARP packetislisted with a 
+		readable value (hex in thePacketDetails pane) 
+	followed by the 
+		raw value (on the rightside of thePacketDetails pane)
+
+	Both of these values can generally beused in an expression.
+
+	Wireshark transforms the readable format to the corresponding raw format for your convenience.
+
+	If you want to see only ARP requestsin thePacket List pane, the filterwould be 'arp.opcode == 1'.
+
+	In this case, typing 'request' would not work, because it is not a named representation of the same data.
+			The number 1 could mean many things.
+
+Building Display Filters Interactively
+	Start by right-clicking on a section of a packetthatinterests you
+			Then select 'Apply as Filter'
+
+			Selected to filter the packet list by the selected variable.
+
+	For example, selecting the source IP addressfield and applying a filterto itis a good way to start quickly narrowing down the packets youare interested in.
+
+	After filtering for this particular IP address, you might want to add a destination portto the filterto only see trafficfrom this hostto port 80.
+
+	This can also be done in the GUI without throwing away the currentfilter by right-clicking the source 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+39
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
