@@ -1,0 +1,238 @@
+delegates 739
+	callbacks and 738
+	defined 731 / 775
+	delegate type 731 / 775
+	events, callbacks, and 740
+	exploring in debugger 733
+	hooking up to one event 736–738
+	in action 732–733
+	multiple events 718
+	using the Windows settings charm 742
+	Windows Phone app, BeeAttack 841
+
+
+
+A delegate STANDS IN for an actual method
+	One of the most useful aspects of events is that when an event fires, it has no idea whose event handler methods it’s calling.
+
+	Anyone who happens to subscribe to an event gets his event handler called. So how does the event manage that?
+
+	It uses a C# type called a 'delegate'. 
+			A delegate is a special kind of reference type. 
+
+			Delegates let you refer to a method inside a class. 
+
+			Delegates are the basis for events.
+
+	You’ve actually already been using delegates throughout this chapter! When you created the 'BallInPlay' event, you used 'EventHandler'. 
+
+	Well, an 'EventHandler' is just a delegate. 
+
+	If you right-click on EventHandler in the IDE and select Go To Definition, this is what you’ll see (try it yourself):
+
+public delegate void EventHandler(object sender, EventArgs e);
+			void - 
+			This specifies the return value of the delegate’s signature -— which means an EventHandler can only point to methods with void return values.
+
+			EventHandler - 
+			The name of this delegate is 'EventHandler'.
+
+			(object sender, EventArgs e) - 
+			Method signagute - 
+			When you create a delegate, all you need to do is specify the signature of methods that it can point to.
+
+			So this delegate can be used to reference any method that takes an object and an EventArgs and has no return value.
+
+A delegate adds a new type to your project
+	When you add a 'delegate' to your project, you’re adding a 'delegate type'.
+
+	And when you use it to create a field or variable, you’re creating an 'instance' of that delegate type. 
+
+	 So create a new Console Application project. 
+
+	Then add a new class file to the project called ConvertsIntToString.cs.
+
+	But instead of putting a class inside it, add a single line:
+			delegate string ConvertsIntToString(int i);
+			// ConvertsIntToString is a delegate 
+			// type that you’ve added to your 
+			// project. Now you can use it to 
+			// declare variables. This is just like 
+			// how you can use a class or interface 
+			// as a type to define variables.
+	
+	Next, add a method called 'HiThere()' to your Program class:
+			
+			// This method’s signature matches 
+			// ConvertsIntToString.
+			private static string HiThere(int i)
+			{
+				return "Hi there! #" + (i * 100);
+			}
+
+	Finally, fill in the Main() method:
+			static void Main(string[] args)
+			{
+				// someMethod is a variable whose type is ConvertsIntToString. It’s a lot like a reference variable, except instead of putting a label on an object on the heap you’re putting a label on a method.
+
+				// You can set someMethod just like any other variable. When you call it like a method, it calls whatever method it happens to point to.
+				ConvertsIntToString someMethod = new ConvertsIntToString(HiThere);
+
+				string message = someMethod(5);
+
+				Console.WriteLine(message);
+				Console.ReadKey();
+			}
+
+	The 'someMethod' variable is pointing to the 'HiThere()' method.
+			When your program calls someMethod(5), it HiThere() and passes it the argument 5,
+
+			This causes it to return the string value “Hi there! #500” -— exactly as if it were called directly.
+
+			Take a minute and step through the program in the debugger to see exactly what’s going on.
+
+Delegates in action
+	Here's another program where we're using a Windows Forms app. 
+		This time it's because 'MessageBox.Show()' blocks, which makes it easy to see what's going on.	
+
+	There’s nothing mysterious about delegates.  Let’s use them to help a restaurant owner sort out his top chef ’s secret ingredients.
+
+Create a new Windows Forms Application project and add a delegate.
+	Delegates usually appear outside of any other classes, so add a new class file to your project and call it 'GetSecretIngredient.cs'.
+
+	Delete the class declaration from the new class file and replace it with this line of code.
+
+	It will have exactly one line of code in it:
+			delegate string GetSecretIngredient(int amount);
+
+Add a class for the first chef, Suzanne.
+	'Suzanne.cs' will hold a class that keeps track of the first chef’s secret ingredient. 
+					class Suzanne {
+						public GetSecretIngredient MySecretIngredientMethod {
+							get {
+								return new GetSecretIngredient(SuzannesSecretIngredient);
+							}
+						}
+
+						private string SuzannesSecretIngredient(int amount) {
+							return amount.ToString() + " ounces of cloves";
+						}
+					}
+			It has a 'private' method called 'SuzannesSecretIngredient()' with a signature that matches 'GetSecretIngredient'.
+					Suzanne’s secret ingredient method takes an int called amount and returns a string that describes her secret ingredient.
+
+			But it also has a read-only property —- and check out that property’s type. It returns a 'GetSecretIngredient'.
+						public GetSecretIngredient MySecretIngredientMethod {
+							get {
+								return new GetSecretIngredient(SuzannesSecretIngredient);
+							}
+						}
+					You can read about read only properties on (225 / 269). It is in Chapter 5: Encapsulation: Keep your privates…private (197 / 241). 
+
+			So other objects can use that property to get a reference to her 'SuzannesIngredientList()' method —- the property can return a delegate reference to it, 'even though it’s private'.
+
+Then add a class for the second chef, Amy.
+	Amy’s method works a lot like Suzanne’s:
+	
+	Amy’s secret ingredient method also takes an int called amount and returns a string, but it returns a different string from Suzanne’s
+			namespace ChefIngredients
+			{
+			    class Amy
+			    {
+			    }
+			                private string AmysSecretIngredient(int amount) {
+			            if(amount < 10) {
+			                return amount.ToString() + " cans of sardines -- you need more!";
+			            } else {
+			                return amount.ToString() + " can of sardines";
+			            }
+			        }
+			    }
+			}
+
+	Amy’s 'GetSecretIngredient' property returns a new instance of the 'GetSecretIngredient' delegate. 
+
+	This delagate is pointing to her secret ingredient method.
+			namespace 'ChefIngredients'
+			{
+			    class Amy
+			    {
+			        public GetSecretIngredient AmysSecretIngredientMethod {
+			            get {
+			                return new GetSecretIngredient(AmysSecretIngredient);
+			            }
+			        }
+			    }
+			}
+
+Build this form
+	Here’s the code for the form:
+
+Windows Presentation Foundation (WPF)
+
+
+pg 115 C#: Loops
+
+
+1) We need an object for the event arguments.
+	class BallEventArgs : EventArgs
+
+2) We’ll need to define the event in the class that’ll raise it.
+	public event EventHandler BallInPlay;
+
+5) A Ball object raises its event to notify subscribers that it’s in play.
+	EventHandler ballInPlay = BallInPlay;
+
+	if (ballInPlay != null)
+		ballInPlay(this, e);
+
+3) The subscribing classes need event handler methods.
+	void ball_BallInPlay(object sender, EventArgs e)
+
+4) Each individual object subscribes to the event
+	ball.BallInPlay += new EventHandler(ball_BallInPlay);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

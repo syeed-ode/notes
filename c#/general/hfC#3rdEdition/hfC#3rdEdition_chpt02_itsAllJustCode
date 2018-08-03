@@ -1,0 +1,311 @@
+
+
+
+
+Every program starts out as source code files
+	(.sln)
+	The IDE bundles all of the files for your program into a solution by creating a solution (.sln) file and a folder that contains all of the other files for the program.
+			(.csproj)
+			The solution file has a list of the project files (which end in .csproj) in the solution.
+					The project files contain lists of all the other files associated with the program.
+
+Build the program to create an executable
+	When you select Build Solution from the Build menu, the IDE compiles your program *by running the compiler which turns your program’s source code into an executable.
+
+	When you build the program, it creates the executable inside the bin folder, which is inside the project folder.
+
+
+The .NET Framework gives you the right tools for the job
+	C# is just a language—by itself, it can’t actually do anything.
+
+	That’s where the .NET Framework comes in. All of the controls you used are part of .NET for Windows Store apps, which contains an API with grids, buttons, pages, and other tools for building Windows Store apps. 
+
+	One of the things you’ll learn by the end of this book is how Windows Store and Windows Desktop apps do some of those things differently. 
+			That’s the kind of insight and understanding that helps good programmers become great programmers.
+
+	The tools in both the Windows Runtime and the .NET Framework are divided up into 'namespaces'.
+			You’ve seen these namespaces before, at the top of your code in the “using” lines.
+
+			One namespace is called 'Windows.UI.Xaml.Conrols' — it’s where your buttons, checkboxes, and other controls come from.
+
+			Whenever you create a new Windows Store project, the IDE will add the necessary files so that your project contains a page, and those files have the line “using Windows.UI.Xaml.Controls;” at the top.
+
+Your program runs inside the Common Language Runtime
+	Every program in Windows 8 runs on an architecture called the Windows Runtime. 
+
+	But there’s an extra “layer” between the Windows Runtime and your program called the 'Common Language Runtime', or CLR.
+			The CLR—often referred to as a virtual machine—takes care of all hardware and low-level machine stuff for you by doing a sort of “translation” between your program and the computer running it.
+
+	The CLR tightly manages your computer’s memory by figuring out when your program is finished with certain pieces of data and getting rid of them for you.
+
+The IDE helps you code
+	You’ll spend a lot of time going back and forth between classes, and the easiest way to do that is to use the Solution Explorer
+
+	When you’re working on a program, you’ll often have two tabs for it at the same time—one for the designer, and one to view the code. 
+
+	Use 'Control-Tab' to switch between open windows quickly.
+
+Anatomy of a program
+	Every time you make a new program, you define a namespace for it.
+
+	This way its code is separate from the .NET Framework and Windows Store API classes.
+
+	All programs use 'namespaces', 'classes', and 'methods' to make your code easier to manage.
+			A class contains a piece of your program (although some very small programs can have just one class). 
+					A class has one or more methods. Your methods always have to live inside a class. And methods are made up of statements—like the ones you’ve already seen.
+
+Let’s take a closer look at your code
+	Open up the code from your Save the Humans project’s 'MainPage.xaml.cs' so we can have a closer look at it.
+
+	The code file starts by using the .NET Framework tools
+			You’ll find a set of 'using' lines at the top of every program file.
+
+			They tell C# which parts of the .NET Framework or Windows Store API to use. 
+
+			If you use other classes that are in other namespaces, then you’ll add using lines for them, too.
+
+			Since apps often use a lot of different tools from the .NET Framework and Windows Store API, the IDE automatically adds a bunch of 'using' lines when it creates a page (which isn’t quite as “blank” as it appeared) and adds it to your project.
+
+			These 'using' lines are at the top of every code file. They tell C# to use all of those .NET Framework classes. 
+					using System;
+					using System.Collections.Generic;
+					using System.IO;
+					using System.Linq;
+					using Windows.Foundation;
+					using Windows.Foundation.Collections;
+					using Windows.UI.Xaml;
+			Each one tells your program that the classes in this particular .cs file will use all of the classes in one specific .NET Framework (System) or Windows Store API namespace.
+
+C# programs are organized into classes
+	Every C# program is organized into 'classes'. A class can do anything, but most classes do one specific thing.
+			When you created the new program, the IDE added a class called 'MainPage' that displays the page.
+
+	When you called your program Save the Humans, the IDE created a namespace for it called Save_the_Humans. 
+			It converted the spaces to underscores because namespaces can’t have spaces. 
+
+	It creates the namespace by adding the 'namespace' keyword at the top of your code file. 
+			Everything inside its pair of curly brackets is part of the Save_the_Humans namespace.
+					namespace Save_the_Humans
+					{
+					}
+
+	This is a class called 'MainPage'. It contains all of the code to make the page work. 
+			The IDE created it when you told it to create a new blank C# Windows Store project.
+					public sealed partial class MainPage : Page
+					{
+					}
+	
+Two classes can be in the same namespace
+	Take a look at these two class files from a program called 'PetFiler2'.
+
+	They’ve got three classes: a 'Dog' class, a 'Cat' class, and a 'Fish' class.
+
+	Since these classes are in the same namespace, they can all “see” each other—even though they’re in different files (SomeClasses.cs and MoreClasses.cs).
+				file: SomeClasses.cs
+				namespace PetFiler2 {
+					class Dog {
+						public void Bark() {
+							// statements go here
+						}
+					}
+					
+					partial class Cat {
+						public void Meow() {
+							// more statements
+						}
+					}
+				}
+
+				file: MoreClasses.cs
+				namespace PetFiler2 {
+					class Fish {
+						public void Swim() {
+							// statements
+						}
+					}
+
+					partial class Cat {
+						public void Purr() {
+							// statements
+						}
+					}
+				}
+	A class can span multiple files too, but you need to use the “partial” keyword when you declare it.
+
+	The IDE used it to split your page up into two files so it could put the XAML code into 'MainPage.xaml' and the C# code into MainPage.xaml.cs.
+	pg 109
+
+	pg 898
+	Namespaces and assemblies
+	It’s worth taking a step back and looking a little closer at what it is that you’re building.
+
+	When you compile your C# program, you’re creating an assembly. An assembly is a file that contains the compiled code. 
+
+	There are two kinds of assemblies (process & libraries).
+			Executables (occasionally called “process assemblies”) have the EXE file extension. 
+					All of the programs you write in this book are compiled as executables.
+
+			Library extensions. There are also (library assemblies), which have the DLL file extension. 
+					They contain classes that you can use in your programs, and, as you’ll see shortly, namespaces play a big role in how you use them.
+
+	You can get a handle on the basics of assemblies by first creating a class library.
+
+	Then you by building a program that uses it. 
+
+	Start by 'opening Visual Studio 2012 for Desktop' and creating a new Class Library project called 'Headfirst.Csharp.Leftover3'.
+
+	When the library is first created, it contains the file 'Class.cs'.
+
+	'Delete' that file and add a new class called 'Guy.cs'. Open up the new 'Guy.cs' file.
+			namespace Headfirst.Csharp.Leftover3
+			{
+				class Guy
+				{
+				}
+			}
+	Notice how Visual Studio made the namespace match your class library name? That’s a very standard pattern. 
+
+	Go ahead and fill in the Guy class with the code from leftover #2—we’ll use it in a minute. 
+
+	Next, add two more classes called 'HiThereWriter' and 'LineWriter'. Here’s the code for 'HiThereWriter':
+			namespace Headfirst.Csharp.Leftover3
+			{
+				public static class HiThereWriter
+				{
+					public static void HiThere(string name)
+					{
+						MessageBox.Show("Hi there! My name is " + name);
+					}
+				}
+
+				internal static class LineWriter 
+				{
+					public static void WriteALine(string message)
+					{
+						Console.WriteLine(message);
+					}
+				}
+			}
+
+	We named the class library 'Headfirst.Csharp.Leftover3' because that’s a pretty standard way of naming assemblies.
+			Read more about assembly naming here: https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/names-of-assemblies-and-dlls
+
+			A good rule of thumb is to name the DLL based on the common prefix of the namespaces contained in the assembly. 
+
+			For example, an assembly with two namespaces, 'MyCompany.MyTechnology.FirstFeature' and MyCompany.MyTechnology.SecondFeature', could be called 'MyCompany.MyTechnology.dll'.
+
+			CONSIDER naming DLLs according to the following pattern: <Company>.<Component>.dll, where <Component> contains one or more dot-separated clauses. For example: 'Litware.Controls.dll'.
+
+	Now try to compile your program. You’ll get an error: "The name 'MessageBox' does not exist in the current context". 
+
+	OK, no problem—we know how to fix this in a Desktop app. Add a line to the top of your class:
+			using System.Windows.Forms;
+
+	Wait, it still doesn’t compile! And something’s weird here. 
+			When you typed in that line, did you notice that when you got as far as “using System.Win” the IntelliSense window stopped giving you suggestions?
+
+			That’s because your project hasn’t referenced the 'System.Windows.Forms' assembly. 
+
+	Let’s fix this by referencing the correct assembly. 
+			Go to the Solution Explorer and expand the “References” folder in your project.
+
+			Right-click on it and choose “Add Reference…”; a window should pop up:
+					This window is showing you the assemblies your program can access.
+
+					Some of them are stored in the Global Assembly Cache (GAC), but not every assembly in the GAC shows up in this window.
+
+	The GAC is a central, machine-wide set of assemblies that all of the .NET programs on the computer can access.
+			You can see all of the assemblies in it by typing '%systemroot%\ Microsoft.NET\assembly' into the Search box on the Start page (or Start/Run for older versions of Windows).
+
+	On the .NET tab, start typing “System.Windows.Forms”—it should jump down to that assembly. Make sure it’s highlighted and click OK.
+
+	 Now 'System.Windows.Forms' should show up under the References folder in the Solution Explorer—and your program compiles!
+	 		The “Add References” window figures out which assemblies to display by checking a registry key, not the GAC.
+
+	 		See https://support.microsoft.com/en-us/help/306149/how-to-display-an-assembly-in-the-add-reference-dialog-box
+
+	Take a close look at the declarations for LineWriter and HiThereWriter:
+			public class HiThereWriter
+
+			internal static class LineWriter
+
+	There are access modifiers on the class declarations:
+			'HiThereWriter' is declared with the 'public' access modifier
+
+			'LineWriter' is declared with the 'internal' one.
+
+	In a minute, you’ll write a console application that references this class library.
+			A program can only 'directly' access another class library’s public classes. 
+
+			Although they can be accessed indirectly, like when one method calls another or returns an instance of an internal object that implements a public interface.
+
+	Now go back to your Guy class and look at its declaration:
+			class Guy
+
+	Since there’s no access modifier, it defaults to 'internal'. We’ll want to expose Guy to other assemblies that reference this one, so change the declaration to be public:
+			public class Guy
+
+	Next, try running your program in the debugger. You’ll see this error:
+			"A project with an Output Type of Class Library cannot be started directly"
+
+	That makes sense when you think about it, because a class library doesn’t have an entry point. 
+	pg 901
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

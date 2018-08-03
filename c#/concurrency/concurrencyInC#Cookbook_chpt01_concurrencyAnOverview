@@ -1,0 +1,321 @@
+	                                                                   |
+	                                                                   |
+*************************************************************
+*							    *
+*							    *
+*							    *
+toc: 20
+pg560 - 580
+*************************************************************
+*****       Chapter 1 - Concurrency: An Overview        *****
+*************************************************************
+*************************************************************
+Concurrency 
+	Doing more than one thing at a time.
+
+Multithreading 
+	A form of concurrency that uses multiple threads of execution.
+
+Parallel Processing 
+	Doing lots of work by dividing it up among multiple threads that run concurrently.
+
+Asynchronous Programming 
+	A form of concurrency that uses futures or callbacks to avoid unnecessary threads.
+
+Reactive Programming 
+	A declarative style of programming where the application reacts to events.
+*************************************************************
+Previously, concurrent programming was the domain of experts; these days, every developer can (and should) embrace concurrency.
+
+1.1. Introduction to Concurrency
+Concurrency - Doing more than one thing at a time.
+
+Multithreading - A form of concurrency that uses multiple threads of execution.
+
+	Multithreading literally refers to using multiple threads. As we’ll see in many recipes in this book, multithreading is one form of concurrency, but certainly not the only one.
+
+	In fact, direct use of the low-level threading types has almost no purpose in a modern application.
+
+	Higher-level abstractions are more powerful and more efficient than oldschool multithreading.
+
+	None of the multithreading recipes in this book use the 'Thread' or 'BackgroundWorker' types; they have been replaced with superior alternatives.
+
+	***As soon as you type new Thread(), it’s over; your project already has legacy code.***
+
+	But don’t get the idea that multithreading is dead! 
+
+	Multithreading lives on in the 'thread pool', a useful place to queue work that automatically adjusts itself according to demand.
+
+	In turn, the thread pool enables another important form of concurrency: 'parallel processing'.
+
+Parallel Processing - Doing lots of work by dividing it up among multiple threads that run concurrently.
+
+	Parallel processing (or parallel programming) uses multithreading to maximize the use of multiple processors.
+			Parallel processing will split up the work among multiple threads, which can each run independently on a different core.
+
+	Parallel processing is one type of multithreading, and multithreading is one type of concurrency.
+
+	There’s another type of concurrency that is important in modern appli‐ cations but is not (currently) familiar to many developers: 'asynchronous programming'.
+
+Asynchronous Programming - A form of concurrency that uses futures or callbacks to avoid unnecessary threads.
+
+	A 'future' (or 'promise') is a type that represents some operation that will complete in the future.
+			The modern future types in .NET are Task and Task<TResult>.
+
+			Older asynchronous APIs use callbacks or events instead of futures.
+
+	Asynchronous programming is centered around the idea of an 'asynchronous operation': some operation that is started that will complete some time later. 
+
+	***
+	While the operation is in progress, it does not block the original thread; the thread that starts the operation is free to do other work.
+	***
+
+	When the operation completes, it notifies its future or invokes its completion callback event to let the application know the operation is finished.
+
+	Asynchronous programming is a powerful form of concurrency, but until recently, it required extremely complex code.
+			The async and await support in VS2012 make asynchronous programming almost as easy as synchronous (nonconcurrent) programming.
+
+	Another form of concurrency is 'reactive programming'.
+
+	Asynchronous programming implies that the application will start an operation that will complete once at a later time.
+
+	Reactive programming is closely related to asynchronous programming, but is built on 'asynchronous events' instead of 'asynchronous operations'. 
+
+	Asynchronous events may not have an actual “start,” may happen at any time, and may be raised multiple times.
+
+Reactive Programming - A declarative style of programming where the application reacts to events.
+
+	If you consider an application to be a massive state machine, the application’s behavior can be described as reacting to a series of events by updating its state at each event.
+			This is not as abstract or theoretical as it sounds. Reactive programming is not necessarily concurrent, but it is closely related to concurrency, so we’ll be covering the basics in this book.
+
+	Most applications at least use multithreading (via the thread pool) and asynchronous programming. 
+
+	Feel free to mix and match all the various forms of concurrency, using the appropriate tool for each part of the application.
+
+1.2. Introduction to Asynchronous Programming
+	Asynchronous programming has two primary benefits. 
+
+	The first benefit is for end-user GUI programs: asynchronous programming enables responsiveness.
+			We’ve all used a program that temporarily locks up while it’s working; an asynchronous program can remain responsive to user input while it’s working.
+
+	The second benefit is for server-side programs: asynchronous programming enables scalability.
+
+	A server application can scale somewhat just by using the thread pool, but an asynchronous server application can usually scale an order of magnitude better than that.
+
+	Modern asynchronous .NET applications use two keywords: 'async' and 'await'.
+
+	The 'async' keyword is added to a method declaration. 
+
+	Its primary purpose is to enable the 'await' keyword within that method.
+			The keywords were introduced as a pair for backward-compatibility reasons.
+
+	An 'async' method should return 'Task<T>' if it returns a value, or 'Task' if it does not return a value.
+			These task types represent futures; they notify the calling code when the 'async' method completes.
+
+	Avoid 'async' 'void'! It is possible to have an async method return 'void'. 
+			But you should only do this if you’re writing an async event handler. 
+
+			A regular async method without a return value should return 'Task', not void.
+
+	With that background, let’s take a quick look at an example:
+			async Task DoSomethingAsync()
+			{
+				int val = 13;
+
+				// Asynchronously wait 1 second.
+				await Task.Delay(TimeSpan.FromSeconds(1));
+				
+				val *= 2;
+				
+				// Asynchronously wait 1 second.
+				await Task.Delay(TimeSpan.FromSeconds(1));
+				
+				Trace.WriteLine(val);
+			}
+
+	An 'async' method begins executing synchronously, just like any other method.
+			
+	Within an 'async' method, the 'await' keyword performs an 'asynchronous wait' on its argument.
+			First, it checks whether the operation is already complete; if it is, it continues executing (synchronously).
+
+			Otherwise, it will pause the 'async' method and return an incomplete task.
+
+			When that operation completes some time later, the async method will resume executing.
+
+	You can think of an async method as having several synchronous portions, broken up by 'await' statements.
+			
+	The first synchronous portion executes on whetever thread calls the method, but where do the other synchronous portions execute?
+
+	The answer is a bit complicated.
+		When you 'await' a task (the most common scenario), a 'context' is captured when the await decides to pause the method.
+				This context is the current 'SynchronizationContext'.
+
+				Unless it is null, in which case the context is the current 'TaskScheduler'.
+
+		The method resumes executing within that captured context. Usually, this context is the 
+				UI context (if you’re on the UI thread), 
+				
+				an ASP.NET request context (if you’re processing an ASP.NET request), or 
+
+				the thread pool context (most other situations).
+
+	So, in the preceding code, all the synchronous portions will attempt to resume on the original context.
+			If you call 'DoSomethingAsync' from a UI thread, each of its synchronous portions will run on that UI thread
+
+			But if you call it from a thread-pool thread, each of its synchronous portions will run on a thread-pool thread.
+
+	You can avoid this default behavior by awaiting the result of the 'ConfigureAwait' extension method and passing 'false' for the 'continueOnCapturedContext' parameter.		
+
+	The following code will start on the calling thread, and after it is paused by an await, it will resume on a thread-pool thread:
+			async Task DoSomethingAsync()
+			{
+				int val = 13;
+
+				// Asynchronously wait 1 second.
+				await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+
+				val *= 2;
+
+				// Asynchronously wait 1 second.
+				await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+
+				Trace.WriteLine(val.ToString());
+			}
+
+*************************************************************
+* It is better to resume the synchronous portions 
+* of you async code on a ThreadPool thread.
+*************************************************************
+	It’s good practice to always call 'ConfigureAwait' in your core “library” methods, and only resume the context when you need it —- in your outer “user interface” methods.
+
+	The 'await' keyword is not limited to working with tasks; it can work with any kind of 'awaitable' that follows a certain pattern.
+			As one example, the Windows Runtime API defines its own interfaces for asynchronous operations. 
+
+			These are not convertible to 'Task', but they do follow the awaitable pattern, so you can directly 'await' them.
+
+	These awaitables are more common in Windows Store applications, but most of the time await will take a Task or Task<T>.
+
+	There are two basic ways to create a 'Task' instance.
+*************************************************************
+* How to create a tesk instance
+*************************************************************
+	Computational tasks should be created by calling 'Task.Run' (or 'TaskFactory.StartNew' if you need them to run on a particular scheduler).
+			Computational tasks represent actual code that a CPU has to execute.
+
+	Event-based tasks are created by 'TaskCompletionSource<T>' (or one of its shortcuts). 
+			These tasks represent a notification.
+
+			Most I/O tasks use TaskCompletionSource<T>.
+
+	Error handling is natural with 'async' and 'await'.
+
+	In the following code snippet, 'PossibleExceptionAsync' may throw a 'NotSupportedException', but 'TrySomethingAsync' can catch the exception naturally. 
+
+	The caught exception has its stack trace properly preserved and is not artificailly wrapped in a 'TargetInvocationException' or 'AggregateException':
+			async Task TrySomethingAsync()
+			{
+				try
+				{
+					await PossibleExceptionAsync();
+				}
+				catch (NotSupportedException ex)
+				{
+					LogException(ex);
+					throw;
+				}
+			}
+	
+	When an 'async' method throws (or propagates) an exception, 
+			the exception is placed on its returned 'Task' and the 'Task' is completed.
+
+	When that Task is awaited, the await operator will 
+		retrieve that exception and 
+
+		(re)throw it in a way such that its original stack trace is preserved.
+
+	Thus, code like this would work as expected if 'PossibleExceptionAsync' was an 'async' method:
+			async Task TrySomethingAsync()
+			{
+				// The exception will end up on the Task, not thrown directly.
+				Task task = PossibleExceptionAsync();
+				try
+				{
+					// The Task's exception will be raised here, at the await.
+					await task;
+				}
+				catch (NotSupportedException ex)
+				{
+					LogException(ex);
+					throw;
+				}
+			}
+
+	There’s one other important guideline when it comes to async methods: once you start using async, it’s best to allow it to grow through your code.
+			If you call an async method, you should (eventually) await the task it returns
+
+			Resist the temptation of calling 'Task.Wait' or 'Task<T>.Result'; this could cause a deadlock.
+					async Task WaitAsync()
+					{
+						// This await will capture the current context ...
+						await Task.Delay(TimeSpan.FromSeconds(1));
+						// ... and will attempt to resume the method here in that context.
+					}
+
+			This code will deadlock if called from a UI or ASP.NET context.
+					void Deadlock()
+					{
+						// Start the delay.
+						Task task = WaitAsync();
+						// Synchronously block, waiting for the async method to complete.
+						task.Wait();
+					}
+
+			This is because both of those contexts only allow one thread in at a time. 
+
+			'Deadlock' will call 'WaitAsync', which begins the delay.
+
+			'Deadlock' then (synchronously) waits for that method to complete, blocking the context thread.
+					When the delay completes, await attempts to resume
+
+			
+		Z
+
+				Z
+
+				Z
+
+				Z
+
+				Z
+
+						Z
+
+						Z
+
+	Z
+
+	Z
+
+	Z
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+		Z
+
+
+
+
+
