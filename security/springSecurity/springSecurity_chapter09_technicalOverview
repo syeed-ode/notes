@@ -244,14 +244,16 @@ class SampleAuthenticationManager implements AuthenticationManager {
 		quite a simple answer.
 -->	A user is authenticated when the SecurityContextHolder contains a 
 		fully populated Authentication object.
-	                                                                   |
 
 9.3.2 Setting the SecurityContextHolder Contents Directly
-	In fact, Spring Security doesn’t mind how you put the Authentication object inside the SecurityContextHolder.
-
-	The only critical requirement is that the 'SecurityContextHolder' contains a 'Authentication' (which represents a principal) before the 'AbstractSecurityInterceptor' needs to authorizae a user operation.
-
+	In fact, Spring Security doesn’t mind how you put the Authentication 
+		object inside the SecurityContextHolder.
+	The only critical requirement is that the 'SecurityContextHolder' 
+		contains a 'Authentication' (which represents a principal) 
+		before the 'AbstractSecurityInterceptor' needs to authorizae 
+		a user operation.
 	In situations where a company has a proprietary authentication system it’s quite easy to get Spring Security to work, and still provide authorization capabilities. 
+	                                                                   |
 		All you need to do is write a filter (or equivalent) that reads the third-party user information. 
 
 		Then build a Spring Security-specific Authentication object, and put it into the SecurityContextHolder.
