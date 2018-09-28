@@ -9,98 +9,147 @@ pg 120 - 145
 *****           Chapter 9 - Technical Overview          *****
 *************************************************************
 9.2 Core Components
-	Here are some of the Java types that you’ll find in the core module. They represent the building blocks of the framework, it’s important that you understand what they are.
-
-	The core module no longer contains any code related to web-application security, LDAP or namespace configuration.
+	Here are some of the Java types that you’ll find in the core module. 
+		They represent the building blocks of the framework, it’s 
+		important that you understand what they are.
+	The core module no longer contains any code related to 
+		web-application security, LDAP or namespace configuration.
 
 9.2.1 'SecurityContextHolder', 'SecurityContext' and 'Authentication' Objects
-	The most fundamental object is 'SecurityContextHolder'.  This is where the details of the present security context of the application is stored.
-			
-	'SecurityContextHolder' includes details of the principal currently using the application.
-			The 'SecurityContextHolder' uses a 'ThreadLocal' to store these details. This means the security context is always available to methods in the same thread of execution.
+	The most fundamental object is SecurityContextHolder. This is where 
+		we store details of the present security context of the 
+		application. 
+	'SecurityContextHolder' includes details of the principal currently 
+		using the application.
+	The SecurityContextHolder uses a ThreadLocal to store these details. 
+		This is the SecurityContextHolder.MODE_THREADLOCAL. 
+				This means that the security context is 
+					always available to methods in the 
+					same thread of execution, even if 
+					the security context is no explicitly 
+					passed around as an argument to those 
+					methods.
+	If you want all threads in a Java Virtual Machine to use the same 
+		security context by using the SecurityContextHolder.MODE_GLOBAL 
+		strategy.
+	SecurityContextHolder.MODE_INHERITABLETHREADLOCAL assues threads 
+		spawned by the secure thread also assume the same security 
+		identity.
+	The most fundamental object is 'SecurityContextHolder'.  This is 
+		where the details of the present security context of the 
+		application is stored.
 
-			This is the case even if the security context is not explicitly passed around as an argument to those methods. 
-					Using a ThreadLocal in this way is quite safe if care is taken to clear the thread after the present principal’s request is processed.
+Obtaining information about the current user
+	Inside the SecurityContextHolder we store details of the principal 
+		currently interacting with the application.
+	Spring Security uses an 'Authentication' object to represent this 
+		information. It is fairly common for users to query the 
+		Authentication object.
+			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-					Of course, Spring Security takes care of this for you automatically so there is no need to worry about it.
+			if (principal instanceof UserDetails) {
+				String username = ((UserDetails)principal).getUsername();
+			} else {
+				String username = principal.toString();
+			}
 
-	Obtaining information about the current user
-		Inside the SecurityContextHolder we store details of the principal currently interacting with the application.
-
-		Spring Security uses an 'Authentication' object to represent this information. It is fairly common for users to query the Authentication object.
-				Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-				if (principal instanceof UserDetails) {
-					String username = ((UserDetails)principal).getUsername();
-				} else {
-					String username = principal.toString();
-				}
-
-		The object returned by the call to getContext() is an instance of the 'SecurityContext' interface. This is the object that is kept in thread-local storage.
-
-		Most authentication mechanisms within Spring Security return an instance of UserDetails as the principal.
-
+	The object returned by the call to getContext() is an instance of 
+		the 'SecurityContext' interface. This is the object that is 
+		kept in thread-local storage.
+	Most authentication mechanisms within Spring Security return an 
+		instance of UserDetails as the principal.
 9.2.2 The UserDetailsService
-	Another note from the above code fragment is that you can obtain a principal from the 'Authentication' object.
-
-	'UserDetails' is a core interface in Spring Security. The principal is just an Object that can be cast into a 'UserDetails' object.
-
-	Think of 'UserDetails' as the adapter between your own user database and what Spring Security needs inside the 'SecurityContextHolder'.
-
-	Since it represents somethng from your own database, quite often you will cast the 'UserDetails' to the original object that your application provided, so you can call business-specific methods (like getEmail(), getEmployeeNumber() and so on).
-
-	The 'UserDetailsService' determines when and how one provides a UserDetails object. The only has one method:
+	Another note from the above code fragment is that you can obtain a 
+		principal from the 'Authentication' object.
+	'UserDetails' is a core interface in Spring Security. The principal 
+		is just an Object that can be cast into a 'UserDetails' object.
+	Think of 'UserDetails' as the adapter between your own user database 
+		and what Spring Security needs inside the 
+		'SecurityContextHolder'.
+	Since it represents somethng from your own database, quite often you
+		will cast the 'UserDetails' to the original object that your 
+		application provided, so you can call business-specific 
+		methods (like getEmail(), getEmployeeNumber() and so on).
+	The 'UserDetailsService' determines when and how one provides a 
+		UserDetails object. The only has one method:
 			UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 
-			This is the most common approach to loading information for a user within Spring Security. 
-
-			You will see it used throughout the framework whenever information on a user is required.
-
-	On successful authentication, 'UserDetails' is used to build the 'Authentication' object that is stored in the 'SecurityContextHolder'.
-			The good news is that we provide a number of UserDetailsService implementations.
-					This includes one that uses an in-memory map (InMemoryDaoImpl) and another that uses JDBC (JdbcDaoImpl).
-
-			Most users tend to write their own, though, with their implementations. 
-					Typlical their implementation sit on top of an existing Data Access Object (DAO) that represents their employees, customers, or other users of the application.
-
-	Remember the advantage that whatever your 'UserDetailsService' returns can always be obtained from the 'SecurityContextHolder' using the above code fragment.
-			The 'UserDetailsService' *does not* authenticate the user. This is done by the 'AuthenticationManager'.
-
-			If you need to authenticate a user it makes more sense to implement AuthenticationProvider, to define a custom authentication process.
+	This is the most common approach to loading information for a user 
+		within Spring Security. 
+	You will see it used throughout the framework whenever information 
+		on a user is required.
+	On successful authentication, 'UserDetails' is used to build the 
+		'Authentication' object that is stored in the 
+		'SecurityContextHolder'.
+			The good news is that we provide a number of 
+				UserDetailsService implementations.
+					This includes one that uses an 
+						in-memory map (InMemoryDaoImpl) 
+						and another that uses JDBC 
+						(JdbcDaoImpl).
+			Most users tend to write their own, though, with 
+				their implementations. 
+			Typlical their implementation sit on top of an 
+				existing Data Access Object (DAO) that 
+				represents their employees, customers, or 
+				other users of the application.
+	Remember the advantage that whatever your 'UserDetailsService' 
+		returns can always be obtained from the 
+		'SecurityContextHolder' using the above code fragment.
+			The 'UserDetailsService' *does not* authenticate 
+				the user. This is done by the 
+				'AuthenticationManager'.
+			If you need to authenticate a user it makes more 
+				sense to implement AuthenticationProvider, 
+				to define a custom authentication process.
 
 9.2.3 GrantedAuthority
-	'Authentication' provides another important method besides the principal, 'getAuthorities()'. This method provides an array of GrantedAuthority objects.
-
-	A 'GrantedAuthority' is an authority that is granted to the principal. Such authorities are usually "roles", such as ROLE_ADMINISTRATOR or ROLE_HR_SUPERVISOR.
-			These roles are later on configured for web authorization, method authorization and domain object authorization.
-
-			Other parts of Spring Security are capable of interpreting these authorities, and expect them to be present.
-
-	'GrantedAuthority' objects are usually loaded by the 'UserDetailsService'.
-
-	Usually the 'GrantedAuthority' objects are application-wide permissions. They are not specific to a given domain object.
-			Of course, Spring Security is expressly designed to handle this common requirement, but you’d instead use the project’s domain object security capabilities for this purpose.
+	'Authentication' provides another important method besides the 
+		principal, 'getAuthorities()'. This method provides an array 
+		of GrantedAuthority objects.
+	A 'GrantedAuthority' is an authority that is granted to the 
+		principal. Such authorities are usually "roles", such as 
+		ROLE_ADMINISTRATOR or ROLE_HR_SUPERVISOR.
+			These roles are later on configured for web 
+				authorization, method authorization and 
+				domain object authorization.
+			Other parts of Spring Security are capable of 
+				interpreting these authorities, and expect 
+				them to be present.
+	'GrantedAuthority' objects are usually loaded by the 
+		'UserDetailsService'.
+	Usually the 'GrantedAuthority' objects are application-wide 
+		permissions. They are not specific to a given domain object.
+			Of course, Spring Security is expressly designed to 
+				handle this common requirement, but you’d 
+				instead use the project’s domain object 
+				security capabilities for this purpose.
 
 9.2.4 Summary
-	Just to recap, the major building blocks of Spring Security that we’ve seen so far are:
-
-	SecurityContextHolder, to provide access to the SecurityContext.
-
-	SecurityContext, to hold the Authentication and possibly request-specific security information.
-
-	Authentication, to represent the principal in a Spring Security-specific manner.
-
-	GrantedAuthority, to reflect the application-wide permissions granted to a principal.
-
-	UserDetails, to provide the necessary information to build an Authentication object from your application’s DAOs or other source of security data.
-
-	UserDetailsService, to create a UserDetails when passed in a String-based username (or certificate ID or the like).
-
-	Now that you’ve gained an understanding of these repeatedly-used components, let’s take a closer look at the process of authentication.
+	Just to recap, the major building blocks of Spring Security that 
+		we’ve seen so far are:
+	SecurityContextHolder, to provide access to the 
+		SecurityContext.
+	SecurityContext, to hold the Authentication and possibly 
+		request-specific security information.
+	Authentication, to represent the principal in a Spring 
+		Security-specific manner.
+	GrantedAuthority, to reflect the application-wide permissions 
+		granted to a principal.
+	UserDetails, to provide the necessary information to build an 
+		Authentication object from your application’s DAOs or other 
+		source of security data.
+	UserDetailsService, to create a UserDetails when passed in a
+		String-based username (or certificate ID or the like).
+	Now that you’ve gained an understanding of these repeatedly-used 
+		components, let’s take a closer look at the process of 
+		authentication.
 
 9.3 Authentication
-	Spring Security can participate in many different authentication environments. We recommend people use Spring Security for authentication.
-
+	Spring Security can participate in many different authentication 
+		environments. We recommend people use Spring Security for 
+		authentication.
+	                                                                   |
 	However integrating with existing Container Managed Authentication is nevertheless supported.
 
 	Spring Security also supports integrating with your own proprietary authentication system.
