@@ -149,30 +149,102 @@ Obtaining information about the current user
 	Spring Security can participate in many different authentication 
 		environments. We recommend people use Spring Security for 
 		authentication.
-	                                                                   |
-	However integrating with existing Container Managed Authentication is nevertheless supported.
-
-	Spring Security also supports integrating with your own proprietary authentication system.
+	However integrating with existing Container Managed Authentication 
+		is nevertheless supported.
+	Spring Security also supports integrating with your own proprietary 
+		authentication system.
 
 9.3.1 What is authentication in Spring Security?
-	Let’s consider a standard authentication scenario that everyone is familiar with.
-			1. A user is prompted to log in with a username and password.
-			2. The system (successfully) verifies that the password is correct for the username.
-			3. The context information for that user is obtained (their list of roles and so on).
-			4. A security context is established for the user
-			5. The user proceeds, potentially to perform some operation which is potentially protected by an access control mechanism which checks the required permissions for the operation against the current security context information.
+	Let’s consider a standard authentication scenario that everyone is 
+		familiar with.
+			1. A user is prompted to log in with a username and 
+				password.
+			2. The system (successfully) verifies that the 
+				password is correct for the username.
+			3. The context information for that user is obtained 
+				(their list of roles and so on).
+			4. A security context is established for the 
+				user
+			5. The user proceeds, potentially to perform some 
+				operation which is potentially protected by 
+				an access control mechanism which checks the 
+				required permissions for the operation 
+				against the current security context 
+				information.
+	The first three items constitute the authentication process so we’ll 
+		take a look at how these take place within Spring Security.
+			1. The username and password are obtained and 
+				combined into an instance of 
+				UsernamePasswordAuthenticationToken (an 
+				instance of the Authentication interface, 
+				which we saw earlier).
+			2. The token is passed to an instance of 
+				AuthenticationManager for validation.
+			3. The AuthenticationManager returns a fully 
+				populated Authentication instance on 
+				successful authentication.
+			4. The security context is established by calling 
+				SecurityContextHolder.getContext().setAuthentication(…​), 
+				passing in the returned authentication object.
+	From that point on, the user is considered to be authenticated. 
+		Let’s look at some code as an example.
 
-	The first three items constitute the authentication process so we’ll take a look at how these take place within Spring Security.
-			1. The username and password are obtained and combined into an instance of UsernamePasswordAuthenticationToken (an instance of the Authentication interface, which we saw earlier).
-			2. The token is passed to an instance of AuthenticationManager for validation.
-			3. The AuthenticationManager returns a fully populated Authentication instance on successful authentication.
-			4. The security context is established by calling SecurityContextHolder.getContext().setAuthentication(…​), passing in the returned authentication object.
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.*;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-	From that point on, the user is considered to be authenticated. Let’s look at some code as an example.
+public class AuthenticationExample {
+	private static AuthenticationManager am = new SampleAuthenticationManager();
 
-	Note that this process will normally occur internally, in a web authentication filter for example. We’ve just shown what actually constitutes authentication in Spring Security has quite a simple answer.
+	public static void main(String[] args) throws Exception {
+	    BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
--->	A user is authenticated when the SecurityContextHolder contains a fully populated Authentication object.
+	    while(true) {
+		    System.out.println("Please enter your username:");
+		    String name = in.readLine();
+		    System.out.println("Please enter your password:");
+		    String password = in.readLine();
+		    
+		    try {
+			Authentication request = new UsernamePasswordAuthenticationToken(name, password);
+			Authentication result = am.authenticate(request);
+			SecurityContextHolder.getContext().setAuthentication(result);
+			break;
+		    } catch(AuthenticationException e) {
+			System.out.println("Authentication failed: " + e.getMessage());
+		    }
+	    }
+	    System.out.println("Successfully authenticated. Security context contains: " +
+		    SecurityContextHolder.getContext().getAuthentication());
+	}
+}
+
+class SampleAuthenticationManager implements AuthenticationManager {
+	static final List<GrantedAuthority> AUTHORITIES = new ArrayList<GrantedAuthority>();
+
+	static {
+	    AUTHORITIES.add(new SimpleGrantedAuthority("ROLE_USER"));
+	}
+
+	public Authentication authenticate(Authentication auth) throws AuthenticationException {
+	    if (auth.getName().equals(auth.getCredentials())) {
+		    return new UsernamePasswordAuthenticationToken(
+		    	  auth.getName()
+			, auth.getCredentials()
+			, AUTHORITIES);
+	    }
+	    throw new BadCredentialsException("Bad Credentials");
+	}
+}
+
+	Note that this process will normally occur internally, in a web 
+		authentication filter for example. We’ve just shown what 
+		actually constitutes authentication in Spring Security has 
+		quite a simple answer.
+-->	A user is authenticated when the SecurityContextHolder contains a 
+		fully populated Authentication object.
+	                                                                   |
 
 9.3.2 Setting the SecurityContextHolder Contents Directly
 	In fact, Spring Security doesn’t mind how you put the Authentication object inside the SecurityContextHolder.
