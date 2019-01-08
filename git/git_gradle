@@ -60,3 +60,6 @@ git config apply.whitespace nowarn
 
 ##Create java library with source and test directory
 gradle init --type java-library
+
+
+
