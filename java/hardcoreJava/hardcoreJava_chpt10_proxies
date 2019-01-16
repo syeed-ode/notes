@@ -1,0 +1,281 @@
+Chapter 10 - Proxies
+The concept of a proxy is one of the most important aspects of modern programming. 
+
+A proxy makes it possible to simplify many tasks that would be difficult and time-consuming otherwise.
+ 
+10.1 What is a Proxy 
+To put it simply, a 'proxy' is an object that stands in for another object and appears to perform the first object’s functions.
+
+The object that the proxy imitates is called the 'implementation object'.
+
+*** The advantage of proxies is that they allow you to insert code between the implementation and the proxy. ***
+		A proxy can hide complex tasks such as 
+				network communication and 
+
+				transaction management from the proxy user, 
+
+		All without changing the implementation object’s functionality.
+
+Since you want a user to be able to use this class without having direct access to it, you need to create a proxy.
+
+At this point, you may wonder why this special code isn’t inserted into the implementation object itself. There are many reasons why you may not want to do this:
+		• The source code of the implementation class may not be accessible.
+				This could be the case if third-party libraries were implemented by your company or provided by a separate department.
+
+		• The new functionality added is often not consistent with the functionality of the implementation object.
+				If you want to access a class remotely across a LAN or WAN, you need to write some networking code.
+
+				However, placing the networking code inside the implementation violates the principle that an object should implement only one concept.
+
+		The implementation could expose features that should remain hidden from various users. 
+
+		• You may want to hide the names of the implementation methods from the users of the implementation for security reasons. 
+
+		• The functionality may be dependent on the development phase. 
+
+		• The location of the implementation object may be changeable, as it is in enterprise programming.
+
+10.1.1 Network Proxies and CORBA
+If a user wanted to call a remote object, he would have to 
+		set up a TCP connection to the remote object and then 
+
+		create a protocol to communicate with it. Finally, he would 
+
+		use the protocol to talk to the remote object, request an action, and get a response. 
+
+The invention of the 'network proxy model' made this all much easier.
+
+The user on the client side simply uses one of these objects as if it were the actual implementation.
+
+Using proxies is an example of 'distributed programming'.
+		It allows the objects to be distributed around a network of computers transparently.
+
+10.1.2 Factories
+To get a proxy to an object, you usually have to use a factory object, which combines the proxy and the implementation into one unit.
+
+Factory objects are used to obtain proxies because they often do a great deal of work setting up proxies.
+
+Whenever you access any EJB object, you take advantage of a factory called a home interface. 
+		Since a home interface is second nature to EJB programmers, many don’t realize that this is actually a factory, 
+
+		nor do they realize that the object they are using on the client side is actually a quite sophisticated proxy.
+
+10.1.3 Client and Server Objects 
+In proxy-based programming, the client is simply an object that takes advantage of the services of another object, called the server (object).
+
+10.2 Two Kinds of Proxies
+One strategy is the use of pre-compile-time tools such as those used by CORBA. 
+
+Also, proxies can be manually written, reflexively driven, or dynamically generated.
+
+10.2.1 Static Proxies
+Staticproxies are written manually and programmed into the system at compile time. 
+
+The proxy can never extend the implementation (or vice versa).
+		The proxy and implementation must form a delegation structure in which the proxy delegates to the implementation. 
+
+		If the proxy class inherited from the implementation then you would get ClassNotFound exceptions when trying to run the client.
+
+The user of the proxy should never create the implementation.
+		If the user can create an implementation directly, then he can bypass the proxy and simply use the implementation.
+
+Proxies should always be obtained from a factory or through calls to other proxies.
+		Furthermore, the implementations should be protected from access by the client.
+
+When writing static proxies, the programmer introduces new code into the proxy to implement the new functionality.
+
+Here, you access the methods in an identical fashion as the last proxy you wrote.
+
+You can insert code in between the implementation of an object and the object itself to alter the functionality of the original implementation.
+
+Decorators are especially useful when you want to modify objects whose sources you do not control, such as third-party libraries.
+
+10.2.2 Proxy by Interface
+However, the user of the implementation is not interested in these details. He simply wants to use the object without worrying about where the actual implementation is.
+
+10.2.3 Dynamic Proxies
+While programming proxies to objects, you may notice yourself doing the same thing over and over again in a proxy class.
+
+To alleviate this problem, you could create helper utility methods that each proxy could call, but you would still be stuck with multiple proxy classes that do essen tially the same thing.
+
+What you need is a way to implement the method-counting code in one location, and a way to reuse it for any object.
+
+Dynamic proxies can do this by using reflection. Dynamic proxies differ from static proxies in that they do not exist at compile time. 
+
+Instead, they are generated at runtime by the JDK and then made available to the user. 
+
+This allows the factory to bind an object to many different kinds of implementations without copying or duplicating code.
+
+10.2.3.1 Invocation handlers
+When writing a dynamicproxy, the principal task of the programmer is to write an object called an invocation handler, which implements the InvocationHandler interface from the java.lang.reflect package.
+
+An invocation handler intercepts calls to the implementation, performs some programming logic, and then passes on the request to the implementation. 
+		Once the implementation method returns, the invocation handler returns its results (along with any exceptions thrown).
+
+This invocation handler provides the same functionality as static proxies. However, it uses reflection to do the job.
+
+When a user executes a method on the proxy, the invocation handler is called instead of the implementation.
+
+Inside the invocation handler, insert code to increment the invocationCount variable and then forward the call to the implementation using the invoke() method on the Method object.
+
+When writing invocation handlers, be careful of methods that return primitive types. The JDK will wrap primitive types in their corresponding wrapper types to return them from a reflexive invocation. The problem is that your handler can return null, but the actual method being called on the implementation cannot. Therefore, if you try to return null after calling a method that returns a primitive, the proxy class will throw a NullPointerException. This NullPointerException applies to
+the return value, not to the parameters of the method.
+
+10.2.3.2 Generated proxy classes
+Writing an invocation handler is only the first step in generating a dynamic proxy.
+
+Once you have an invocation handler, you must generate a proxy for the users. 
+
+Furthermore, according to the proxy design pattern, you have to make sure that the proxy looks like the implementation.
+
+The user shouldn’t be aware of the differences between the proxy and the implementation.
+		You can do this by using a java.lang.reflect.Proxy class in conjunction with your proxy factory.
+
+In this version of the factory method, {@code SomeClass} is an interface implemented by the actual implementation, named {@code SomeClassImpl}. 
+
+This allows you to tell the {@code Proxy} class to generate a new proxy that implements the interface {@code SomeClass} and uses the invocation handler.
+
+The {@code Proxy} class plays a pivotal role in creating and managing new proxy classes in the virtual machine. Proxy got its enormous power from only four methods.
+
+getInvocationHandler()
+		This method gives the caller a reference to the invocation handler used in the proxy given as a parameter.
+
+getProxyClass()
+		This is the prime method in the creation of the actual proxy class. It takes an array of interfaces and a class loader as arguments and generates the byte code for the proxy class at runtime. Once the class is generated, it can be instantiated and used. It is then cached and returned the next time the method is called with the same parameters. Since the generation of the proxy class is relatively slow, this improves the performance of proxies significantly.
+
+isProxyClass()
+		This method tells you whether the proxy class was generated dynamically. It is used by the security engine to verify that the class is a proxy class.
+
+newProxyInstance( )
+		This method is a shortcut to calling getProxyClass() and then calling newInstance() on the resulting class.
+
+Generated proxy classes are required to conform to the following rules:
+		• All proxy classes are declared as public and final.
+
+		• All proxy classes extend the class java.lang.reflect.Proxy.
+
+		• When a proxy class is defined, it implements the interfaces stated in the same order as they are in the array.
+
+There are several additional aspects of generated proxy classes of which you should be aware:
+		• The unqualified name of proxies is considered undefined, although the prefix $Proxy is generally reserved for proxy classes. 
+				This means that you can’t depend on references to the class by name. 
+
+For example, the following code would be dangerous:
+		/**
+		 * The unqualified name of proxies is considered undefined, although
+		 * the prefix $Proxy is generally reserved for proxy classes.
+		 */
+		public class DangerousName {
+		    public static final void main(final String[] args) {
+		        SomeClass proxy = SomeClassFactory.getDynamicSomeClassProxy();
+		        System.out.println(proxy.getClass().getName());
+		        try {
+		            /**
+		             * Since the unqualified name of a proxy is undefined,
+		             * using the name literally (as was done here) could
+		             * cause problems.
+		             * 
+		             */
+		            Class cl = Class.forName("$Proxy0"); // <== Dangerous!
+		            System.out.println(cl.getName());
+		        } catch (final ClassNotFoundException ex) {
+		            ex.printStackTrace();
+		        }
+		    }
+		}
+
+
+This code may work on one virtual machine and fail on another, 
+		as the name may be correct on the first virtual machine, 
+
+		while the other virtual machine may generate '$Proxy_SomeClass0' as the name of the proxy class. 
+
+• Proxy classes are just like other classes with respect to reflection. You can use reflection to get a list of their methods and interfaces and then execute them dynamically.
+
+• The protection domain of Java proxy classes is the same as the protection domain of the Java bootstrap classes. This means that proxy classes can access all permissions in the JDK.
+
+• Proxy classes are generated with a single constructor that takes a single argument of type InvocationHandler. 
+		This allows you to create a new proxy if the proxy class object is already using the newInstance() method.
+
+10.2.3.3 Using dynamic proxies
+Using the proxy class is virtually identical to using the static proxy classes. However, there are a couple of important differences.
+
+First, the implementation of the proxy is generated by the {@code Proxy} class.
+
+Second, to get the method invocation count of the {@code Proxy}, you would have to fetch the invocation handler and then ask the invocation handler for the count:
+        InvocationHandler proxyHandler = Proxy.getInvocationHandler(proxy);
+        if(proxyHandler instanceof MethodCountingHandler) {
+            int count = ((MethodCountingHandler)handler).getInvocationCount();
+            System.out.println("This is my count: " + count);
+        }
+
+10.3 Proxy Gotchas
+As demonstrated in the previous sections, proxies are an extremely powerful tool in the creation of modern applications. 
+
+However, as with any powerful tool, you can get into trouble if you aren’t careful.
+
+One of the prime dangers of using proxies is the performance hit they put on your application.
+		When using a proxy, every call to the implementation goes through at least one extra method call. 
+
+A major annoyance of dynamic proxies is that the class has to be designed with the dynamic proxy in mind.
+		If the class does not implement an interface, you can’t create a proxy to a class using that interface. 
+		
+		Although this is not such a big deal in code over which you have control, in third-party libraries, it can be a pain.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,65 @@
+Chapter 6 - Nested Classes
+Not all types of nested classes should be used routinely, however, you will likely encounter most of them in other people’s code. Therefore, it is important that you understand how the various nested classes function.
+
+Nested classes fall into one of three basic categories:
+		• Inner classes
+		• Limited-scope inner classes
+		• Static nested classes
+
+6.1 Inner Classes
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

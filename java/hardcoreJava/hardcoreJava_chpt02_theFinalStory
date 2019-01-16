@@ -1,0 +1,215 @@
+
+2.1.1 Public Primitives and Substitution
+Primitive finals are substituted at compile time with their values. 
+
+If you change a 'final' that is used by other classes, you must remembert to recompiler those other classes or your change will not take effect.
+
+The same rule applies to constants of type 'java.lang.String'. Although 'String' is a constructed type, it is also substituted at compile time. 
+
+All constructed types other than 'String' mutable or not, are NOT substituted at compile time.
+
+    
+Once the compiler sees code such as this, it starts substituting out the primitives and 'String' objects. After the first pass of the compiler, the class will look something like this.
+     
+
+The primitive and 'String' constants were substituted while other construted types were left as variables.
+
+
+The compiler will concatenate consecutive 'String' literals to form one literal. 
+
+The following two lines are identical from the point of view of the compiler.
+
+		public final static String A_STRING1 = "Hardcore Java";
+		public final static String A_STRING2 = "Hardcore " +  "Java";
+
+This is a class that uses the constant 'A_STRING' from FinalReplacementBaseObject. It has a problem. It will have to be recompiled to trigger a resubstitution using any new 'A_STRING' value. But the Java compiler will not notice this dependency.
+		public class ExternalUser {
+		    public static void main(String [] args) {
+		        System.out.println("The title of the book is: " 
+		                + FinalReplacementBaseObject.A_STRING);
+		    }
+
+		}
+
+2.1.2 Excessive Constants
+In fact, whenever you change a public primitve constant it's a good idea to simply rebuild the whole project, just to be safe.
+
+If your code is also being used by other projects, make sure you put the change in your release notes so that others will know to recompile their projects.
+
+Although the method-scoped 'final' variables may look strange, they are quite legal and useful. 
+		For the compiler, the semantics for method-scoped constants are the same as those for class-scoped. 
+
+		The compiler will replace primitive and String constants variables with the value of the variable at compile time.
+
+Configure your IDE to warn you if a private memember of a class is not used in that class. This helps you find private constants that should have been declared public.
+
+To summarize, if you have a 'private final static' that is used only in one mehtod, you should probably move it into that method.
+
+2.2 Final Variables
+Final variables that are scoped and constructed can be used a a powerful tool to solidify code in methods.
+
+2.2.1 Method-Scoped 'final' Variables
+This is a scoped 'final' variable that adds a prefix to the parameter 'environmentKey'. The 'final' variable is final only within the 'execution scope', which is different at each execution method.
+
+Each time the method is entered, the 'final' is reconstructed. As soon as it is constructed, it cannot be changed during the scope of the method execution.
+
+To see how this works, use the test program below
+
+
+Each time the method is entered, the passed-in 'environmentKey' parameter is appended to the constant prefix and then frozen for the duration of the method call.
+
+The technique of fixing variables with 'final' is extremely handy for long or complicated methods that have many local variables. You can avert typos by using 'final' to fix the value of your variables.
+
+2.2.2 Deferred Initialization
+If you want to, you can defer the initialization of a 'final' variable within the method.
+
+Once you assign the variable a value, it can't be assigned again.
+
+This coding technique allows you to make single-shot, assign-and-freeze variables. 
+		After assignment, these variables behave like constant for the rest of the method.
+
+The difference is that method scoped 'final' variables are 'variable'. 
+		Each time the method is entered, their values are changed. based on the needs of that particular execution. 
+
+Method-scoped constants always have the same values regardless of the circumstances under which the method is run. 
+
+Also, primitive and String method-scoped 'final' variables are not substituted at compile time like prmitive and String method-scoped constants.
+
+Instance-scoped variables must be initialized in a constructor.
+
+Classed-scoped variables must be initialized in the 'static{}' method or you will rexceive compiule errors stating that the variable has not been initialized.
+
+2.3 Final Parameters
+Changing the value of the parameter passed into the method is a problem. 
+
+This is a typo example. Instead of typing 'powInputValue' the developer typed in 'inputValue'. Little bugs like this are often the most idfficult to locate.
+
+2.4 Final Collections
+This desire to make constant sets and store them in 'final' variables for public use can lead to all sorts of problems.
+
+The goal of this code is to declare a class with a 'Set' of 'final' and 'static' 'Color's representing the colors of the rainbow. You want to be able to use this 'Set' without concerning yourself with the possiblity of accidentallychanging it. The problem is 'Set' isn't 'final' at all!!
+
+The reference to the 'Set' is 'final' but the 'Set' itself is mutable. For collections 'final' is 'not the same' as immutable. 
+
+This version of the class is much better. The Set of {@code Color} cannot be modified because it is an immutable object. The {@code Set} is 'final', and the contents of the collection are locked down.
+
+The class {@code UnmodifiableSet} implements {@code java.util.Set} and inherits from {@code UnmodifiableCollection}, which in turn implements {@code java.util.Collection}. Any read call to the {@code UnmodifiableCollection is forwarded to the delegate collection.
+
+Together they form a delegate structure. Any read call to the {@code UnmodifiableCollection} is forwarded to the delegate collectiop. 
+
+However, if the user tries to access a write operation, the class throws and instance of {@code UnsupportedOperationException}.
+
+You should use these heavily in your code.
+
+2.5 Instanced-Scope Variables
+Another type of 'final' class member that can be very useful is instance-scoped 'final' attributes. 
+		public class FinalMembers {
+		    /** Holds the creation date-time of the instance */
+		    /** */
+		    private Date creationDate = Calendar
+		            .getInstance(TimeZone.getTimeZone("GMT"))
+		            .getTime();
+
+		    /**
+		     * Get the Date-Time when the object was created
+		     *
+		     * @return The creation date of the object
+		     */
+		    public Date getCreationDate() {
+		        return this.creationDate;
+		    }
+		}
+
+This propoerty creationDate represents a read-only property that is set once.
+
+There is a problem with this property illustrated by another part of the same class.
+
+Here is yet another typo bug. Instead of setting the modificationDate, the author set the creationDate. You can block this problem with a coding standard.
+
+Java requires that all instance-scoped 'final' variables and members must be set before the end of the constructor. 
+
+In a similar mannert, all class-scoped members must be set by the end of the static initialization of the class they are declared in, and all method-scoped 'final's must be set by the end of the method they are declared in.
+
+2.6 Final Classes
+Final classes mark endpoints in teh inheritance tree.
+
+There are two ways to make a class final. The first is to use the keyword 'final'. The second is to declare all of the constructors private.
+
+However if a class needs to be final, private constructors are not enough. You should always use the 'final' keyword. If you don't follow this rule you could end up causing some devious problems.
+
+The 'java.beans.Introspector' class is a good example. There is no reason for the {@code Introspector} class should be 'final'. Making it implicitly 'final' doesn't allow it to be inherited.
+
+Singleton classes need to be protected from external instantiation, so you can't make the constructor public. The solution to the problem is a protected constructor.
+
+There are rare circumstances when a class should be made final. One example is the concept of the constant object class.
+
+2.7 Final Methods
+Final methods allow you to make a class partially final without preventing its inheritance by another class.
+
+While the 'abstract' keyword declares that a subclass 'must' override the method, the 'final' keyword guarantees that the method can 'never' be overridden by subclasses. 
+
+You should never make amethod final unless it 'must' be final. When in doubt, leave the 'final' keyword off a method. You never know the kinds of variations the users of your class may come up with.
+
+One example of where a final method is the proper way to go is on getter methods (read-only properties). getClass() method is final.
+
+2.8 Conditional Compilation 
+Conditional compilation is when lines of code are not compiled into the class file based on a particular condition. This can be used to remove 
+
+2.8.1 Conditional Compilation Variable Location 
+You need to watch out for a couple of pitfalls.
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
