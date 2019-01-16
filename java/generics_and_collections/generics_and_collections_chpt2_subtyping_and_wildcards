@@ -1,0 +1,279 @@
+	                                                                   |
+
+*
+*
+*
+*
+************       CHAPTER 2 - Subtyping and Wildcards       ************
+*
+*
+*
+*
+*******  CHAPTER 2.1 - Subtyping and the Substitution Principle   *******
+		Integer 		is a subtype of		Number
+		Double			is a subtype of 	Number
+		ArrayList<E> 	is a subtype of 	List<E>
+		List<E> 		is a subtype of 	Collection<E>
+		Collection<E> 	is a subtype of 	Iterable<E>
+Subtyping is transitive, meaning that if one type is a subtype of a second, and the second is a subtype of a third, then the first is a subtype of the third.
+
+So, from the last two lines in the preceding list, it follows that List<E> is a subtype of Iterable<E>.
+
+*
+*
+*
+*******  CHAPTER 2.2 - Wildcards with extends   *******
+Using the code
+		interface Collection<E> { 
+			public boolean addAll(Collection<? extends E> c);
+		}
+The quizzical phrase "? extends E" means that it is also OK to add all members of a collection with elements of any type that is a 'subtype' of E.
+
+The question mark is called a wildcard, since it stands for some type that is a subtype of E.
+
+We create an empty list of numbers, and add to it first a list of integers and then a list of doubles:
+		List<Number> nums = new ArrayList<Number>(); 
+		List<Integer> ints = Arrays.asList(1, 2); 
+		List<Double> dbls = Arrays.asList(2.78, 3.14); 
+		nums.addAll(ints);
+		nums.addAll(dbls);
+		assert nums.toString().equals("[1, 2, 2.78, 3.14]");*
+
+The first call is permitted because nums has type 
+		List<Number>, which is a subtype of Collection<Number>, 
+
+		and ints has type List<Integer>, which is a subtype of Collection<? extends Number>.
+
+If the method signature for addAll had been written without the wildcard, then the calls to add lists of integers and doubles to a list of numbers would not have been permitted; you would only have been able to add a list that was explicitly declared to be a list of numbers.
+
+*
+*
+*
+*****************  CHAPTER 2.3 - Wildcards with super   *****************
+Here is a method that copies into a destination list all of the elements from a source list, from the convenience class Collections:
+			public static <T> void copy(List<? super T> dst, List<? extends T> src) { 
+				for (int i = 0; i < src.size(); i++) {
+					dst.set(i, src.get(i)); 
+				}
+			}
+
+The quizzical phrase '? super T' means that the destination list may have elements of any type that is a 'supertype' of T. 
+
+Just as the source list may have elements of any type that is a subtype of T.
+
+Here is a sample call.
+		List<Object> objs = Arrays.<Object>asList(2, 3.14, "four"); 
+		List<Integer> ints = Arrays.asList(5, 6); 
+		Collections.copy(objs, ints);
+		assert objs.toString().equals("[5, 6, four]");
+As with any generic method, the type parameter may be inferred or may be given ex- plicitly. In this case, there are four possible choices, all of which type-check and all of which have the same effect:
+			Collections.copy(objs, ints); 
+			Collections.<Object>copy(objs, ints); 
+			Collections.<Number>copy(objs, ints); 
+			Collections.<Integer>copy(objs, ints);
+In the third line, the type parameter T is taken to be Number. 
+
+The call is permitted because objs has type List<Object>, which is a subtype of List<? super Number> 
+		(since Object is a supertype of Number, as required by the wildcard) and ints has type List<Integer>, which is a subtype of List<? extends Number> (since Integer is a subtype of Number, as required by the extends wildcard).
+
+We could also declare the method with several possible signatures.
+		public static <T> void copy(List<T> dst, List<T> src)
+				// The first of these is too restrictive, as it only permits calls when the destination and source have exactly the same type. 
+
+		public static <T> void copy(List<T> dst, List<? extends T> src)
+				// works only when the type parameter is Object
+
+		public static <T> void copy(List<? super T> dst, List<T> src)
+				// works only when the type parameter is Integer
+
+		public static <T> void copy(List<? super T> dst, List<? extends T> src)
+				// works (as we have seen) for all three type parameters—i.e., Object, Number, and Integer.
+
+Always use wildcards where you can in a signature, since this permits the widest range of calls.
+*
+*
+*
+*******  CHAPTER 2.1 - Subtyping and the Substitution Principle   *******
+*************************************************************************
+*
+*
+*
+*************    CHAPTER 2.4 - The Get and Put Principle   **************
+It may be good practice to insert wildcards whenever possible, but how do you decide which wildcard to use and where is it inappropriate to use a wildcard at all? 
+
+*************************************************************************
+*************************************************************************
+The Get and Put Principle: 
+		use an extends wildcard when you only get values out of a structure, 
+		
+		use a super wildcard when you only put values into a structure, 
+
+		and don’t use a wildcard when you both get and put.
+*************************************************************************
+*************************************************************************
+
+The method gets values out of the source src, so it is declared with an extends wildcard, and it puts values into the destination dst, so it is declared with a super wildcard.
+
+Whenever you use an iterator, you get values out of a structure, so use an extends wildcard.
+		public static double sum(Collection<? extends Number> nums) { 
+			double s = 0.0;
+			for (Number num : nums) s += num.doubleValue();
+			return s;
+		}
+Since this uses extends, all of the following calls are legal:
+		List<Integer> ints = Arrays.asList(1,2,3); 
+		assert sum(ints) == 6.0;
+
+		List<Double> doubles = Arrays.asList(2.78,3.14); 
+		assert sum(doubles) == 5.92;
+
+		List<Number> nums = Arrays.<Number>asList(1,2,2.78,3.14); 
+		assert sum(nums) == 8.92;
+
+
+The first two calls would not be legal if extends was not used.
+
+Whenever you use the add method, you put values into a structure, so use a super wildcard.
+
+Here is a method that takes a collection of numbers and an integer n, and puts the first n integers, starting from zero, into the collection:
+		public static void count(Collection<? super Integer> ints, int n) {
+			for (int i = 0; i < n; i++) ints.add(i); 
+		}
+
+Since this uses super, all of the following calls are legal:
+		List<Integer> ints = new ArrayList<Integer>(); 
+		count(ints, 5);
+		assert ints.toString().equals("[0, 1, 2, 3, 4]");
+
+		List<Number> nums = new ArrayList<Number>(); 
+		count(nums, 5); 
+		nums.add(5.0);
+		assert nums.toString().equals("[0, 1, 2, 3, 4, 5.0]");
+
+		List<Object> objs = new ArrayList<Object>(); 
+		count(objs, 5); 
+		objs.add("five");
+		assert objs.toString().equals("[0, 1, 2, 3, 4, five]");
+
+The last two calls would not be legal if super was not used.
+
+Whenever you both put values into and get values out of the same structure, you should not use a wildcard.
+		public static double sumCount(Collection<Number> nums, int n) { 
+			count(nums, n);
+			return sum(nums); 
+		}
+
+The collection is passed to both sum and count, so its element type must both extend Number (as sum requires) and be super to Integer (as count requires).
+
+The only two classes that satisfy both of these constraints are Number and Integer, and we have picked the first of these. Here is a sample call:
+		List<Number> nums = new ArrayList<Number>(); 
+		double sum = sumCount(nums,5);
+		assert sum == 10;
+
+
+Since there is no wildcard, the argument must be a collection of Number.
+
+If an extends wildcard is present, pretty much all you will be able to do is get but not put values of that type; and 
+
+If a super wildcard is present, pretty much all you will be able to do is put but not get values of that type.
+
+For example, consider the following code fragment, which uses a list declared with an extends wildcard:
+		List<Integer> ints = new ArrayList<Integer>(); 
+		ints.add(1);
+		ints.add(2);
+		List<? extends Number> nums = ints;
+		double dbl = sum(nums); // ok nums.add(3.14); // compile-time error
+
+*************************************************************************
+*************************************************************************
+The Get and Put Principle: 
+		use an extends wildcard when you only get values out of a structure, 
+		
+		use a super wildcard when you only put values into a structure, 
+
+		and don’t use a wildcard when you both get and put.
+*************************************************************************
+*************************************************************************
+The call to sum is fine, because it gets values from the list, but the call to add is not, because it puts a value into the list. 
+		This is just as well, since otherwise we could add a double to a list of integers!
+
+Conversely, consider the following code fragment, which uses a list declared with a super wildcard:
+		List<Object> objs = new ArrayList<Object>(); 
+		objs.add(1);
+		objs.add("two");
+		List<? super Integer> ints = objs; ints.add(3); // ok
+		double dbl = sum(ints); // compile-time error
+Now the call to add is fine, because it puts a value into the list, but the call to sum is not, because it gets a value from the list.
+
+
+The exception proves the rule, and each of these rules has one exception. You cannot put anything into a type declared with an extends wildcard—except for the value null, which belongs to every reference type:
+		List<Integer> ints = new ArrayList<Integer>(); 
+		ints.add(1);
+		ints.add(2);
+		List<? extends Number> nums = ints; 
+		nums.add(null); // ok
+		assert nums.toString().equals("[1, 2, null]");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

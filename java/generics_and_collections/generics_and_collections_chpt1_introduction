@@ -1,0 +1,169 @@
+	                                                                   |
+
+*
+*
+*
+*
+************            CHAPTER 1 - Introduction            ************
+Let’s do something simple with sums: put three numbers into a list and add them together. Here is how to do it in Java with generics:
+		List<Integer> ints = Arrays.asList(1,2,3); 
+		int s = 0; 
+		for (int n : ints) { 
+			s += n; 
+		}
+		assert s == 6;
+
+Let’s touch on the key features. The type List is now generic; you write List<E> to indicate a list with elements of type E.
+
+Here we write List<Integer> to indicate that the elements of the list belong to the class Integer. 
+		Integer is the wrapper class that corresponds to the primitive type int.
+
+		Boxing and unboxing operations, used to convert from the primitive type to the wrapper class, are automatically inserted.
+
+		The new loop form, foreach, is used to bind a variable successively to each element of the list, and the loop body adds these into the sum.
+
+The assertion statement (introduced in Java 1.4), is used to check that the sum is correct; 
+		When assertions are enabled, it throws an error if the condition does not evaluate to true.
+
+Here is how the same code looks in Java before generics:
+		List ints = Arrays.asList( new Integer[] {
+			new Integer(1), new Integer(2), new Integer(3)
+		} );
+		int s = 0;
+		for (Iterator it = ints.iterator(); it.hasNext(); ) {
+			int n = ((Integer)it.next()).intValue();
+			s += n; 
+		}
+		assert s == 6;
+
+Without generics, there is no way to indicate in the type declaration what kind of elements you intend to store in the list, 
+
+So instead of writing 'List<Integer>', you write 'List'.
+
+Now it is the coder rather than the compiler who is responsible for remembering the type of the list elements.
+		So you must write the cast to (Integer) when extracting elements from the list.  
+
+Without boxing and unboxing, you must explicitly allocate each object belonging to the wrapper class Integer 
+		And you must use the intValue method to extract the corresponding primitive int.
+
+Without functions that accept a variable number of arguments, you must explicitly allocate an array to pass to the asList method.
+
+Without the new form of loop, you must explicitly declare an iterator and advance it through the list.
+
+By the way, here is how to do the same thing with an array in Java before generics:
+		int[] ints = new int[] { 1,2,3 };
+		int s = 0;
+		for (int i = 0; i < ints.length; i++) { 
+			s += ints[i]; 
+		} 
+		assert s == 6;
+
+This is slightly longer than the corresponding code that uses generics and collections, 
+		is arguably a bit less readable, and 
+
+		is certainly less flexible. 
+
+Collections let you easily grow or shrink the size of the collection, or 
+		switch to a different representation when appropriate, 
+				such as a linked list or hash table or ordered tree.
+
+The introduction of generics, boxing and unboxing, foreach loops, and varargs in Java marks the first time that using collections is just as simple, perhaps even simpler, than using arrays.
+
+
+*
+*
+*
+*
+************            1.1 Generics
+erasure - the types List<Integer>, List<String>, and List<List<String>> are all represented at run-time by the same type, List. 
+
+We also use erasure to describe the process that converts the first program to the second. The term erasure is a slight misnomer, since the process erases type parameters but adds casts.
+
+erasure - the process erases type parameters but adds casts.
+
+Generics implicitly perform the same cast that is explicitly performed without generics.
+
+Cast-iron guarantee: the implicit casts added by the compilation of generics never fail.
+
+There is also some fine print on this guarantee: it applies only when no unchecked warnings have been issued by the compiler.
+
+Another consequence of erasure is that array types differ in key ways from parameterized types. Executing
+		new String[size]
+allocates an array, and stores in that array an indication that its components are of type 'String'.
+
+In contrast, executing:
+		new ArrayList<String>()
+allocates a list, but does not store in the list any indication of the type of its elements.
+
+In the jargon, we say that Java **reifies array component types** but **does not reify list element types** (or other generic types). 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
