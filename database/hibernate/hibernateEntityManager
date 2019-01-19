@@ -1,0 +1,253 @@
+
+Hibernate EntityManager
+
+Introducing JPA Persistence
+Hibernate EntityManager implements the programming interfaces and lifecycle rules as defined by the JPA 2.0 specification. 
+
+Persistence in JPA is available in containers like EJB 3 or the more modern CDI (Java Context and Dependency Injection), as well as in standalone Java SE applications that execute outside of a particular container.
+
+EntityManagerFactory
+		An entity manager factory provides entity manager instances. 
+
+		All instances are configured to connect to the same database.
+
+EntityManager
+		The EntityManager API is used to access a database. It is used to create and remove persistent entity instances, to find entities by their primary key identity, and to query over all entities.
+
+Persistence context
+		A persistence context is a set of entity instances. Within the persistence context, the entity instances is managed by a particular entity manager. 
+
+		The scope of this context is the transaction.
+
+Persistence unit
+		The set of entity types managed by a given entity manager is a persistence unit. 
+
+		A persistence unit defines the set of all classes that are related or grouped by the application.
+
+1.2. In container environment (eg. EJB 3)
+		In this mode, the container is responsible for the opening and closing of the entity manager.
+
+		It is also responsible for transaction boundaries.
+
+		A container-managed entity manger requires the use of a JTA transaction.
+
+1.2.1. Container-managed entity manager
+		In this mode, the container is responsible for the opening and closing of the entity manager.
+				This is transparent to the application.
+
+		It is also responsible for transaction boundaries.
+
+		A container-managed entity manager is obtained in an application through dependency injection or through JNDI lookup.
+
+		A container-managed entity manger requires the use of a JTA transaction.
+
+1.2.2. Application-managed entity manager
+		An application-managed entity manager allows you to control the entity manager in application code.
+
+		This entity manager is retrieved through the EntityManagerFactory API.
+-->				emFactory = Persistence.createEntityManagerFactory(PersisanceUnitName: 
+								"com.concretepage");
+
+		An application managed entity manager can be either
+				involved in the current JTA transaction
+						a JTA entity manager
+
+				the transaction may be controlled through the EntityTransaction API
+						a resource-local entity manager
+
+						The resource-local entity manager transaction maps to a direct resource transaction
+
+						In Hibernate's case a JDBC transaction.
+
+		The entity manager type (JTA or resource-local) is defined at configuration time, when setting up the entity manager factory.
+
+		The persistence context is created when the entity manager is created and kept until the entity manager is closed.
+
+1.2.3. Persistence context scope
+		An entity manager is the API to interact with the persistence context.
+
+		Two common strategies can be used: 
+				binding the persistence context to the transaction boundaries, or
+
+				keeping the persistence context available across several transactions.
+
+		The most common case is to bind the persistence context scope to the current transaction scope.
+				This is only doable when JTA transactions are used.
+
+				When an entity manager is invoked, the persistence context is also opened.
+						If there already is a persistence context associated with the current JTA transactrion, the associated persistence context is used.
+
+				The persistence context ends when the JTA transaction completes.
+
+		You can also use an extended persistence context.
+				The persistence context is created when an entity manager is retrieved from dependency injection or JNDI lookup
+
+				This is a perfect mechanism for implementing a "long" unit of work.
+
+				The persistence context is created when the entity manager is created and kept until the entity manager is closed.
+
+				The transaction typically occurs at the user process end, allowing the whole process to be committed or rollbacked.
+
+1.2.4. Persistence context propagation
+		Persistence context propagation occurs for container-managed entity managers.
+
+		In a transaction-scoped container managed entity manager
+				The JTA transaction propagation is the same as the persistence context resource propagation.
+
+		Container-managed transaction-scoped entity managers all share the same persistence context.
+
+		In Hibernate terms, this means all managers share the same session.
+
+		Persistence context are never shared between 
+				different JTA transactions or 
+
+				entity manager that do not came from the same entity manager factory.
+
+		An an 'IllegalStateException' is thrown
+				If a stateless session, message-driven, or stateful session with a transaction-scope persistence context bean 
+						call a stateful session bean with an extended persistence context
+
+						in the same JTA transaction
+
+		The persistence context is propagated.
+				If a stateful session bean with an extended persistence context calls in the same JTA transaction
+						stateless session bean or
+
+						stateful session bean with a transaction-scoped persistence context
+
+		<see https://docs.jboss.org/hibernate/entitymanager/3.6/reference/en/html_single/ right before 1.3. Java SE environments>
+
+		<see https://docs.oracle.com/cd/E19798-01/821-1841/gipnl/index.html and https://docs.oracle.com/cd/E19798-01/821-1841/6nmq2cp38/index.html>
+
+1.3. Java SE environments
+Extended context application-managed entity managers are the only thing available in a Java SE environment.
+
+You can retrieve an entity manger using the EntityManagerFactory API.
+
+Only resource-local entity managers are available. 
+
+In other words, JTA transactions and persistence context propagation are not supported in Java SE 
+		You will have to 
+				propagate the persistence context yourself, 
+
+				use the thread local session pattern popular in the Hibernate community.
+
+Extended context means that a persistence context is 
+		created when the entity manager is retrieved.
+				using EntityManagerFactory.createEntityManager(...) 
+
+		closed when the entity manager is closed
+
+		Many resource-local transaction share the same persistence context, in this case.
+
+Chapter 2. Setup and configuration
+2.1. Setup
+The JPA 2.0 compatible Hibernate EntityManager is built on top of the core of Hibernate and Hibernate Annotations. 
+
+Starting from version 3.5, we have bundled in a single Hibernate distribution all the necessary modules:
+
+		Hibernate Core: the native Hibernate APIs and core engine
+
+		Hibernate Annotations: the annotation-based mapping
+
+		Hibernate EntityManager: the JPA 2.0 APIs and livecycle semantic implementation
+
+2.2. Configuration and bootstrapping
+2.2.1. Packaging
+The configuration for entity managers reside in a persistence archive.
+
+A persistence archive is a JAR file which must define a 'persistence.xml' file that resides in the META-INF folder.
+
+All properly 
+		annotated classes included in the archive (ie. having an @Entity annotation), 
+
+		all annotated packages and 
+
+		all Hibernate hbm.xml files 
+in the archive will be added to the persistence unit configuration
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
