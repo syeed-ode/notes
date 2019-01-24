@@ -1,0 +1,411 @@
+************************************************************************
+************************************************************************
+metadata 		- representation of the program itself
+metaobjects 	-  what metadata is oganized into
+introspection 	= runtime self-examination of metaobjects 
+************************************************************************
+************************************************************************
+
+Chapter 1 - A few basics
+
+Consider the following scenarios:
+		■ The system needs to accept new components even after it is built and deployed. You need to completely satisfy the need for pluggability.
+
+		■ Using a different remote mechanism will increase sales. You now must reimplement all of your remote interfaces.
+
+		■ The public API to your module needs to accept calls only from specific packages to keep outsiders from misusing your module. You add a parameter to each of the API calls that will hold the package name of the calling class. But, now legitimate users must change their calls, and unwelcome code can fake a package name.
+
+These scenarios illustrate modularity, remote access, and security—and do not seem to have much in common.
+
+Reimplementing interfaces, patching JAR files, and modifying method calls are all tedious and mechanical tasks.
+		1 Examine the program for its structure or data.
+		
+		2 Make decisions using the results of the examination.
+		
+		3 Change the behavior, structure, or data of the program based upon the decisions.
+
+Learning reflection allows you to get beyond this assumption and make your program do this adaptation for you. 
+		public class DemoTypeInformation {
+		    public void printName() {
+		        System.out.println("Inside method printName: " + this.getClass().getName());
+		    }
+		}
+
+The line
+		(new HelloWorld()).printName();
+sends the string HelloWorld to standard out. 
+
+Without being overridden, the printName method behaves differently for each subclass than it does for HelloWorld. 
+		The printName method is flexible; it adapts to the class that inherits it, causing the change in behavior.
+
+As we build our examples in scope and complexity, we will show you many more ways to attain flexibility using reflection.
+
+1.1 Reflection’s value proposition
+Reflection is the ability of a running program to examine itself and its software environment, and to change what it does depending on what it finds.
+
+To perform this self-examination, a program needs to have a representation of itself. This information we call metadata. 
+
+In an object-oriented world, metadata is organized into objects, called metaobjects. 
+
+The runtime self-examination of the metaobjects is called introspection.
+
+The introspection step is followed by behavior change
+
+In general, there are three techniques that a reflection API can use to facilitate behavior change: 
+		direct metaobject modification, 
+
+		operations for using metadata (such as dynamic method invocation), and 
+
+		intercession, in which code is permitted to intercede in various phases of program execution.
+
+ Java supplies a rich set of operations for using metadata and just a few important intercession capabilities.
+
+Java avoids many complications by not allowing direct metaobject modification.
+
+Applications programmed with reflection adapt more easily to changing requirements.
+
+It's not enough to just learn the concepts and the use of the API. You must also be able to distinguish between situations when reflection is absolutely required. 
+		When it may be used advantageously from those when it should be shunned.
+
+Three issues have impeded the broad use of reflection: 
+		■ security
+				Java is so well crafted and its reflection API so carefully constrained that security is controlled simply
+
+		■ code complexity
+				 By learning when to use reflection and when not to, you will avoid unnecessarily complex code
+
+		■ runtime performance 
+				You will learn to evaluate the performance of your designs, thereby ensuring the resulting code satisfies its performance requirements.
+
+Knowing how to produce flexible code increases your value in the marketplace.
+
+************************************************************************
+************************************************************************
+metadata 		- representation of the program itself
+metaobjects 	-  what metadata is oganized into
+introspection 	= runtime self-examination of metaobjects 
+************************************************************************
+************************************************************************
+
+Reflection—introspection followed by behavior change—is the path to flexible software. 
+
+1.2 Enter George the programmer
+Each of these components provides a setColor method that takes a java.awt.Color parameter. These components cannot be referenced using a common type that supports this setColor method.
+
+They just want to call setColor regardless of a component’s concrete type.
+
+1.2.1 Choosing reflection
+The team’s code must accomplish two steps:
+		1 Discover a setColor method supported by the component.
+
+		2 Call that setColor method with the desired color.
+
+If George’s team controlled all of the source code, the components could be refactored to implement a common interface that declares setColor. 
+
+However, the team does not control the standard Java components or third-party components.
+
+Alternatively, the team could implement an adapter for each component. 
+		 However, because of the large number of component classes that the team is using, the solution would cause an explosion in the number of classes to maintain.
+
+		 This solution would cause an explosion of the number of objects in the system at runtime.
+
+Each of these alternatives involves program changes that adjust or discover the type of a component. George understands that it is only necessary to find a 'setColor' method and call it.
+
+Having studied a little reflection, he understands how to query an object’s class for a method at runtime. 
+		Reflection is uniquely suited to solving this problem because it does not over-constrain the solution with type information.
+
+1.2.2 Programming a reflective solution
+public class ReflectiveColorSetter {
+    /**
+     * This method uses reflection to invoke the 'setColor' method on any
+     * object that has a 'setColor' method. We say that setObjectColor introspects
+     * on its parameter, obj.
+     *
+     * @param obj
+     * @param color
+     */
+    public static void setObjectColor(Object obj, Color color) {
+        /** 1 Query the object for the class */
+        Class cls = obj.getClass();
+
+        try {
+            Method method = cls.getMethod("setCoilor", /** <- Queries class for setObjectMethod */
+                    new Class [] {Color.class});
+            /**
+             * Dynamic invocation is a feature that enables a program to call a method on an object at
+             * runtime without specifying which method at compile time. This line calls the resulting 
+             * method on obj, passing it the color
+             */
+            method.invoke(obj, new Object[]{color});
+        } catch (NoSuchMethodException ex) {
+            throw new IllegalArgumentException(cls.getName() + " does not support setColor(Color)");
+        } catch (IllegalAccessException ex) {
+        	/** The class containing listing 1.1 does not have access privileges to call a protected, package, or private visibility setColor method. */
+            throw new IllegalArgumentException("Insufficient access permision to call"
+                    + "setColor(:Color) in class " + cls.getName());
+        } catch (InvocationTargetException ex) {
+            /** 6 'setColor' method throws an exception */
+            throw new RuntimeException(ex);
+        }
+    }
+}
+
+George does not know which 'setColor' method to call when writing the code because he does not know the type of the obj parameter.
+
+George’s program discovers which 'setColor' method is available at runtime through introspection.
+
+Dynamic invocation introduces latency by resolving which method to call and checking access at runtime rather than at compile time.
+		The method calls for introspection are not necessary if the information is known at compile time.
+
+1.3 Examining running programs 
+Reflection is a program’s ability to examine and change its behavior and structure at runtime.
+
+Think of introspection as looking at yourself in a mirror. The mirror provides you with a representation of yourself—your reflection—to examine. 
+
+************************************************************************
+************************************************************************
+metadata 		- representation of the program itself
+metaobjects 	-  what metadata is oganized into
+introspection 	= runtime self-examination of metaobjects 
+base-level objects 	- Objects used to accomplish the main purpose of an application 
+base program 	- the non reflective parts of the program 
+************************************************************************
+************************************************************************
+
+By examining its self-representation, a program can obtain the right information about its structure and behavior to make important decisions.
+
+Listing 1.1 uses instances of Class and Method to find the appropriate setColor method to invoke. These objects are part of Java’s self-representation.
+
+We refer to objects that are used to accomplish the main purposes of an application as base-level objects. 
+
+In the 'setObjectColor' example above, the application that calls George’s method as well as the objects passed to it as parameters are baselevel objects.
+
+ We refer to the nonreflective parts of a program as the base program. 
+
+ For the moment, it is important to understand that the figure can be read as “fido, a base-level object, is an instance of Dog, a class object on the metalevel.”
+
+ Metaobjects are a convenient self-representation for reflective programming.
+ 		Imagine the difficulty that using the source code or the bytecodes as a representation.
+
+Metaobjects often also provide ways of changing program structure, behavior, or data. 
+		In our example, George uses dynamic invocation to call a method that he finds through introspection.
+
+Other reflective abilities that make changes include 
+		reflective construction, 
+
+		dynamic loading, and 
+
+		intercepting method calls.
+
+		This book shows how to use these mechanisms and others to solve common but difficult software problems.
+
+1.4 Finding a method at runtime
+George’s 'setObjectColor' method is passed a parameter obj of type 'Object'. The method cannot do any introspection until it knows the class of that parameter.
+
+The 'getClass' method is often used to begin reflective programming because many reflective tasks require objects representing classes.
+		The getClass method is final. This keeps Java programmers from fooling reflective programs. If it were not final, a programmer could override getClass to return the wrong class.
+
+Throughout this book, we use the term 'class object' to mean an instance of java.lang.Class. 
+		Class objects are the most important kind of metaobject because all Java programs consist solely of classes.
+
+Class objects provide programming metadata about a class’s fields, methods, constructors, and nested classes.
+		Class objects also provide information about the inheritance hierarchy and provide access to reflective facilities.
+
+Once the setObjectColor method has discovered the class of its parameter, it queries that class for the method it wants to call:
+-->		Method method = cls.getMethod("setColor", new Class[] {Color.class});
+
+The first parameter to this query is a String containing the desired method’s name, in this case, 'setColor'.
+
+The second parameter is an array of class objects that identify the types of the method’s parameters.
+		In this case, we want a method that accepts one parameter of type Color, so we pass getMethod an array of one element containing the class object for Color.
+
+The getClass method is useful for obtaining the class for an object reference, but when we know only the name of the class, we need another way. 
+
+Class literals are Java’s way to specify a class object statically.
+
+Syntactically, any class name followed by '.class' evaluates to a class object.
+
+In the example, George knows that setObjectColor always wants a method that takes one Color argument. He specifies this using 'Color.class'.
+
+In querying for a parameterless method, it is legal to supply null, which is treated the same as a zero-length array.
+
+'Class' has other methods for introspecting about methods.
+		Method getMethod( String name, Class[] parameterTypes )
+				Returns a Method object that represents a public method (either declared or inherited) of the target Class object with the signature specified by the second parameters
+
+		Method[] getMethods()
+				Returns an array of Method objects that represent all of the public methods (either declared or inherited) supported by the target Class object
+
+		Method getDeclaredMethod(String name, Class[] parameterTypes )
+				Returns a Method object that represents a declared method of the target Class object with the signature specified by the second parameters. The set of declared methods does not include methods that the class inherits. However, this method does return methods of all visibilities—public, protected, package, and private.
+
+		Method[] getDeclaredMethods()
+				Returns an array of Method objects that represent all of the methods declared by the target Class object. The set of declared methods does not include methods that the class inherits. However, this method does return methods of all visibilities—public, protected, package, and private.
+
+A programmer querying a class using 'getDeclaredMethod' might accidentally specify a method that the class does not declare. In this case, the query fails with a 'NoSuchMethodException'.
+
+The discussion of the methods from table 1.1 indicates that Java reflection uses instances of 'Class' to represent types.
+	For example, getMethod from listing 1.1 uses an array of 'Class' to indicate the types of the parameters of the desired method.
+
+Java represents primitive, array, and interface types by introducing class objects to represent them.
+		These class objects cannot do everything that many other class objects can. For instance, you cannot create a new instance of a primitive or interface.
+
+		Class getComponentType()
+				If the target object is a Class object for an array, returns the 'Class' object representing the component type
+
+		boolean isArray()
+				Returns true if and only if the target Class object represents an array
+
+		boolean isInterface()
+				Returns 'true' if and only if the target 'Class' object represents an interface
+
+		boolean isPrimitive()
+				Returns 'true' if and only if the target 'Class' object represents a primitive type or 'void'
+
+The rest of this section explains in greater detail how Java represents primitive, interface, and array types using class objects.
+
+1.5.1 Representing primitive types
+Although primitives are not objects at all, Java uses class objects to represent all eight primitive types.
+		For example, to specify type 'int', use 'int.class'.
+-->		Method m = Vector.class.getMethod("get", new Class[] {int.class});
+
+A class object that represents a primitive type can be identified using 'isPrimitive'.
+
+Java does have a class object to represent 'void'. The 'isPrimitive' method returns true for 'void.class'.
+		When introspecting for the return type of a method, 'void.class' is used to indicate that a method returns no value.
+
+1.5.2 Representing interfaces 
+A class object that represents an interface may be queried for the methods and constants supported by that interface. 
+		The 'isInterface' method of 'Class' can be used to identify class objects that represent interfaces. 
+
+1.5.3 Representing array types
+Java arrays are objects, but their classes are created by the JVM at runtime. A new class is created for each element type and dimension. 
+
+Class literals for arrays are specified like any other class literal. 
+
+For instance, to specify a parameter of a single-dimension Object array, use the class literal 'Object[].class'.
+
+Class objects that represent arrays can be identified using the 'isArray' method of 'Class'.
+
+The component type for an array class can be obtained using 'getComponentType'. 
+
+Java treats multidimensional arrays like nested single-dimension arrays. Therefore, the line
+-->		int[][].class.getComponentType()
+evaluates to 
+-->		int[].class. 
+
+
+************************************************************************
+Note the distinction between component type and element type. For the array type int[][], the component type is int[] while the element type is int.
+************************************************************************
+
+Let’s examine what can be done once a method is retrieved.
+
+
+
+
+************************************************************************
+************************************************************************
+metadata 		- representation of the program itself
+metaobjects 	- what metadata is oganized into
+introspection 	= runtime self-examination of metaobjects 
+base-level objects 	- Objects used to accomplish the main purpose of an application 
+base program 	- the non reflective parts of the program 
+************************************************************************
+************************************************************************
+
+1.6 Understanding method objects
+'Method' is the type of the result of all of the method queries in table 1.1.
+
+It should be no surprise that 'java.lang.reflect.Method' is the class of the metaobjects that represent methods.
+
+Below shows some of the methods supported by the metaobject class 'Method'.
+		Class getDeclaringClass()
+				Returns the 'Class' object that declared the method represented by this 'Method' object
+
+		Class[] getExceptionTypes()
+				Returns an array of Class objects representing the types of the exceptions declared to be thrown by the method represented by this Method object
+
+		int getModifiers()
+				Returns the modifiers for the method represented by this 'Method' object encoded as an 'int'
+
+		String getName()
+				Returns the name of the method represented by this Method object
+
+		Class[] getParameterTypes()
+				Returns an array of 'Class' objects representing the formal parameters in the order in which they were declared
+
+		Class getReturnType()
+				Returns the 'Class' object representing the type returned by the method represented by this 'Method' object
+
+		Object invoke(Object obj, Object[] args)
+				Invokes the method represented by this 'Method' object on the specified object with the arguments specified in the 'Object' array
+
+		
+
+
+
+
+Error Code: 1142. UPDATE command denied to user 'adcampaign'@'localhost' for table 'user'
+
+
+Error Code: 1046. No database selected Select the default DB to be used by double-clicking its name in the SCHEMAS list in the sidebar.
+
+Error Code: 1044. Access denied for user 'adcampaign'@'%' to database 'ad_campaign'
+
+
+
+create user if not exists 
+        `adcampaign` 
+identified by 
+        'adcampaign'; 
+
+
+Use RFC 2822 date and time output format. This is equivalent to use ``%a, %d %b %Y %T %z'' as output_fmt while LC_TIME is set to the ``C'' locale .
+
+/usr/local/mysql/bin/mysqld --user=_mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data --plugin-dir=/usr/local/mysql/lib/plugin --log-error=/usr/local/mysql/data/mysqld.local.err --pid-file=/usr/local/mysql/data/mysqld.local.pid --keyring-file-data=/usr/local/mysql/keyring/keyring --early-plugin-load=keyring_file=keyring_file.so --default_authentication_plugin=mysql_native_password
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
