@@ -1,5 +1,20 @@
+** https://docs.jboss.org/hibernate/entitymanager/3.6/reference/en/html_single/ **
+https://docs.jboss.org/jbossas/docs/Server_Configuration_Guide/4/html/ch01s02s01.html
+https://docs.jboss.org/jbossas/docs/Server_Configuration_Guide/4/html/EJB3_Services-Entity_Beans.html
 
-Hibernate EntityManager
+Hibernate EntityManager 
+
+String grandTotal = String.format("Grand Total: %,.2f", dblTotal);
+
+
+
+JPA defines a different bootstrap process that uses its own configuration file named 'persistence.xml'.
+
+'persistence.xml' files should provide a unique name for each persistence unit.
+		This name is how applications reference the configuration while obtaining an javax.persistence.EntityManagerFactory reference.
+
+
+
 
 Introducing JPA Persistence
 Hibernate EntityManager implements the programming interfaces and lifecycle rules as defined by the JPA 2.0 specification. 
