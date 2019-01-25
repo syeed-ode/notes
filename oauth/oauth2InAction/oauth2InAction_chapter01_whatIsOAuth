@@ -5,7 +5,8 @@ Add 51 to the page to get the pdf location. A page references are in PDF pages.
 The entire point of an authentication protocol is to know whether the user is present.
 *************************************************************
 *************************************************************
-The client is the piece of software that accesses the protected resource on behalf of the resource owner.
+The client is the piece of software that accesses the protected resource on 
+	behalf of the resource owner.
 *************************************************************
 *************************************************************
 *							    *
@@ -84,13 +85,16 @@ In the printing example, storage site’s API is the resource and the printing
 	service is the client of that API. You, as the resource owner, need 
 	to be able to delegate part of your authority to the printer so that 
 	it can read your photos.
-We’ll see how this problem could be solved imperfectly without OAuth, and then we’ll look at how OAuth can solve it in a better way. 
+We’ll see how this problem could be solved imperfectly without OAuth, and 
+	then we’ll look at how OAuth can solve it in a better way. 
 
-*************************************************************
-*************************************************************
-The entire point of an authentication protocol is to know whether the user is present.
-*************************************************************
-*************************************************************
+	                                                                   |
+****************************************************************************
+****************************************************************************
+The entire point of an authentication protocol is to know whether the user 
+	is present.
+****************************************************************************
+****************************************************************************
 1.2  The bad old days: credential sharing (and credential theft) pg11
 
 One approach, popular in the enterprise space, is to 'copy the user’s credentials and replay them on another service'. In this case, the photo printer assumes that the user is using the same credentials as the storage site. The printer replays the user’s username and password, pretending to be the user.
@@ -112,7 +116,7 @@ One approach, popular in the enterprise space, is to 'copy the user’s credenti
 
 						The client system must have access to the plaintext password of the user during the transaction; other wise, it has no way of verifying it with the LDAP server.
 
-						In a ver y real sense, this method is  a  form  of  man-in-the-middle  attack  on  the  user,  although  one  that’s  generally benevolent in nature.
+						In a very real sense, this method is  a  form  of  man-in-the-middle  attack  on  the  user,  although  one  that’s  generally benevolent in nature.
 
 		If the client application is ever compromised, the attacker gains access not only to the client but also to the protected resource, as well as any other service where the end user may have used the same password.
 
@@ -141,22 +145,26 @@ In OAuth, the end user (resource owner) delegates some part of their
 To make that happen, OAuth introduces another component into the system: the 
 	'authorization server'. The authorization server (AS) is trusted by 
 	the protected resource (photos) to issue special-purpose security 
-	credentials—called OAuth access tokens -— to clients (photo printing 
-	service). 
+	credentials -— called OAuth access tokens -— to clients (photo 
+	printing service). 
 		To acquire a token, the client (application / photo printing 
 			service) first sends the resource owner (user) to 
 			the authorization server in order to request that 
 			the resource owner authorize this client.
-	                                                                   |
+
 		[client]--(can I authorize?)-->[resource owner]--(allow client access)-->[authorization server]
 
-		The resource owner authenticates to the authorization server and is generally presented with a choice of whether to authorize the client making the request. 
-
-		The client is able to ask for a subset of functionality, or scopes, which the resource owner may be able to further diminish.
-
-		Once the authorization grant has been made, the client can then request an access token from the authorization server.
-
-		This access token can be used at the protected resource to access the API, as granted by the resource owner.
+		The resource owner authenticates to the authorization server 
+			and is generally presented with a choice of whether 
+			to authorize the client making the request. 
+		The client is able to ask for a subset of functionality, or 
+			scopes, which the resource owner may be able to 
+			further diminish.
+		Once the authorization grant has been made, the client can 
+			then request an access token from the authorization 
+			server.
+		This access token can be used at the protected resource to 
+			access the API, as granted by the resource owner.
 
 		[client (application)] --> Requests authorization --> [resource owner (person)]
 		[resource owner (person)] --> Grants authorization to client --> [authorization server] 
@@ -166,8 +174,12 @@ To make that happen, OAuth introduces another component into the system: the
 		[client (application)] --> Sends access token to resource server --> [protected resource]
 		[protected resource] --> Sends requested resource --> [client (application)]
 
-At no time in this process are the resource owner’s credentials exposed to the client. The resource owner authenticates to the authorization server separately from anything used to communicate with the client. Neither  does  the  client  have  a  high-powered developer key: the client is unable to access anything on its own and instead must be authorized by a valid resource owner.
-
+At no time in this process are the resource owner’s credentials exposed to 
+	the client. The resource owner authenticates to the authorization 
+	server separately from anything used to communicate with the client. 
+	Neither  does  the  client  have  a  high-powered developer key: the 
+	client is unable to access anything on its own and instead must be 
+	authorized by a valid resource owner.
 Instead of requiring the user to generate tokens and paste them into 
 	clients, the OAuth protocol facilitates this process and makes it 
 	simple for the client to request a token and the user to authorize 
@@ -217,62 +229,113 @@ Instead of requiring the user to generate tokens and paste them into
 
 	1.3.2 Authorization delegation: why it matters and how it’s used pg18
 
-	Fundamental to  the  power  of  OAuth  is  the  notion  of  delegation. Although  OAuth is often called an authorization protocol it is a delegation protocol. a subset of a user’s authorization is delegated, but OAuth itself doesn’t carry or convey the authorizations. 
-	                                                                   |
-	Instead, a  client  can  request  that  a  user  delegate  some  of  their authority to it. The user can then approve this request, and the client can then act on it with the results of that approval.
-	                                                                   |
-	The  distinction  between  a  delegation  and  an  authorization  protocol is important here because the authorizations being carried by the OAuth token are opaque to most of the system.  Only  the  protected  resource needs  to  know  the  authorization. 
-
-	As long as it’s able to find out from the token and its presentation context (either by looking at the token directly or by using a service of some type to obtain this information), it can serve the API as required.
+	Fundamental to  the  power  of  OAuth  is  the  notion  of  
+		delegation. Although  OAuth is often called an authorization 
+		protocol it is a delegation protocol. a subset of a user’s 
+		authorization is delegated, but OAuth itself doesn’t carry 
+		or convey the authorizations. 
+	Instead, a  client  can  request  that  a  user  delegate  some  of  
+		their authority to it. The user can then approve this 
+		request, and the client can then act on it with the results 
+		of that approval.
+	The  distinction  between  a  delegation  and  an  authorization  
+		protocol is important here because the authorizations being 
+		carried by the OAuth token are opaque to most of the system.  
+		Only  the  protected  resource needs  to  know  the  
+		authorization. 
+	As long as it’s able to find out from the token and its presentation 
+		context (either by looking at the token directly or by using 
+		a service of some type to obtain this information), it can 
+		serve the API as required.
 
 	1.3.3 User-driven security and user choice pg19 
 
-	Since the  OAuth  delegation  process  involves  the  resource  owner, important security decisions can be driven by end user choice.
-
-	Traditionally, security decisions, who can use a service, with which client software, and for what purpose, have been the purview of centralized authorities. OAuth allows these authorities to push some of that decision-making power into the hands of the users who will ultimately be using the software. 
-
-	OAuth allows these authorities to push some of that decision-making power into the hands of the users who will ultimately be using the software. 
-
-	OAuth systems often follow the principle of TOFU: Trust On First Use. Tthe first time a security decision needs to be made at runtime the user is  prompted. 
-			This can be as simple as “Connect a new application?” The user with appropriate authority is allowed to make a security decision.
-
-			The first time an authorization context is met, the system can be directed to trust the user’s decision for later processing: Trust On First Use. 
-
-			The Trust On First Use (TOFU) method of managing security decisions is not required by OAuth implementations, but it’s especially common to find these two technologies together.
-
-			The TOFU method strikes a balance between asking end users to make security decisions and the fatigue of asking them constantly. Without the “Trust” portion users would have no say in how delegations are made; without the “On First Use” portion users would quickly become numb to access requests.
-
-			This kind of security fatigue breeds workarounds that are usually more insecure than the practice the security is trying to address.
-
-	This approach also presents the user’s decision in terms of functionality, not security. This is an important distinction where decision makers are  asked ahead of time to demarcate what isn’t permissible.
-
-	The user cares more about what they’re trying to accomplish instead of what they’re trying to prevent.
-
-	Now this isn’t to say that the TOFU method must be used for all transactions or decisions. A three-layer listing mechanism offers powerful flexibility for security architects:
-			The  whitelist determines  known-good  and  trusted  applications: Internal parties, known business partners, Customer organizations, Trust frameworks
+	Since the  OAuth  delegation  process  involves  the  resource  
+		owner, important security decisions can be driven by end 
+		user choice.
+	Traditionally, security decisions, who can use a service, with which 
+		client software, and for what purpose, have been the purview 
+		of centralized authorities. OAuth allows these authorities 
+		to push some of that decision-making power into the hands of 
+		the users who will ultimately be using the software. 
+	OAuth allows these authorities to push some of that decision-making 
+		power into the hands of the users who will ultimately be 
+		using the software. 
+	OAuth systems often follow the principle of TOFU: Trust On First 
+		Use. The first time a security decision needs to be made at 
+		runtime the user is  prompted. 
+			This can be as simple as “Connect a new application?” 
+				The user with appropriate authority is 
+				allowed to make a security decision.
+			The first time an authorization context is met, the 
+				system can be directed to trust the user’s 
+				decision for later processing: 
+				Trust On First Use. 
+			The Trust On First Use (TOFU) method of managing 
+				security decisions is not required by OAuth 
+				implementations, but it’s especially common 
+				to find these two technologies together.
+			The TOFU method strikes a balance between asking end 
+				users to make security decisions and the 
+				fatigue of asking them constantly. Without 
+				the “Trust” portion users would have no say 
+				in how delegations are made; without the “On 
+				First Use” portion users would quickly 
+				become numb to access requests.
+			This kind of security fatigue breeds workarounds 
+				that are usually more insecure than the 
+				practice the security is trying to address.
+	This approach also presents the user’s decision in terms of 
+		functionality, not security. This is an important 
+		distinction where decision makers are  asked ahead of time 
+		to demarcate what isn’t permissible.
+	The user cares more about what they’re trying to accomplish instead 
+		of what they’re trying to prevent.
+	Now this isn’t to say that the TOFU method must be used for all 
+		transactions or decisions. A three-layer listing mechanism 
+		offers powerful flexibility for security architects:
+			The  whitelist determines  known-good  and  trusted  
+				applications: Internal parties, known 
+				business partners, Customer organizations, 
+				Trust frameworks
 					This decision can be provided apriori
-
 			The blacklist determines known-bad applications or other negative  actors: Known bad parties, Attack sites
 					This decision can be provided apriori
-
-			In a traditional security model, the discussion would stop here, everything not on the whitelist is automatically on the blacklist by default.
-
-			With the addition of the TOFU method, we can allow a graylist in the middle of these two, In which user-based runtime trust decisions can take precedence.
-					By offering the graylist capability, a system can greatly expand the ways it can be used without sacrificing security.
-
+			In a traditional security model, the discussion 
+				would stop here, everything not on the 
+				whitelist is automatically on the blacklist 
+				by default.
+			With the addition of the TOFU method, we can allow 
+				a graylist in the middle of these two, In 
+				which user-based runtime trust decisions can 
+				take precedence.
+					By offering the graylist capability, 
+						a system can greatly expand 
+						the ways it can be used 
+						without sacrificing security.
 *************************************************************
 *************************************************************
 The entire point of an authentication protocol is to know whether the user is present.
 *************************************************************
 *************************************************************
 1.4  OAuth 2.0: the good, the bad, and the ugly pg20
-	OAuth 2.0  is  very  good  at  capturing  a  user  delegation decisons, allowing  for multiple different parties to be involved in the security decision  process, most notably the end user at runtime. 
-
-			One key assumption in OAuth 2.0 was that there would be more client than there would be authorization servers or protected resource servers. A single authorization server can protect multiple resource servers.
-			
-			An authorization server can have different classes of clients that are trusted at different levels, but we’ll cover that in more depth in chapter 12. Wherever possible, complexity is shifted away from clients and onto  servers.
-	
+	OAuth 2.0  is  very  good  at  capturing  a  user  delegation 
+		decisons, allowing  for multiple different parties to be 
+		involved in the security decision process, most notably 
+		the end user at runtime. 
+			One key assumption in OAuth 2.0 was that there would 
+				be more client than there would be 
+				authorization servers or protected resource 
+				servers. A single authorization server can 
+				protect multiple resource servers.
+			An authorization server can have different classes 
+				of clients that are trusted at different 
+				levels, but we’ll cover that in more depth 
+				in chapter 12. Wherever possible, complexity 
+				is shifted away from clients and onto  
+				servers.
 	The client becomes the simplest piece of software in the system. Client developers no longer have to worry about handling sensitive  user credentials. 
+	                                                                   |
 			OAuth  tokens  provide  a  mechanism  that’s  only  slightly more complex than passwords but significantly more secure when used properly.
 
 			A client needs to manage own client credentials and the user’s tokens, and the breach of a single client would be limited to the users of that client.
