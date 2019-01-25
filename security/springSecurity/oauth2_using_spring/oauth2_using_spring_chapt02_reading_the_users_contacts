@@ -1,0 +1,428 @@
+	                                                                   |
+************************************************************************
+************************************************************************
+	6.1.1 Implicit grant type - used when client is inside browser (JS application) {implicitGrantService}
+		1. Grant Type is equal to token instead of 
+			'authorization_code'
+		2. Client calls authoriztion endpoint only and gets 'token' 
+		3. Resource owner still authenticates with autorization 
+			server
+		4. The client_secret won't be needed using Implicit grant 
+			type
+		5. Implicit grant type uses only the front channel since the 
+			client (JS code) is inside the browser.
+************************************************************************
+************************************************************************
+*
+*
+*
+************************************************************************
+* Cht 2 - Reading the user's contacts from Facebook on the client side *
+************************************************************************
+Grant types as you may already know, defines different methods for an application to retrieve access tokens from an Authorization Server.
+		A grant type may apply for a given scenario regarding the client type being developed. 
+
+OAuth 2.0 specification defines two types of client types: 'public' and 'confidential'.
+
+
+This recipe will present you with how you can integrate with Facebook using the Implicit grant type. 
+
+The Implicit grant type is the better choice for public clients and runs directly on the user's web browser.
+
+2.1 Getting ready
+To run this recipe, you must create a web application using Spring Boot, which will help the development of the application. 
+
+We also need to register our application on Facebook. As an OAuth Provider, Facebook needs to know which clients are asking for access token.
+		
+The Resource Owner (the user) would want to know who is to be granted access to her profile.
+
+2.2 How to do it...
+First of all, remember that you must have a Facebook account, and have to register a new application. Go to https://developers.facebook.com/apps/ 
+
+Click on Create a New App to start registering your application, and you should see the following interface which allows you to define the name of the application:
+		
+Click on Create App ID and you will be redirected to the newly created application's dashboard as follows:
+		Welcome to your Facebook for Developers Dashboard. 
+
+		Your app dashboard is where you can get an overview of your app, edit app settings, and configure new products.
+
+To start using the Facebook's Graph API and retrieve the user's contacts, we first need to 
+		select one product from several provided by Facebook. For what we need now, you must 
+
+		click on the 'Set Up' button from the 'Facebook Login' box.
+
+After clicking on 'Set Up', you must choose one platform, which must be 'Web' for this recipe.
+
+After choosing the 'Web platform', enter the 'Site URL' for your application. I am using a fictitious URL named http://clientimplicit.test.
+
+After saving the URL of your site, just click on 'Continue'.
+
+Now you are ready to set up the redirection URI for the application by clicking on Settings in the left panel.
+		Facebook Login --> Settings --> Valid OAuth Redirect URIs
+
+		As this application isn't running for production, I have set up the redirect URI as http://localhost:8080/callback
+
+		Don't forget to save the changes:
+
+Now you can click on 'Dashboard' at the left side of the panel so you can grab the 'App ID' (229963314611061) and 'App Secret' (8ddbff325254e16a9d87a53f37aa40c8). 
+		This maps to the 'client_id' and 'client_secret' from OAuth 2.0 specifications respectively.
+
+Copy the App ID and App Secret from the dashboard as represented by the following screenshot as follows, so we can use in the code which comes in the next steps
+
+Once we have our client registered on Facebook, we are ready to start writing code to retrieve the OAuth 2.0 access token. 
+
+We will use the Implicit grant type (requesting the access token from the client side).
+
+Create a new web application using Spring Initializr at https://start.spring.io/ and define the following data:
+************************************************************************
+************************************************************************
+	6.1.1 Implicit grant type - used when client is inside browser (JS application) {implicitGrantService}
+		1. Grant Type is equal to token instead of 
+			'authorization_code'
+		2. Client calls authoriztion endpoint only and gets 'token' 
+		3. Resource owner still authenticates with autorization 
+			server
+		4. The client_secret won't be needed using Implicit grant 
+			type
+		5. Implicit grant type uses only the front channel since the 
+			client (JS code) is inside the browser.
+************************************************************************
+************************************************************************
+		Set up the group as com.syeedode.implicitclient
+
+		Define the artifact as client-implicit
+
+		Add Web and Thymeleaf as dependencies for this project
+
+Create the file 'client.html' within the folder templates which resides inside the 'src/main/resources' project's directory.
+
+Add the following content within the file 'client.html':
+		<!DOCTYPE html>
+		<html lang="en" xmlns:th="http://www.thymeleaf.org">
+		<head>
+		    <meta charset="UTF-8">
+		    <title>Facebook - client side integration</title>
+		</head>
+		<body>
+		    Press the following button to start the implicit flow.
+		    <button id="authorize" type="button">Authorize</button>
+		    <div id="box"></div>
+		</body>
+		</html>
+
+The button we have added to the client.html page does not have any behavior attached. 
+		So, to allow the user to start the Implicit grant type flow, add the following JavaScript code after the body tag:
+			    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+			    <script type="text/javascript" th:inline="javascript">
+			        /*<![CDATA[*/
+			        $(document).ready(function() {
+			           $("#authorize").click(makeRequest);
+			        });
+
+			        function makeRequest() {
+			            var auth_endpoint = "https://www.facebook.com/v2.9/dialog/oauth",
+			                 response_type = "token",
+			                 client_id = "229963314611061",
+			                 redirect_uri = "http://localhost:8080/callback",
+			                 scope = "public_profile user_friends";
+
+			           var request_endpoint = auth_endpoint + "?" +
+			                 "response_type=" + response_type + "&" +
+			                 "client_id=" + client_id + "&" +
+			                 "redirect_uri=" + encodeURI(redirect_uri) + "&" +
+			                 "scope=" + encodeURI(scope);
+
+			           window.location.href = request_endpoint;
+			        }
+			        /*]]>*/
+			    </script>
+			    Press the following button to start the implicit flow.
+			    <button id="authorize" type="button">Authorize</button>
+			    <div id="box"></div>
+
+Before starting the application, we need to map a URL pattern to the HTML code we wrote before can be rendered.
+		To do so, open the class ClientImplicitApplication.java and assure your code looks like the following:
+				package com.syeedode.implicitclient.clientimplicit.controller;
+
+				import org.springframework.stereotype.Controller;
+				import org.springframework.web.bind.annotation.GetMapping;
+
+				@Controller
+				public class ImplicitGrantClientController {
+				    
+				    @GetMapping("/")
+				    public String client() {return "client";}
+				}
+
+In the previous code, we've mapped the root of our application to the 'client.html' web page. 
+
+But all of this is now serving the purpose of sending to the user the Authorization Server (in this case Facebook). 
+
+The the resource owner (user, she) could grant our application access to protected resources (which are her friends). 
+
+Try to start the application and go to 
+		http://localhost:8080/
+
+Click on the 'Authorize' button that will be provided by 'client.html' to start the Implicit grant flow.
+		Log in with your Facebook account, and accept the permissions requested by the 'client-implicit' application.
+
+		Make sure that jquery is properly declared inside 'client.html' file.
+
+If you grant all the permissions at the consent user page you shall be redirected to 'http://localhost:8080/callback' URL that was specified at the client registration phase on Facebook. 
+		Click on 'Continue' and pay attention to the content received and the URL fragment in the browser's address bar. 
+
+		It should be something like the following:
+				http://localhost:8080/callback#access_token=EAADRJoGtw3UBAJ2epeLDUi6lZADcz5ZBbrQFDa2HEREoZCwXrqANINfHxhmZCFrZC6nBw9e6bOMTkquMKc3ru96hQ88cnCHZCvy8oHbIBaKyq1gZBFIEGptTXZASy1kzvpbVfD7MHNKmhharxJDlOcBZBlqlw6BSXJ0iFyiKNmy6WayMJxNWIZAzAD0gYcdWnWqeIZD&expires_in=5688&reauthorize_required_in=7776000&data_access_expiration_time=1556159112 <-- mine
+
+				http://localhost:8080/callback#access_token=EAAbsiSHMZC60BANUwKBDCYeySZCjcBpvFuUO1gXsfTGwWjnZAFTAZBIJB62jdUroAcNuZAVWO24yeqo0iazWYytVgrQ1bgNWI8vm07Ws4ZCHXpGridHfZB6PQ1rzM4BzP29IljgTTuBLZBFQBEnEn2LJiOWJjA8J6Y73BLcjIe2vVMZB9c2GnZBpiK4iZAWEtkTsMEZD&expires_in=7152 <-- example 
+
+So now we need to extract both the 'access_token' and 'expires_in' parameters which comas after the '#' character.
+		Then we can start using the Facebook Graph API to retrieve the user's friends.
+
+The first thing we can do is to create another URL mapping through our default controller, which is 'ImplicitGrantClientController'.
+		Open this class and add the following method so we can deal with Facebook's redirection:
+				@Controller
+				public class ImplicitGrantClientController {
+				    @GetMapping("/callback")
+				    public String callback() { return "callback_page"; }
+				}
+
+		As we can see, the method 'callback' is returning the 'callback_page' string, which will automatically be mapped to the file 'callback_page.html'. 
+
+		Create this file inside the templates folder which resides in the 'src/main/resources' project directory. 
+
+		At first just add the following HTML content to the callback_page.html file:
+				<!DOCTYPE html>
+				<html lang="en">
+				<head>
+				    <meta charset="UTF-8">
+				    <title>Insert title here</title>
+				</head>
+				<body>
+				    Friends who has also granted client-implicit
+				    <div id="friends">
+				        <ul></ul>
+				    </div>
+				</body>
+				</html>
+
+After receiving the 'acces_token' as a URL fragment, this file will use JavaScript code to interact with Facebook's graph API to retrieve the user's friends.
+		It will populate the tag '<ul>' with each friend received within the respective '<li>' tag.
+
+		Let's start writing our JavaScript code by adding the following content after the body tag:
+			    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+			    <script type="text/javascript">
+			        /*<![CDATA[*/
+			        $(document).ready(function() {
+			           var fragment = window.location.hash;
+			         });
+			        /*]]>*/
+			    </script>
+
+	    As we have the fragment content in the fragment variable, add the following function at the end of the JavaScript code:
+		        function getResponse(fragment) { 
+		           var attributes = fragment.slice(1).split('&'); 
+		           var response = {}; 
+		         
+		           $(attributes).each(function(idx, attr) { 
+		                 var keyValue = attr.split('='); 
+		                 response[keyValue[0]] = keyValue[1]; 
+		           }); 
+		         
+		           response.hasError = function() { 
+		                 return !response['access_token']; 
+		           }; 
+		         
+		           return response; 
+		        } 
+
+        The code presented before creates an object named 'response' which might contain an 'access_token' or error description.
+        		Unfortunately, Facebook returns all the error data as URL query parameters instead of using the fragment as per OAuth 2.0's specifications.
+
+        		At least the object returned by the 'getResponse' function can tell if the response has an error.
+
+		Now let's update the main JavaScript code to the following.
+		        /*<![CDATA[*/
+		        $(document).ready(function() {
+		           var fragment = window.location.hash;
+		           var res = getResponse(fragment);
+		           window.location.hash = '_#';
+		            if (res.hasError()) {
+		                $("<div>Error trying to obtain user's authorization!</div>").insertBefore('#friends');
+		                return;
+		           }
+		        });
+		        /*]]>*/
+        The preceeding code 
+        		extracts the response from the URL fragment, 
+
+        		clears the fragment of the URL as a security measure, and 
+
+        		in case of an error, just presents a message to the user through a <div> HTML tag
+
+************************************************************************
+************************************************************************
+	6.1.1 Implicit grant type - used when client is inside browser (JS application) {implicitGrantService}
+		1. Grant Type is equal to token instead of 
+			'authorization_code'
+		2. Client calls authoriztion endpoint only and gets 'token' 
+		3. Resource owner still authenticates with autorization 
+			server
+		4. The client_secret won't be needed using Implicit grant 
+			type
+		5. Implicit grant type uses only the front channel since the 
+			client (JS code) is inside the browser.
+************************************************************************
+************************************************************************
+Now let's create the most expected function, which is responsible for using the 'access_token' to interact with the Facebook Graph API. 
+
+        function getFriends(accessToken, callback) {
+           var baseUrl = 'https://graph.facebook.com/v2.9/';
+           var endpoint = 'me/friends';
+           var url = baseUrl + endpoint;
+
+           $.ajax({
+                url: url,
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
+                },
+                success: function(result){
+                       var friends = result.data;
+                       callback(friends);
+                },
+                error: function(jqXHR, textStatus, errorThrown)   {
+                    console.log(textStatus);
+                }
+            });
+        }
+
+And to finish, just update the main JavaScript code which is using all the declared functions as follows:
+        /*<![CDATA[*/
+        $(document).ready(function() {
+           var fragment = window.location.hash;
+           var res = getResponse(fragment);
+           window.location.hash = '_#';
+            if (res.hasError()) {
+                $("<div>Error trying to obtain user's authorization!</div>").insertBefore('#friends');
+                return;
+           }
+
+           getFriends(res['access_token'], function(friends) {
+               $(friends).each(function(index, friend) {
+                   $('#friends').find('ul').append('<li>' + friend.name + '</li>');
+               });
+           });
+        });
+        /*]]>*/
+
+Now it's time to run the 'client-implicit' application to see the usage of OAuth 2.0 and the Facebook Graph API in practice.
+		Start the application.
+
+		Go to 'http://localhost:8080/' and click on the 'Authorize' button.
+
+		Grant the requested permissions.
+
+		When you are redirected back to 'client-implicit', you should see something like the following in your web browser:
+
+As you might notice, your application might not retrieve any users yet.
+		That's because Facebook just allows you to present friends who also authorized your application. 
+
+		In our case, another user should be the 'client-implicit' user and you have to register her as a tester for your application.
+
+2.3 How it works...
+************************************************************************
+************************************************************************
+	6.1.1 Implicit grant type - used when client is inside browser (JS application) {implicitGrantService}
+		1. Grant Type is equal to token instead of 
+			'authorization_code'
+		2. Client calls authoriztion endpoint only and gets 'token' 
+		3. Resource owner still authenticates with autorization 
+			server
+		4. The client_secret won't be needed using Implicit grant 
+			type
+		5. Implicit grant type uses only the front channel since the 
+			client (JS code) is inside the browser.
+************************************************************************
+************************************************************************
+To start using OAuth 2.0's protected resources we registered the application client-implicit through the OAuth 2.0 Provider [Authorization Server] (Facebook). 
+		This must be done prior to requesting the 'access_token' through the user's [resource owner's] grant.
+
+		The responsibility of maintaining the client's data belongs to the Authorization Server.
+
+		In using Facebook the boundaries between the Authorization Server and the Resource Server is not so clear. 
+
+		The most important thing to understand here is that Facebook is acting as an OAuth 2.0 [Identity] Provider.
+
+As per the specifications, we have performed the three important steps in client registration process, which was to 
+		choose the client type, 
+				{implicit}
+
+		register the redirection URI, and 
+				{has to be done at the Authorization Service} 
+
+		enter the application's information.
+				{done by client after client type is chosen}
+
+By registering the application, we've received the 'client_id' and 'client_secret'.
+
+But as we are using the Implicit grant flow the 'client_secret' won't be needed.
+		That's because this first recipe presents an application which runs directly on the web browser. 
+				So, there is no way to safely protect the 'client_secret'. 
+
+		When not using the 'client_secret' we must try not to expose the received 'access_token' that comes with the URL fragment. 
+				Once the user grants permission to access her resources. 
+
+		Another measure to help the application to not expose the access token was to clear the URL fragment.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,156 @@
+1. Introduction
+The main purpose of this chapter is to help you integrate with popular web applications and social media, 
+
+Although at the same time allow you to get familiarized with the foundational principles of OAuth 2.0 specification.
+
+The four main components of the OAuth 2.0 specification:
+		Resource Owner
+
+		Authorization Server
+
+		Resource Server
+
+		Client
+
+The Resource Owner is the user which delegates authority for third-party applications to use resources on its behalf.
+
+The third-party application mentioned is represented by the client which I depicted as Mobile client and Web Client.
+
+The Resource Server protects and maintains the user's (resource owner's) resources.
+
+Usually the resource server and authorization server are implemented together.
+
+The composition of the Authorization Server and Resource Server are referred to as the OAuth 2.0 Provider.
+
+1.1 Preparing the environment
+1.1.1 How to do it...
+Generate a project using Spring Initializr service by visiting https://start.spring.io/. 
+		Spring Initializr provides lots of options to start setting up your project, such as if you want to use Maven or Gradle to manage your project dependencies, which version of Spring Boot to use, which dependencies to use, and even changing the language from Java to Groovy or Kotlin. 
+
+In the Dependencies section, type web and select Full-stack web development with Tomcat and Spring MVC. 
+		After selecting the right choice, you will see the tag Web underneath Selected Dependencies as follows:
+
+After setting up all the requirements for this simple example, click on the 'Generate Project' button 
+		Your browser will start downloading the ZIP file into your 'Downloads' folder.
+
+Create a new class and turn the class into a controller by adding the annotation '@Controller' as presented in the following code:
+		@Controller
+		public class AuthController {
+		}
+
+
+Now that our class is declared as a controller, we can define an endpoint so we can see if the project is running properly. Add the method 'getMessage' as follows, within the class 'AuthController'
+    @GetMapping("/message")
+    public ResponseEntity<String> getMessage() {
+        return ResponseEntity.ok("Hello!");
+    }
+
+If you want to run your project inside the Eclipse IDE, you should just run the class 'AuthservicesApplication' as a Java application by right-clicking at the class and selecting the menu option 'Run As |Java Application'.
+
+Execute the following command to know if your application works properly (just check if the output prints Hello):
+		curl "http://localhost:8080/message"
+
+If you would like to use the command line you can also start your application by running the following Maven command.
+		To run the application with Maven through the command line, you must install Maven, as explained in the next sections.
+-->				mvn spring-boot:run
+		If you don't have Maven installed on your machine, the first thing to do is to start downloading the latest version from https://maven.apache.org/download.cgi which at the time of this writing was apache-maven-3.5.0-bin.tar.gz.
+
+		After the file has downloaded, just unpack it into any folder you want and start running Maven commands.
+
+		Copy the full path of the Maven directory, which was created when you unpacked the downloaded file from the Maven website. If you are running macOS or Linux, run 'pwd' at the command line to discover the full path.
+
+		After that, you must add the path for Maven's directory to the 'PATH' environment variable. If you are using Linux or macOS, create the variable 'MVN_HOME' within the '.bash_profile' file and append the content of 'MVN_HOME' to the end of the 'PATH' environment variable, as presented in the following code:
+-->				MVN_HOME=/Users/{your_user_name}/maven-3.5.0 
+-->				export PATH=$PATH:$MVN_HOME/bin 
+
+		
+		To check if Maven is perfectly running on your environment, run the following command:
+-->				mvn --version
+
+1.1.2 See also
+		The OAuth 2.0 specification is available as RFC 6749 at https://tools.ietf.org/html/rfc6749
+
+		You can read more about Spring Boot at https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/
+
+1.1.3 How it works...
+Because of the usage of Spring Boot we can take advantage of projects like Spring MVC and Spring Security.
+
+By using the Spring Security OAuth2 project, for example, we can configure our own OAuth 2.0 Providers in addition, to act like clients.
+
+Spring Security OAuth2 already addresses the main concerns any developer would have to think about.
+
+When creating a Spring project without Spring Boot we need to deal with dependencies manually by taking care of possible library conflicts. 
+		To solve this problem, Spring Boot has some pre-configured modules provided by starters. 
+
+		As an example of a useful starter, let's consider an application with Spring Data JPA. 
+
+		Instead of declaring all the dependencies for 'hibernate', 'entity-manager', and 'transaction-api'.
+
+		Just by declaring spring-boot-starter-data-jpa all the dependencies will be imported automatically.
+
+While starting using Spring Boot, things can still become easier by using the Spring Initializr service provided by Pivotal (the Spring maintainer now).
+
+1.1.4 There's more...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
