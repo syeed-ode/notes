@@ -1,43 +1,82 @@
 	                                                                   |
-*************************************************************
-*************************************************************
-The entire point of an authentication protocol is to know whether the user is present.
-*************************************************************
-*************************************************************
-The client is the piece of software that accesses the protected resource on behalf of the resource owner.
-*************************************************************
-*************************************************************
+****************************************************************************
+****************************************************************************
+The entire point of an authentication protocol is to know whether the user 
+	is present.
+****************************************************************************
+****************************************************************************
+The client is the piece of software that accesses the protected resource on 
+	behalf of the resource owner.
+****************************************************************************
+****************************************************************************
 Spring references are included in the {} marker
-*************************************************************
+****************************************************************************
 *************************************************************
 *							    *
 *							    *
 *							    *
 pg 120 - 145
-*************************************************************
+****************************************************************************
 ***         Chapter 6 - 0Auth 2.0 In the Real World       ***
-*************************************************************
+****************************************************************************
 6.1 Authorization grant types
-		When OAuth 2.0 was being developed, the working group made a distinct decision to treat the core protocol as a framework instead of a single protocol. One of the key areas that OAuth 2.0 can vary is that of the 'authorization grant', colloquially known as 'the OAuth flow'. 
-				The authorization code grant type is just one of several different ways that an OAuth client can get a token from an authorization server. 
-
-		We’ll be looking at the other primary options here in this section.
-
+		When OAuth 2.0 was being developed, the working group made 
+			a distinct decision to treat the core protocol as a 
+			framework instead of a single protocol. One of the 
+			key areas that OAuth 2.0 can vary is that of the 
+			'authorization grant', colloquially known as 
+			'the OAuth flow'. 
+				The authorization code grant type is just 
+					one of several different ways that 
+					an OAuth client can get a token 
+					from an authorization server. 
+		We’ll be looking at the other primary options here in this 
+			section.
 	6.1.1 Implicit grant type - used when client is inside browser (JS application) {implicitGrantService}
-		1. Grant Type is equal to token instead of 'authorization_code'
+		1. Grant Type is equal to token instead of 
+			'authorization_code'
 		2. Client calls authoriztion endpoint only and gets 'token' 
-		3. Resource owner still authenticates with autorization server
-			But what if we were to put the client inside the browser (see figure 6.1)?
-
-			One key aspect in the authorization code flow is that it keeps information separate between different components. 
-					This way, the browser doesn’t learn things that only the client should know about, and the client doesn’t get to see the state of the browser, and so on.
-
-			But what if we were to put the client inside the browser (see figure 6.1)? This is what happens with a JavaScript application running completely inside the browser. 
-					In this case, there is no real benefit in passing the authorization code through the browser to the client, only to have the client exchange that for a token because the extra layer of secrets isn’t protected against anyone involved.
-
-			Implicit grant type uses only the front channel since the client is inside the browser.
-
-			The implicit grant type does away with this extra secret and its attendant round trip by returning the token directly from the authorization endpoint. The implicit grant type therefore uses only the front channel (covered in chapter 2) to communicate with the authorization server.
+		3. Resource owner still authenticates with autorization 
+			server
+		4. The client_secret won't be needed using Implicit grant 
+			type
+		5. Implicit grant type uses only the front channel since the 
+			client (JS code) is inside the browser.
+	                                                                   |
+			But what if we were to put the client inside the 
+				browser (see figure 6.1)?
+			One key aspect in the authorization code flow is 
+				that it keeps information separate between 
+				different components. 
+					This way, the browser doesn’t learn 
+						things that only the client 
+						should know about, and the 
+						client doesn’t get to see 
+						the state of the browser, 
+						and so on.
+			But what if we were to put the client inside the 
+				browser (see figure 6.1)? This is what 
+				happens with a JavaScript application 
+				running completely inside the browser. 
+					In this case, there is no real 
+						benefit in passing the 
+						authorization code through 
+						the browser to the client, 
+						only to have the client 
+						exchange that for a token 
+						because the extra layer of 
+						secrets isn’t protected 
+						against anyone involved.
+			Implicit grant type uses only the front channel 
+				since the client is inside the browser.
+			The implicit grant type does away with this extra 
+				secret and its attendant round trip by 
+				returning the token directly from the 
+				authorization endpoint. The implicit grant t
+				ype therefore uses only the front channel 
+				(covered in chapter 2) to communicate with 
+				the authorization server.
+	                                                                   |
 					This flow is useful for JavaScript applications within websites that perform authorized session sharing across security domains.
 
 			The implicit grant has severe limitations that need to be considered.
@@ -226,7 +265,7 @@ pg 120 - 145
 							Use authorization code
 
 			Is your client acting on its own behalf?
-				i.e.: Accessing APIs that don't map to a sing user, such as bulk data transferes.
+				i.e.: Accessing APIs that don't map to a single user, such as bulk data transferes.
 					Yes:
 							Use client credentials
 
