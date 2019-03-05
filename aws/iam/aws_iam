@@ -1,0 +1,57 @@
+Amazon IAM (Identity and Access Management) enables you to manage users and user permissions in AWS.
+
+You can create one or more IAM users in your AWS account. 
+		You might create an IAM user for someone who needs access to your AWS console, or 
+
+		when you have a new application that needs to make API calls to AWS. 
+
+		This is to add an extra layer of security to your AWS account.
+
+In this chapter, we are going to create a new IAM user for a couple of the AWS related tools we are going to be using later.
+
+Create User
+		Select IAM from the list of services.
+
+		Select Users.
+				Select Add User.
+						Enter a User name (serverlessAppAdminUser) and check Programmatic access, then select Next: Permissions.
+								Programmatic access enables an access key ID and secret access key for the AWS API, CLI, SDK, and other development tools.
+
+						This account will be used by our AWS CLI and Serverless Framework.
+								They’ll be connecting to the AWS API directly and will not be using the Management Console.
+
+				Select Attach existing policies directly.
+						Search for AdministratorAccess and select the policy, then select Next: Review.
+
+						We can provide a more fine-grained policy here and we cover this later in the Customize the Serverless IAM Policy chapter. 
+
+						But for now, let’s continue with this.
+
+						Select Create user.
+									User name: 				serverlessAppAdminUser
+									AWS access type: 		Programmatic access - with an access key
+									Permissions boundary: 	Permissions boundary is not set
+
+						Select Show to reveal Secret access key
+								
+
+
+
+see: /Users/syeedode/Google Drive/strategic_living/books/software/aws/iam/configureAWSForServerlessAndReact/aws_iam_notes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
