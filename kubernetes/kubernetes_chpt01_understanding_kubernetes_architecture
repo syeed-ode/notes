@@ -1,0 +1,160 @@
+	                                                                   |
+************************************************************************
+*
+*
+*
+************************************************************************
+*******    Chapter 1 - Understanding Kubernetews Architecture    *******
+************************************************************************
+Kubernetes was made by Google, but joined the Cloud Native Computing Foundation (CNFC) and became the leader in the field of container-based applications.
+
+To use Kubernetes effectively we start by understanding what Kubernetes is and what container orchestration means exactly. 
+
+Then we cover important kubernetes concepts that form the vocabulary. 
+
+After that we dive into the architecture of Kubernetes and how that enables all the capabilities that it provides the user. 
+
+At the end of this chapter you will have a solid understanding of 
+		cantainer orchestration
+
+		what problems Kubernetes addresses
+
+		the rationale of Kubernetes design and architecture, and
+
+		the different rutimes it supports, and
+
+		the structure of the open source repository
+
+1.1 What is Kubernetes
+Kubernetes core functionality is its ability to schedule workloads in containers across your infrastruture. It also brings:
+		Mounting storage systems
+
+		Distributing secrets
+
+		Checking application health
+
+		Replicating application instances
+
+		Using horizontal pod autoscaling
+
+		Naning and discovering
+
+		Balancing loads
+
+		Rolling updates
+
+		Monitoring resources
+		
+		Accessing and ingesting logs
+		
+		Debugging applications
+
+		Providing authentication and authorization
+
+1.2 What Kubernetes is not
+Kubernetes is not a platform as a service (Paas). It doesn't tictate many of the important aspects of your desired system it leves taht to Deis, OpenShift, and Eldarion.
+
+1.3 Understanding container orchestration
+The primary responsibility of Kubernetes is container orchestration. 
+		This makes sure all of teh containers are scheduled to run on physical or virtual machines.
+
+		The containerts must follow the constraints of the deployment environment and the cluster configuration.
+
+Kubernetes must monitor and replace dead, unresponsive, or otherwises unhealthy containers.
+
+1.3.1 Physical machines, virtual machines, and containers
+In order to run you workloads, you need some real hardware provisioned. 
+
+This includes actual physical machines with compute capabilities (CPUs or cores), memory, and somer local persistent storage (spinning disks or SSD). 
+
+You will also need some shared persistent storage and teh networking to hook up all of these machines. 
+		Kubernetes can be deployed on a bare-metal cluster (real hardware) or on a cluster of virtual machines.
+
+		1.3.1.1 The benefits of containers
+		Containers represent a paradigm shift in the development and operation of large complicated software systems. Here are some benefits:
+
+				Agile application creation and deployment
+
+				Continuous development, integration, and deployment
+
+				Dev and ops separation of concerns
+
+				Environment consistency across development, testing, and production
+
+				Cloud- and OS-distribution portability
+
+				Application-centric management
+
+				Loosely coupled, distributed, elastic, liberated microservices
+
+				Resource isolation
+
+				Resource utilization
+
+		1.3.1.2 Containers in the cloud
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
