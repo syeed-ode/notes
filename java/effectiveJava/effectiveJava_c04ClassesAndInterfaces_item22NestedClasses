@@ -1,0 +1,174 @@
+Item 22: Favor static member classes over nonstatic
+
+A 'nested class' is a class defined within another class.
+		A nested class should exist only to serve its enclosing class. 
+
+There are four kinds of nested classes: 
+		static member classes, 
+
+		nonstatic member classes, 
+
+		anonymous classes, and 
+
+		local classes
+
+Inner classes are: nonstatic member classes, anonymous classes, local classes.
+
+Static Member Classes
+		It is best thought of as an ordinary class that 
+				happens to be declared inside another class and 
+
+				has access to all of the enclosing class’s members, even those declared private.
+
+		A static member class is a static member of its enclosing class and obeys the same accessibility rules as other static members.
+				If it is declared private, it is accessible only within the enclosing class, and so forth.
+
+		Usage
+				One common use of a static member class is as a public helper class
+
+				Useful only in conjunction with its outer class
+
+
+Nonstatic member class
+		Each instance of a nonstatic member class is/has/can 
+				implicitly associated with an 'enclosing instance' of its containing class.
+
+				instance methods that can invoke methods on the enclosing instance
+
+				obtain a reference to the enclosing instance using the 'qualified this' construct 
+
+		To create an instance of a nonstatic member class, you must first create an instance of the enclosing class.
+				when a nonstatic member class instance is created it cannot be modified thereafter
+
+		Normally you invoke the nonstatic member class constructor from within an instance method of the enclosing class. 
+
+		You can also establish the association manually using the expression 
+-->				enclosingInstance.new MemberClass(args). 
+		
+				The creation takes up space in the nonstatic member class instance and adds time to its construction.
+
+		Usage
+				One common use of a nonstatic member class is to define an Adapter that allows an instance of the outer class to be viewed as an instance of some unrelated class.
+						For example, implementations of the Map interface typically use nonstatic member classes to implement their 'collection views', which are returned by 'Map'’s 'keySet', 'entrySet', and 'values' methods.
+
+Anonymous 
+		Anonymopus classes are not a member of its enclosing class. 
+
+		It is simultaneously declared and instantiated at the point of use.
+
+		Anonymous Classes are permitted at any point in the code where an expression is legal.
+
+		Anonymous classes have enclosing instances if and only if they occur in a nonstatic context.
+				But even if they occur in a static context, they cannot have any static members.
+
+		Because anonymous classes occur in the midst of expressions, they must be kept short— about ten lines or fewer—or readability will suffer
+
+		Usage
+				There are many limitations on the applicability of anonymous classes.
+						You can’t instantiate them except at the point they’re declared. 
+
+						You can’t perform instanceof tests or do anything else that requires you to name the class. 
+
+						You can’t declare an anonymous class to implement multiple interfaces, or to extend a class and implement an interface at the same time.
+
+				One common use of anonymous classes is to create 'function objects'.
+
+				Another common use of anonymous classes is to create process objects, such as 'Runnable', 'Thread', or 'TimerTask' instances.
+
+				A third common use is within static factory methods (see the intArrayAsList method in Item 18).
+					    // Concrete implementation built atop skeletal implementation
+					    static List<Integer> intArrayAsList(final int[] a) {
+					        if (a == null)
+					            throw new NullPointerException();
+					        return new AbstractList<Integer>() {
+					            public Integer get(int i) {
+					                return a[i]; // Autoboxing (Item 5)
+					            }
+					            @Override public Integer set(int i, Integer val) {
+					                int oldVal = a[i];
+					                a[i] = val; // Auto-unboxing
+					                return oldVal; // Autoboxing
+					            }
+					            public int size() {
+					                return a.length;
+					            }
+					        };
+					    }
+
+Local Classes
+		A local class can be declared anywhere a local variable can be declared and obeys the same scoping rules.
+
+		Local classes have attributes in common with each of the other kinds of nested classes. 
+				Like member classes, they have names and can be used repeatedly.
+
+				Like anonymous classes, they have enclosing instances only if they are defined in a nonstatic context, and they cannot contain static members.
+
+				And like anonymous classes, they should be kept short so as not to harm readability. 
+
+		Usage
+				if you need to create instances from only one location
+						if there is a preexisting type that characterizes the class
+								make it an anonymous class
+
+						if there is no preexisting type that characterizes the class
+								make it a local class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

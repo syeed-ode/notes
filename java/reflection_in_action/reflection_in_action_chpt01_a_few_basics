@@ -341,29 +341,257 @@ Below shows some of the methods supported by the metaobject class 'Method'.
 		Object invoke(Object obj, Object[] args)
 				Invokes the method represented by this 'Method' object on the specified object with the arguments specified in the 'Object' array
 
+1.6.1 Using dynamic invocation
+Dynamic invocation enables a program to call a method on an object at runtime without specifying which method at compile time.
+		It relies upon introspection to examine the class of a parameter, 'obj', at runtime to find the right method.
+
+		As a result of the introspection, the 'Method' representing 'setColor' is stored in the variable 'method'.
+
+Following the introspection in listing 1.1, setColor is invoked dynamically with this line:
+-->		method.invoke(obj, new Object[] {color});
+where the variable color holds a value of type Color. 
+
+The setColor method is invoked on obj and is passed the ****value*** of color as a parameter.
+
+The first parameter to 'invoke' is the target of the method call, or the 'Object' on which to invoke the method.
+
+***If setColor is declared static by the class of obj, the first parameter is ignored because static methods do not need invocation targets.***
+		For a static method, null can be supplied as the first argument to invoke without causing an exception.
+
+The second parameter to invoke, args, is an Object array. 
+		The invoke method passes the elements of this array to the dynamically invoked method as actual parameters.
+
+		For a method with no parameters, the second parameter may be either a zero-length array or null.
+
+1.6.2 Using primitives with dynamic invocation
+The second parameter to invoke is an array of 'Object', and the return value is also an 'Object'.
+		It is important to understand how to use primitives with the invoke method.
+
+If the type of a parameter is a primitive, invoke expects the corresponding args array element to be a wrapper object containing the argument. 
+		When invoking a method with an int parameter, wrap the int argument in a 'java.lang.Integer' and pass it into the 'args' array.
+
+		The invoke method unwraps the argument before it passes it to the actual code for the method being invoked.
+
+When invoking a method with an int return type, the program receives an object of type Integer in return.
+
+If the method being invoked is declared with a 'void' return, 'invoke' returns the value 'null'.
+
+***So, primitives need to be wrapped when passed into a dynamic invocation and unwrapped when received as a return value.***
+
+For clarity, consider the following dynamic call to 'hashCode' method on our 'obj' variable from the example.
+-->		Method method = obj.getClass().getMethod("hashCode", null); 
+-->		int code = ((Integer) method.invoke(obj, null)).intValue();
+
+The first line introspects for the method 'hashCode' with no arguments.
+		This query does not fail because that method is declared by 'Object'.
+
+		The 'hashCode' method returns an 'int'.
+
+The second line invokes 'hashCode' dynamically and stores the return value in the variable 'code'.
+		Notice that the return value comes back wrapped in an 'Integer', and it is cast and unwrapped.
+
+1.6.3 Avoiding invocation pitfalls
+At one point, George thinks, “If I have a Method representing setColor, why do I need to introspect for it every time? I’ll just cache the first one that comes along and optimize out the rest of the queries.”
+
+When he tries this, he gets an 'IllegalArgumentException' from invoke on many of the subsequent calls. The exception message means that the method was invoked on an object that is not an instance of the declaring class.
+
+George’s optimization fails because it assumes that all methods with the same signature represent the same method.
+		This is not the case. In Java, each method is identified by both its signature and its declaring class.
+
+Figure 1.3 shows the classes 'Animal' and 'Shape', which both declare a setColor method with the same signature. 
+		These two 'setColor' methods are not the same method in Java because they do not have the same declaring class.
+
+		The Java language considers the two 'setColor' methods shown to be different methods. 
+
+		However, the 'setColor' method for 'Dog' is the same method as the one for 'Animal' because Dog inherits 'setColor' from 'Animal'.
+
+When dealing with this situation, it is usually simplest to introspect for a Method each time instead of caching.
+
+Several other exceptions can occur when calling invoke. 
+		If the class calling 'invoke' does not have appropriate access privileges for the method, 'invoke' throws an 'IllegalAccessException'.
+				For example, this exception can occur when attempting to invoke a private method from outside its declaring class.
+
+		'IllegalArgumentException' can be thrown by invoke under several circumstances. 
+				Supplying an invocation target whose class does not support the method being invoked causes an 'IllegalArgumentException'.
+
+				Supplying an args array of incorrect length or with entries of the wrong type also causes an 'IllegalArgumentException'. 
+
+		If any exception is thrown by the method being invoked, that exception is wrapped in an 'InvocationTargetException' and then thrown.
+
+Dynamic invocation is a truly important feature in Java reflection.
+		Without it, each method call must be hard-coded at compile time, denying programmers the flexibility of doing what George does in listing 1.1.
+
+In later chapters, we return to dynamic invocation for more advanced applications and expose other powerful ways to use information gained through introspection.
+
+************************************************************************
+************************************************************************
+metadata 			- representation of the program itself
+metaobjects 		- what metadata is oganized into
+introspection 		- runtime self-examination of metaobjects 
+base-level objects 	- Objects used to accomplish the main purpose of an application 
+base program 		- the non reflective parts of the program 
+************************************************************************
+************************************************************************
+
+1.7 Diagramming for reflection
+Reflection represents all of the class diagram entities at runtime using metaobjects. Therefore, combining class and object diagrams is useful for clearly communicating reflective designs.
+
+Modeling reflection calls for combining classes or only non-class objects and using the 'instanceOf' dependency to connect an object with its instantiating class.
+
+This book uses the instanceOf dependency only to show that an object is a direct instance of a class.
+
+For clarity, we partition figure 1.4 into its base level and metalevel, although that partition is not standard UML. 
+		The diagram shows an object, dolly, which is an instance of the class 'Sheep'. 
+
+		 It describes Sheep as a Mammal that implements Cloneable. 
+
+		 The important thing to notice about this diagram is that it includes both objects and classes, as is necessary for describing reflective systems.
+
+1.8 Navigating the inheritance hierarchy
+Listing 1.1 is not seeing a 'setColor' method inherited by her component. The inherited method is protected, and so it is not found by the line:
+-->		Method method = cls.getMethod("setColor", new Class[] {Color.class});
+
+We need a method that introspects over methods of all visibilities, declared or inherited. 
+		Listing 1.3 shows the source code for 'getSupportedMethod', a method that accomplishes that query.
+
+		/**
+		 * Listing 1.3
+		 *
+		 * This method is a recursive method that traverses the inheritance hierarchy
+		 * looking for a method with the correct signature using
+		 * {@code getDeclaredMethod}.
+		 */
+		public static Method getSupportedMethod(Class cls, String name, Class[] paramTypes)
+		        throws NoSuchMethodException {
+		    if(Objects.isNull(cls)) {
+		        throw new NoSuchMethodException();
+		    }
+		    try {
+		        /**
+		         * The {@code getSuperclass} method returns the class object representing the class 
+		         * that its target extends.
+		         */
+		        return cls.getDeclaredMethod(name, paramTypes);
+		    } catch (NoSuchMethodException ex) {
+		        return getSupportedMethod(cls.getSuperclass(), name, paramTypes);
+		    }
+		}
+
+If cls represents 'Object', 'getSuperclass' returns 'null', and 'getSupportedMethod' throws a 'NoSuchMethodException' on the next call.
+
+		/**
+		 * Listing 1.4
+		 *
+		 * This update allows {@code setObjectColor} to retrieve metaobjects for private, package,
+		 * and protected methods that are not retrieved by {@code getMethod}. However, this update 
+		 * does not guarantee permission to invoke the method.
+		 *
+		 * @param obj
+		 * @param color
+		 */
+		public static void setObjectColor(Object obj, Color color) {
+		    Class cls = obj.getClass();
+		    try {
+		        Method method = getSupportedMethod(cls, "setColor", new Class[]{Color.class});
+		        method.invoke(obj, new Object[]{color});
+		    } catch (NoSuchMethodException e) {
+		        throw new IllegalArgumentException(cls.getName()
+		                + " does not support method setColor(:Color)");
+		    } catch (IllegalAccessException e) {
+		        /**
+		         * If {@code setObjectColor} does not have access to the  inherited method, an 
+		         * {@code IllegalAccessException} is thrown instead of a 
+		         * {@code NoSuchMethodException}.
+		         * 
+		         */
+		        throw new IllegalArgumentException(cls.getName()
+		                + " Insufficient access permission to call setColor(:Color) in class "
+		                + cls.getName());
+		    } catch (InvocationTargetException ex) {
+		        throw new RuntimeException(ex);
+		    }
+		}
+
+Let’s continue to discuss the tools that make this enhancement possible.
+
+1.8.1 Introspecting the inheritance hierarchy
+As shown in the previous section, runtime access to information about the inheritance hierarchy can prevent extra work.
+
+Getting the superclass of a class is only one of the operations that Java reflection provides for working with the inheritance hierarchy.
+
+Below shows the signatures and return types for the methods of 'Class' for dealing with inheritance and interface implementation. 
+
+		Class[] getInterfaces()
+				Returns an array of 'Class' objects that represent the direct superinterfaces of the target 'Class' object.
+
+		Class getSuperclass()
+				 Returns the 'Class' object representing the direct superclass of the target 'Class' object or 'null' if the target represents 'Object', an interface, a primitive type, or void
+
+		 boolean isAssignableFrom( Class cls )
+	 			Returns 'true' if and only if the class or interface represented by the target 'Class' object is either the same as or a superclass of or a superinterface of the specified 'Class' parameter
+
+		boolean isInstance( Object obj )
+				Returns 'true' if and only if the specified 'Object' is assignment-compatible with the object represented by the target 'Class' object
+
+The 'getInterfaces' method returns class objects that represent interfaces.
+
+Note the method names getInterfaces and getSuperclass are slightly inconsistent with terminology defined by the Java Language Specification.
+		A 'direct superclass' is the one named in the extends clause of a class declaration. 
+				A class X is a 'superclass' of a class Y if there is a sequence of one or more direct superclass links from Y to X.
+
+		There is a corresponding pair of definitions for 'direct superinterface' and 'superinterface'.
+
+		Consequently, 'getSuperclass' returns the direct superclass and 'getInterfaces' returns the direct superinterfaces.
+
+To get all of the methods of a class, a program must walk the inheritance hierarchy. Luckily, this walk is not necessary to query whether a class object represents a subtype of another class object.
+
+This query can be accomplished using the 'isAssignableFrom' method. 
+		For example, the following lines evaluate to true:
+-->				Object.class.isAssignableFrom(String.class)
+
+-->				java.util.List.class.isAssignableFrom(java.util.Vector.class)
+
+-->				double.class.isAssignableFrom(double.class)
+
+		The line below, however, evaluates to false:
+-->				Object.class.isAssignableFrom(double.class)
+
+The 'isInstance' method is Java reflection’s dynamic version of 'instanceof'. 
+		If the target class object represents a class, 'isInstance' returns 'true' 
+				if its argument is an instance of 
+						that class or 
+						
+						any subclass of that class. 
+
+		If the target class object represents an interface, 'isInstance' returns 'true' 
+				if its argument’s class implements 
+						that interface or 
+
+						any subinterface of that interface.
+
+1.8.2 Exposing some surprises
+
+holmesreginald0719@yahoo.com
+
+
+
+
+
+
+"#access_token=EAADRJoGtw3UBAKwwv12M3YFwvnJ5Ul4drz75uFZCZAF6JMgxSXG588UgD3ON7thYDez9F6wZAACP9fBLHfHeYpINgT6C0jjvzm4p1GExUZBL7jBMTLA4XalNjL0doKe7l1vJKO4IXZBqxQqtTlvrL3UZBthQ8V2w0a9i8if0ICRZAD2Edr57wbneOPDaZAisjQ8ZD&
+
+expires_in=5500&
+reauthorize_required_in=7776000&
+data_access_expiration_time=1556198900"
+
+
+
+
+
+
 		
 
 
-
-
-Error Code: 1142. UPDATE command denied to user 'adcampaign'@'localhost' for table 'user'
-
-
-Error Code: 1046. No database selected Select the default DB to be used by double-clicking its name in the SCHEMAS list in the sidebar.
-
-Error Code: 1044. Access denied for user 'adcampaign'@'%' to database 'ad_campaign'
-
-
-
-create user if not exists 
-        `adcampaign` 
-identified by 
-        'adcampaign'; 
-
-
-Use RFC 2822 date and time output format. This is equivalent to use ``%a, %d %b %Y %T %z'' as output_fmt while LC_TIME is set to the ``C'' locale .
-
-/usr/local/mysql/bin/mysqld --user=_mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data --plugin-dir=/usr/local/mysql/lib/plugin --log-error=/usr/local/mysql/data/mysqld.local.err --pid-file=/usr/local/mysql/data/mysqld.local.pid --keyring-file-data=/usr/local/mysql/keyring/keyring --early-plugin-load=keyring_file=keyring_file.so --default_authentication_plugin=mysql_native_password
 
 
 
