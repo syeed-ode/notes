@@ -1,0 +1,254 @@
+	                                                                   |
+                Connecting Everything with Graphs (pg. 184)
+
+Let’s say that we’re building a social network such as Facebook. 
+		In such an application, many people can be “friends” with one another. 
+
+		These friendships are mutual, so if Alice is friends with Bob, then Bob is also friends with Alice.
+
+How can we best organize this data? One very simple approach might be to use a two-dimensional array that stores the list of friendships:
+		relationships = [
+			["Alice", "Bob"],
+			["Bob", "Cynthia"],
+			["Alice", "Diana"],
+			["Bob", "Diana"],
+			["Elise", "Fred"],
+			["Diana", "Fred"],
+			["Fred", "Alice"]
+		]
+
+Unfortunately, with this approach there’s no quick way to see who Alice’s friends are. 
+		We’d have to inspect each relationship within the array, and check to see whether Alice is contained within the relationship.
+
+		By the time we get through the entire array, we’d create a list of all of Alice’s friends (who happen to be Bob, Diana, and Fred). 
+				We’d also perform the same process if we wanted to simply check whether Elise was Alice’s friend.
+
+		Based on the way we’ve structured our data, searching for Alice’s friends would have an efficiency of O(N), 
+				since we need to inspect every relationship in our database.
+
+		But we can do much, much better. 
+
+With a data structure known as a graph, we can find each of Alice’s friends in just O(1) time.
+
+Graphs
+	A graph is a data structure than specializes in relationships, as it easily conveys how data is connected.
+
+	Here is a visualization of our Facebook network:
+
+		Alice --Fred -- Elise
+		  |  \    |
+		 Bob--Diania
+		 /
+	Cynthia
+
+	Each person is represented by a node, and each line indicates a friendship with another person.
+
+	In graph jargon, each node is called a 'vertex', and each line is called an 'edge'.
+
+	Vertices that are connected by an edge are said to be 'adjacent' to each other.
+
+	There are a number of ways that a graph can be implemented, but one of the simplest ways is using a hash table. 
+
+	Here’s a barebones Ruby implementation of our social network:
+			friends = {
+				"Alice" => ["Bob", "Diana", "Fred"],
+				"Bob" => ["Alice", "Cynthia", "Diana"],
+				"Cynthia" => ["Bob"],
+				"Diana" => ["Alice", "Bob", "Fred"],
+				"Elise" => ["Fred"],
+				"Fred" => ["Alice", "Diana", "Elise"]
+			}
+
+	With a graph, we can look up Alice’s friends in O(1), because we can look up the value of any key in a hash table in one step:
+
+	With Twitter, in contrast to Facebook, relationships are not mutual. That is, Alice can follow Bob, but Bob doesn’t necessarily follow Alice. 
+
+	Let’s construct a new graph that demonstrates who follows whom:
+					Alice
+					/      \
+				  ' '      ' '
+				 Cynthia<-->Bob
+
+	 		In this example, the arrows indicate the direction of the relationship. Alice follows both Bob and Cynthia, but no one follows Alice. Bob and Cynthia follow each other.
+
+	 		Using our hash table approach, we’d use the following code:
+					followees = {
+						"Alice" => ["Bob", "Cynthia"],
+						"Bob" => ["Cynthia"],
+						"Cynthia" => ["Bob"]
+					}
+
+	While the Facebook and Twitter examples are similar, the nature of the relationships in each example are different.
+			 Because relationships in Twitter are one-directional, we use arrows in our visual implementation, and such a graph is known as a 'directed graph'.
+
+			 In Facebook, where the relationships are mutual and we use simple lines, the graph is called a 'non-directed graph'.
+
+	While a simple hash table can be used to represent a graph, a more robust object-oriented implementation can be used as well.
+
+	Here’s a more robust implementation of a graph, using Ruby:
+			class Person
+				attr_accessor :name, :friends
+
+				def initialize(name)
+					@name = name
+					@friends = []
+				end
+
+				def add_friend(friend)
+					@friends << friend
+				end
+			end
+
+
+	LinkedIn is another popular social network that specializes in business relationships. 
+			One of its well-known features is that 
+
+			you can determine your second and third degree connections in addition to your direct network.
+
+	In the following diagram:
+			Alice---Bob---Cynthia
+	
+	Alice is connected directly to Bob, and Bob is connected directly to Cynthia. 
+			However, Alice is not connected directly to Cynthia. 
+
+			Since Cynthia is connected to Alice by way of Bob, Cynthia is said to be Alice’s second-degree connection.
+
+	If we wanted to find Alice’s 'entire' network, including her indirect connections, how would we go about that?
+
+	There are two classic ways to traverse a graph, 'breadth-first search' and 'depthfirst search'.
+
+	We’ll explore breadth-first search here, and you can look up depth-first search on your own. Both are similar and work equally well for most cases, though.
+
+	The breadth-first search algorithm uses a queue (see Crafting Elegant Code with Stacks and Queues), which keeps track of which vertices to process next.
+
+	At the very beginning, 
+			the queue only contains the starting vertex <Alice>
+					(Alice, in our case). So, when our algorithm begins, our queue look like this:
+			
+					[Alice]
+
+			We then process the Alice vertex 
+					by removing it from the queue, 
+
+					marking it as having been “visited”, 
+
+					and designating it as the current vertex. 
+							(This will all become clearer when we walk through the example shortly.)
+
+					We then follow three steps: 
+							1. Visit each vertex adjacent to the current vertex. 
+									If it has not yet been visited, 
+											mark it as visited, and 
+
+											add it to a queue. 
+													(We do not yet make it the current vertex, though.)
+							
+							2. If the current vertex has no unvisted vertices adjacent to it, 
+									remove the next vertex from the queue and 
+
+									make it the current vertex.
+							
+							3. If there are no more unvisted vertices adjacent to the current vertex, and there are no more vertices in the queue, 
+									the algorithm is complete.
+
+	Let’s see this in action. Here is Alice’s LinkedIn network:
+			Alice
+					=> Bob
+							=> Fred
+									=> Helen
+
+					=> Candy
+
+					=> Derek
+							=> Gina
+									=> Irena
+
+					=> Elaine 
+
+			We start by making <Alice> the current vertex.
+					To indicate in our diagram that she is the current vertex, we will surround her with lines. We will also put a checkmark by her to indicate that she has been visited.
+
+			We then continue the algorithm by visiting an unvisited adjacent vertex - in this case, <Bob>. 
+					We’ll add a checkmark by his name too:
+
+					We also add Bob to our queue
+							[Bob]
+
+					This indicates that we still have yet to make Bob the current vertex.
+							Note that while Alice is the 'current vertex', we’ve still been able to 'visit' Bob.
+
+			Next, we check whether Alice - the current vertex - has any other unvisited adjacent vertices.
+					We find Candy, so we mark that as visited:
+
+					Our queue now contains [Bob, Candy].
+
+			Alice still has Derek as an unvisited adjacent vertex, so we visit it:
+					We mark Derek as visited
+
+					The queue is now [Bob, Candy, Derek].
+
+			Alice has one more unvisited adjacent connection, so we visit Elaine:
+					We mark Elaine as visited
+
+					Our queue is now [Bob, Candy, Derek, Elaine].
+
+			Alice - our current vertex - has no more unvisited adjacent vertices, so we move on to the second rule of our algorithm.
+
+			We remove a vertex from the queue, and make it our current vertex.
+					We can only remove data from the beginning of a queue, so that would be Bob.
+
+			pg 191
+			We now return to the first rule, which asks us to find any unvisited adjacent vertices of the current vertex. 
+					Bob has one such vertex - Fred - so we mark it as visited and add it to our queue:
+							Our queue now contains: [Candy, Derek, Elaine, Fred].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,65 @@
+	                                                                   |
+
+
+Array:
+	Reading: 		O(1) - you only need the first value and added what 
+						   you're looking for
+	Searching: 		O(N) - you have to read every item in the array
+	Insertion: 		O(N) - inserting at index 0 requires shifting every 
+						   item to the right
+
+
+Linked List:
+	Reading: 		O(N) - you have to read every item in the list
+	Searching: 		O(N) - you have to read every item in the list 
+	Insertion: 		O(N) - even though all you have to do is update pointer 
+						   values, you have to read the list until the end 
+						   O(N), then update the pointers O(1).
+						   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

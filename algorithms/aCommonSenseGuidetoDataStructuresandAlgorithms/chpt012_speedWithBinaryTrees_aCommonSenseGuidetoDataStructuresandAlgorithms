@@ -1,0 +1,374 @@
+	                                                                   |
+                Speeding Up All the Things with Binary Trees (pg. 165)
+pg. 145
+
+************************************************************************
+************************************************************************
+* Has fast insertion, search, and deletion
+* Maintains order
+* 	binary trees have O(log N) search and O(log N) insertion. 
+* 	This is what makes binary trees so efficient
+************************************************************************
+************************************************************************
+
+In Why Algorithms Matter, we covered the concept of binary search 
+		We demonstrated that if we have an ordered array, 
+
+		We can use binary search to locate any value in O(log N) time. 
+				O(log N) is the best peformer
+
+				O(log N) < O(N) < O(N log N) < O(N^2)
+
+		Thus, ordered arrays are awesome.
+
+However, there is a problem with ordered arrays.
+		When it comes to insertions and deletions, ordered arrays are slow. 
+				Whenever a value is inserted into an ordered array, we first shift all items greater than that value one cell to the right. 
+
+				And when a value is deleted from an ordered array, we shift all greater values one cell to the left. 
+
+				This takes N steps in a worst case scenario (inserting into or deleting from the first value of the array), and N / 2 steps on average. 
+
+				Either way, it’s O(N), and O(N) is relatively slow.
+
+Now, we learned in Blazing Fast Lookup With Hash Tables (pg. 94) that hash tables are O(1) for search, insertion, and deletion, but they have one significant disadvantage: 
+		They do not maintain order.
+
+But what do we do if we want a data structure that maintains order, and also has fast search, insertion, and deletion? 
+		Neither an ordered array or hash table is ideal.
+
+		Enter the binary tree.
+
+Binary Trees
+	In a simple linked list, each node contains a link that connects this node to a single other node.
+
+	A tree is also a node-based data structure, but within a tree, each node can have links to multiple nodes.
+
+							J				<- First level
+					M 				B 		<- Second level
+				Q		Z 		T 		S 	<- Thrid Level
+
+	Trees come with their own unique nomenclature:
+			• The uppermost node (in our example, the “j”) is called the root. 
+
+			• In our example, we’d say that the “j” is a parent to “m” and “b”, which are in turn children of “j”. 
+					The “m” is a parent of “q” and “z”, which are in turn children of “m”.
+
+			• Trees are said to have levels. The above tree has three levels:
+
+	There are many different kinds of tree-based data structures, but in this chapter we’ll be focusing on particular tree known as a binary tree.
+			A binary tree is a tree that abides by the following rules:
+					• Each node has either zero, one, or two children.
+					• If a node has two children, it must have 
+							one child that has a lesser value than the parent, and 
+
+							one child that has a greater value than the parent.
+
+	Here’s an example of a binary tree, in which the values are numbers:
+
+						50
+
+		    25 			 |			75	
+	  10		  33 	 |	  56  		  89
+	4	11		30	40	 |	52 	61 		82 	95
+
+	Note that each node has one child with a 
+			lesser value than itself which is depicted on the left side, and 
+
+			one child with a greater value than itself which is depicted on the right side.
+
+	While the following example is a tree, it is not a binary tree:
+
+						  50
+					20 			30
+
+	It is not a valid binary tree because both children of the parent node have values less than the parent itself.
+
+	The implementation of a tree node in Python might look something like this:
+			class TreeNode:
+				def __init__(self,val,left=None,right=None):
+					self.value = val
+					self.leftChild = left
+					self.rightChild = right
+
+	We can then build a simple tree like this:
+			node = TreeNode(1)
+			node2 = TreeNode(10)
+			root = TreeNode(5, node, node2)
+
+Insertion
+	For a tree with a lenght of 4, insertion takes 5 steps, consisting of 4 search steps, and 1 insertion step.
+
+	Insertion always takes just one extra step beyond a search, which means that insertion takes log N + 1 steps, which is O(log N) as Big O ignores constants.
+
+	In an ordered array, by contrast, insertion takes O(N), because in addition to search, we must shift a lot of data to the right to make room for the value which we’re inserting.
+
+	This is what makes binary trees so efficient. While ordered arrays have O(log N) search and O(N) insertion, binary trees have O(log N) and O(log N) insertion.
+			This becomes critical in an application where you anticipate a lot of changes to your data.
+
+	It is important to note that only when creating a tree out of randomly sorted data do trees usually wind up well-balanced. 
+
+	However, if we insert sorted data into a tree, it can become imbalanced and less efficient. 
+			For example, if we were to insert the following data in this order: 1, 2, 3, 4, 5, we’d end up with a tree that looks like this:
+				1
+					2
+						3
+							4
+								5
+
+			Searching for the 5 within this tree would take O(N).
+
+			However, if we inserted the same data in the following order: 3, 2, 4, 1, 5, the tree would be evenly balanced.
+
+	Because of this, if you ever wanted to convert an ordered array into a binary tree, you’d better first randomize the order of the data.
+
+	It emerges that in a worst case scenario, where a tree is completely imbalanced, search is O(N). 
+
+	In a best case scenario, where it is perfectly balanced, search is O(log N). 
+
+	In the typical scenario, in which data is inserted in random order, a tree will be pretty well balanced and search will take about O(log N).
+
+
+Searching
+	The algorithm for searching within a binary tree begins at the root node:
+			1. Inspect the value at the node.
+
+			2. If we’ve found the value we’re looking for, great!
+
+			3. If the value we’re looking for is less than the current node, search for it in its left subtree.
+
+			4. If the value we’re looking for is greater than the current node, search for it in its right subtree.
+
+	Here’s a simple, recursive implementation for this search in Python:
+			def search(value, node):
+			    # Base case: If the node is nonexistent
+			    # or we've found the value we're looking for:
+			    if node is None or node.value == value:
+			        return node
+			    
+			    # If the value is less than the current node, perform
+			    # search on the left child:
+			    elif value < node.value:
+			        return search(value, node.leftChild)
+			    
+			    # If the value is less than the current node, perform
+			    # search on the right child:
+			    else: # value > node.value
+			        return search(value, node.rightChild)
+
+    When searching a tree, we must always begin at the root.
+
+    More generally, we’d say that searching in a binary tree is O(log N).
+    		This is because each step we take eliminates half of the remaining possible values in which our value can be stored. 
+
+    		(We’ll see soon, though, that this is only for perfectly balanced binary tree, which is a best case scenario.)
+
+	Compare this with binary search, another O(log N) algorithm, in which each number we try also eliminates half of the remaining possible values. 
+			In this regard, then, searching a binary tree has the same efficiency as binary search within an ordered array.
+
+	Where binary trees really shine over ordered arrays, though, is with insertion.
+
+Deletion
+	Deletion is the least straightforward operation within a binary tree, and requires some careful manueuvering.
+
+	Let’s say that we wanted to delete the 4 from this binary tree.
+			First, we’d perform a search to first find the 4, and then we can just delete it one step.
+
+	While that was simple, let’s say we now wanted to delete the 10 as well. If we deleted the 10:
+			We’d end up with an 11 that isn’t connected to the tree anymore. And we can’t have that, because we’d lose the 11 forever.
+
+			However, there’s a solution to this problem: We’ll plug the 11 into where the 10 used to be.
+
+	So far, our deletion algorithm follows these rules:
+			• If the node being deleted has no children, simply delete it.
+			• If the node being deleted has one child, delete it and plug the child into the spot where the deleted node was.
+
+	Deleting a node that has two children is the most complex scenario. Let’s say that we wanted to delete the 56:
+			What are we going to do with the 52 and 61? We can’t put both of them where the 56 was. 
+
+			That’s where the next rule of the deletion algorithm comes into play:
+
+			• When deleting a node with two children, 
+					replace the deleted node with the successor node. 
+							The successor node is the child node whose value is the 'least of all values that are greater than the deleted node'.
+									That was a tricky sentence. 
+
+									In other words, the successor node is the next number up from the deleted value. 
+
+									In this case, the next number up among the descendants of 56 is 61. So we replace the 56 with the 61:
+
+					How does the computer find the successor value? There’s an algorithm for that.
+							Visit the right child of the deleted value, and then 
+
+							keep on visiting the left child of each subsequent child until there are no more left children. 
+
+							The bottom value is the successor node.
+
+					Let’s see this again in action in a more complex example. Let’s delete the root node:
+							We now need to plug the successor value into the root node. Let’s find the successor value.
+									To do this, we first visit the right child, 75, and then keep descending leftwards until we reach a node that doesn’t have a left child, 52.
+
+									Now that we’ve found the successor node - the 52, we plug it into the node which we deleted. 
+
+							And we’re done!
+
+			However, there is one case that we haven’t accounted for yet, and that’s where the successor node has a right child of its own. 
+					Let’s recreate the tree above, but add a right child to the 52:
+
+					In this case, we can’t simply plug the successor node - the 52 - into the root, since we’d leave its child of 55 hanging.
+
+					Because of this there’s one more rule to our deletion algorithm:
+
+			• If the successor node has a right child, 
+					after plugging the successor into the spot of the deleted node, 
+
+					take the right child of the successor node and 
+							
+					turn it into the left child of the parent of the successor node.
+
+					Let’s walk through the steps.
+										50
+
+		    			25 			 	 |					75	
+
+	  		10		  			33 	 	 |	  		56  		  89
+
+		4		11			30		40	 |		52 		61 		82 		95
+												  55  
+
+							First, we plug the successor node, 52, into the root:
+									At this point, the 55 is left dangling.
+
+							Next, we turn the 55 into the left child of what was the parent of the successor node, 61.
+									In this case, 61 was the parent of the successor node, so we make the 55 the left child of the 61.
+
+			And now we’re 'really' done.
+
+	Pulling all the steps together, the algorithm for deletion from a binary tree is:
+			• If the node being deleted has no children, simply delete it.
+			• If the node being deleted has one child, delete it and plug the child into the spot where the deleted node was.
+			• When deleting a node with two children, replace the deleted node with the successor node. The successor node is the child node whose value is the least of all values that are greater than the deleted node.
+			• If the successor node has a right child, after plugging the successor node into the spot of the deleted node, take the right child of the successor node and turn it into the left child of the parent of the successor node.
+
+	Here’s a recursive Python implementation of deletion from a binary tree. It’s a little tricky at first, so we’ve sprinkled comments liberally:
+
+Binary Trees in Action
+	We’ve seen that binary trees boast efficiencies of O(log N) for search, insertion, and deletion, making it an efficient choice for scenarios in which we need to store and manipulate ordered data.
+			This is particulary true if we will be modifying the data often.
+
+	While ordered arrays are just as fast as binary trees when searching data, 
+
+	Binary trees are significantly faster when it comes to inserting and deleting data.
+
+	Let’s say that we’re creating an application that maintains a list of book titles. We’d want our application to have the following functionality.
+			• Our program should be able to print out the list of book titles in alphabetical order.
+
+			• Our program should allow for constant changes to the list.
+
+			• Our program should allow the user to search for a title within the list.	
+
+	If we didn’t anticipate that our booklist would be changing that often, an ordered array would be a suitable data structure to contain our data.
+			However, we’re building an app should be able to handle many changes in realtime. 
+
+			If our list had millions of titles, we’d better use a binary tree.
+
+	Now, we’ve already covered how to search, insert, and delete data from a binary tree. 
+
+	We mentioned, though, that we also want to be able to print the entire list of book titles in alphabetical order. How can we do that?
+
+	Firstly, we will need the ability to visit every single node in the tree.
+			The process of visiting every node in a data structure is known as 'traversing' the data structure.
+
+	Secondly, we need to make sure that we traverse the tree in alphabetically ascending order so that we can print out the list in that order.
+
+	There are multiple ways to traverse a tree, but for this application we will perform what is known as 'inorder traversal' so that we can print out each title in alphabetical order.
+			Recursion is a great tool for performing inorder traversal. 
+
+	We’ll create a recursive function called 'traverse' that can be called on a particular node. The function then performs the following steps:
+			1. Call itself (traverse) on the node’s left child if it has one.
+			
+			2. Visit the node. (For our book title app, we print the value of the node at this step.)
+			
+			3. Call itself (traverse) on the node’s right child if it has one.
+
+			For this recursive algorithm, the base case is when a node has no children in which case we simply print the node’s title but do not call traverse again.
+
+
+										 Moby Dick
+
+ 			Great Expectations 								       Robinson Crusoe
+
+Alice In Wonderland 	Lord Of The Flies 			Pride and Prejudice 		The Odyssey
+
+
+	Note that tree traversal is O(N), since by definition, traversal visits every node of the tree.
+
+Wrapping Up
+	Binary trees are a powerful node-based data structure that provides order maintenance, while also offering fast search, insertion, and deletion.
+
+	They’re more complex than their linked list cousins, but offer tremendous value.
+
+	It is worth mentioning that in addition to binary trees, there are many other types of tree-based data structures as well. 
+			Heaps, 					B-trees, 
+			Red-Black Trees,  		2-3-4 Trees 
+	as well as many other trees each have their own use for specialized scenarios.
+
+	In the next chapter, we’ll encounter yet another node-based data structure that serves as the heart of complex applications such as social networks and mapping software. 
+			It’s powerful yet nimble, and it’s called a graph.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
