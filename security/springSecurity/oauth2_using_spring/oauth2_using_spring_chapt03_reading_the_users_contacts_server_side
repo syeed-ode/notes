@@ -1,0 +1,371 @@
+	                                                                   |
+************************************************************************
+************************************************************************
+	6.1.1 Implicit grant type - used when client is inside browser (JS application) {implicitGrantService}
+		1. Grant Type is equal to token instead of 
+			'authorization_code'
+		2. Client calls authoriztion endpoint only and gets 'token' 
+		3. Resource owner still authenticates with autorization 
+			server
+		4. The client_secret won't be needed using Implicit grant 
+			type
+		5. Implicit grant type uses only the front channel since the 
+			client (JS code) is inside the browser.
+************************************************************************
+************************************************************************
+*
+*
+*
+************************************************************************
+* Cht 3 - Reading the user's contacts from Facebook on the server side *
+************************************************************************
+This chapter presents how to use the server side approach which maps directly to the Authorization Code grant type from the OAuth 2.0 specifications.
+
+3.1 Getting ready
+As we will develop an application which interacts with Facebook at the server side, we are supposed to write a lot of code. 
+
+But instead of writing too much code, let's use the Spring Social Facebook project.
+
+As the application is a Facebook client we need to register a new application.
+
+3.2 How to do it...
+Follow the steps below to create a client application to integrate with Facebook using the server-side flow from OAuth 2.0:
+		Go to https://developers.facebook.com/apps/ and add a new application by clicking on 'Add a New App'.
+
+		Register a new client application on Facebook with the 'Display Name' 'social-authcode'.
+
+		You will be guided to select one Facebook product. So, choose 'Facebook Login' by clicking on 'Set Up' and then choose Web as a platform.
+
+		You will be asked to enter the site URL, which might be 'http://socialauthcode.test/'.
+
+		After creating the application on Facebook, click on Facebook Login on the left panel to configure a valid redirect URI, which should be 'http://localhost:8080/connect/facebook'.
+
+		Click on Dashboard on the left panel so you can retrieve the App ID {1750152398424781} and App Secret {9112a5f528edc7de7a4143adf42d143c} which map to 'client_id' and 'client_secret'. 
+
+		As you may already know, and grab the credentials to use later when implementing the client application.
+
+		Now let's create the initial project using Spring Initializr, as we did for other recipes in this book. Go to https://start.spring.io/ and define the following data:
+				Set up the Group as 'com.syeedode.authcodeforserver'
+
+				Define the 'Artifact' as 'social-authcode'
+
+				Add 'Web' and 'Thymeleaf' as the dependencies for this project
+
+		Now add the following dependencies into the pom.xml file to add support for Spring Social Facebook
+				compile group: 'org.springframework.social', name: 'spring-social-config', version: '1.1.0.RELEASE'
+
+				compile group: 'org.springframework.social', name: 'spring-social-core', version: '1.1.6.RELEASE'
+
+				compile group: 'org.springframework.social', name: 'spring-social-web', version: '1.1.6.RELEASE'
+
+				compile group: 'org.springframework.social', name: 'spring-social-facebook', version: '2.0.3.RELEASE'
+
+		Create an HTML file named 'friends.html' inside the templates directory located within 'src/main/resources', as follows:
+				<!DOCTYPE html>
+				<html lang="en" xmlns:th="http://www.thymeleaf.org">
+				<head>
+				    <meta charset="UTF-8">
+				    <title>Friends</title>
+				</head>
+				<body>
+				    <h3>Hello, <span th:text="${facebookProfile.name}">User</span>!</h3>
+				    <h4>Your friends which also allowed social-authcode:</h4>
+				    <div th:each="friend:${friends}">
+				        <b th:text="${friend.id}">[id]</b> - <b th:text="${friend.name}">[name]</b>
+				        <hr/>
+				    </div>
+				</body>
+				</html>
+
+		Now, we need URL mapping so the previous HTML file can be rendered. To do this, create a new Java class named 'FriendsController.java' inside the package 'com.syeedode.authcodeforserver.socialauthcode.controller', with the following content:
+				package com.syeedode.authcodeforserver.socialauthcode.controller;
+
+				import org.springframework.ui.Model;
+				import org.springframework.web.bind.annotation.GetMapping;
+
+				public class FriendsController {
+				    @GetMapping
+				    public String friends(Model model) { return "friends"; }
+				}
+
+		As you may realize, the template 'friends.html' relies on an object named 'facebookProfile' and another named 'friends'. 
+				The object 'facebookProfile' must have the name attribute and 
+
+				The 'friends' object must be a list of objects which have id and name properties. 
+
+		The good news is that we don't have to declare classes for these objects because 'Spring Social' already provides them.
+
+		We just need to have a valid user connection to start using these objects, so add the following attributes inside the 'FriendsController' class:
+				import org.springframework.beans.factory.annotation.Autowired;
+				import org.springframework.social.connect.ConnectionRepository;
+				import org.springframework.social.facebook.api.Facebook;
+
+				public class FriendsController {
+				    @Autowired
+				    private Facebook facebook;
+				    
+				    @Autowired
+				    private ConnectionRepository connectionRepository;
+				}
+
+		With the class 'ConnectionRepository' we can save or retrieve user connections with any provider (only Facebook matters now).
+				Let's take advantage of this class to know if there is any user connected with Facebook.
+
+				If not, we must redirect the user so she can authorize the social-authcode of the application to retrieve protected resources (her friends).
+
+		Replace the code from friends method of the FriendsController class with the code presented in the following code:
+			    @GetMapping
+			    public String friends(Model model) {
+			        if (connectionRepository.findPrimaryConnection(Facebook.class) == null) {
+			            return "redirect:/connect/facebook";
+			        }
+			        return "friends";
+			    }
+
+	    Now, add the following source code after the if block, that checks for a connection. 
+
+	    This new block of code will be executed when there is a user connected to Facebook 
+	    		(when importing 'User' and 'Reference' classes, make sure to import from org.springframework.social.facebook.api package):
+
+		Create the class 'EnhancedFacebookProperties', as presented in the following code, inside the inner package 'facebook', so we can configure the application properties as 'client_id' and 'client_secret' (don't forget to create the respective getters and setters for each attribute):
+
+		Before continuing creating the other classes, you must configure the 'appSecret' and 'apiVersion' values so the application 'social-authcode' is able to request an 'access_token'.
+
+		As you may realize, the class 'EnhancedFacebookProperties' is annotated with '@ConfigurationProperties' which allows for defining the properties inside the 'application.properties' file, as follows:
+				facebook.app-id=1948923582021549 
+				facebook.app-secret=1b4b0f882b185094a903e76a661c7c7c 
+				facebook.api-version=2.9 		
+
+		Now create the class 'CustomFacebookServiceProvider', as follows. This class is responsible for creating a custom instance of 'OAuth2Template' 
+				The template allows us to effectively configure the Facebook API version which at the time of this writing was 2.9:
+						import org.springframework.social.facebook.api.Facebook;
+						import org.springframework.social.facebook.api.impl.FacebookTemplate;
+						import org.springframework.social.oauth2.AbstractOAuth2ServiceProvider;
+						import org.springframework.social.oauth2.OAuth2Template;
+
+						public class CustomFacebookServiceProvider extends AbstractOAuth2ServiceProvider<Facebook> {
+
+						    private String appNamespace;
+						    private String apiVersion;
+
+						    public CustomFacebookServiceProvider(String appId, String appSecret, String apiVersion) {
+						        super(getOAuth2Template(appId, appSecret, apiVersion));
+						        this.apiVersion = apiVersion;
+						    }
+
+						    private static OAuth2Template getOAuth2Template(String appId, String appSecret, String apiVersion) {
+						        String graphApiURL = "https://graph.facebook.com/v" + apiVersion + "/";
+
+						        OAuth2Template template = new OAuth2Template(appId
+						                                            , appSecret
+						                                            , "https://www.facebook.com/v" + apiVersion + "/dialog/oauth"
+						                                            , graphApiURL + "oauth/access_token");
+
+						        template.setUseParametersForClientAuthentication(true);
+						        return template;
+						    }
+
+						    @Override
+						    public Facebook getApi(String accessToken) {
+						        FacebookTemplate template = new FacebookTemplate(accessToken, appNamespace);
+						        template.setApiVersion(apiVersion);
+						        return template;
+						    }
+						}
+
+		So that the 'CustomFacebookServiceProvider' can be properly created, create the class 'CustomFacebookConnectionFactory':
+				import org.springframework.social.connect.support.OAuth2ConnectionFactory;
+				import org.springframework.social.facebook.api.Facebook;
+				import org.springframework.social.facebook.connect.FacebookAdapter;
+
+				public class CustomFacebookConnectionFactory extends OAuth2ConnectionFactory<Facebook> {
+
+				    public CustomFacebookConnectionFactory(String appId, String appSecret, String apiVersion) {
+				        super("facebook"
+				                , new CustomFacebookServiceProvider(appId, appSecret, apiVersion)
+				                , new FacebookAdapter());
+				    }
+				}
+
+		And finally create the class 'FacebookConfiguration'
+				import org.springframework.boot.autoconfigure.social.FacebookProperties;
+				import org.springframework.boot.autoconfigure.social.SocialWebAutoConfiguration;
+				import org.springframework.boot.context.properties.EnableConfigurationProperties;
+				import org.springframework.context.annotation.Configuration;
+				import org.springframework.social.config.annotation.EnableSocial;
+				import org.springframework.social.connect.ConnectionFactory;
+
+				@Configuration
+				@EnableSocial
+				@EnableConfigurationProperties(FacebookProperties.class)
+				public class FacebookConfiguration extends SocialWebAutoConfiguration {
+				    @Autowired
+				    private EnhancedFacebookProperties properties;
+
+				    protected ConnectionFactory<?> createConnectionFactory() {
+				        return new CustomFacebookConnectionFactory(
+				                  this.properties.getAppId()
+				                , this.properties.getAppSecret(), this.properties.getApiVersion());
+				    }
+				}
+
+		If you look at the content of 'FriendsController', you should see that this class is using an instance of 'Facebook'  
+				This instance provides the API to interact with Facebook Graph API. 
+
+				The instance of 'Facebook' must be created through a Spring bean declared as follows inside the 'FacebookConfiguration':
+						When importing the Connection class, make sure you import from org.springframework.social.connect package
+
+				@Configuration
+				@EnableSocial
+				@EnableConfigurationProperties(FacebookProperties.class)
+				public class FacebookConfiguration extends SocialWebAutoConfiguration {
+				    @Bean
+				    @ConditionalOnMissingBean(Facebook.class)
+				    @Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
+				    public Facebook facebook(ConnectionRepository repository) {
+				        Connection<Facebook> connection = repository.findPrimaryConnection(Facebook.class);
+				        return connection != null ? connection.getApi() : null;
+				    }
+				}
+
+As we are using Spring Social, most redirection will be handled by the 'ConnectController' class which is declared by Spring Social. 
+
+But how does Spring Social know to build the redirect URI?
+		We have not provided the application's domain. 
+
+		By default, Spring Social uses request data to build the redirect URL automatically. 
+
+		But as the application might be deployed behind a proxy. 
+				The provider won't be capable of redirecting the user back to the callback URL defined inside ConnectController. 
+
+To overcome this issue, declare the following method inside the FacebookConfiguration class:
+		@Configuration
+		@EnableSocial
+		@EnableConfigurationProperties(FacebookProperties.class)
+		public class FacebookConfiguration extends SocialWebAutoConfiguration {
+		    @Bean
+		    public ConnectController connectController(ConnectionFactoryLocator factoryLocator
+		                                             , ConnectionRepository repository) {
+		        ConnectController controller = new ConnectController(factoryLocator, repository);
+		        controller.setApplicationUrl("http://localhost:8080");
+		        return controller;
+		    }
+		}
+
+This controller provides all we need to handle OAuth 2.0's authorization flow. 
+
+It also allows the rendering of two views which by default are named
+		The provider in this case is 'facebook'.
+
+		- {provider}Connect
+
+		- {provider}Connected
+
+To satisfy both views, create the following HTML files inside the folder 'templates/connect' within the 'src/main/resources' project's directory, as follows:
+		- facebookConnect.html
+
+		- facebookConnected.html
+
+Now add the following content to 'facebookConnect.html':
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+		    <meta charset="UTF-8">
+		    <title>Social Authcode</title>
+		</head>
+		<body>
+
+		    <h2>Connect to Facebook to see your contacts</h2>
+
+		    <form action="/connect/facebook" method="POST">
+		        <input type="hidden" name="scope" value="public_profile user_friends" />
+		        <input type="hidden" name="response_type" value="code" />
+
+		        <div class="formInfo">
+		            Click the button to share your contacts
+		            with <b>social-authcode</b>
+		        </div>
+
+		        <p><button type="submit">Connect to Facebook</button></p>
+		    </form>
+
+		</body>
+		</html>
+
+And now add the following content to 'facebookConnected.html':
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+		    <meta charset="UTF-8">
+		    <title>Social Authcode</title>
+		</head>
+		<body>
+
+		    <h2>Connected to Facebook</h2>
+
+		    <p>Click <a href="/">here</a> to see your friends.</p>
+
+		</body>
+		</html>
+
+That's it. Now you can start the application by running the class 'SocialAuthcodeApplication'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

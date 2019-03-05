@@ -374,7 +374,77 @@ But as we are using the Implicit grant flow the 'client_secret' won't be needed.
 
 		Another measure to help the application to not expose the access token was to clear the URL fragment.
 
+		Another measure that might be applied is to not use any external JavaScript code. 
+				An example is code such that is used to send usage metrics. 
 
+				Third party code could such a way that the 'access_token' could be sent to the external service).
+
+After the registration process we got into the code to effectively interact with the Facebook Graph API
+		Facebook offers two ways to log a user with a valid account:
+				By using the Facebook SDK
+
+				By manually building a login flow
+
+To make the OAuth 2.0 usage explicit, this recipe was written by manually building a login flow. 
+		So to start the process of user's authentication and authorization, the 'client-implicit' application builds the URL 
+
+		This URL is constructed in the 'client.html' and sent to the Authorization Server manually as follows:
+		        function makeRequest() {
+		            var auth_endpoint = "https://www.facebook.com/v2.9/dialog/oauth",
+		                 response_type = "token",
+		                 client_id = "229963314611061",
+		                 redirect_uri = "http://localhost:8080/callback",
+		                 scope = "public_profile user_friends";
+
+		           var request_endpoint = auth_endpoint + "?" +
+		                 "response_type=" + response_type + "&" +
+		                 "client_id=" + client_id + "&" +
+		                 "redirect_uri=" + encodeURI(redirect_uri) + "&" +
+		                 "scope=" + encodeURI(scope);
+
+		           window.location.href = request_endpoint;
+		        }
+
+After simply redirecting the user to the Authorization Server's endpoint, the flow is transferred to Facebook, 
+		This is the popup that must be clicked by the user. This is the stage where the user could specify various scope types.
+
+		This step the user would also which authenticates the user [enter in the username/password (Usually the user is logged in)] if needed, and 
+
+		The user authorizes whether or not the client application can make use of its resources. 
+
+		Once the user authorizes the client, she is redirected back to the registered redirection URI, which in our case was 'http://localhost:8080/callback'.
+
+When receiving the access_token all we need to do is extract the token from the URL fragment and start using the Facebook Graph API.
+
+2.3 There's more
+************************************************************************
+************************************************************************
+	6.1.1 Implicit grant type - used when client is inside browser (JS application) {implicitGrantService}
+		1. Grant Type is equal to token instead of 
+			'authorization_code'
+		2. Client calls authoriztion endpoint only and gets 'token' 
+		3. Resource owner still authenticates with autorization 
+			server
+		4. The client_secret won't be needed using Implicit grant 
+			type
+		5. Implicit grant type uses only the front channel since the 
+			client (JS code) is inside the browser.
+************************************************************************
+************************************************************************
+One important thing that should be added to our code is the usage of the state parameter to avoid Cross Site Request Forgery (CSRF) attacks.
+		A CSRF attack allows a malicious user to execute operations in the name of another user (a victim). 
+
+		Regarding web applications, a valid approach to avoid CSRF is to make the client send a variable to the server with some random string. 
+
+		This string can be checked after receiving it back from the server's response. 
+
+		So the first value and the second (received) must be the same.
+
+Regarding security issues, one other valuable suggestion is to send the 'access_token' to the server side. 
+		This way you don't have to request a new access token on every web page of your application (but take care with the expiration time).
+
+All the recipes that follow in this chapter will be using Spring Social project. 
+		For more information about the project, you can read the official documents at https://projects.spring.io/spring-social/.
 
 
 
