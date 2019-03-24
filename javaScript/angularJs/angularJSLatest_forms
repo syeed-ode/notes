@@ -1,0 +1,233 @@
+This information was gather from reading Learning Angular JS: A Guide to AngularJS Development by Ken Williamson. 
+*
+*
+*
+*
+****    Chapter 1 - Introduction to AngularJS    ****
+https://angular.io/guide/forms-overview
+
+Introduction to forms in Angular
+	Applications use forms to enable users to log in, to update a profile, to enter sensitive information, and to perform many other data-entry tasks.
+
+	Angular provides two different approaches to handling user input through forms: 
+			reactive
+
+			template-driven.
+
+	Both 
+			capture user input events from the view, 
+
+			validate the user input, 
+
+			create a form model and data model to update, and 
+
+			provide a way to track changes.
+
+	Reactive and template-driven forms process and manage form data differently. Each offers different advantages.  In general:
+			Reactive forms are more robust: 
+					they're more scalable, reusable, and testable. If forms are a key part of your application, or you're already using reactive patterns for building your application, 
+
+					use reactive forms.
+
+			Template-driven forms are useful for adding a simple form to an app, 
+					such as an email list signup form. 
+
+					They're easy to add to an app, but they don't scale as well as reactive forms. If you have very basic form requirements and logic that can be managed solely in the template, use template-driven forms.
+
+Reactive Forms
+	Reactive forms provide a model-driven approach to handling form inputs whose values change over time.
+
+	This guide shows you how to 
+			create and update a simple form control, 
+
+			progress to using multiple controls in a group, 
+
+			validate form values, and 
+
+			implement more advanced forms.
+
+Introduction to reactive forms
+	Reactive forms use an explicit and immutable approach to managing the state of a form at a given point in time. 
+			Each change to the form state returns a new state, which maintains the integrity of the model between changes. 
+
+	Reactive forms are built around observable streams, where form inputs and values are provided as streams of input values, which can be accessed synchronously.
+
+	Reactive forms also provide a straightforward path to testing because you are assured that your data is consistent and predictable when requested. 
+			Any consumers of the streams have access to manipulate that data safely.
+
+	Reactive forms differ from template-driven forms in distinct ways. Reactive forms provide 
+			more predictability with synchronous access to the data model, 
+
+			immutability with observable operators, and 
+
+			change tracking through observable streams.
+
+	If you prefer direct access to modify data in your template.
+			Template-driven forms are less explicit because 
+					they rely on directives embedded in the template, along with 
+
+					mutable data to track changes asynchronously. 
+
+Getting started
+	This section describes how to add a single form control.
+			the user enters their name into an input field, 
+
+			captures that input value, and 
+
+			displays the current value of the form control element.
+
+	Step 1: Registering the reactive forms module
+		To use reactive forms, 
+				import ReactiveFormsModule from the @angular/forms package and 
+
+				add it to your NgModule's imports array.
+
+	Step 2: Generating and importing a new form control
+		Generate a component for the control.
+				ng generate component NameEditor
+
+		This creates src/app/name-editor/ directory with a file named 'name-editor.component.ts'
+
+		The FormControl class is the basic building block when using reactive forms. 
+
+		To register a single form control, 
+				import the 'FormControl' class into your component and 
+						import { FormControl } from '@angular/forms';
+
+				create a new instance of the form control to save as a class property.	
+						export class NameEditorComponent {
+						  name = new FormControl('');
+						}
+
+						Use the constructor of FormControl to set its initial value, which in this case is an empty string. 
+
+		By creating these controls in your component class, you get immediate access to listen for, update, and validate the state of the form input.
+
+	Step 3: Registering the control in the template
+		After you create the control in the component class, you must associate it with a form control element in the template. 
+				Update the template 'src/app/name-editor/name-editor.component.html' with the form control using the formControl binding
+						<label>
+						  Name:
+						  <input type="text" [formControl]="name">
+						</label>						
+
+				provided by FormControlDirective included in ReactiveFormsModule.
+
+		Using the template binding syntax ([formControl]="name"), the form control is now registered to the 'name' input element in the template.
+
+		The form control and DOM element communicate with each other: 
+				the view (template) reflects changes in the model (data, formControl), and 
+
+				the model reflects changes in the view.
+
+		Displaying the component
+			The form control assigned to 'name' is displayed when the component is added to a template.	
+
+			The template is 'src/app/app.component.html'
+
+			The component is '<app-name-editor></app-name-editor>'
+
+		Managing control values
+			Reactive forms give you access to the form control state and value at a point in time. 
+
+			You can manipulate the current state and value through the component class or the component template. 
+
+			The following examples display the value of the form control instance and change it.
+
+			Displaying a form control value
+				You can display the value in these ways:
+						- Through the 'valueChanges' observable where you can listen for changes 
+								in the form's value in the template using AsyncPipe or 
+
+								in the component class using the subscribe() method.
+
+						- With the 'value' property. which gives you a snapshot of the current value.
+
+				The following example shows you how to display the current value using interpolation in the template.
+						src/app/name-editor/name-editor.component.html (control value)
+								<p>
+								  Value: {{ name.value }}
+								</p>	
+								
+						The displayed value changes as you update the form control element.
+
+				Reactive forms provide access to information about a given control through properties and methods provided with each instance. 
+
+				These properties and methods of the underlying AbstractControl class are used to control form state and determine when to display messages when handling validation.
+
+		Replacing a form control value
+
+
+		Grouping form controls
+			Just as a form control instance gives you control over a single input field, a form group instance tracks the form state of a group of form control instances (for example, a form).
+					Each control in a form group instance is tracked by name when creating the form group. 
+
+					The following example shows how to manage multiple form control instances in a single group.
+
+			Generate a ProfileEditor component and import the FormGroup and FormControl classes from the @angular/forms package.
+
+			Step 1: Creating a FormGroup instance
+				Create a property in the component class named profileForm and set the property to a new form group instance.
+
+				In src/app/profile-editor/profile-editor.component.ts (form group)
+						import { FormGroup, FormControl } from '@angular/forms';
+
+				The individual form controls are now collected within a group. 
+						export class ProfileEditorComponent {
+						  profileForm = new FormGroup({
+						    firstName: new FormControl(''),
+						    lastName: new FormControl(''),
+						  });
+				A FormGroup instance provides its model value as an object reduced from the values of each control in the group.
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

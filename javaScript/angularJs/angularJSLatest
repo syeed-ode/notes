@@ -1,0 +1,120 @@
+This information was gather from reading Learning Angular JS: A Guide to AngularJS Development by Ken Williamson. 
+*
+*
+*
+*
+****    Chapter 1 - Introduction to AngularJS    ****
+https://angular.io/guide/quickstart
+
+Step 1: Install the Angular CLI
+	You use the Angular CLI to create projects, generate application and library code, and perform a variety of ongoing development tasks such as testing, bundling, and deployment.
+
+	Install the Angular CLI globally.
+
+	To install the CLI using npm, open a terminal/console window and enter the following command:
+			npm install -g @angular/cli
+
+
+Step 2: Create a workspace and initial application
+	You develop apps in the context of an Angular workspace. 
+			A workspace contains the files for one or more projects. 
+					In Angular, a folder that contains projects (that is, apps and libraries). The CLI ng new command creates a workspace to contain projects.
+
+					Commands that create or operate on apps and libraries (such as add and generate) must be executed from within a workspace folder.
+
+			A project is the set of files that comprise an app, a library, or end-to-end (e2e) tests.
+
+	To create a new workspace and initial app project:
+			1. Run the CLI command ng new and provide the name my-app, as shown here:
+					ng new my-app
+
+			2. The ng new command prompts you for information about features to include in the initial app project. Accept the defaults by pressing the Enter or Return key.
+					The Angular CLI installs the necessary Angular npm packages and other dependencies. This can take a few minutes.
+
+			It also creates the following workspace and starter project files:
+					A new workspace, with a root folder named my-app
+
+					An initial skeleton app project, also called my-app (in the src subfolder)
+
+					An end-to-end test project (in the e2e subfolder)
+
+					Related configuration files
+
+	The initial app project contains a simple Welcome app, ready to run.
+
+Step 3: Serve the application
+	Angular includes a server, so that you can easily build and serve your app locally.
+			1. Go to the workspace folder (my-app).
+
+			2. Launch the server by using the CLI command ng serve, with the --open option.
+					cd my-app
+
+					ng serve --open
+
+Step 4: Edit your first Angular component
+	Components are the fundamental building blocks of Angular applications. They display data on the screen, listen for user input, and take action based on that input.
+			component - A class with the @Component() decorator that associates it with a companion template. 
+
+			Together, the component and template define a view. 
+
+			A class with the @Component() decorator that associates it with a companion template. 
+
+			Together, the component and template define a view. 
+					An Angular component class is responsible for exposing data and handling most of the view's display and user-interaction logic through data binding.
+
+	As part of the initial app, the CLI created the first Angular component for you. It is the root component, and it is named app-root.
+			1. Open ./src/app/app.component.ts.
+
+			2. Change the title property from 'my-app' to 'My First Angular App'.
+					@Component({
+					  selector: 'app-root',
+					  templateUrl: './app.component.html',
+					  styleUrls: ['./app.component.css']
+					})
+					export class AppComponent {
+					  title = 'My First Angular App!';
+					}
+
+				The browser reloads automatically with the revised title. That's nice, but it could look better.
+
+			3. Open ./src/app/app.component.css and give the component some style.
+			
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
