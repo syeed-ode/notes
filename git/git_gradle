@@ -1,4 +1,9 @@
 
+Find out remote repository
+git config --get remote.origin.url
+git remote show origin
+
+
 To create a new repository on the command line
 echo "# authentication-services" >> README.md
 git init
