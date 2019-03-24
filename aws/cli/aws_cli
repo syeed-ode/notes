@@ -139,14 +139,14 @@ Configure the AWS CLI
 		We now need to tell the AWS CLI to use your Access Keys from the previous chapter.
 
 		It should look something like this:
-				Access key ID AKIAIOSFODNN7EXAMPLE
-				Secret access key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY			
+				Access key ID
+				Secret access key
 
 		Simply run the following with your Secret Key ID and your Access Key.
 				$ aws configure
 				$ aws configure
-					AWS Access Key ID [None]: AKIAIQBVA6Q4WGQ22WEA
-					AWS Secret Access Key [None]: e2/tFXX1MmJ/My4siCXG8m93ibwOlc1+Fdf1k0Qd
+					AWS Access Key ID [None]:
+					AWS Secret Access Key [None]:
 					Default region name [None]: 
 					Default output format [None]: 
 				$ 
