@@ -1,0 +1,256 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+https://serverless-stack.com/chapters/setup-the-serverless-framework.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+***********      Set up the Serverless Framework       ************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+We are going to be using AWS Lambda and Amazon API Gateway to create our backend. 
+
+AWS Lambda is a compute service that lets you run code without provisioning or managing servers.
+		You pay only for the compute time you consume - there is no charge when your code is not running.
+
+API Gateway makes it easy for developers to create, publish, maintain, monitor, and secure APIs. 
+
+Working directly with AWS Lambda and configuring API Gateway can be a bit cumbersome; so we are going to use the 'Serverless Framework' to help us with it.
+
+The Serverless Framework enables developers to deploy backend applications as independent functions that will be deployed to AWS Lambda. 
+
+It also configures AWS Lambda to run your code in response to HTTP requests using Amazon API Gateway.
+
+In this chapter, we are going to set up the Serverless Framework on our local development environment.
+
+Install Serverless
+	Install Serverless globally.
+			$ sudo npm install serverless -g
+				Password:
+				/usr/local/bin/serverless -> /usr/local/lib/node_modules/serverless/bin/serverless
+				/usr/local/bin/slss -> /usr/local/lib/node_modules/serverless/bin/serverless
+				/usr/local/bin/sls -> /usr/local/lib/node_modules/serverless/bin/serverless
+
+				> spawn-sync@1.0.15 postinstall /usr/local/lib/node_modules/serverless/node_modules/spawn-sync
+				> node postinstall
+
+
+				> serverless@1.38.0 postinstall /usr/local/lib/node_modules/serverless
+				> node ./scripts/postinstall.js
+
+
+				┌─────────────────────────────────────────────────────────────┐
+				│               serverless update check failed                │
+				│             Try running with sudo or get access             │
+				│            to the local update config store via             │
+				│ sudo chown -R $USER:$(id -gn $USER) /Users/syeedode/.config │
+				└─────────────────────────────────────────────────────────────┘
+				+ serverless@1.38.0
+				added 386 packages from 261 contributors in 7.702s
+
+
+				   ╭───────────────────────────────────────────────────────────────╮
+				   │                                                               │
+				   │       New minor version of npm available! 6.4.1 → 6.9.0       │
+				   │   Changelog: https://github.com/npm/cli/releases/tag/v6.9.0   │
+				   │               Run npm install -g npm to update!               │
+				   │                                                               │
+				   ╰───────────────────────────────────────────────────────────────╯
+
+Create Domain Name
+	Finally, select Domain name from the left panel. Enter your unique domain name and select Save changes. In our case we are using 'syeedode-notes-app'.
+			https://syeedode-notes-app.auth.us-east-2.amazoncognito.com
+			
+			In your working directory; create a project using a Node.js starter. 
+					$ serverless install --url https://github.com/AnomalyInnovations/serverless-nodejs-starter --name notes-app-api
+
+					-- This is telling Serverless Framework to use the starter as a template to create our project.
+
+			Go into the directory for our backend api project.
+					$ cd /Users/syeedode/angular_projects/notes-app-api
+
+			Now the directory should contain a few files including, the 'handler.js' and 'serverless.yml'.
+					- handler.js file contains actual code for the services/functions that will be deployed to AWS Lambda.
+
+					- serverless.yml file contains the configuration on what AWS services Serverless will provision and how to configure them.
+
+					We also have a 'tests/' directory where we can add our unit tests.
+
+Install Node.js packages
+	The starter project relies on a few dependencies that are listed in the package.json.
+
+	At the root of the project, run.
+			$ npm install
+
+			> fsevents@1.2.4 install /Users/syeedode/angular_projects/notes-app-api/node_modules/chokidar/node_modules/fsevents
+			> node install
+
+			[fsevents] Success: "/Users/syeedode/angular_projects/notes-app-api/node_modules/chokidar/node_modules/fsevents/lib/binding/Release/node-v64-darwin-x64/fse.node" already installed
+			Pass --update-binary to reinstall or --build-from-source to recompile
+
+			> fsevents@1.2.4 install /Users/syeedode/angular_projects/notes-app-api/node_modules/sane/node_modules/fsevents
+			> node install
+
+			[fsevents] Success: "/Users/syeedode/angular_projects/notes-app-api/node_modules/sane/node_modules/fsevents/lib/binding/Release/node-v64-darwin-x64/fse.node" already installed
+			Pass --update-binary to reinstall or --build-from-source to recompile
+			added 1037 packages from 545 contributors and audited 23650 packages in 8.913s
+			found 357 vulnerabilities (44 low, 308 moderate, 5 high)
+			  run `npm audit fix` to fix them, or `npm audit` for details
+
+	Next, we’ll install a couple of other packages specifically for our backend.
+			$ npm install aws-sdk --save-dev
+				npm WARN ajv-keywords@3.2.0 requires a peer of ajv@^6.0.0 but none is installed. You must install peer dependencies yourself.
+
+				+ aws-sdk@2.418.0
+				added 9 packages from 61 contributors and audited 23667 packages in 4.135s
+				found 357 vulnerabilities (44 low, 308 moderate, 5 high)
+				  run `npm audit fix` to fix them, or `npm audit` for details
+			$ npm install uuid --save
+				npm WARN ajv-keywords@3.2.0 requires a peer of ajv@^6.0.0 but none is installed. You must install peer dependencies yourself.
+
+				+ uuid@3.3.2
+				updated 1 package and audited 23668 packages in 3.956s
+				found 357 vulnerabilities (44 low, 308 moderate, 5 high)
+				  run `npm audit fix` to fix them, or `npm audit` for details
+
+			- aws-sdk allows us to talk to the various AWS services.
+
+			- uuid generates unique ids. We need this for storing things to DynamoDB.
+
+	The starter project that we are using allows us to use the version of JavaScript that we’ll be using in our frontend app later. 
+
+	Let’s look at exactly how it does this.
+
+
+*******************************************************************
+https://serverless-stack.com/chapters/add-support-for-es6-es7-javascript.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+*********      Add Support for ES6/ES7 JavaScript       ***********
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+AWS Lambda recently added support for Node.js v8.10. The supported syntax is a little different when compared to the frontend React app we’ll be working on a little later. 
+
+It makes sense to use similar ES features across both parts of the project – 
+		specifically, we’ll be relying on ES imports/exports in our handler functions. 
+
+		To do this we will be transpiling our code using 'Babel' and 'Webpack 4'. 
+
+Serverless Framework supports plugins to do this automatically. 
+
+We are going to use the 'serverless-webpack' plugin.
+		All this has been added in the previous chapter using the serverless-nodejs-starter. We created this starter for a couple of reasons:
+				- Use a similar version of JavaScript in the frontend and backend
+				
+				- Ensure transpiled code still has the right line numbers for error messages
+				
+				- Allow you to run your backend API locally
+				
+				- And add support for unit tests
+
+		If you recall we installed this starter using the serverless install --url https://github.com/AnomalyInnovations/serverless-nodejs-starter --name my-project command. 
+				This is telling Serverless Framework to use the starter as a template to create our project.
+
+				In this chapter, let’s quickly go over how it’s doing this so you’ll be able to make changes in the future if you need to.
+
+Serverless Webpack
+	The transpiling process of converting our ES code to Node v8.10 JavaScript is done by the serverless-webpack plugin.
+
+	This plugin was added in our 'serverless.yml'. Let’s take a look at it in more detail.
+
+	The 'service' option is pretty important. 
+			We are calling our service the 'notes-app-api'. 
+
+			Serverless Framework creates your stack on AWS using this as the name. 
+
+			This means that if you change the name and deploy your project, it will create a completely new project.
+
+	You’ll notice the 'serverless-webpack' plugin that is included. We also have a 'webpack.config.js' that configures the plugin.
+
+	Here is what your webpack.config.js should look like. You don’t need to make any changes to it. We are just going to take a quick look.
+			The main part of this config is the 'entry' attribute that we are automatically generating using the 'slsw.lib.entries' that is a part of the 'serverless-webpack' plugin.
+					This automatically picks up all our handler functions and packages them.
+
+			We also use the 'babel-loader' on each of these to transpile our code.
+
+			One other thing to note here is that we are using 'nodeExternals' because we do not want Webpack to bundle our 'aws-sdk' module – it is not compatible with Webpack.
+
+	Finally, let’s take a quick look at our Babel config. Again you don’t need to change it. Just open the '.babelrc' file in your project root – it should look something like this.
+
+	Here we are telling Babel to transpile our code to target Node v8.10.
+
+	And now we are ready to build our backend.
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

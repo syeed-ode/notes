@@ -1,0 +1,192 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+https://serverless-stack.com/chapters/create-an-s3-bucket-for-file-uploads.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+**************      Create a Cognito User Pool       **************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Our notes app needs to handle user accounts and authentication in a secure and reliable way. To do this we are going to use 'Amazon Cognito'.
+
+Amazon Cognito User Pool makes it easy for developers to add sign-up and sign-in functionality to web and mobile applications.
+
+It serves as your own identity provider to maintain a user directory. 
+
+It supports user registration and sign-in, as well as provisioning identity tokens for signed-in users.
+		In this chapter, we are going to create a User Pool for our notes app.
+
+Create User Pool
+	From your AWS Console, select Cognito from the list of services.
+			Select Manage your User Pools.
+
+			Select Create a User Pool.
+
+			Enter Pool name and select Review defaults.
+					- notes-user-pool
+
+			Select Choose username attributes….
+					And select Email address or phone numbers and Allow email addresses. 
+							This is telling Cognito User Pool that we want our users to be able to sign up and login with their email as their username.
+
+					Scroll down and select Next step.
+
+					Hit 'Review' in the side panel and make sure that the 'Username attributes' is set to 'email'.
+
+					Now hit 'Create pool' at the bottom of the page.
+
+					Your User Pool has been created. Take a note of 
+							the Pool Id, aka User Pool ID, (us-east-2_CuwMY3mpW) and 
+									- us-east-2_CuwMY3mpW
+
+							Pool ARN which will be required later. 
+									- arn:aws:cognito-idp:us-east-2:966118849566:userpool/us-east-2_CuwMY3mpW
+
+							region
+									- us-east-2
+
+							clientId 
+									- 7pf839rut6ji4n1po4qsnt3s3h
+
+					Also, note the region that your User Pool is created in – in our case it’s us-east-1.
+
+Create App Client
+	Select 'App clients' from the left panel.
+			Select Add an app client.
+					Enter App client name, 
+							- notes-app
+
+					un-select 'Generate client secret', 
+							- 'Generate client secret': user pool apps with a client secret are not supported by the JavaScript SDK. We need to un-select the option.
+
+					select 'Enable sign-in API for server-based authentication', then 
+							- Enable sign-in API for server-based authentication: required by AWS CLI when managing the pool users via command line interface. 
+
+							- We will be creating a test user through the command line interface in the next chapter
+
+					select Create app client. 
+							Your app client has been created. Take note of the App client id which will be required in the later chapters.
+
+Create Domain Name
+	Finally, select Domain name from the left panel. Enter your unique domain name and select Save changes. In our case we are using 'syeedode-notes-app'.
+			https://syeedode-notes-app.auth.us-east-2.amazoncognito.com
+
+	Now our Cognito User Pool is ready. 
+			It will maintain a user directory for our notes app. 
+
+			It will also be used to authenticate access to our API. 
+
+	Next let’s set up a test user within the pool.
+
+Create a Cognito Test User (https://serverless-stack.com/chapters/create-a-cognito-test-user.html)
+	We are going to create a test user for our Cognito User Pool. 
+
+	We are going to need this user to test the authentication portion of our app later.
+
+	Create User
+		First, we will use AWS CLI to sign up a user with their email and password.
+					aws cognito-idp sign-up \
+			  --region YOUR_COGNITO_REGION \
+			  --client-id YOUR_COGNITO_APP_CLIENT_ID \
+			  --username admin@example.com \
+			  --password Passw0rd!
+
+					$ aws syeedode-notes-app sign-up \
+					>   --region us-east-2 \
+					>   --client-id 7pf839rut6ji4n1po4qsnt3s3h \
+					>   --username admin@example.com \
+					>   --password Passw0rd!
+
+					Invalid endpoint: https://cognito-idp.YOUR_COGNITO_REGION.amazonaws.com
+
+					$ aws cognito-idp sign-up --region us-east-2 --client-id 7pf839rut6ji4n1po4qsnt3s3h --username admin@example.com --password Passw0rd!
+					{
+					    "UserConfirmed": false,
+					    "CodeDeliveryDetails": {
+					        "Destination": "a***@e***.com",
+					        "DeliveryMedium": "EMAIL",
+					        "AttributeName": "email"
+					    },
+					    "UserSub": "09918642-d56b-480e-ab54-e2458d7d0583"
+					}
+
+		Now, the user is created in Cognito User Pool.
+				However, before the user can authenticate with the User Pool, the account needs to be verified. 
+
+		Let’s quickly verify the user using an administrator command.
+
+		In your terminal, run.
+				$ aws cognito-idp admin-confirm-sign-up --region us-east-2 --user-pool-id us-east-2_CuwMY3mpW --username admin@example.com
+				$ 
+
+		Now our test user is ready. 
+
+		Next, let’s set up the Serverless Framework to create our backend APIs. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

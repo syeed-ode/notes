@@ -34,10 +34,266 @@ Create User
 
 						Select Show to reveal Secret access key
 								
+						https://966118849566.signin.aws.amazon.com/console
 
 
 
 see: /Users/syeedode/Google Drive/strategic_living/books/software/aws/iam/configureAWSForServerlessAndReact/aws_iam_notes
+
+What is IAM
+		In the last chapter, we created an IAM user so that 
+
+		Our AWS CLI can operate on our account without using the AWS Console.
+
+		But the IAM concept is used very frequently when dealing with security for AWS services
+
+		The official definition of IAM.
+				AWS Identity and Access Management (IAM) 
+						is a web service that helps you securely control access to AWS resources for your users. 
+
+						You use IAM to control who can use your AWS resources (authentication) and 
+
+						what resources they can use and in what ways (authorization).
+
+		The first thing to notice here is that IAM is a service just like all the other services that AWS has. 
+				But in some ways it helps bring them all together in a secure way. 
+
+		IAM is made up of a few different parts, so let’s start by looking at the first and most basic one.
+
+
+What is an IAM User
+		When you first create an AWS account, you are the root user. 
+									<ROOT>
+				The email address and password you used to create the account is called your root account credentials. 
+						You can use them to sign in to the AWS Management Console. 
+
+				When you do, you have complete, unrestricted access to all resources in your AWS account, 
+						including access to your billing information and the ability to change your password.
+
+				Though it is not a good practice to regularly access your account with this level of access, 
+						it is not a problem when you are the only person who works in your account.
+
+				However, when another person needs to access and manage your AWS account, you definitely don’t want to give out your root credentials.
+
+		You create an IAM user instead.
+								<ROOT> 
+
+								<HAKIM>
+				
+				An IAM user consists of a 
+						name, 
+
+						a password to sign into the AWS Management Console, and 
+
+						up to two access keys that can be used with the API or CLI.
+
+				By default, users can’t access anything in your account. 
+						You grant permissions to a user by creating a policy and attaching the policy to the user. 
+
+						You can grant one or more of these policies to restrict what the user can and cannot access.
+
+What is an IAM Policy?
+		An IAM policy is a rule or set of rules defining the operations allowed/denied to be performed on an AWS resource.
+
+		Policies can be granted in a number of ways:
+				- Attaching a managed policy. AWS provides a list of pre-defined policies such as AmazonS3ReadOnlyAccess. 
+
+				- Attaching an inline policy. An inline policy is a custom policy created by hand.
+				
+				- Adding the user to a group that has appropriate permission policies attached. We’ll look at groups in detail below.
+				
+				- Cloning the permission of an existing IAM user.
+
+		As an example, here is a policy that grants all operations to all S3 buckets.
+				{
+				  "Version": "2012-10-17",
+				  "Statement": {
+				    "Effect": "Allow",
+				    "Action": "s3:*",
+				    "Resource": "*"
+				  }
+				}
+
+		And here is a policy that grants more granular access, only allowing retrieval of files prefixed by the string Bobs- in the bucket called Hello-bucket.
+				{
+				  "Version": "2012-10-17",
+				  "Statement": {
+				    "Effect": "Allow",
+				    "Action": ["s3:GetObject"],
+				    "Resource": "arn:aws:s3:::Hello-bucket/*",
+				    "Condition": {"StringEquals": {"s3:prefix": "Bobs-"}}
+				}
+
+		We are using S3 resources in the above examples. But a policy looks similar for any of the AWS services. It just depends on the resource ARN (Amazon Resource Name) for Resource property. 
+
+		An ARN is an identifier for a resource in AWS. 
+				An Amazon Resource Name (ARN) is a file naming convention used to identify a particular resource in the Amazon Web Services (AWS) public cloud.
+
+		We also add the corresponding service actions and condition context keys in Action and Condition property. 
+				You can find all the available AWS Service actions and condition context keys for use in IAM Policies here: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html
+
+		Aside from attaching a policy to a user, you can attach them to a role or a group.
+
+What is an IAM Role
+		An IAM role is very similar to a user: 
+				it is an identity with permission policies that determine what the identity can and cannot do in AWS.
+
+		Sometimes your AWS resources need to access other resources in your account. 
+				For example, you have a Lambda function that queries your DynamoDB to retrieve some data, process it, and then send Bob an email with the results.
+
+				In this case, we want Lambda to only be able to make read queries so it does not change the database by mistake. 
+
+				We also want to restrict Lambda to be able to email Bob so it does not spam other people.
+
+		While this could be done by 
+				creating an IAM user and putting the user’s credentials to the Lambda function or 
+
+				embeding the credentials in the Lambda code, 
+
+				these are just not secure.
+						If somebody was to get hold of these credentials, they could make those calls on your behalf. 
+
+		This is where IAM role comes in to play.
+
+		An IAM role is very similar to a user, in that it is an identity with permission policies that determine what the identity can and cannot do in AWS.
+				However, a role does not have any credentials (password or access keys) associated with it.
+
+		Instead of being uniquely associated with one person, a role can be taken on by anyone who needs it.
+											<ROOT> 
+
+					<HAKIM> 	<SERVICE in a ROLE>
+				
+		The Lambda function will be assigned with a role to temporarily take on the permission. 
+
+		Roles can be applied to users as well. 
+				In this case, the user is taking on the policy set for the IAM role.
+
+				This is useful for cases where a user is wearing multiple “hats” in the organization. 
+
+				Roles make this easy since you only need to create these roles once and they can be re-used for anybody else that wants to take it on.
+
+		You can also have a role tied to the ARN (Amazon Resource Name) of a user from a different organization. 
+				This allows the external user to assume that role as a part of your organization.
+						This is typically used when you have a third party service that is acting on your AWS Organization. 
+
+				You’ll be asked to create a Cross-Account IAM Role and add the external user as a Trust Relationship. 
+
+				The Trust Relationship is telling AWS that the specified external user can assume this role.
+
+What is an IAM Group
+		An IAM group is simply a collection of IAM users. 
+
+		You can use groups to specify permissions for a collection of users, which can make those permissions easier to manage for those users.
+
+What is an ARN
+		In the last chapter while we were looking at IAM policies we looked at how you can specify a resource using its ARN. Let’s take a better look at what ARN is.
+
+		Amazon Resource Names (ARNs) uniquely identify AWS resources. 
+				We require an ARN when you need to specify a resource unambiguously across all of AWS, 
+						such as in IAM policies, 
+
+						Amazon Relational Database Service (Amazon RDS) tags, and 
+
+						API calls.
+
+		ARN is really just a globally unique identifier for an individual AWS resource. It takes one of the following formats.
+				arn:partition:service:region:account-id:resource
+
+				arn:partition:service:region:account-id:resourcetype/resource 
+
+				arn:partition:service:region:account-id:resourcetype:resource
+
+		Let’s look at some examples of ARN. Note the different formats used.
+				<!-- Elastic Beanstalk application version -->
+				arn:aws:elasticbeanstalk:us-east-1:123456789012:environment/My App/MyEnvironment
+
+				<!-- IAM user name -->
+				arn:aws:iam::123456789012:user/David
+
+				<!-- Amazon RDS instance used for tagging -->
+				arn:aws:rds:eu-west-1:123456789012:db:mysql-db
+
+				<!-- Object in an Amazon S3 bucket -->
+				arn:aws:s3:::my_corporate_bucket/exampleobject.png
+		
+		Finally, let’s look at the common use cases for ARN.
+				1. Communication
+						ARN is used to reference a specific resource when you orchestrate a system involving multiple AWS resources. 
+
+						For example, you have an API Gateway listening for RESTful APIs and invoking the corresponding Lambda function based on the API path and request method. 
+
+						The routing looks like the following.
+								GET /hello_world => arn:aws:lambda:us-east-1:123456789012:function:lambda-hello-world
+
+				2. IAM Policy
+						We had looked at this in detail in the last chapter but here is an example of a policy definition.
+								{
+								  "Version": "2012-10-17",
+								  "Statement": {
+								    "Effect": "Allow",
+								    "Action": ["s3:GetObject"],
+								    "Resource": "arn:aws:s3:::Hello-bucket/*"
+								}	
+
+						ARN is used to define which resource (S3 bucket in this case) the access is granted for. 
+
+						The wildcard * character is used here to match all resources inside the Hello-bucket.
+
+		Next let’s configure our AWS CLI. We’ll be using the info from the IAM user account we created previously.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

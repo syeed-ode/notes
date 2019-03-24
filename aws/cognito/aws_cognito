@@ -1,0 +1,528 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+https://serverless-stack.com/chapters/create-an-s3-bucket-for-file-uploads.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+**************      Create a Cognito User Pool       **************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Our notes app needs to handle user accounts and authentication in a secure and reliable way. To do this we are going to use 'Amazon Cognito'.
+
+Amazon Cognito User Pool makes it easy for developers to add sign-up and sign-in functionality to web and mobile applications.
+
+It serves as your own identity provider to maintain a user directory. 
+
+It supports user registration and sign-in, as well as provisioning identity tokens for signed-in users.
+		In this chapter, we are going to create a User Pool for our notes app.
+
+Create User Pool
+	From your AWS Console, select Cognito from the list of services.
+			Select Manage your User Pools.
+
+			Select Create a User Pool.
+
+			Enter Pool name and select Review defaults.
+					- notes-user-pool
+
+			Select Choose username attributes….
+					And select Email address or phone numbers and Allow email addresses. 
+							This is telling Cognito User Pool that we want our users to be able to sign up and login with their email as their username.
+
+					Scroll down and select Next step.
+
+					Hit 'Review' in the side panel and make sure that the 'Username attributes' is set to 'email'.
+
+					Now hit 'Create pool' at the bottom of the page.
+
+					Your User Pool has been created. Take a note of 
+							the Pool Id, aka User Pool ID, (us-east-2_CuwMY3mpW) and 
+									- us-east-2_CuwMY3mpW
+
+							Pool ARN which will be required later. 
+									- arn:aws:cognito-idp:us-east-2:966118849566:userpool/us-east-2_CuwMY3mpW
+
+							region
+									- us-east-2
+
+							clientId 
+									- 7pf839rut6ji4n1po4qsnt3s3h
+
+					Also, note the region that your User Pool is created in – in our case it’s us-east-1.
+
+Create App Client
+	Select 'App clients' from the left panel.
+			Select Add an app client.
+					Enter App client name, 
+							- notes-app
+
+					un-select 'Generate client secret', 
+							- 'Generate client secret': user pool apps with a client secret are not supported by the JavaScript SDK. We need to un-select the option.
+
+					select 'Enable sign-in API for server-based authentication', then 
+							- Enable sign-in API for server-based authentication: required by AWS CLI when managing the pool users via command line interface. 
+
+							- We will be creating a test user through the command line interface in the next chapter
+
+					select Create app client. 
+							Your app client has been created. Take note of the App client id which will be required in the later chapters.
+
+Create Domain Name
+	Finally, select Domain name from the left panel. Enter your unique domain name and select Save changes. In our case we are using 'syeedode-notes-app'.
+			https://syeedode-notes-app.auth.us-east-2.amazoncognito.com
+
+	Now our Cognito User Pool is ready. 
+			It will maintain a user directory for our notes app. 
+
+			It will also be used to authenticate access to our API. 
+
+	Next let’s set up a test user within the pool.
+
+Create a Cognito Test User (https://serverless-stack.com/chapters/create-a-cognito-test-user.html)
+	We are going to create a test user for our Cognito User Pool. 
+
+	We are going to need this user to test the authentication portion of our app later.
+
+	Create User
+		First, we will use AWS CLI to sign up a user with their email and password.
+					aws cognito-idp sign-up \
+			  --region YOUR_COGNITO_REGION \
+			  --client-id YOUR_COGNITO_APP_CLIENT_ID \
+			  --username admin@example.com \
+			  --password Passw0rd!
+
+					$ aws syeedode-notes-app sign-up \
+					>   --region us-east-2 \
+					>   --client-id 7pf839rut6ji4n1po4qsnt3s3h \
+					>   --username admin@example.com \
+					>   --password Passw0rd!
+
+					Invalid endpoint: https://cognito-idp.YOUR_COGNITO_REGION.amazonaws.com
+
+					YOUR_COGNITO_APP_CLIENT_ID = 7pf839rut6ji4n1po4qsnt3s3h
+
+					$ aws cognito-idp sign-up --region us-east-2 --client-id 7pf839rut6ji4n1po4qsnt3s3h --username admin@example.com --password Passw0rd!
+					{
+					    "UserConfirmed": false,
+					    "CodeDeliveryDetails": {
+					        "Destination": "a***@e***.com",
+					        "DeliveryMedium": "EMAIL",
+					        "AttributeName": "email"
+					    },
+					    "UserSub": "09918642-d56b-480e-ab54-e2458d7d0583"
+					}
+
+		Now, the user is created in Cognito User Pool.
+				However, before the user can authenticate with the User Pool, the account needs to be verified. 
+
+		Let’s quickly verify the user using an administrator command.
+
+		In your terminal, run.
+				$ aws cognito-idp admin-confirm-sign-up --region us-east-2 --user-pool-id us-east-2_CuwMY3mpW --username admin@example.com
+				$ 
+
+		Now our test user is ready. 
+
+		Next, let’s set up the Serverless Framework to create our backend APIs. 
+
+*******************************************************************
+https://serverless-stack.com/chapters/create-a-cognito-identity-pool.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+***********      Create a Cognito Identity Pool       *************
+*******************************************************************
+Now that we have deployed our backend API; we almost have all the pieces we need for our backend. 
+		
+We have the User Pool that is going to store all of our users and help sign in and sign them up. 
+		We also have an S3 bucket that we will use to help our users upload files as attachments for their notes. 
+
+		The final piece that ties all these services together in a secure way is called Amazon Cognito Federated Identities.
+
+Amazon Cognito Federated Identities enables developers to create unique identities for your users and authenticate them with federated identity providers.
+		With a federated identity, you can obtain temporary, limited-privilege AWS credentials 
+				to securely access other AWS services such as 
+						Amazon DynamoDB, 
+
+						Amazon S3, and 
+
+						Amazon API Gateway.
+
+We are going to create a federated Cognito Identity Pool.
+		We will be using our User Pool as the identity provider. We could also use 
+				User Pool, 
+
+				Facebook, 
+
+				Google, or 
+
+				our own custom identity provider
+
+		Once a user is authenticated via our User Pool, 
+				the Identity Pool will attach an IAM Role to the user. 
+
+				We will define a policy for this IAM Role to grant access to the S3 bucket and our API. 
+
+				This is the Amazon way of securing your resources.
+
+		Let's get started
+
+Create Pool
+	https://966118849566.signin.aws.amazon.com/console
+	
+	From your AWS Console and select Cognito from the list of services.
+
+	Select 'Manage Federated Identities'.
+			Enter an 'Identity pool name'. 
+					- user_notes identity pool
+
+					If you have any existing Identity Pools, you’ll need to click the 'Create new identity pool' button.
+							See /Users/syeedode/java_projects/notes/aws/cognito/aws_cognito
+
+					Select Authentication providers. 
+							Under Cognito tab, 
+									enter User Pool ID and 
+											YOUR_COGNITO_USER_POOL_ID = (us-east-2_CuwMY3mpW)
+
+									App Client ID of the User Pool created in the Create a Cognito user pool chapter. 
+											YOUR_COGNITO_USER_POOL_ID = (us-east-2_CuwMY3mpW)
+
+											YOUR_COGNITO_APP_CLIENT_ID = (7pf839rut6ji4n1po4qsnt3s3h)
+
+											YOUR_COGNITO_REGION = east-2
+
+											YOUR_IDENTITY_POOL_ID = {us-east-2:f25f7fcc-83fb-43fa-b1ec-5bc55e0ad338}
+
+											YOUR_API_GATEWAY_URL = https://wqj608qtc6.execute-api.us-east-2.amazonaws.com
+											
+											YOUR_API_GATEWAY_REGION = us-east-2
+
+											YOUR_API_GATEWAY_ID = wqj608qtc6
+
+
+					Select Create Pool.
+
+			I got this response from AWS
+					Assigning a role to your application end users helps you restrict access to your AWS resources. 
+
+					Amazon Cognito integrates with Identity and Access Management (IAM) and 
+							lets you select specific roles for both 
+									your authenticated and 
+
+									unauthenticated identities. 
+
+									Learn more about IAM: https://aws.amazon.com/iam/
+
+					By default, Amazon Cognito creates a new role with limited permissions 
+							End users only have access to Cognito Sync and Mobile Analytics. 
+
+					You can modify the roles if your application needs access to other AWS resources, such as 
+							S3 or 
+
+							DynamoDB.
+
+			So, now, we need to specify what AWS resources are accessible for users with temporary credentials obtained from the Cognito Identity Pool.
+
+			authenticated users 
+					Select View Details.
+							Two Role Summary sections are expanded. 
+
+							The top section summarizes the permission policy for authenticated users, and 
+
+							The bottom section summarizes that for unauthenticated users.
+
+			Select View Policy Document in the top section. Then select Edit.
+					Add the following policy into the editor. 
+							{
+							  "Version": "2012-10-17",
+							  "Statement": [
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "mobileanalytics:PutEvents",
+							        "cognito-sync:*",
+							        "cognito-identity:*"
+							      ],
+							      "Resource": [
+							        "*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "s3:*"
+							      ],
+							      "Resource": [
+							        "arn:aws:s3:::YOUR_S3_UPLOADS_BUCKET_NAME/private/${cognito-identity.amazonaws.com:sub}/*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "execute-api:Invoke"
+							      ],
+							      "Resource": [
+							        "arn:aws:execute-api:YOUR_API_GATEWAY_REGION:*:YOUR_API_GATEWAY_ID/*/*/*"
+							      ]
+							    }
+							  ]
+							}
+
+					Replace YOUR_S3_UPLOADS_BUCKET_NAME with the bucket name from the Create an S3 bucket for file uploads chapter.
+							ARN: arn:aws:s3:::usernotes-app-uploads
+							ARN: notes-app-api-prod-serverlessdeploymentbucket-mdwjaitkbqgu
+
+					And replace the YOUR_API_GATEWAY_REGION and 
+							ID: us-east-2
+
+					YOUR_API_GATEWAY_ID with the ones that you get after you deployed your API in the last chapter.
+							YOUR_API_GATEWAY_REGION: us-east-2
+							YOUR_API_GATEWAY_ID: wqj608qtc6 
+
+							See /Users/syeedode/java_projects/notes/aws/s3/aws_s3Bucket
+							{
+							  "Version": "2012-10-17",
+							  "Statement": [
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "mobileanalytics:PutEvents",
+							        "cognito-sync:*",
+							        "cognito-identity:*"
+							      ],
+							      "Resource": [
+							        "*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "s3:*"
+							      ],
+							      "Resource": [
+							        "arn:aws:s3:::usernotes-app-uploads/private/${cognito-identity.amazonaws.com:sub}/*",
+							        "arn:aws:s3:::notes-app-api-prod-serverlessdeploymentbucket-mdwjaitkbqgu/private/${cognito-identity.amazonaws.com:sub}/*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "execute-api:Invoke"
+							      ],
+							      "Resource": [
+							        "arn:aws:execute-api:us-east-2:*:wqj608qtc6/*/*/*"
+							      ]
+							    }
+							  ]
+							}
+
+					A quick note on the block that relates to the S3 Bucket. 
+							In the above policy we are granting our logged in users access to the path private/${cognito-identity.amazonaws.com:sub/}/. 
+									Where cognito-identity.amazonaws.com:sub is the authenticated user’s federated identity ID (their user id).
+
+							So a user has access to only their folder within the bucket. 
+
+							This is how we are securing the uploads for each user.
+
+			So in summary we are telling AWS that an authenticated user has access to two resources.
+					1. Files in the S3 bucket that are inside a folder with their federated identity id as the name of the folder.
+
+					2. And, the APIs we deployed using API Gateway.
+
+			One other thing to note is that the federated identity id is a UUID that is assigned by our Identity Pool. 
+					This is the id (event.requestContext.identity.cognitoIdentityId) that we were using as our user id back when we were creating our APIs.
+
+			Select Allow.
+
+	Get AWS Credentials (from credentials)
+			// Initialize the Amazon Cognito credentials provider
+			CognitoCachingCredentialsProvider credentialsProvider = 
+					new CognitoCachingCredentialsProvider(
+		 			    getApplicationContext()
+		 			      // Identity pool ID
+		 			    , "us-east-2:f25f7fcc-83fb-43fa-b1ec-5bc55e0ad338"
+		 			      // Region
+		 			    , Regions.US_EAST_2 
+					);
+
+	Our Cognito Identity Pool should now be created. Let’s find out the Identity Pool ID.
+			Select 'Dashboard' from the left panel, then select 'Edit identity pool'.
+					Identity pool ID us-east-2:f25f7fcc-83fb-43fa-b1ec-5bc55e0ad338
+
+	Now before we test our serverless API let’s take a quick look at the 
+			Cognito User Pool and 
+
+			Cognito Identity Pool 
+
+	Make sure we’ve got a good idea of the two concepts and the differences between them.
+
+*******************************************************************
+https://serverless-stack.com/chapters/cognito-user-pool-vs-identity-pool.html
+*******************************************************************
+*******************************************************************
+So in summary; the Cognito User Pool stores all your users which then plugs into your Cognito Identity Pool which can give your users access to your AWS services.
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+**********      Cognito User Pool vs Identity Pool       **********
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+We often get questions about the differences between 
+		the Cognito User Pool and 
+
+		the Identity Pool
+
+		The two can seem a bit similar in function and it is not entirely clear what they are for. 
+
+		Let’s first start with the official definitions for the Cognito User Pool.
+				Cognito User Pool makes it easy for developers to 
+						add sign-up and sign-in functionality to web and mobile applications. 
+
+						It serves as your own identity provider 
+								to maintain a user directory. 
+
+						It supports user registration and sign-in 
+								
+						As well as provisioning identity tokens for signed-in users.
+
+		The Cognito Federated Identities or Identity Pool is:
+				Cognito Federated Identities enables developers to 
+						create unique identities for your users and 
+
+						authenticate them with federated identity providers. 
+
+						With a federated identity, you can 
+								obtain temporary, limited-privilege AWS credentials to 
+										securely access other AWS services such as 
+												Amazon DynamoDB, 
+
+												Amazon S3, and 
+
+												Amazon API Gateway.
+
+		Unfortunately they are both a bit vague and confusingly similar. 
+
+		Here is a more practical description of what they are.
+
+User Pool
+	Say you were creating a new web or mobile app and you were thinking about how to handle 
+			user registration, 
+
+			authentication, and 
+
+			account recovery.
+
+	This is where Cognito User Pools would come in. 
+
+	Cognito User Pool handles all of this and as a 
+
+	Developer you just need to use the SDK to retrieve user related information.
+
+Identity Pool
+	Cognito Identity Pool (or Cognito Federated Identities) on the other hand is a way to 
+			authorize your users to use the various AWS services
+
+	Say you wanted to allow a user to 
+			have access to your S3 bucket so that they could upload a file; 		
+			you could specify that while creating an Identity Pool. 
+
+			And to create these levels of access, 
+					the Identity Pool has its own concept of an identity (or user). 
+
+					The source of these identities (or users) could be a Cognito User Pool or even Facebook or Google.
+
+User Pool vs Identity Pool
+	To clarify this a bit more, let’s put these two services in context of each other. 
+
+	Here is how they play together.	
+
+Identity Providers:
+	Developer 
+	Provided
+
+
+	Cognito User Pool 	--->  Cognito Identy Pool 	--->  	AWS Resources
+
+
+	Social Identity
+	Provides
+
+
+	Notice how we could use the 
+			User Pool, 
+
+			social networks, or 
+
+			even our own custom authentication system 
+	as the identity provider for the Cognito Identity Pool.
+			The Cognito Identity Pool simply takes all your identity providers and puts them together (federates them). 
+
+	And with all of this it can now give your users secure access to your AWS services, regardless of where they come from.
+	
+	So in summary; the Cognito User Pool stores all your users which then plugs into your Cognito Identity Pool which can give your users access to your AWS services.		
+
+	Now that we have a good understanding of how our users will be handled, let’s finish up our backend by testing our APIs.
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

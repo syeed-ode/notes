@@ -1,0 +1,455 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+https://serverless-stack.com/chapters/setup-bootstrap.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+******************      Set up Bootstrap       ********************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+A big part of writing web applications is having a UI Kit to help create the interface of the application.
+		We are going to use Bootstrap for our note taking app. 
+				https://getbootstrap.com/
+
+		While Bootstrap can be used directly with React; 
+				the preferred way is to use it with the React-Bootstrap package.
+						https://react-bootstrap.github.io/ 
+
+				This makes our markup a lot simpler to implement and understand.
+
+Installing React Bootstrap
+	Run the following command in your working directory.
+			$ npm install react-bootstrap@0.32.4 --save
+				npm WARN ts-pnp@1.0.1 requires a peer of typescript@* but none is installed. You must install peer dependencies yourself.
+
+				+ react-bootstrap@0.32.4
+				added 13 packages from 8 contributors and audited 36306 packages in 7.499s
+				found 63 low severity vulnerabilities
+				  run `npm audit fix` to fix them, or `npm audit` for details
+
+	This installs the NPM package and adds the dependency to your package.json.
+
+Add Bootstrap Styles
+	React Bootstrap uses the standard Bootstrap v3 styles; so just add the following styles to your 'public/index.html'.
+			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+			We’ll also tweak the styles of the form fields so that the mobile browser does not zoom in on them on focus. 
+					We just need them to have a minimum font size of 16px to prevent the zoom.
+
+			To do that, let’s add the following to our src/index.css.
+					select.form-control,
+					textarea.form-control,
+					input.form-control {
+					  font-size: 16px;
+					}
+					input[type=file] {
+					  width: 100%;
+					}
+						
+
+			
+			We are also setting the width of the input type file to prevent the page on mobile from overflowing and adding a scrollbar.
+
+			Now if you head over to your browser, you might notice that the styles have shifted a bit. 
+					This is because Bootstrap includes Normalize.css to have a more consistent styles across browsers.
+							http://necolas.github.io/normalize.css/
+
+			Next, we are going to create a few routes for our application and set up the React Router.
+
+
+*******************************************************************
+https://serverless-stack.com/chapters/handle-routes-with-react-router.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+**********      Handle Routes with React Router       *************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Create React App sets a lot of things up by default but it does not come with a built-in way to handle routes. 
+
+And since we are building a single page app, we are going to use React Router to handle them for us.
+		https://reacttraining.com/react-router/
+
+Let’s start by installing React Router. We are going to be using the React Router v4, the newest version of React Router. 
+
+React Router v4 can be used on the web and in native. So let’s install the one for the web.
+
+Installing React Router v4
+	Run the following command in your working directory.
+		notes-app-client$ npm install react-router-dom --save
+				npm WARN ts-pnp@1.0.1 requires a peer of typescript@* but none is installed. You must install peer dependencies yourself.
+
+				+ react-router-dom@5.0.0
+				added 19 packages from 89 contributors and audited 36371 packages in 8.119s
+				found 63 low severity vulnerabilities
+				  run `npm audit fix` to fix them, or `npm audit` for details
+
+	This installs the NPM package and adds the dependency to your package.json.
+
+Setting up React Router
+	Even though we don’t have any routes set up in our app, we can get the basic structure up and running. 
+
+	Our app currently runs from the App component in 'src/App.js'. 
+			We are going to be using this component as the container for our entire app. 
+
+			To do that we’ll encapsulate our 'App' component within a 'Router'.
+
+			Replace the following code in src/index.js:
+					ReactDOM.render(<App />, document.getElementById('root'));
+			with this:
+					ReactDOM.render(
+					  <Router>
+					    <App />
+					  </Router>,
+					  document.getElementById("root")
+					);			
+
+			Added this import header to 'src/index.js'.					
+					import { BrowserRouter as Router } from "react-router-dom";
+
+	We’ve made two small changes here.
+			1. Use BrowserRouter as our router. This uses the browser’s History API to create real URLs.
+					https://developer.mozilla.org/en-US/docs/Web/API/History
+
+			2. Use the Router to render our App component. 
+					This will allow us to create the routes we need inside our App component.
+
+	Now if you head over to your browser, your app should load just like before. The only difference being that we are using React Router to serve out our pages.
+
+	Next we are going to look into how to organize the different pages of our app.
+	
+
+*******************************************************************
+https://serverless-stack.com/chapters/create-containers.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+******************      Create Containers       *******************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Currently, our app has a single component that renders our content. 
+		For creating our note taking app, we need to create a few different pages to load/edit/create notes.
+
+		Before we can do that we will 
+				put the outer chrome of our app inside a component and 
+				
+				render all the top level components inside them.
+
+		These top level components that represent the various pages will be called containers.
+
+Add a Navbar
+	Let’s start by creating the outer chrome of our application by first adding a navigation bar to it. 
+
+	We are going to use the Navbar React-Bootstrap component.
+			https://react-bootstrap.github.io/components/navbar/
+
+	To start, you can go remove the 'src/logo.svg' that is placed there by Create React App.
+			$ rm src/logo.svg
+
+	And go ahead and remove the code inside src/App.js and replace it with the following.
+				import React, { Component } from "react";
+				import { Link } from "react-router-dom";
+				import { Navebar } from "react-bootstrap";
+				import "./App.css";
+
+				class App extends Component {
+				  render() {
+				    return(
+				      <div className="App container">
+				        <Navbar fluid collapseOnSelect>
+				          <Navbar.Header>
+				            <Navbar.Brand>
+				              <Link to="/">Scratch</Link>
+				            </Navbar.Brand>
+				            <Navbar.Toggle />
+				          </Navbar.Header>
+				        </Navbar>
+				      </div>
+				    );
+				  }
+				}
+
+				export default App;
+
+	We are doing a few things here:
+			1. Creating a fixed width container using Bootstrap in div.container.
+			2. Adding a Navbar inside the container that fits to its container’s width using the attribute 'fluid'.
+			3. Using Link component from the React-Router to handle the link to our app’s homepage (without forcing the page to refresh).
+
+	Let’s also add a couple of line of styles to space things out a bit more.
+	
+	Remove all the code inside src/App.css and replace it with the following:
+			.App {
+			  margin-top: 15px;
+			}
+
+			.App .navbar-brand {
+			  font-weight: bold;
+			}
+
+Add the Home container
+	Now that we have the outer chrome of our application ready, let’s add the container for the homepage of our app. 
+			It’ll respond to the '/'route.
+
+	Create a src/containers/ directory by running the following in your working directory.
+			We’ll be storing all of our top level components here. 
+
+	These are components that will respond to our routes and make requests to our API. 
+
+	We will be calling them containers through the rest of this tutorial.
+
+	Create a new container and add the following to 'src/containers/Home.js'.
+			import React, { Component } from "react";
+			import "./Home.css";
+
+			export default class Home extends Component {
+			    render() {
+			        return(
+			            <div className="Home">
+			                <div className="lander">
+			                    <h1>Scratch</h1>
+			                    <p>Note taking home container</p>
+			                </div>
+			            </div>
+			        );
+			    }
+			}
+
+	Add the following into 'src/containers/Home.css'
+			.Home .lander {
+			    padding: 80px 0;
+			    text-align: center;
+			}
+
+			.Home .lander h1 {
+			    font-family: "Open Sans", sans-serif;
+			    font-weight: 600;
+			}
+
+			.Home .lander p {
+			    color: #999;
+			}
+
+Set up the Routes
+	Now we’ll set up the routes so that we can have this container respond to the '/' route.
+
+	Create 'src/Routes.js' and add the following into it.
+			import React from "react";
+			import { Route, Switch } from "react-router-dom";
+			import Home from "./containers/Home";
+
+			export default () =>
+			    <Switch>
+			        <Route path="/" exact component={Home} />
+			    </Switch>;
+
+	This component uses this 'Switch' component from React-Router that renders the first matching route that is defined within it. 
+			For now we only have a single route, it looks for '/' and renders the 'Home' component when matched.
+
+			We are also using the 'exact' prop to ensure that it matches the '/' route exactly. 
+
+			This is because the path / will also match any route that starts with a /.
+
+Render the Routes
+	Now let’s render the routes into our App component.
+
+	Add the following to the header of your 'src/App.js'.
+			import Routes from "./Routes";
+
+	And add the following line below our Navbar component inside the render of 'src/App.js'.
+			<Routes />
+
+	So the render method of our 'src/App.js' should now look like this.
+			render() {
+			  return (
+			    <div className="App container">
+			      <Navbar fluid collapseOnSelect>
+			        <Navbar.Header>
+			          <Navbar.Brand>
+			            <Link to="/">Scratch</Link>
+			          </Navbar.Brand>
+			          <Navbar.Toggle />
+			        </Navbar.Header>
+			      </Navbar>
+			      <Routes />
+			    </div>
+			  );
+			}
+				
+	This ensures that as we navigate to different routes in our app, the portion below the navbar will change to reflect that.
+
+	Next we are going to add login and signup links to our navbar.
+
+
+*******************************************************************
+https://serverless-stack.com/chapters/adding-links-in-the-navbar.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+**************      Adding Links in the Navbar       **************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Now that we have our first route set up, let’s add a couple of links to the navbar of our app.
+
+These will direct users to login or signup for our app when they first visit it.
+
+Replace the render method in 'src/App.js' with the following.
+          <Navbar.Collapse>
+            <Nav pullRight>
+              <NavItem href="/signup">Signup</NavItem>
+              <NavItem href="/login">Login</NavItem>
+            </Nav>
+          </Navbar.Collapse>
+
+This adds two links to our navbar using the 'NavItem' Bootstrap component. 
+
+The 'Navbar.Collapse' component ensures that on mobile devices the two links will be collapsed.
+
+And let’s include the necessary components in the header.
+
+Replace the react-router-dom and react-bootstrap import in src/App.js with this.
+		import { Link } from "react-router-dom";
+		import { Nav, Navbar, NavItem } from "react-bootstrap";
+
+Now if you flip over to your browser, you should see the two links in our navbar.
+
+Unfortunately, when you click on them they refresh your browser while redirecting to the link. 
+		We need it to route it to the new link without refreshing the page since we are building a single page app.
+
+To fix this we need a component that works with React Router and React Bootstrap called React Router Bootstrap. 
+		https://github.com/react-bootstrap/react-router-bootstrap
+
+		It can wrap around your Navbar links and use the React Router to route your app to the required link without refreshing the browser.
+
+		Run the following command in your working directory.
+				$ npm install react-router-bootstrap --save
+					npm WARN ts-pnp@1.0.1 requires a peer of typescript@* but none is installed. You must install peer dependencies yourself.
+
+					+ react-router-bootstrap@0.24.4
+					added 1 package from 1 contributor in 6.76s
+
+		And include it at the top of your 'src/App.js'.			
+				import { LinkContainer } from "react-router-bootstrap";
+
+		We will now wrap our links with the 'LinkContainer'. Replace the 'render' method in your 'src/App.js with this'.
+				render() {
+				  return (
+				    <div className="App container">
+				      <Navbar fluid collapseOnSelect>
+				        <Navbar.Header>
+				          <Navbar.Brand>
+				            <Link to="/">Scratch</Link>
+				          </Navbar.Brand>
+				          <Navbar.Toggle />
+				        </Navbar.Header>
+				        <Navbar.Collapse>
+				          <Nav pullRight>
+				            <LinkContainer to="/signup">
+				              <NavItem>Signup</NavItem>
+				            </LinkContainer>
+				            <LinkContainer to="/login">
+				              <NavItem>Login</NavItem>
+				            </LinkContainer>
+				          </Nav>
+				        </Navbar.Collapse>
+				      </Navbar>
+				      <Routes />
+				    </div>
+				  );
+				}
+
+And that’s it! Now if you flip over to your browser and click on the login link, you should see the link highlighted in the navbar. 
+
+Also, it doesn’t refresh the page while redirecting.
+
+You’ll notice that we are not rendering anything on the page because we don’t have a login page currently. 
+		We should handle the case when a requested page is not found.
+
+Next let’s look at how to tackle handling 404s with our router.
+
+*******************************************************************
+https://serverless-stack.com/chapters/handle-404s.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+*********************      Handle 404s       **********************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Now that we know how to handle the basic routes; let’s look at handling 404s with the React Router.
+
+Create a Component
+	Let’s start by creating a component that will handle this for us.
+
+	Create a new component at 'src/containers/NotFound.js' and add the following.
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

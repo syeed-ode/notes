@@ -1,0 +1,400 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+https://serverless-stack.com/chapters/add-a-create-note-api.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+****************      Add a Create Note API       *****************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Let’s get started on our backend by first adding an API to create a note.
+
+This API will take the note object as the input and store it in the database with a new id. 
+		The note object will contain the content field (the content of the note) and 
+
+		an attachment field (the URL to the uploaded file).
+
+Add the Function
+	Create a new file called create.js in our project root with the following.
+
+	There are some helpful comments in the code but we are doing a few simple things here.
+			- The AWS JS SDK assumes the region based on the current region of the Lambda function. 
+					So if your DynamoDB table is in a different region, 
+							make sure to set it by calling 
+
+							'AWS.config.update({ region: "my-region" });' 
+									before initilizing the DynamoDB client.
+
+			- Parse the input from the 'event.body'. This represents the HTTP request parameters.
+
+			- The userId is a Federated Identity id that comes in as a part of the request. This is set after our user has been authenticated via the User Pool. 
+					We are going to expand more on this in the coming chapters when we set up our Cognito Identity Pool. 
+
+					However, if you want to use the user’s User Pool user Id; take a look at the Mapping Cognito Identity Id and User Pool Id chapter.
+							https://serverless-stack.com/chapters/mapping-cognito-identity-id-and-user-pool-id.html
+
+			- Make a call to DynamoDB to put a new object with a generated 'noteId' and the current date as the 'createdAt'.
+
+			- Upon success, return the newly created note object with the HTTP status code 200 and response headers to enable CORS (Cross-Origin Resource Sharing).
+
+			- And if the DynamoDB call fails then return an error with the HTTP status code 500.
+
+Configure the API Endpoint
+	Open the serverless.yml file and replace it with the following.
+			Here we are adding our newly added create function to the configuration.
+
+			We specify that it handles post requests at the '/notes' endpoint.
+
+			This pattern of using a single Lambda function to respond to a single HTTP event is very much like the Microservices architecture.
+					See https://en.wikipedia.org/wiki/Microservices.
+
+					https://serverless-stack.com/chapters/organizing-serverless-projects.html
+
+			We set CORS support to true. 
+					This is because our frontend is going to be served from a different domain. 
+
+			As the authorizer we are going to restrict access to our API based on the user’s IAM credentials. 
+					We will touch on this and how our User Pool works with this, in the Cognito Identity Pool chapter.
+
+			The 'iamRoleStatements' section is telling AWS which resources our Lambda functions have access to. 
+					In this case we are saying that our Lambda functions can carry out the above listed actions on DynamoDB. 
+
+					We specify DynamoDB using 'arn:aws:dynamodb:us-east-1:*:*'. 
+							This is roughly pointing to every DynamoDB table in the us-east-1 region.
+
+							We can be more specific here by specifying the table name but we’ll leave this as an exercise for the reader.
+
+							Just make sure to use the region that the DynamoDB table was created in, as this can be a common source of issues later on.
+
+Test
+	In our project root, create a 'mocks/' directory.
+
+	Create a mocks/create-event.json file and add the following.
+			{
+			  "body": "{\"content\":\"hello world\",\"attachment\":\"hello.jpg\"}",
+			  "requestContext": {
+			    "identity": {
+			      "cognitoIdentityId": "USER-SUB-1234"
+			    }
+			  }
+			}
+
+	Run the following command to get an error:
+			$ serverless invoke local --function create --path mocks/create-event.json
+			 
+			  Serverless Error ---------------------------------------
+			 
+			  Function "create" doesn't exist in this Service
+			 
+			  Get Support --------------------------------------------
+			     Docs:          docs.serverless.com
+			     Bugs:          github.com/serverless/serverless/issues
+			     Issues:        forum.serverless.com
+			 
+			  Your Environment Information -----------------------------
+			     OS:                     darwin
+			     Node Version:           10.15.3
+			     Serverless Version:     1.38.0
+			 
+    To fix this error change
+			functions:
+			  # Defines an HTTP API endpoint that calls the main function
+			  # in create.js
+			  # - path: url path is /notes
+			  # - method: POST request
+			  # - cors: enabled CORS (Cross-Origin Resource Sharing)
+			  #     for browser cross domain api call
+			  # - authorizer: authenticate using the AWS IAM role
+			  hello:
+			    handler: create.main
+	to
+			functions:
+			  # Defines an HTTP API endpoint that calls the main function
+			  # in create.js
+			  # - path: url path is /notes
+			  # - method: POST request
+			  # - cors: enabled CORS (Cross-Origin Resource Sharing)
+			  #     for browser cross domain api call
+			  # - authorizer: authenticate using the AWS IAM role
+			  create:
+			    handler: create.main
+			    events:
+			      - http:
+
+  	note the 'hello' changed to 'create'.
+			$ serverless invoke local --function create --path mocks/create-event.json
+			Serverless: Bundling with Webpack...
+			Time: 799ms
+			Built at: 03/11/2019 3:55:07 AM
+			        Asset      Size  Chunks             Chunk Names
+			    create.js  7.17 KiB  create  [emitted]  create
+			create.js.map  6.88 KiB  create  [emitted]  create
+			Entrypoint create = create.js create.js.map
+			[./create.js] 2.08 KiB {create} [built]
+			[aws-sdk] external "aws-sdk" 42 bytes {create} [built]
+			[babel-runtime/core-js/json/stringify] external "babel-runtime/core-js/json/stringify" 42 bytes {create} [built]
+			[source-map-support/register] external "source-map-support/register" 42 bytes {create} [built]
+			[uuid] external "uuid" 42 bytes {create} [built]
+			{
+			    "statusCode": 200,
+			    "headers": {
+			        "Access-Control-Allow-Origin": "*",
+			        "Access-Control-Allow-Credentials": true
+			    },
+			    "body": "{\"userId\":\"USER-SUB-1234\",\"noteId\":\"fcb89860-43d2-11e9-8faf-159094bc9095\",\"content\":\"hello world\",\"attachment\":\"hello.jpg\",\"createdAt\":1552290907366}"
+			}
+			$ date -r 1552290907
+			Mon Mar 11 03:55:07 EDT 2019
+
+Refactor Our Code
+	Before we move on to the next chapter, let’s quickly refactor the code since we are going to be doing much of the same for all of our APIs.
+
+	In our project root, create a libs/ directory.
+			And create a libs/response-lib.js file.
+
+			Again inside libs/, create a dynamodb-lib.js file.
+
+			Now, we’ll go back to our create.js and use the helper functions we created. Replace our create.js with the following.
+
+	We are also using the async/await pattern here to refactor our Lambda function. 
+			This allows us to return once we are done processing; instead of using the callback function.
+
+			$ serverless invoke local --function create --path mocks/create-event.json
+			Serverless: Bundling with Webpack...
+			Time: 527ms
+			Built at: 03/11/2019 5:04:06 AM
+			        Asset      Size  Chunks             Chunk Names
+			    create.js   4.6 KiB  create  [emitted]  create
+			create.js.map  3.52 KiB  create  [emitted]  create
+			Entrypoint create = create.js create.js.map
+			[./create.js] 821 bytes {create} [built] [failed] [1 error]
+
+			ERROR in ./create.js
+			Module build failed (from ./node_modules/babel-loader/lib/index.js):
+			SyntaxError: await is a reserved word (40:4)
+
+			  38 |     // processing; instead of using the callback
+			  39 |     // function.
+			> 40 |     await dynamoDbLib.call("put", params);
+			     |     ^
+			  41 |     
+			  42 |     return success(params.Item);
+			  43 |   } catch (e) {
+
+			 
+			  Error --------------------------------------------------
+			 
+			  Webpack compilation error, see above
+			 
+			     For debugging logs, run again after setting the "SLS_DEBUG=*" environment variable.
+			 
+			  Get Support --------------------------------------------
+			     Docs:          docs.serverless.com
+			     Bugs:          github.com/serverless/serverless/issues
+			     Issues:        forum.serverless.com
+			 
+			  Your Environment Information -----------------------------
+			     OS:                     darwin
+			     Node Version:           10.15.3
+			     Serverless Version:     1.38.0
+			 
+
+ 	Update your code to use the async keyword before the function keyword:
+			$ serverless invoke local --function create --path mocks/create-event.json
+			Serverless: Bundling with Webpack...
+			Time: 672ms
+			Built at: 03/11/2019 5:08:17 AM
+			        Asset      Size  Chunks             Chunk Names
+			    create.js  10.8 KiB  create  [emitted]  create
+			create.js.map  8.84 KiB  create  [emitted]  create
+			Entrypoint create = create.js create.js.map
+			[./create.js] 3 KiB {create} [built]
+			[./libs/dynamodb-lib.js] 474 bytes {create} [built]
+			[./libs/response-lib.js] 800 bytes {create} [built]
+			[aws-sdk] external "aws-sdk" 42 bytes {create} [built]
+			[babel-runtime/core-js/json/stringify] external "babel-runtime/core-js/json/stringify" 42 bytes {create} [built]
+			[babel-runtime/helpers/asyncToGenerator] external "babel-runtime/helpers/asyncToGenerator" 42 bytes {create} [built]
+			[babel-runtime/regenerator] external "babel-runtime/regenerator" 42 bytes {create} [built]
+			[source-map-support/register] external "source-map-support/register" 42 bytes {create} [built]
+			[uuid] external "uuid" 42 bytes {create} [built]
+			{
+			    "statusCode": 200,
+			    "headers": {
+			        "Access-Control-Allow-Origin": "*",
+			        "Access-Control-Allow-Credentials": true
+			    },
+			    "body": "{\"userId\":\"USER-SUB-1234\",\"noteId\":\"35a092e0-43dd-11e9-83b6-6f41fa6fdab4\",\"content\":\"hello world\",\"attachment\":\"hello.jpg\",\"createdAt\":1552295297807}"
+			}
+
+
+*******************************************************************
+https://serverless-stack.com/chapters/add-a-get-note-api.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+*****************      Add a Get Note API       *******************
+*******************************************************************
+Now that we created a note and saved it to our database. Let’s add an API to retrieve a note given its id.
+
+Add the Function
+	Create a new file get.js and the following code.
+
+	This follows exactly the same structure as our previous create.js function.
+
+	The major difference here is that we are doing a 'dynamoDbLib.call('get', params)' to get a note object given the 'noteId' and 'userId' that is passed in through the request.
+
+Configure the API Endpoint
+	Open the serverless.yml file and append the following to it.
+		  get:
+		    # Defines an HTTP API endpoint that calls the main function in get.js
+		    # - path: url path is /notes/{id}
+		    # - method: GET request
+		    handler: get.main
+		    events:
+		      - http:
+		          path: notes/{id}
+		          method: get
+		          cors: true
+		          authorizer: aws_iam
+
+Test
+	Create a 'mocks/get-event.json' file and add the following.
+			{
+			  "pathParameters": {
+			    "id": "578eb840-f70f-11e6-9d1a-1359b3b22944"
+			  },
+			  "requestContext": {
+			    "identity": {
+			      "cognitoIdentityId": "USER-SUB-1234"
+			    }
+			  }
+			}
+	First time through received this: 
+			$ serverless invoke local --function get --path mocks/get-event.json
+			Serverless: Bundling with Webpack...
+			Time: 750ms
+			Built at: 03/11/2019 6:21:35 AM
+			     Asset      Size  Chunks             Chunk Names
+			    get.js  10.7 KiB     get  [emitted]  get
+			get.js.map  7.31 KiB     get  [emitted]  get
+			Entrypoint get = get.js get.js.map
+			[./get.js] 3.16 KiB {get} [built]
+			[./libs/dynamodb-lib.js] 474 bytes {get} [built]
+			[./libs/response-lib.js] 800 bytes {get} [built]
+			[aws-sdk] external "aws-sdk" 42 bytes {get} [built]
+			[babel-runtime/core-js/json/stringify] external "babel-runtime/core-js/json/stringify" 42 bytes {get} [built]
+			[babel-runtime/helpers/asyncToGenerator] external "babel-runtime/helpers/asyncToGenerator" 42 bytes {get} [built]
+			[babel-runtime/regenerator] external "babel-runtime/regenerator" 42 bytes {get} [built]
+			[source-map-support/register] external "source-map-support/register" 42 bytes {get} [built]
+			{
+			    "statusCode": 500,
+			    "headers": {
+			        "Access-Control-Allow-Origin": "*",
+			        "Access-Control-Allow-Credentials": true
+			    },
+			    "body": "{\"status\":false,\"error\":\"Item not found.\"}"
+			}
+	Updated the json to have a correct uuid.	
+			{
+			  "pathParameters": {
+			    "id": "35a092e0-43dd-11e9-83b6-6f41fa6fdab4"
+			  },
+			  "requestContext": {
+			    "identity": {
+			      "cognitoIdentityId": "USER-SUB-1234"
+			    }
+			  }
+			}
+	This new json returned the following.
+			$ serverless invoke local --function get --path mocks/get-event.json
+				Serverless: Bundling with Webpack...
+				Time: 406ms
+				Built at: 03/11/2019 6:28:56 AM
+				     Asset      Size  Chunks             Chunk Names
+				    get.js  10.7 KiB     get  [emitted]  get
+				get.js.map  7.31 KiB     get  [emitted]  get
+				Entrypoint get = get.js get.js.map
+				[./get.js] 3.16 KiB {get} [built]
+				[./libs/dynamodb-lib.js] 474 bytes {get} [built]
+				[./libs/response-lib.js] 800 bytes {get} [built]
+				[aws-sdk] external "aws-sdk" 42 bytes {get} [built]
+				[babel-runtime/core-js/json/stringify] external "babel-runtime/core-js/json/stringify" 42 bytes {get} [built]
+				[babel-runtime/helpers/asyncToGenerator] external "babel-runtime/helpers/asyncToGenerator" 42 bytes {get} [built]
+				[babel-runtime/regenerator] external "babel-runtime/regenerator" 42 bytes {get} [built]
+				[source-map-support/register] external "source-map-support/register" 42 bytes {get} [built]
+				{
+				    "statusCode": 200,
+				    "headers": {
+				        "Access-Control-Allow-Origin": "*",
+				        "Access-Control-Allow-Credentials": true
+				    },
+				    "body": "{\"attachment\":\"hello.jpg\",\"content\":\"hello world\",\"createdAt\":1552295297807,\"noteId\":\"35a092e0-43dd-11e9-83b6-6f41fa6fdab4\",\"userId\":\"USER-SUB-1234\"}"
+				}
+			$ date -r 1552295297
+				Mon Mar 11 05:08:17 EDT 2019
+				
+	Next, let’s create an API to list all the notes a user has.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

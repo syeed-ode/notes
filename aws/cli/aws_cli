@@ -2,6 +2,7 @@
 	                                                                   |
 *******************************************************************
 - Advanced Topics
+https://966118849566.signin.aws.amazon.com/console
 *******************************************************************
 *******************************************************************
 *							    *
@@ -82,6 +83,7 @@ Configuring the AWS CLI
 					5. To see the new access key, choose Show. Your credentials will look something like this:
 						• Access key ID: AKIAIOSFODNN7EXAMPLE
 						• Secret access key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+						https://966118849566.signin.aws.amazon.com/console
 					6. To download the key pair, choose Download .csv file. Store the keys in a secure location.
 
 			Keep the keys confidential in order to protect your AWS account, and never email them.

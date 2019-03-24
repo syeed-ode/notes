@@ -1,0 +1,555 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+https://serverless-stack.com/chapters/handle-api-gateway-cors-errors.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+***********      Handle API Gateway CORS Errors       *************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Before we deploy our APIs we need to add CORS headers to API Gateway errors. 
+		We added the CORS headers to our Lambda functions. 
+
+However when we make an API request, API Gateway gets invoked before our Lambda functions.
+		This means that if there is an error at the API Gateway level, the CORS headers won’t be set.
+
+		Consequently, debugging such errors can be really hard. Our client won’t be able to see the error message and instead will be presented with something like this:		
+				No 'Access-Control-Allow-Origin' header is present on the requested resource
+
+		These CORS related errors are one of the most common Serverless API errors.
+
+		We are going to configure API Gateway to set the CORS headers in the case there is an HTTP error. 
+				We won’t be able to test this right away, but it will really help when we work on our frontend client.
+
+Create a Resource
+	To configure API Gateway errors we are going to add a few things to our 'serverless'.yml.
+			By default, Serverless Framework supports CloudFormation to help us configure our API Gateway instance through code.
+					See https://serverless.com/ and
+
+					https://aws.amazon.com/cloudformation/
+
+	Let’s create a directory to add our resources. We’ll be adding to this later in the guide.
+			Resources:
+			  GatewayResponseDefault4XX:
+			    Type: 'AWS::ApiGateway::GatewayResponse'
+			    Properties:
+			      ResponseParameters:
+			        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+			        gatewayresponse.header.Access-Control-Allow_Headers: "'*'"
+			      ResponseType: DEFAULT_4XX
+			      RestApiId:
+			        Ref: 'ApiGatewayRestApi'
+			  GatewayResponseDefault5XX:
+			    Type: 'AWS::ApiGateway::GatewayRespone'
+			    Properties:
+			      ResponseParameters:
+			        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+			        gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+			      ResponseType: DEFAULT_5XX
+			      RestApiId:
+			        Ref: 'ApiGatewayRestApi'
+
+    The above might look a little intimidating. It’s a CloudFormation resource and its syntax tends to be fairly verbose.
+    		We are adding the CORS headers to the 'ApiGatewayRestApi' resource in our app.
+
+    		The GatewayResponseDefault4XX is for 4xx errors, while GatewayResponseDefault5XX is for 5xx errors.
+
+Include the Resource
+	Now let’s include the above CloudFormation resource in our 'serverless.yml'.
+			# Create our resources with separate CloudFormation templates
+			resources:
+			  # API Gateway Errors
+			  - ${file(resources/api-gateway-errors.yml)}
+
+
+*******************************************************************
+https://serverless-stack.com/chapters/deploy-the-apis.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+******************      Deploy the APIs       *********************
+*******************************************************************
+Now that our APIs are complete, let’s deploy them.
+	
+Run the following in your working directory.
+		$ serverless deploy
+			Serverless: Bundling with Webpack...
+			Time: 935ms
+			Built at: 03/13/2019 8:46:06 PM
+			        Asset      Size  Chunks             Chunk Names
+			    create.js   8.6 KiB       0  [emitted]  create
+			       get.js  8.68 KiB       1  [emitted]  get
+			      list.js  8.15 KiB       2  [emitted]  list
+			    update.js  8.97 KiB       3  [emitted]  update
+			    delete.js   8.1 KiB       4  [emitted]  delete
+			create.js.map  8.77 KiB       0  [emitted]  create
+			   get.js.map  7.26 KiB       1  [emitted]  get
+			  list.js.map  6.96 KiB       2  [emitted]  list
+			update.js.map  7.88 KiB       3  [emitted]  update
+			delete.js.map  6.93 KiB       4  [emitted]  delete
+			Entrypoint create = create.js create.js.map
+			Entrypoint get = get.js get.js.map
+			Entrypoint list = list.js list.js.map
+			Entrypoint update = update.js update.js.map
+			Entrypoint delete = delete.js delete.js.map
+			 [0] external "source-map-support/register" 42 bytes {0} {1} {2} {3} {4} [built]
+			 [1] external "babel-runtime/regenerator" 42 bytes {0} {1} {2} {3} {4} [built]
+			 [2] external "babel-runtime/helpers/asyncToGenerator" 42 bytes {0} {1} {2} {3} {4} [built]
+			 [3] ./libs/dynamodb-lib.js 474 bytes {0} {1} {2} {3} {4} [built]
+			 [4] external "aws-sdk" 42 bytes {0} {1} {2} {3} {4} [built]
+			 [5] ./libs/response-lib.js 800 bytes {0} {1} {2} {3} {4} [built]
+			 [6] external "babel-runtime/core-js/json/stringify" 42 bytes {0} {1} {2} {3} {4} [built]
+			 [7] ./create.js 3 KiB {0} [built]
+			 [8] external "uuid" 42 bytes {0} [built]
+			 [9] ./get.js 3.16 KiB {1} [built]
+			[10] ./list.js 2.61 KiB {2} [built]
+			[11] ./update.js 3.42 KiB {3} [built]
+			[12] ./delete.js 2.55 KiB {4} [built]
+			Serverless: Package lock found - Using locked versions
+			Serverless: Packing external modules: source-map-support@^0.4.18, babel-runtime@^6.26.0, uuid@^3.3.2
+			Serverless: Packaging service...
+			Serverless: Creating Stack...
+			Serverless: Checking Stack create progress...
+			.....
+			Serverless: Stack create finished...
+			Serverless: Uploading CloudFormation file to S3...
+			Serverless: Uploading artifacts...
+			Serverless: Uploading service notes-app-api.zip file to S3 (1.41 MB)...
+			Serverless: Validating template...
+			 
+			  Error --------------------------------------------------
+			 
+			  The CloudFormation template is invalid: Template format error: Unrecognized resource types: [AWS::ApiGateway::GatewayRespone]
+			 
+			     For debugging logs, run again after setting the "SLS_DEBUG=*" environment variable.
+			 
+			  Get Support --------------------------------------------
+			     Docs:          docs.serverless.com
+			     Bugs:          github.com/serverless/serverless/issues
+			     Issues:        forum.serverless.com
+			 
+			  Your Environment Information -----------------------------
+			     OS:                     darwin
+			     Node Version:           10.15.3
+			     Serverless Version:     1.38.0
+	 
+		$
+	I needed to update [AWS::ApiGateway::GatewayRespone] to [AWS::ApiGateway::GatewayResponse]
+$
+			$ serverless deploy
+				Serverless: Bundling with Webpack...
+				Time: 603ms
+				Built at: 03/13/2019 8:56:15 PM
+				        Asset      Size  Chunks             Chunk Names
+				    create.js   8.6 KiB       0  [emitted]  create
+				       get.js  8.68 KiB       1  [emitted]  get
+				      list.js  8.15 KiB       2  [emitted]  list
+				    update.js  8.97 KiB       3  [emitted]  update
+				    delete.js   8.1 KiB       4  [emitted]  delete
+				create.js.map  8.77 KiB       0  [emitted]  create
+				   get.js.map  7.26 KiB       1  [emitted]  get
+				  list.js.map  6.96 KiB       2  [emitted]  list
+				update.js.map  7.88 KiB       3  [emitted]  update
+				delete.js.map  6.93 KiB       4  [emitted]  delete
+				Entrypoint create = create.js create.js.map
+				Entrypoint get = get.js get.js.map
+				Entrypoint list = list.js list.js.map
+				Entrypoint update = update.js update.js.map
+				Entrypoint delete = delete.js delete.js.map
+				 [0] external "source-map-support/register" 42 bytes {0} {1} {2} {3} {4} [built]
+				 [1] external "babel-runtime/regenerator" 42 bytes {0} {1} {2} {3} {4} [built]
+				 [2] external "babel-runtime/helpers/asyncToGenerator" 42 bytes {0} {1} {2} {3} {4} [built]
+				 [3] ./libs/dynamodb-lib.js 474 bytes {0} {1} {2} {3} {4} [built]
+				 [4] external "aws-sdk" 42 bytes {0} {1} {2} {3} {4} [built]
+				 [5] ./libs/response-lib.js 800 bytes {0} {1} {2} {3} {4} [built]
+				 [6] external "babel-runtime/core-js/json/stringify" 42 bytes {0} {1} {2} {3} {4} [built]
+				 [7] ./create.js 3 KiB {0} [built]
+				 [8] external "uuid" 42 bytes {0} [built]
+				 [9] ./get.js 3.16 KiB {1} [built]
+				[10] ./list.js 2.61 KiB {2} [built]
+				[11] ./update.js 3.42 KiB {3} [built]
+				[12] ./delete.js 2.55 KiB {4} [built]
+				Serverless: Package lock found - Using locked versions
+				Serverless: Packing external modules: source-map-support@^0.4.18, babel-runtime@^6.26.0, uuid@^3.3.2
+				Serverless: Packaging service...
+				Serverless: Uploading CloudFormation file to S3...
+				Serverless: Uploading artifacts...
+				Serverless: Uploading service notes-app-api.zip file to S3 (1.41 MB)...
+				Serverless: Validating template...
+				Serverless: Updating Stack...
+				Serverless: Checking Stack update progress...
+				.........................................................................................................
+				Serverless: Stack update finished...
+				Service Information
+				*********************************************
+				** Service Information
+				*********************************************
+				service: notes-app-api
+				stage: prod
+				region: us-east-2
+				stack: notes-app-api-prod
+				resources: 35
+				api keys:
+				  None
+				endpoints:
+				  POST - https://wqj608qtc6.execute-api.us-east-2.amazonaws.com/prod/notes
+				  GET - https://wqj608qtc6.execute-api.us-east-2.amazonaws.com/prod/notes/{id}
+				  GET - https://wqj608qtc6.execute-api.us-east-2.amazonaws.com/prod/notes
+				  PUT - https://wqj608qtc6.execute-api.us-east-2.amazonaws.com/prod/notes/{id}
+				  DELETE - https://wqj608qtc6.execute-api.us-east-2.amazonaws.com/prod/notes/{id}
+				functions:
+				  create: notes-app-api-prod-create
+				  get: notes-app-api-prod-get
+				  list: notes-app-api-prod-list
+				  update: notes-app-api-prod-update
+				  delete: notes-app-api-prod-delete
+				layers:
+				  None
+				*********************************************
+				** Service Information
+				*********************************************
+			$ serverless deploy
+
+	If you have multiple profiles for your AWS SDK credentials, you will need to explicitly pick one. Use the following command instead:
+			$ serverless deploy --aws-profile myProfile
+	
+			Where 'myProfile' is the name of the AWS profile you want to use. 
+
+			If you need more info on how to work with AWS profiles in Serverless, refer to our Configure multiple AWS profiles chapter.
+					https://serverless-stack.com/chapters/configure-multiple-aws-profiles.html
+
+	Near the bottom of the output for this command, you will find the 'Service Information'.
+			This has a list of the API endpoints that were created. 
+					Make a note of these endpoints as we are going to use them later while creating our frontend. 
+
+					Also make a note of the region and the id in these endpoints, we are going to use them in the coming chapters. 
+
+					In our case, 'us-east-1' is our API Gateway Region and 'ly55wbovq4' is our API Gateway ID.
+							YOUR_API_GATEWAY_REGION: us-east-2
+							YOUR_API_GATEWAY_ID: wqj608qtc6 
+
+Deploy a Single Function
+	There are going to be cases where you might want to deploy just a single API endpoint as opposed to all of them. 
+		The serverless deploy function command deploys an individual function without going through the entire deployment cycle. 
+
+		This is a much faster way of deploying the changes we make.
+
+	For example, to deploy the 'list' function again, we can run the following.
+			$ $ serverless deploy function -f list
+					Serverless: Bundling with Webpack...
+					Time: 701ms
+					Built at: 03/13/2019 9:24:55 PM
+					      Asset      Size  Chunks             Chunk Names
+					    list.js  8.12 KiB       0  [emitted]  list
+					list.js.map  6.96 KiB       0  [emitted]  list
+					Entrypoint list = list.js list.js.map
+					[0] external "source-map-support/register" 42 bytes {0} [built]
+					[1] ./list.js 2.61 KiB {0} [built]
+					[2] external "babel-runtime/regenerator" 42 bytes {0} [built]
+					[3] external "babel-runtime/helpers/asyncToGenerator" 42 bytes {0} [built]
+					[4] ./libs/dynamodb-lib.js 474 bytes {0} [built]
+					[5] external "aws-sdk" 42 bytes {0} [built]
+					[6] ./libs/response-lib.js 800 bytes {0} [built]
+					[7] external "babel-runtime/core-js/json/stringify" 42 bytes {0} [built]
+					Serverless: Package lock found - Using locked versions
+					Serverless: Packing external modules: source-map-support@^0.4.18, babel-runtime@^6.26.0
+					Serverless: Packaging function: list...
+					Serverless: Uploading function: list (1.36 MB)...
+					Serverless: Successfully deployed function: list
+					Serverless: Successfully updated function: list
+
+			$
+			Now before we test our APIs we have one final thing to set up. 
+					We need to ensure that our users can securely access the AWS resources we have created so far. 
+
+	Let’s look at setting up a Cognito Identity Pool.
+
+
+
+
+*******************************************************************
+https://serverless-stack.com/chapters/create-a-cognito-identity-pool.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+***********      Create a Cognito Identity Pool       *************
+*******************************************************************
+Now that we have deployed our backend API; we almost have all the pieces we need for our backend. 
+		
+We have the User Pool that is going to store all of our users and help sign in and sign them up. 
+		We also have an S3 bucket that we will use to help our users upload files as attachments for their notes. 
+
+		The final piece that ties all these services together in a secure way is called Amazon Cognito Federated Identities.
+
+Amazon Cognito Federated Identities enables developers to create unique identities for your users and authenticate them with federated identity providers.
+		With a federated identity, you can obtain temporary, limited-privilege AWS credentials 
+				to securely access other AWS services such as 
+						Amazon DynamoDB, 
+
+						Amazon S3, and 
+
+						Amazon API Gateway.
+
+We are going to create a federated Cognito Identity Pool.
+		We will be using our User Pool as the identity provider. We could also use 
+				User Pool, 
+
+				Facebook, 
+
+				Google, or 
+
+				our own custom identity provider
+
+		Once a user is authenticated via our User Pool, 
+				the Identity Pool will attach an IAM Role to the user. 
+
+				We will define a policy for this IAM Role to grant access to the S3 bucket and our API. 
+
+				This is the Amazon way of securing your resources.
+
+		Let's get started
+
+Create Pool
+	https://966118849566.signin.aws.amazon.com/console
+	
+	From your AWS Console and select Cognito from the list of services.
+
+	Select 'Manage Federated Identities'.
+			Enter an 'Identity pool name'. 
+					- user_notes identity pool
+
+					If you have any existing Identity Pools, you’ll need to click the 'Create new identity pool' button.
+							See /Users/syeedode/java_projects/notes/aws/cognito/aws_cognito
+
+					Select Authentication providers. 
+							Under Cognito tab, 
+									enter User Pool ID and 
+											(us-east-2_CuwMY3mpW)
+
+									App Client ID of the User Pool created in the Create a Cognito user pool chapter. 
+											(7pf839rut6ji4n1po4qsnt3s3h)
+
+					Select Create Pool.
+
+			I got this response from AWS
+					Assigning a role to your application end users helps you restrict access to your AWS resources. 
+
+					Amazon Cognito integrates with Identity and Access Management (IAM) and 
+							lets you select specific roles for both 
+									your authenticated and 
+
+									unauthenticated identities. 
+
+									Learn more about IAM: https://aws.amazon.com/iam/
+
+					By default, Amazon Cognito creates a new role with limited permissions 
+							End users only have access to Cognito Sync and Mobile Analytics. 
+
+					You can modify the roles if your application needs access to other AWS resources, such as 
+							S3 or 
+
+							DynamoDB.
+
+			So, now, we need to specify what AWS resources are accessible for users with temporary credentials obtained from the Cognito Identity Pool.
+
+			authenticated users 
+					Select View Details.
+							Two Role Summary sections are expanded. 
+
+							The top section summarizes the permission policy for authenticated users, and 
+
+							The bottom section summarizes that for unauthenticated users.
+
+			Select View Policy Document in the top section. Then select Edit.
+					Add the following policy into the editor. 
+							{
+							  "Version": "2012-10-17",
+							  "Statement": [
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "mobileanalytics:PutEvents",
+							        "cognito-sync:*",
+							        "cognito-identity:*"
+							      ],
+							      "Resource": [
+							        "*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "s3:*"
+							      ],
+							      "Resource": [
+							        "arn:aws:s3:::YOUR_S3_UPLOADS_BUCKET_NAME/private/${cognito-identity.amazonaws.com:sub}/*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "execute-api:Invoke"
+							      ],
+							      "Resource": [
+							        "arn:aws:execute-api:YOUR_API_GATEWAY_REGION:*:YOUR_API_GATEWAY_ID/*/*/*"
+							      ]
+							    }
+							  ]
+							}
+
+					Replace YOUR_S3_UPLOADS_BUCKET_NAME with the bucket name from the Create an S3 bucket for file uploads chapter.
+							ARN: arn:aws:s3:::usernotes-app-uploads
+							ARN: notes-app-api-prod-serverlessdeploymentbucket-mdwjaitkbqgu
+
+					And replace the YOUR_API_GATEWAY_REGION and 
+							ID: us-east-2
+
+					YOUR_API_GATEWAY_ID with the ones that you get after you deployed your API in the last chapter.
+							YOUR_API_GATEWAY_REGION: us-east-2
+							YOUR_API_GATEWAY_ID: wqj608qtc6 
+
+							See /Users/syeedode/java_projects/notes/aws/s3/aws_s3Bucket
+							{
+							  "Version": "2012-10-17",
+							  "Statement": [
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "mobileanalytics:PutEvents",
+							        "cognito-sync:*",
+							        "cognito-identity:*"
+							      ],
+							      "Resource": [
+							        "*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "s3:*"
+							      ],
+							      "Resource": [
+							        "arn:aws:s3:::usernotes-app-uploads/private/${cognito-identity.amazonaws.com:sub}/*",
+							        "arn:aws:s3:::notes-app-api-prod-serverlessdeploymentbucket-mdwjaitkbqgu/private/${cognito-identity.amazonaws.com:sub}/*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "execute-api:Invoke"
+							      ],
+							      "Resource": [
+							        "arn:aws:execute-api:us-east-2:*:wqj608qtc6/*/*/*"
+							      ]
+							    }
+							  ]
+							}
+
+					A quick note on the block that relates to the S3 Bucket. 
+							In the above policy we are granting our logged in users access to the path private/${cognito-identity.amazonaws.com:sub/}/. 
+									Where cognito-identity.amazonaws.com:sub is the authenticated user’s federated identity ID (their user id).
+
+							So a user has access to only their folder within the bucket. 
+
+							This is how we are securing the uploads for each user.
+
+			So in summary we are telling AWS that an authenticated user has access to two resources.
+					1. Files in the S3 bucket that are inside a folder with their federated identity id as the name of the folder.
+
+					2. And, the APIs we deployed using API Gateway.
+
+			One other thing to note is that the federated identity id is a UUID that is assigned by our Identity Pool. 
+					This is the id (event.requestContext.identity.cognitoIdentityId) that we were using as our user id back when we were creating our APIs.
+
+			Select Allow.
+
+	Get AWS Credentials (from credentials)
+			// Initialize the Amazon Cognito credentials provider
+			CognitoCachingCredentialsProvider credentialsProvider = 
+					new CognitoCachingCredentialsProvider(
+		 			    getApplicationContext()
+		 			      // Identity pool ID
+		 			    , "us-east-2:f25f7fcc-83fb-43fa-b1ec-5bc55e0ad338"
+		 			      // Region
+		 			    , Regions.US_EAST_2 
+					);
+
+	Our Cognito Identity Pool should now be created. Let’s find out the Identity Pool ID.
+			Select 'Dashboard' from the left panel, then select 'Edit identity pool'.
+					Identity pool ID us-east-2:f25f7fcc-83fb-43fa-b1ec-5bc55e0ad338
+
+	Now before we test our serverless API let’s take a quick look at the 
+			Cognito User Pool and 
+
+			Cognito Identity Pool 
+
+	Make sure we’ve got a good idea of the two concepts and the differences between them.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

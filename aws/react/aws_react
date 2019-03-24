@@ -1,0 +1,321 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+https://serverless-stack.com/chapters/create-a-new-reactjs-app.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+**************      Create a New React.js App       ***************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Let’s get started with our frontend. We are going to create a single page app using React.js. 
+
+We’ll use the Create React App project to set everything up. 
+		https://github.com/facebook/create-react-app
+
+		It is officially supported by the React team and conveniently packages all the dependencies for a React.js project.
+
+Move out of the directory that we were working in for the backend.
+		$ cd ../
+
+Create a New React App
+	Run the following command to create the client for our notes app.
+			$ npx create-react-app notes-app-client
+
+			syeedode:/Users/syeedode/angular_projects$ npx create-react-app notes-app-client
+				npx: installed 63 in 3.688s
+
+				Creating a new React app in /Users/syeedode/angular_projects/notes-app-client.
+
+				Installing packages. This might take a couple of minutes.
+				Installing react, react-dom, and react-scripts...
+
+				> fsevents@1.2.7 install /Users/syeedode/angular_projects/notes-app-client/node_modules/chokidar/node_modules/fsevents
+				> node install
+
+				[fsevents] Success: "/Users/syeedode/angular_projects/notes-app-client/node_modules/chokidar/node_modules/fsevents/lib/binding/Release/node-v64-darwin-x64/fse.node" is installed via remote
+
+				> fsevents@1.2.4 install /Users/syeedode/angular_projects/notes-app-client/node_modules/fsevents
+				> node install
+
+				[fsevents] Success: "/Users/syeedode/angular_projects/notes-app-client/node_modules/fsevents/lib/binding/Release/node-v64-darwin-x64/fse.node" already installed
+				Pass --update-binary to reinstall or --build-from-source to recompile
+				+ react-scripts@2.1.8
+				+ react-dom@16.8.4
+				+ react@16.8.4
+				added 1973 packages from 735 contributors and audited 36231 packages in 40.81s
+				found 63 low severity vulnerabilities
+				  run `npm audit fix` to fix them, or `npm audit` for details
+
+				Initialized a git repository.
+
+				Success! Created notes-app-client at /Users/syeedode/angular_projects/notes-app-client
+				Inside that directory, you can run several commands:
+
+				  npm start
+				    Starts the development server.
+
+				  npm run build
+				    Bundles the app into static files for production.
+
+				  npm test
+				    Starts the test runner.
+
+				  npm run eject
+				    Removes this tool and copies build dependencies, configuration files
+				    and scripts into the app directory. If you do this, you can’t go back!
+
+				We suggest that you begin by typing:
+
+				  cd notes-app-client
+				  npm start
+
+				Happy hacking!
+
+	This should take a second to run, and it will create your new project and your new working directory.
+
+	Now let’s go into our working directory and run our project.
+			$ cd notes-app-client
+			$ npm start
+				Compiled successfully!
+
+				You can now view notes-app-client in the browser.
+
+				  Local:            http://localhost:3000/
+				  On Your Network:  http://10.0.0.211:3000/
+
+				Note that the development build is not optimized.
+				To create a production build, use npm run build.
+				__
+
+Change the Title
+	Let’s quickly change the title of our note taking app. Open up 'public/index.html' and edit the title tag to the following:
+
+	Create React App comes pre-loaded with a pretty convenient yet minimal development environment. 
+
+	It includes live reloading, a testing framework, ES6 support, and much more.
+			https://github.com/facebook/create-react-app#why-use-this
+
+Next, we are going to create our app icon and update the favicons.
+
+*******************************************************************
+https://serverless-stack.com/chapters/add-app-favicons.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+******************      Add App Favicons       ********************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Add App Favicons
+	Create React App generates a simple favicon for our app and places it in public/favicon.ico.
+
+	However, getting the favicon to work on all browsers and mobile platforms requires a little more work. 
+			There are quite a few different requirements and dimensions. 
+
+			And this gives us a good opportunity to learn how to include files in the 'public/' directory of our app.
+
+	For our example, we are going to start with a simple image and generate the various versions from it.
+			To ensure that our icon works for most of our targeted platforms we’ll use a service called the Favicon Generator.
+					https://realfavicongenerator.net/
+
+					Click 'Select your Favicon picture' to upload our icon.
+							Once you upload your icon, it’ll show you a preview of your icon on various platforms. 
+
+					Scroll down the page and hit the Generate your Favicons and HTML code button.
+							This should generate your favicon package and the accompanying code.
+
+							Click 'Favicon package' to download the generated favicons. And copy all the files over to your 'public/' directory.
+
+							I also copied the recommended text into my html page: 
+									<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+									<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+									<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+									<link rel="manifest" href="/site.webmanifest">
+									<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+									<meta name="msapplication-TileColor" content="#da532c">
+									<meta name="theme-color" content="#ffffff">
+
+					Then replace the contents of public/manifest.json with the following:
+							{
+							  "short_name": "Scratch",
+							  "name": "Scratch Note Taking App",
+							  "icons": [
+							    {
+							      "src": "favicon.ico",
+							      "sizes": "64x64 32x32 24x24 16x16",
+							      "type": "image/x-icon"
+							    },
+							    {
+							      "src": "android-chrome-192x192.png",
+							      "sizes": "192x192",
+							      "type": "image/png"
+							    },
+							    {
+							      "src": "android-chrome-256x256.png",
+							      "sizes": "256x256",
+							      "type": "image/png"
+							    }
+							  ],
+							  "start_url": ".",
+							  "display": "standalone",
+							  "theme_color": "#000000",
+							  "background_color": "#ffffff"
+							}
+
+					To include a file from the public/ directory in your HTML, Create React App needs the %PUBLIC_URL% prefix.
+
+					Add this to your public/index.html.
+							<link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png">
+							<link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon-32x32.png" sizes="32x32">
+							<link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon-16x16.png" sizes="16x16">
+							<link rel="mask-icon" href="%PUBLIC_URL%/safari-pinned-tab.svg" color="#5bbad5">
+							<meta name="theme-color" content="#ffffff">
+
+					And remove the following lines that reference the original favicon and theme color.
+							<meta name="theme-color" content="#000000">
+							<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+
+
+
+	Finally head over to your browser and try the /favicon-32x32.png path to ensure that the files were added correctly.
+
+	Next we are going to look into setting up custom fonts in our app.
+
+*******************************************************************
+https://serverless-stack.com/chapters/setup-custom-fonts.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+*****************      Set up Custom Fonts       ******************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+Custom Fonts are now an almost standard part of modern web applications. 
+		We’ll be setting it up for our note taking app using Google Fonts.
+				https://fonts.google.com/
+
+		This also gives us a chance to explore the structure of our newly created React.js app.
+
+Include Google Fonts
+	For our project we’ll be using the combination of a Serif (PT Serif) and Sans-Serif (Open Sans) typeface.
+			See https://fonts.google.com/specimen/PT+Serif and https://fonts.google.com/specimen/Open+Sans
+
+			They will be served out through Google Fonts and can be used directly without having to host them on our end.
+
+			Let’s first include them in the HTML. Our React.js app is using a single HTML file.
+
+	Go ahead and edit public/index.html and add the following line in the <head> section of the HTML to include the two typefaces.
+			<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=PT+Serif|Open+Sans:300,400,600,700,800">
+
+			Here we are referencing all the 5 different weights (300, 400, 600, 700, and 800) of the Open Sans typeface.
+
+Add the Fonts to the Styles
+	Now we are ready to add our newly added fonts to our stylesheets. 
+			Create React App helps separate the styles for our individual components and 
+
+			It has a master stylesheet for the project located in 'src/index.css'.
+
+	Let’s change the current font in src/index.css for the body tag to the following.
+			This is recommended
+					body {
+					  margin: 0;
+					  padding: 0;
+					  font-family: "Open Sans", sans-serif;
+					  font-size: 16px;
+					  color: #333;
+					  -webkit-font-smoothing: antialiased;
+					  -moz-osx-font-smoothing: grayscale;
+					}
+			This is actual
+					body {
+					  margin: 0;
+					  padding: 0;
+					  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+					    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+					    "Open Sans", sans-serif;
+					  font-size: 16px;
+					  color: #333;
+					  -webkit-font-smoothing: antialiased;
+					  -moz-osx-font-smoothing: grayscale;
+					}
+
+	And let’s change the fonts for the header tags to our new Serif font by adding this block to the css file.
+					h1, h2, h3, h4, h5, h6 {
+					  font-family: "PT Serif", serif;
+					}
+
+	We’ll stay on the theme of adding styles and set up our project with Bootstrap to ensure that we have a consistent UI Kit to work with while building our app.
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,221 @@
+*******************************************************************
+https://serverless-stack.com/chapters/create-a-cognito-identity-pool.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+***********      Create a Cognito Identity Pool       *************
+*******************************************************************
+Now that we have deployed our backend API; we almost have all the pieces we need for our backend. 
+		
+We have the User Pool that is going to store all of our users and help sign in and sign them up. 
+		We also have an S3 bucket that we will use to help our users upload files as attachments for their notes. 
+
+		The final piece that ties all these services together in a secure way is called Amazon Cognito Federated Identities.
+
+Amazon Cognito Federated Identities enables developers to create unique identities for your users and authenticate them with federated identity providers.
+		With a federated identity, you can obtain temporary, limited-privilege AWS credentials 
+				to securely access other AWS services such as 
+						Amazon DynamoDB, 
+
+						Amazon S3, and 
+
+						Amazon API Gateway.
+
+We are going to create a federated Cognito Identity Pool.
+		We will be using our User Pool as the identity provider. We could also use 
+				User Pool, 
+
+				Facebook, 
+
+				Google, or 
+
+				our own custom identity provider
+
+		Once a user is authenticated via our User Pool, 
+				the Identity Pool will attach an IAM Role to the user. 
+
+				We will define a policy for this IAM Role to grant access to the S3 bucket and our API. 
+
+				This is the Amazon way of securing your resources.
+
+		Let's get started
+
+Create Pool
+	https://966118849566.signin.aws.amazon.com/console
+	
+	From your AWS Console and select Cognito from the list of services.
+
+	Select 'Manage Federated Identities'.
+			Enter an 'Identity pool name'. 
+					- user_notes identity pool
+
+					If you have any existing Identity Pools, you’ll need to click the 'Create new identity pool' button.
+							See /Users/syeedode/java_projects/notes/aws/cognito/aws_cognito
+
+					Select Authentication providers. 
+							Under Cognito tab, 
+									enter User Pool ID and 
+											(us-east-2_CuwMY3mpW)
+
+									App Client ID of the User Pool created in the Create a Cognito user pool chapter. 
+											(7pf839rut6ji4n1po4qsnt3s3h)
+
+					Select Create Pool.
+
+			I got this response from AWS
+					Assigning a role to your application end users helps you restrict access to your AWS resources. 
+
+					Amazon Cognito integrates with Identity and Access Management (IAM) and 
+							lets you select specific roles for both 
+									your authenticated and 
+
+									unauthenticated identities. 
+
+									Learn more about IAM: https://aws.amazon.com/iam/
+
+					By default, Amazon Cognito creates a new role with limited permissions 
+							End users only have access to Cognito Sync and Mobile Analytics. 
+
+					You can modify the roles if your application needs access to other AWS resources, such as 
+							S3 or 
+
+							DynamoDB.
+
+			So, now, we need to specify what AWS resources are accessible for users with temporary credentials obtained from the Cognito Identity Pool.
+
+			authenticated users 
+					Select View Details.
+							Two Role Summary sections are expanded. 
+
+							The top section summarizes the permission policy for authenticated users, and 
+
+							The bottom section summarizes that for unauthenticated users.
+
+			Select View Policy Document in the top section. Then select Edit.
+					Add the following policy into the editor. 
+							{
+							  "Version": "2012-10-17",
+							  "Statement": [
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "mobileanalytics:PutEvents",
+							        "cognito-sync:*",
+							        "cognito-identity:*"
+							      ],
+							      "Resource": [
+							        "*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "s3:*"
+							      ],
+							      "Resource": [
+							        "arn:aws:s3:::YOUR_S3_UPLOADS_BUCKET_NAME/private/${cognito-identity.amazonaws.com:sub}/*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "execute-api:Invoke"
+							      ],
+							      "Resource": [
+							        "arn:aws:execute-api:YOUR_API_GATEWAY_REGION:*:YOUR_API_GATEWAY_ID/*/*/*"
+							      ]
+							    }
+							  ]
+							}
+
+					Replace YOUR_S3_UPLOADS_BUCKET_NAME with the bucket name from the Create an S3 bucket for file uploads chapter.
+							ARN: arn:aws:s3:::usernotes-app-uploads
+							ARN: notes-app-api-prod-serverlessdeploymentbucket-mdwjaitkbqgu
+
+					And replace the YOUR_API_GATEWAY_REGION and 
+							ID: us-east-2
+
+					YOUR_API_GATEWAY_ID with the ones that you get after you deployed your API in the last chapter.
+							YOUR_API_GATEWAY_REGION: us-east-2
+							YOUR_API_GATEWAY_ID: wqj608qtc6 
+
+							See /Users/syeedode/java_projects/notes/aws/s3/aws_s3Bucket
+							{
+							  "Version": "2012-10-17",
+							  "Statement": [
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "mobileanalytics:PutEvents",
+							        "cognito-sync:*",
+							        "cognito-identity:*"
+							      ],
+							      "Resource": [
+							        "*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "s3:*"
+							      ],
+							      "Resource": [
+							        "arn:aws:s3:::usernotes-app-uploads/private/${cognito-identity.amazonaws.com:sub}/*",
+							        "arn:aws:s3:::notes-app-api-prod-serverlessdeploymentbucket-mdwjaitkbqgu/private/${cognito-identity.amazonaws.com:sub}/*"
+							      ]
+							    },
+							    {
+							      "Effect": "Allow",
+							      "Action": [
+							        "execute-api:Invoke"
+							      ],
+							      "Resource": [
+							        "arn:aws:execute-api:us-east-2:*:wqj608qtc6/*/*/*"
+							      ]
+							    }
+							  ]
+							}
+
+					A quick note on the block that relates to the S3 Bucket. 
+							In the above policy we are granting our logged in users access to the path private/${cognito-identity.amazonaws.com:sub/}/. 
+									Where cognito-identity.amazonaws.com:sub is the authenticated user’s federated identity ID (their user id).
+
+							So a user has access to only their folder within the bucket. 
+
+							This is how we are securing the uploads for each user.
+
+			So in summary we are telling AWS that an authenticated user has access to two resources.
+					1. Files in the S3 bucket that are inside a folder with their federated identity id as the name of the folder.
+
+					2. And, the APIs we deployed using API Gateway.
+
+			One other thing to note is that the federated identity id is a UUID that is assigned by our Identity Pool. 
+					This is the id (event.requestContext.identity.cognitoIdentityId) that we were using as our user id back when we were creating our APIs.
+
+			Select Allow.
+
+	Get AWS Credentials (from credentials)
+			// Initialize the Amazon Cognito credentials provider
+			CognitoCachingCredentialsProvider credentialsProvider = 
+					new CognitoCachingCredentialsProvider(
+		 			    getApplicationContext()
+		 			      // Identity pool ID
+		 			    , "us-east-2:f25f7fcc-83fb-43fa-b1ec-5bc55e0ad338"
+		 			      // Region
+		 			    , Regions.US_EAST_2 
+					);
+
+	Our Cognito Identity Pool should now be created. Let’s find out the Identity Pool ID.
+			Select 'Dashboard' from the left panel, then select 'Edit identity pool'.
+					Identity pool ID us-east-2:f25f7fcc-83fb-43fa-b1ec-5bc55e0ad338
+
+	Now before we test our serverless API let’s take a quick look at the 
+			Cognito User Pool and 
+
+			Cognito Identity Pool 
+
+	Make sure we’ve got a good idea of the two concepts and the differences between them.
+

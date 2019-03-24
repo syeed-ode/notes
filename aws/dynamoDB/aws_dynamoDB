@@ -1,157 +1,98 @@
 	                                                                   |
 	                                                                   |
 *******************************************************************
-- Advanced Topics
+https://serverless-stack.com/chapters/create-a-dynamodb-table.html
 *******************************************************************
 *******************************************************************
 *							    *
 *							    *
 *							    *
-toc: 3 - 6
-pg 24 - 84
 *******************************************************************
-****    AWS Command Line Interface (CLI) - Getting Started     ****
+******************    Create a DynamoDB Table     *****************
 *******************************************************************
-What Is the AWS CLI?
-	The AWS CLI is an open source tool built on top of the AWS SDK for Python (Boto) that provides commands for interacting with AWS services.
+https://966118849566.signin.aws.amazon.com/console
 
-	• Linux shells – Use common shell programs such as Bash, Zsh, and tsch to run commands in Linux, macOS, or Unix.
-	• Windows command line – On Microsoft Windows, run commands in either PowerShell or the Windows Command Processor.
-	• Remotely – Run commands on Amazon EC2 instances through a remote terminal such as PuTTY or SSH, or with Amazon EC2 systems manager.
+To build the backend for our notes app, it makes sense that we first start by thinking about how the data is going to be stored. 
+		We are going to use DynamoDB to do this.
 
-	The AWS CLI provides direct access to AWS services' public APIs.
+		https://aws.amazon.com/dynamodb/
 
-	Explore a service's capabilities with the AWS CLI, and develop shell scripts to manage your resources.
+About DynamoDB
+	Amazon DynamoDB is a fully managed NoSQL database that provides fast and predictable performance with seamless scalability. 
 
-	Or take what you've learned to develop programs in other languages with the AWS SDK.
+	Similar to other databases, DynamoDB stores data in tables. 
+			Each table contains multiple items, and each item is composed of one or more attributes. 
 
-	The AWS CLI provides low level, API equivalent commands.
+			To get a better feel for it, here is a great guide on DynamoDB. 
+					https://www.dynamodbguide.com/
 
-	The AWS CLI provides customizations for several services. Customizations are higher level commands that simplify using a service with a complex API.
-			For example, the aws s3 set of commands provide a familiar syntax for managing files in Amazon S3.
+Create Table
+	First, log in to your AWS Console and select DynamoDB from the list of services.
+			
 
-	Example Upload a file to Amazon S3
-		'aws s3 cp' provides a shell-like copy command, and automatically performs a multipart upload to transfer large files quickly and resiliently:
-				~$ aws s3 cp myvideo.mp4 s3://mybucket/
+	Select Create table. (userTable)
 
-		Performing the same task with the low level commands (available under 'aws s3api') would take a lot more effort.
+			Enter the Table name and Primary key info as shown below. Just make sure that userId and noteId are in camel case.
 
-About Amazon Web Services
-	Amazon Web Services (AWS) is a collection of digital infrastructure services that developers can leverage when developing their applications.
+			Each DynamoDB table has a primary key, which cannot be changed once set. 
+					The primary key uniquely identifies each item in the table, so that no two items can have the same key. 
 
-	The services include computing, storage, database, and application synchronization (messaging and queuing).
+			DynamoDB supports two different kinds of primary keys:
+					- Partition key
 
-Installing the AWS Command Line Interface
-	The primary distribution method for the AWS CLI on Linux, Windows, and macOS is 'pip'. (Package Installer for Python)
+					- Partition key and sort key (composite)
 
-	If you already have pip and a supported version of Python, you can install the AWS CLI with the following command:
-			$ pip install awscli --upgrade --user
+			The composite primary key gives us additional flexibility when querying the data.
+					For example, if you provide only the value for userId, DynamoDB would retrieve all of the notes by that user.
 
-	The '--upgrade' option tells 'pip' to upgrade any requirements that are already installed.
+					Or you could provide a value for userId and a value for noteId, to retrieve a particular note.
 
-	The '--user' option tells pip to install the program to a subdirectory of your user directory to avoid modifying libraries used by your operating system.
+					To further your understanding of how indexes work in DynamoDB, you can read more here: 
+							https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html
 
-Configuring the AWS CLI
-	This section explains how to configure settings that the AWS Command Line Interface uses when interacting with AWS. 
 
-	These include your security credentials and the default region.
+	Scroll to the bottom, ensure that DynamoDB AutoScaling Service Linked Role is selected, and select Create.
+			https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/AutoScaling.Console.html#AutoScaling.Permissions
 
-	Quick Configuration
-		For general use, the 'aws configure' command is the fastest way to set up your AWS CLI installation.
+			Before You Begin: Grant User Permissions for DynamoDB Auto Scaling
+					For DynamoDB auto scaling, IAM users will require some additional privileges.
 
-		$ aws configure
-		AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
-		AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-		Default region name [None]: us-west-2
-		Default output format [None]: json 
+					'application-autoscaling:*' permissions are required to delete an autoscaling enabled table. 
 
-		To get the access key ID and secret access key for an IAM user
-			The access key ID and secret access key are used to sign programmatic requests that you make to AWS.
+					The AWS-managed policy DynamoDBFullAccess attached next includes such permissions.
 
-			If you don't have access keys, you can create them from the AWS Management Console.
+					To attach the AmazonDynamoDBFullAccess policy
+							1. Open the IAM console at https://console.aws.amazon.com/iam/.
 
-			We recommend that you use IAM access keys instead of AWS account root user access keys.
+							2. On the IAM console dashboard, choose Users, and then choose your IAM user from the list.
 
-			IAM lets you securely control access to AWS services and resources in your AWS account.
+							3. On  the Summary page, choose Add permissions.
 
-			You can create new access keys at any time. You must also have permissions to perform the required IAM actions.
-					1. Open the IAM console.
-					2. In the navigation pane of the console, choose Users.
-					3. Choose your IAM user name (not the check box).
-					4. Choose the Security credentials tab and then choose Create access key.
-					5. To see the new access key, choose Show. Your credentials will look something like this:
-						• Access key ID: AKIAIOSFODNN7EXAMPLE
-						• Secret access key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-					6. To download the key pair, choose Download .csv file. Store the keys in a secure location.
+							**4. Choose 'Attach existing policies directly'.**
 
-			Keep the keys confidential in order to protect your AWS account, and never email them.
+							5. From the list of policies, choose AmazonDynamoDBFullAccess, and then choose Next: Review.
 
-		To update any of your settings, simply run 'aws configure' again and enter new values as appropriate.
+							6. Choose Add permissions.
 
-	Configuration Settings and Precedence
-		The AWS CLI uses a 'provider chain' to look for AWS credentials in a number of different places, including system or user environment variables and local AWS configuration files.
+			Creating a New Table with Auto Scaling Enabled
+					DynamoDB auto scaling requires the presence of a service linked role (AWSServiceRoleForApplicationAutoScaling_DynamoDBTable) that performs auto scaling actions on your behalf. 
 
-		The AWS CLI looks for credentials and configuration settings in the following order:
-			1. Command line options – region, output format and profile can be specified as command options to override default settings.
-			2. Environment variables (p. 22) – AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN.
-			3. The AWS credentials file – located at ~/.aws/credentials on Linux, macOS, or Unix, or at C:\Users\USERNAME\.aws\credentials on Windows. This file can contain multiple named profiles in addition to a 'default' profile.
+					This role is created automatically for you. For more information, see Service-Linked Roles for Application Auto Scaling.
+							https://docs.aws.amazon.com/autoscaling/application/userguide/application-auto-scaling-service-linked-roles.html
 
-			[20180530-14:04:29 syeedode:~] $ cat ~/.aws/config 
-			[default]
-			output = json
-			region = us-east-1
+	Otherwise, simply ensure that Use default settings is checked, then select Create.
+			Note that the default setting provisions 5 reads and 5 writes.
 
-			[profile user2]
-			region=us-east-1
-			output=text
+			When you create a table, you specify how much provisioned throughput capacity you want to reserve for reads and writes.
+					DynamoDB will reserve the necessary resources to meet your throughput needs while ensuring consistent, low-latency performance. 
 
-			[20180530-14:04:29 syeedode:~] $ cat ~/.aws/credentials 
-			[default]
-			aws_access_key_id=AKIAIOSFODNN7EXAMPLE
-			aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+					One read capacity unit can read up to 8 KB per second and one write capacity unit can write up to 1 KB per second. You can change your provisioned throughput settings, increasing or decreasing capacity as needed.
 
-			[user2]
-			aws_access_key_id=AKIAI44QH8DHBEXAMPLE
-			aws_secret_access_key=je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY
+					
 
-		Important - Do not include the 'profile ' prefix when configuring a named profile in the AWS credentials file.
 
-https://serverless-stack.com/chapters/configure-the-aws-cli.html
 
-Configure the AWS CLI
-	To make it easier to work with a lot of the AWS services, we are going to use the AWS CLI.
-
-	Install the AWS CLI
-		AWS CLI needs Python 2 version 2.6.5+ or Python 3 version 3.3+ and Pip. Use the following if you need help installing Python or Pip.
-				Installing Python (https://www.python.org/downloads/)
-
-				Installing Pip	(https://pip.pypa.io/en/stable/installing/)
-
-		Now using Pip you can install the AWS CLI (on Linux, macOS, or Unix) by running:
-				$ sudo pip install awscli
-
-		Or using Homebrew on macOS:
-				$ brew install awscli
-
-	Add Your Access Key to AWS CLI
-		We now need to tell the AWS CLI to use your Access Keys from the previous chapter.
-
-		It should look something like this:
-				Access key ID AKIAIOSFODNN7EXAMPLE
-				Secret access key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY			
-
-		Simply run the following with your Secret Key ID and your Access Key.
-				$ aws configure
-				$ aws configure
-					AWS Access Key ID [None]: AKIAIQBVA6Q4WGQ22WEA
-					AWS Secret Access Key [None]: e2/tFXX1MmJ/My4siCXG8m93ibwOlc1+Fdf1k0Qd
-					Default region name [None]: 
-					Default output format [None]: 
-				$ 
-
-		You can leave the Default region name and Default output format the way they are.
-
-Next let’s get started with setting up our backend.
+	
 
 
 

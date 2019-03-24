@@ -1,0 +1,89 @@
+	                                                                   |
+	                                                                   |
+*******************************************************************
+https://serverless-stack.com/chapters/configure-aws-amplify.html
+*******************************************************************
+*******************************************************************
+*							    *
+*							    *
+*							    *
+*******************************************************************
+****************      Configure AWS Amplify       *****************
+*******************************************************************
+https://966118849566.signin.aws.amazon.com/console
+
+To allow our React app to talk to the AWS resources that we created (in the backend section of the tutorial), we’ll be using a library called AWS Amplify.
+		https://github.com/aws-amplify/amplify-js
+
+AWS Amplify provides a few simple modules (Auth, API, and Storage) to help us easily connect to our backend. Let’s get started.
+		Run the following command in your working directory.
+				$ npm install aws-amplify --save
+					npm WARN ts-pnp@1.0.1 requires a peer of typescript@* but none is installed. You must install peer dependencies yourself.
+
+					+ aws-amplify@1.1.22
+					added 31 packages from 86 contributors and audited 36718 packages in 14.743s
+					found 72 vulnerabilities (63 low, 9 moderate)
+					  run `npm audit fix` to fix them, or `npm audit` for details
+
+		This installs the NPM package and adds the dependency to your package.json.
+
+	Create a Config
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
