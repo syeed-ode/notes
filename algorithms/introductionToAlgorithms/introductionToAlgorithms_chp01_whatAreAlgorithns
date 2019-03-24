@@ -1,0 +1,53 @@
+What are algorithms? 
+		an algorithm is any well-defined computational procedure 
+				it takes some value, or set of values, as input and 
+
+				produces some value, or set of values, as output.
+
+		We can also view an algorithm as a tool for solving a well-specified computa- tional problem.
+				The statement of the problem specifies in general terms the desired input/output relationship. 
+
+				The algorithm describes a specific computational proce- dure for achieving that input/output relationship.
+
+
+
+
+Why is the study of algorithms worthwhile? 
+		
+What is the role of algorithms relative to other technologies used in computers? 
+
+
+
+Here is how we formally define the 'sorting problem':
+		Input: Asequenceofnnumbers [a1, a2, ....., an]
+
+		Output: A permutation (reordering) such that a'1 <= a'2 <= ... <= a'n
+
+For example, given the input sequence [31; 41; 59; 26; 41; 58], a sorting algorithm returns as output the sequence [26; 31; 41; 41; 58; 59].
+		Such an input sequence is called an 'instance' of the sorting problem.
+
+		In general, an 'instance of a problem' consists of the 
+				input 
+
+				(satisfying whatever constraints are imposed in the problem statement) needed to compute a solution to the problem.
+
+		Because many programs use it as an intermediate step, sorting is a fundamental operation in computer science.
+				As a result, we have a large number of good sorting algorithms at our disposal.
+
+				Which algorithm is best for a given application depends on—among other factors—
+						the number of items to be sorted
+
+						the extent to which the items are already somewhat sorted
+
+						possible restrictions on the item values, and t
+
+						he kind of storage devices to be used: 
+								main memory, 
+
+								disks, or even 
+
+								tapes.
+
+
+
+

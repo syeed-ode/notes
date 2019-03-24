@@ -1,5 +1,8 @@
 	                                                                   |
                 Connecting Everything with Graphs (pg. 184)
+*************************************************************************
+* we say that breadth-first search has an efficiency of O(V + E).
+*************************************************************************
 
 Let’s say that we’re building a social network such as Facebook. 
 		In such an application, many people can be “friends” with one another. 
@@ -197,16 +200,381 @@ Graphs
 			We remove a vertex from the queue, and make it our current vertex.
 					We can only remove data from the beginning of a queue, so that would be Bob.
 
-			pg 191
 			We now return to the first rule, which asks us to find any unvisited adjacent vertices of the current vertex. 
 					Bob has one such vertex - Fred - so we mark it as visited and add it to our queue:
 							Our queue now contains: [Candy, Derek, Elaine, Fred].
 
+			Since Bob has no more unvisited adjacent vertices, we remove the next vertex from the queue - Candy - and make it the current vertex:
+
+			However, Candy has no unvisited adjacent vertices. So we grab the next item off the queue - Derek, leaving our queue as [Elaine, Fred]
+					Derek has Gina as an unvisited adjacent connection, so we mark Gina as visited:
+
+					The queue is now [Elaine, Fred, Gina]
+
+					Derek has no more adjacent vertices to visit, so we take Elaine off the queue and make her the current vertex:
+
+			Elaine has no adjacent vertices that have not been visited, so we take Fred off the queue:
+					At this point our queue is [Gina].
+
+					Now, Fred has one person to visit - Helen - so we mark her as visited and add her to the queue, making it [Gina, Helen]:
+
+			Since Fred has no more unvisited connections, we take Gina off the queue, making her the current vertex:
+
+			Our queue now only contains Helen: [Helen].
+
+			Gina has one vertex to visit - Irena:
+					Our queue currently contains [Helen, Irena].
+
+			Gina has no more connections to visit, so we take Helen from the queue, making her the current vertex, and 
+					leaving our queue with [Irena]. 
+
+			Helen has nobody to visit, so we take Irena from the queue and make her the current vertex. Now, Irena also has no vertices to visit, so since the queue is empty, we’re done!
+
+			Let’s add a display_network method to our Person class that used breadth-first search do display the names of a person’s entire network:
+					class Person
+						attr_accessor :name, :friends, :visited
+
+						def initialize(name)
+							@name = name
+							@friends = []
+							@visited = false
+						end
+
+						def add_friend(friend)
+							@friends << friend
+						end
+
+						def display_network
+							# We keep track of every node we ever visit, so we can reset
+							# their 'visited' attribute back to false after our algorithm
+							# is complete:
+							to_reset = [self]
+							
+							# Create the queue. It starts out containing the root vertex:
+							queue = [self]
+							self.visited = true
+							
+							while queue.any?
+								# The current vertex is whatever is removed from the queue
+								current_vertex = queue.shift
+								puts current_vertex.name
+
+								# We add all adjacent vertices of the current vertex to the queue:
+								current_vertex.friends.each do |friend|
+
+								if !friend.visited
+									to_reset << friend
+									queue << friend
+									friend.visited = true
+								end
+							end
+						end
+
+						to_reset.each do |node|
+							node.visited = false
+						end
+					end
+
+			To make this work, we’ve also added visited attribute to the Person class that keeps track of whether the person was visited in the search.
+
+	The efficiency of breadth-first search in our graph can be calculated by breaking down the algorithm’s steps into two types:
+			• We remove a vertex from the queue to designate it as the current vertex.
+			• For each current vertex, we visit each of its adjacent vertices.
+
+	Now, each vertex ends up being removed from the queue once. In Big O Notation this is called O(V). That is, for V vertices in the graph, there are V removals from the queue.
+			In this (and many graph algorithms) we also have additional steps that process not just the vertices themselves, but also the edges, as we’ll now explain.
+
+	Why don’t we simply call this O(N) - with N being the number of vertices?
+			The answer is because in this (and many graph algorithms) we also have additional steps that process not just the vertices themselves, but also the edges, as we’ll now explain.
+pg 196
+	Let’s examine the number of times we visit each of the adjacent vertices of a current vertex.
+			Let’s zero in on the step where Bob is the current vertex.
+
+			At this step, this code runs:
+		            for(Person friend : currentVertex.friends) {
+		                if(!friend.visited) {
+		                    toBeReset.add(friend);
+		                    personQueue.add(friend);
+		                    friend.visited = true;
+		                }
+		            }
+			That is, we visit every vertex adjacent to Bob. 
+
+			This doesn’t just include Fred, but it also includes Alice! 
+
+			While we don’t queue Alice at this step because her vertex was already visited, she still takes up another step in our each loop.			
+
+	If you walk through the steps of breadth-first search again carefully, you’ll see that 
+			the number of times we visit adjacent vertices is 
+
+			twice the number of edges in the graph.
+
+	This is because each edge connects two vertices, and for every vertex, we check all of its adjacent vertices. So each edge gets used twice.
+
+	So, for E edges, we check adjacent vertices 2E times.
+			That is, for E edges in the graph, we check twice that number of adjacent vertices.
+
+	However, since Big O ignores constants, we just write it as O(E).
+
+	Since there are O(V) removals from the queue, and O(E) visits, we say that breadth-first search has an efficiency of O(V + E).
+
+Graph Databases
+	Because graphs are so versatile at handling relationships, there are actually databases that store data in the form of a graph.
+			Traditional relational databases (databases that store data as columns and rows) can also store such data. 
+
+	Relational Database Example
+			But let’s compare their performance against graph databases for dealing with something like a social network.
+					Let’s say that we have a social network in which there are five friends who are all connected to each other.
+
+					These friends are Alice, Bob, Cindy, Dennis, and Ethel. A graph database that will store their personal information may look something like this:
+							[Everybody is connected to everyone else]
+
+					We can use a relational database to store this information as well.
+							This would likely use two tables, 
+									one for storing the personal info of each user, and 
+
+									one for storing the relationships between the friends.
+
+							Here is the Users table:
+												User Table
+								id 	firstName 	lastName 	email 			phone
+								1 	Alice 		Adams 		alice@s.com 	555-111-1111
+								2 	Bob 		Block 		bob@s.com 		555-111-2222
+								3 	Cindy 		Clide 		cindy@s.com 	555-111-3333
+								4 	Dennis 		Dimberg 	dennis@s.com 	555-111-4444
+								5 	Ethel 		Emory 		ethel@s.com 	555-111-5555
+
+							We'd use a separate Friendships table to keep track of who is friends with whom:
+												Friendship Table
+											user_id 	friend_id 
+											1 			2
+											1 			3
+											1 			4
+											1 			5
+											2 			1
+											2 			3
+											2 			4
+											2 			5
+											3			1
+											3 			2
+											3 			4
+											3 			5
+											4 			1
+											4 			2
+											4 			3
+											5 			5
+					We’ll avoid getting too deep into database theory, but note how this Friendships table uses the id’s of each user to represent each user.
+
+					Cindy would like to see everything about Alice, Bob, Dennis, and Ethel, including their email addresses and phone numbers.
+
+					Let’s see how Cindy’s request would be executed if our application was backed by a relational database. 
+							First, we’d have to look up Cindy’s id in the Users table:
+
+							Then, we’d look for all the rows in the Friendships table where the user id is 3:
+
+							We now have a list of the id’s of all of Cindy’s friends: [1, 2, 4, 5].
+
+					With this id list, we need to return to the Users table to find each row with the appropriate id. 
+
+					The speed at which the computer can find each row in the Users table will be approximately O(log N). 
+							This is because the database maintains the rows in order their id’s, and 
+
+							the database can then use binary search to find each row.
+
+					Since Cindy has four friends, the computer needs to perform O(log N) four times to pull all the friends’ personal data.
+
+					To say this more generally, for M friends, the efficiency of pulling their information is O(M log N). 
+					 		That is, for each friend, we run a search that takes log N steps.
+
+	Graph Database Example
+		Contrast this with getting the scoop on Cindy’s friends if our application was backed by a graph database.
+
+		In this case, once we’ve located Cindy in our database, it takes just one step to find one friend’s info. 
+				This is because each vertex in the database contains all the information of its user, 
+						so we simply traverse the edges from Cindy to each of her friends. 
+
+						This takes a grand total of four steps:
+
+		With a graph database, for N friends, pulling their data takes O(N) steps.
+				This is a significant improvement over the efficiency of O(M log N) that a relational database would provide.
+						Neo4j1 is an example of a popular open source graph database.
+								https://neo4j.com/
+
+						Other examples of open source graph databases include ArangoDB2 and Apache Giraph3.
+								http://giraph.apache.org/
+
+		Note that graph databases aren’t 'always' the best solution for a given application. You’ll need to carefully assess each application and its needs.
+
+	Weighted Graphs
+		Another type of graph is one known as a 'weighted graph'.
+				A weighted graph is like a regular graph but contains additional information about the edges in the graph.
+
+		In this graph, each edge is accompanied a number that represents the distance in miles between the cities that the edge connects. 
+				For example, there are 714 miles between Chicago and New York City. 
+
+		It’s also possible to have directional weighted graphs. 
+				In the following example, we can see that although 
+						a flight from Dallas to Toronto is $138, 
+
+						a flight from Toronto to Dallas is $216:
+
+		To add weights to our graph, we need to make a slight modification to our implementation.
+				Specifically, we’ll be using a hash table rather than an array to represent the adjacent nodes. 
+
+				In this case, each vertex will be represented by a City class:
+
+	Shortest Path Problem
+		Let’s use the power of the weighted graph to solve a something known as the shortest path problem.
+
+		Here’s a graph that demonstrates the costs of available flights between five different cities.
+
+        // roadsAvailable [[1,2], [2,3], [3, 4], [4, 5], [1, 5] ]
+        // numRoadsToBeRepaired = 3
+        // costRoadsToBeRepaired = [[1,2,12], [3,4,30], [1,5,8]]
+followees = {
+	"Alice" => ["Bob", "Cynthia"],
+	"Bob" => ["Cynthia"],
+	"Cynthia" => ["Bob"]
+}
+		We've constructed these as a list of lists. 
+				Denver => [[Chicago, 40], [El Paso, 140]]
+				Chicago => [El Paso, 80]
+				El Paso => [Boston, 100]
+				Atlanta => [[Denver, 160], [Boston, 100]]
+				Boston => [[Chicago, 120], [Denver, 180]]
+
+		Now, say that I’m in Atlanta and want to fly to El Paso.
+				I can fly from Atlanta to Denver, and from Denver to El Paso. That route would set me back $300.
+
+				If you look closely, you’ll notice that there’s a cheaper route if I go from Atlanta to Denver to Chicago to El Paso. 
+						Although I have to take an extra flight, 
+
+						I only end up shelling out $280.
+
+		In this context, the shortest path problem is this: How can I get from Atlanta to El Paso with the least amount of money?
+
+	Dijkstra’s Algorithm
+		Here are the rules of Dijkstra’s Algorithm
+				1. We make the starting vertex our current vertex.
+
+				2. We check all the vertices adjacent to the current vertex and calculate and record the weights from the starting vertex to all known locations. 
+
+				3. To determine the next current vertex, we find the cheapest unvisited known vertex that can be that reached from our starting vertex.
+
+				4. Repeat the first three steps until we have visited every vertex in the graph.
+
+		Let’s walk through this algorithm step by step.
+				To record the cheapest price of the routes from Atlanta to other cities, we will use a table as follows:
+
+pg203
+From Atlanta to: Boston 	Chicago 	  Denver 	El Paso
+					? 		   ? 			? 		   ?
+
+		First, we make the starting vertex (Atlanta) the current vertex. 
+				All our algorithm has access to at this point is the current vertex and its connections to its adjacent vertices.
+
+		We next check all adjacent vertices and record the weights from the starting vertex (Atlanta) to all known locations.
+				Since we can see that we can get from Atlanta to Boston for $100, and from Atlanta to Denver for $160, we’ll record that in our table:
+
+From Atlanta to: Boston 	Chicago 	  Denver 	El Paso
+				  $100 		   ? 		   $160 	   ?
+
+		Next, we find the cheapest vertex that can be reached from Atlanta that has not yet been visited.
+				We only know how to get to Boston and Denver from Atlanta at this point, and it’s cheaper to get to Boston ($100) than it is to Denver ($160). 
+				
+		So we make Boston our current vertex:
+				We now check both of the routes from Boston, and record all new data about the cost of the routes from 'Atlanta - the starting vertex -' to all known locations.
+
+				We can see that Boston to Chicago is $120.
+						Now, we can also conclude that since Atlanta to Boston is $100, and Boston to Chicago is $120, that 
+								the cheapest (and only) known route from Atlanta to Chicago is $220.
+
+						We’ll record this in our table:								
+From Atlanta to: Boston 	Chicago 	  Denver 	El Paso
+				  $100 		  $220 		   $160 	   ?
+				
+				We also look at Boston’s other route - which is to Denver - and that turns out to be $180.
+						Now we have a new route from Atlanta to Denver: Atlanta to Boston to Denver.
+
+						However, since this costs $280 while the direct flight from Atlanta to Denver is $160, we do not update the table, since 
+
+						we only keep the cheapest known routes in the table.
+
+						Now that we’ve explored all the outgoing routes from the current vertex (Boston), 
+
+		we next look for the unvisited vertex that is the cheapest to reach from Atlanta, which was our starting point.
+				According to our table, Boston is still the cheapest known city to reach from Atlanta, 
+						but we’ve already checked it off. 
+
+				So that would make Denver the cheapest unvisited city, 
+						since it’s only $160 from Atlanta, 
+
+						compared with Chicago which is $220 from Atlanta. 
+
+We've constructed these as a list of lists. 
+	Denver => [[Chicago, 40], [El Paso, 140]]
+	Chicago => [El Paso, 80]
+	El Paso => [Boston, 100]
+	Atlanta => [[Denver, 160], [Boston, 100]]
+	Boston => [[Chicago, 120], [Denver, 180]]
+		
+		So Denver becomes our current vertex:
+				One route is a $40 flight from Denver to Chicago. 
+						We can now update our table since we now have a cheaper path from Atlanta from Chicago than before. 
+
+						Our table currently says that the cheapest route from Atlanta to Chicago is $220, 
+								but if we take Atlanta to Chicago by way of Denver, 
+
+								it will cost us just $200. 
+
+								We update our table accordingly:
+
+				There’s another flight out of Denver as well, and that is to the newly revealed city of El Paso.
+						We now have to figure out the cheapest known path from Atlanta to El Paso, and that would be the $300 path from Atlanta to Denver to El Paso.
+
+						We can now add this to our table as well:
+
+From Atlanta to: Boston 	Chicago 	  Denver 	El Paso
+				  $100 		  $220 		   $160 	 $300
+
+		We now have two unvisited vertices: Chicago and El Paso.
+				Since the cheapest known path to Chicago from Atlanta ($200) is cheaper than the cheapest known path to El Paso from Atlanta ($300), 
+
+		we will next make Chicago the current vertex:
+				Chicago has just one outbound flight, and that is an $80 trip to El Paso.
+						We now have a cheaper path from Atlanta to El Paso: Atlanta to Denver to Chicago to El Paso that costs a total of $280.
+
+						We update our table with this newfound data:
+
+From Atlanta to: Boston 	Chicago 	  Denver 	El Paso
+				  $100 		  $220 		   $160 	 $280
+
+						There’s one known city left to make the current vertex, and that is El Paso:
+
+		El Paso has only one outbound route, and that is a $100 flight to Boston.
+				This data doesn’t reveal any cheaper paths from Atlanta to anywhere, so we don’t need to modify our table.
+
+				Since we’ve visited every vertex and checked it off, we now know every path from Atlanta to every other city. 
+
+				The algorithm is now complete, and our resulting table reveals the cheapest price of Atlanta to every other city on the map:
+
+		Here is a Ruby implementation of Dijkstra’s algorithm:
+				We’ll begin by creating a Ruby class representing a city. 
+						Each city is a node in a graph, which keeps track of its own name, and routes to adjacent cities:
 
 
 
 
 
+
+
+
+
+
+
+
+routes_from_city[city] = 
+[price_info + routes_from_city[current_city][0], current_city]
 
 
 
