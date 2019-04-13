@@ -1,0 +1,10 @@
+arrays allocate contiguous space
+
+linear search - the computer checks each cell one at a time
+
+Arrays
+	Reading - 1 Step
+	Searching - N steps
+	Insertion - N + 1 (N moving steps + 1 inserting step)
+	Deletion - 1 Step
+

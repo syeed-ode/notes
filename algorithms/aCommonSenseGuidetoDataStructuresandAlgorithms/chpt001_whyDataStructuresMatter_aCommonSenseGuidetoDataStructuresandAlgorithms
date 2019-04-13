@@ -1,0 +1,185 @@
+	                                                                   |
+
+				Why Data Structures Matter
+Data structures -  refer to how data is organized.
+
+The Array: The Foundational Data Structure
+			array = ["apples", "bananas", "cucumbers", "dates", "elderberries"]
+
+	To understand the performance of a data structure - such as the array - we need to analyze the common ways that our code might interact with that data structure.
+
+	Most data structures are used in four basic ways, which we refer to as 'operations'. They are:
+			1. Read
+					Reading refers to looking something up from a particular spot within the data structure.
+			2. Search
+					Searching refers to looking for a particular value within a data structure. With an array, this would mean looking to see if a particular value exists within the array, and if so, which index it’s at.
+			3. Insert
+					 Insertion refers to adding another value to our data structure. With an array, this would mean adding a new value to an additional slot within the array.
+			4. Delete
+					Deletion refers to removing a value from our data structure. With an array, this would mean removing one of the values from the array.
+
+	In this chapter, we’ll analyze how fast each of these operations when applied to an array.
+
+********When we measure how “fast” an operation takes, we do not refer to how fast the operation takes in terms of pure time, but instead in how many steps it takes.*******
+	
+	Measuring the speed of an operation in terms of time is flaky, since it will always change depending on the hardware that it is run on.
+
+	However, we can measure the speed of an operation in terms of how many steps it takes.
+			If Operation A takes 5 steps, and Operation B takes 500 steps, we can assume that Operation A will always be faster than Operation B on all pieces of hardware.
+
+	Measuring the speed of an operation is also known as measuring its time complexity.
+
+	Throughout this book, we’ll use the terms speed, time complexity, efficiency, and performance interchangeably. They all refer to the number of steps that a given operation takes.
+
+	Reading - 1 Step
+		Reading from an array actually takes just one step. 
+				This is because the computer has the ability to jump to any particular index in the array and peer inside.
+						if we looked up index 2, the computer would jump right to index 2 and report that it contains the value "cucumbers".
+
+		How is the computer able to look up an array’s index in just one step? Let’s see how:
+				When a program declares an array, it allocates a contiguous set of empty cells for use in the program.
+
+				Now, every cell in a computer’s memory has a specific address. Each cell’s memory address is one number greater than the previous cell.
+
+				When the computer reads a value at a particular index of an array, it can jump straight to that index in one step because of the combination of the following facts:
+						1. A computer can jump to any memory address in one step. 
+								(Think of this as driving to 123 Main Street - you can drive there in one trip since you know exactly where it is.)
+
+						2. Recorded in each array is the memory address which it begins at. 
+								So the computer has this starting address readily.
+
+						3. Every array begins at index 0.
+
+		Reading from an array is, therefore, a very efficient operation, since it takes just one step.
+				An operation with just one step is naturally the fastest type of operation.
+						One of the reasons that the array is such a powerful data structure is that we can look up the value at any index with such speed.
+
+	Searching - N steps
+		A computer needs to make its way through the array step by step.
+				To search for a value within an array, the computer starts at index 0, checks the value, and if it doesn’t find what it’s looking for, moves on to the next index.
+
+		The search operation - in which the computer checks each cell one at a time - is known as 'linear search'.
+				If the value we’re looking for doesn’t occur in the array at all, the computer would likewise have to search every cell so it can be sure that the value doesn’t exist within the array.
+
+				So it turns out that for an array of 5 cells, the maximum number of steps that linear search would take is 5. For an array of 500 cells, the maximum number of steps that linear search would take is 500.
+
+		Another way of saying this is that for N cells in an array, linear search will take a maximum of N steps.
+				In any case, it’s clear that searching is less efficient than reading, since 
+
+		Searching can take many steps, while reading always takes just one step no matter how large the array.
+
+	Insertion - N + 1 steps
+		The efficiency of inserting a new piece of data inside an array depends on 'where' inside the array you’d like to insert it.
+				'End' of list insertion takes just one step.
+
+				'Beginning' or the 'middle' insertion can take up to N + 1 steps for an array containing N elements.
+						we need to move "cucumbers", "dates", and "elderberries" to the right to make room for the "figs".
+
+						But even this takes multiple steps, since we need to first move "elderberries" one cell to the right to make room to move "dates". 
+
+						This is because the worst case scenario is inserting a value into the beginning of the array in which there are N shifts (every data element of the array) and 1 insertion.
+
+	Deletion - N + 1 steps
+		Deletion from an array is the process of eliminating the value at a particular index.
+
+		An array is not allowed to have gaps in the middle of it, 
+				so to resolve this issue, we need to shift "dates" and "elderberries" to the left.
+
+		So it turns out that for this deletion, the entire operation took three steps. 
+				The first step was the actual deletion, and 
+
+				the other two steps were data shifts to close the gap.
+
+		For an array containing N elements, the maximum number of steps that deletion would take is N steps.
+
+Sets: How a Single Rule Can Affect Efficiency
+	A set is a data structure that does not allow duplicate values to be contained within it.
+			Yet, this constraint actually causes the set to have a different efficiency for one of the four primary operations.
+
+	For this discussion, we’ll talk about an array-based set. 
+
+	Let’s analyze the reading, searching, insertion and deletion operations in context of a array-based set.
+			Reading from a set is exactly the same as reading from an array - it takes just one step for the computer to look up what is contained within a particular index.
+
+			Searching a set also turns out to be no different than searching an array - it takes up to N steps to search to see if a value exists within in a set.
+
+			Insertion, however, is where arrays and sets diverge.
+					With a set, the computer 'first needs to determine that this value doesn’t already exist in this set' - because that’s what sets do.
+
+					So every insert first 'requires a search'.
+
+					Inserting at the end takes N + 1 (search each item, then insert)
+
+					Inserting at the beginning takes 2N + 1 (search each item, then shift each item, then insert)
+
+Wrapping Up
+	Now that we’ve begun to learn how to think about the time complexity of data structures, 
+
+	We can also use the same analysis to compare competing algorithms 
+			(even within the same data structure) 
+
+	To ensure the ultimate speed and performance of our code.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,161 @@
+	                                                                   |
+
+				Why Algorithms Matter
+
+There is another major factor that can affect the efficiency of our code: The proper selection of which 'algorithm' to use.
+
+An algorithm is simply a particular process for solving a problem. The process for preparing a bowl of cereal can be called an algorithm.
+		1. Grab a bowl.
+		2. Pour cereal in the bowl.
+		3. Pour milk in the bowl.
+		4. Dip a spoon in the bowl.
+
+In the previous chapter, we analyzed four major operations, including reading, searching, insertion, and deletion.
+
+There are multiple algorithms that can achieve a particular operation.
+
+We’re about to see how the selection of a particular algorithm can either make our code fast or slow - even to the point where it stops working under a lot of pressure. 
+		But first, let’s take a look at a new data structure, the ordered array. 
+
+		We’ll see how there is more than one algorithm for searching an ordered array, and we’ll learn how to choose the right one.
+
+Ordered Arrays
+	The 'ordered array' is almost identical to the array we discussed in the previous chapter.
+
+	For example, let’s take the array [3, 17, 80, 202]:
+			Assume that we wanted to insert the value 75.
+
+			The computer cannot simply drop the 75 into the right slot in a single step, because first it has to 
+					find the right place in which the 75 needs to be inserted, and then 
+
+					shift other values to make room for it.
+
+	Let’s break down this process step by step.
+			Step #1: 
+					We check the value at index 0, to determine whether the value we want to insert - the 75 - should go to its left or to its right:
+
+			Step #2:
+					We’ve encountered the value 80, which is greater than the 75 that we wish to insert. 
+
+					We need to shift data to make room for the 75.
+
+			Step #3:
+					Move the final value to the right, move the next to last value to the right, 
+
+			Step #4:
+					We can finally insert the 75 into its correct spot.
+
+	Inserting into an ordered array always requires a search before the actual insertion to determine the correct spot for the insertion.
+			That is one key difference (in terms of efficiency) between a standard array and an ordered array.
+
+	The ordered array has a secret superpower when it comes to the search operation.
+
+Searching an Ordered Array
+	In the previous chapter, we described the process for searching for a particular value within a regular array: 
+			We check each cell one at a time - from left to right - until we find the value we’re looking for. 
+
+	We noted that this process is referred to as linear search.
+
+	Let’s see how linear search differs between a regular and ordered array.
+			With an ordered array, however, we can stop a search early even if the value isn’t contained within the array.
+
+			Let’s say we’re searching for a 22 within an ordered array of [3, 17, 75, 80, 202].
+			 		We can stop the search as soon as we reach the 75, since it’s impossible that the 22 is anywhere to the right of it.
+							def linear_search(array, value)
+							  # We iterate through every element in the array:
+							  array.each do |element|
+							  # If we find the value we're looking for, we return it:
+							    if element == value
+							      puts value
+							      return value
+							    elsif element > value
+								  # If we reach an element that is greater than the value
+								  # we're looking for, we can exit the loop early:
+							      break
+							    end
+							  end
+							  # We return nil if we do not find the value within the array:
+							  return nil
+							end
+
+			In this light, linear search will take fewer steps in an ordered array versus a standard array in most situations. That being said, 
+					if we’re searching for a value that happens to be the final value or greater than the final value, 
+
+			We will still end up searching each and every cell.  
+
+Binary Search
+	You’ve probably played this guessing game: I’m thinking of a number between 1 and 100.
+			You wouldn’t start the guessing by choosing the number 1. You’d start with 50 which is smack in the middle.
+					Why? Because by selecting 50, no matter whether I tell you to guess higher or lower, you’ve automatically eliminated half the possible numbers!
+
+					You’d keep on choosing the halfway mark in order to keep eliminating half of the remaining numbers.
+
+	This, in a nutshell, is binary search.
+			The major advantage of an ordered array over a standard array is that we have the option of performing a binary search rather than a linear search.
+
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
