@@ -1,0 +1,85 @@
+$ brew install arangodb
+==> Updated Formulae
+awscli ✔  
+gradle ✔  
+openssl ✔ 
+sqlite ✔  
+
+==> Installing dependencies for arangodb: openssl
+==> Installing arangodb dependency: openssl
+==> Downloading https://homebrew.bintray.com/bottles/openssl-1.0.2r.mojave.bottle.tar.gz
+######################################################################## 100.0%
+==> Pouring openssl-1.0.2r.mojave.bottle.tar.gz
+==> Caveats
+A CA file has been bootstrapped using certificates from the SystemRoots
+keychain. To add additional certificates (e.g. the certificates added in
+the System keychain), place .pem files in
+  /usr/local/etc/openssl/certs
+
+and run
+  /usr/local/opt/openssl/bin/c_rehash
+
+openssl is keg-only, which means it was not symlinked into /usr/local,
+because Apple has deprecated use of OpenSSL in favor of its own TLS and crypto libraries.
+
+If you need to have openssl first in your PATH run:
+  echo 'export PATH="/usr/local/opt/openssl/bin:$PATH"' >> ~/.bash_profile
+
+For compilers to find openssl you may need to set:
+  export LDFLAGS="-L/usr/local/opt/openssl/lib"
+  export CPPFLAGS="-I/usr/local/opt/openssl/include"
+
+==> Summary
+🍺  /usr/local/Cellar/openssl/1.0.2r: 1,795 files, 12.1MB
+==> Installing arangodb
+==> Downloading https://homebrew.bintray.com/bottles/arangodb-3.4.3.mojave.bottle.tar.gz
+######################################################################## 100.0%
+==> Pouring arangodb-3.4.3.mojave.bottle.tar.gz
+==> Caveats
+An empty password has been set. Please change it by executing
+  /usr/local/opt/arangodb/sbin/arango-secure-installation
+
+To have launchd start arangodb now and restart at login:
+  brew services start arangodb
+Or, if you don't want/need a background service you can just run:
+  /usr/local/opt/arangodb/sbin/arangod
+==> Summary
+🍺  /usr/local/Cellar/arangodb/3.4.3: 4,869 files, 349.1MB
+==> `brew cleanup` has not been run in 30 days, running now...
+Removing: /Users/syeedode/Library/Caches/Homebrew/awscli--1.16.110.mojave.bottle.tar.gz... (8.5MB)
+Removing: /usr/local/Cellar/openssl/1.0.2q... (1,794 files, 12.1MB)
+Removing: /Users/syeedode/Library/Caches/Homebrew/openssl--1.0.2q.mojave.bottle.tar.gz... (3.7MB)
+Removing: /Users/syeedode/Library/Caches/Homebrew/sqlite--3.27.1.mojave.bottle.tar.gz... (1.8MB)
+Removing: /Users/syeedode/Library/Logs/Homebrew/wget... (64B)
+Removing: /Users/syeedode/Library/Logs/Homebrew/libidn2... (64B)
+Removing: /Users/syeedode/Library/Logs/Homebrew/libunistring... (64B)
+Removing: /Users/syeedode/Library/Logs/Homebrew/openssl... (64B)
+Pruned 0 symbolic links and 2 directories from /usr/local
+==> Caveats
+==> openssl
+A CA file has been bootstrapped using certificates from the SystemRoots
+keychain. To add additional certificates (e.g. the certificates added in
+the System keychain), place .pem files in
+  /usr/local/etc/openssl/certs
+
+and run
+  /usr/local/opt/openssl/bin/c_rehash
+
+openssl is keg-only, which means it was not symlinked into /usr/local,
+because Apple has deprecated use of OpenSSL in favor of its own TLS and crypto libraries.
+
+If you need to have openssl first in your PATH run:
+  echo 'export PATH="/usr/local/opt/openssl/bin:$PATH"' >> ~/.bash_profile
+
+For compilers to find openssl you may need to set:
+  export LDFLAGS="-L/usr/local/opt/openssl/lib"
+  export CPPFLAGS="-I/usr/local/opt/openssl/include"
+
+==> arangodb
+An empty password has been set. Please change it by executing
+  /usr/local/opt/arangodb/sbin/arango-secure-installation
+
+To have launchd start arangodb now and restart at login:
+  brew services start arangodb
+Or, if you don't want/need a background service you can just run:
+  /usr/local/opt/arangodb/sbin/arangod

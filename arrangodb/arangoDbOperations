@@ -1,0 +1,87 @@
+$ arangoimport --file ~/Downloads/GraphCourse_DemoData_ArangoDB-2/airports.csv --collection airports --create-collection true --type csv
+		Please specify a password: 
+		Connected to ArangoDB 'http+tcp://127.0.0.1:8529', version 3.4.4, database: '_system', username: 'root'
+		----------------------------------------
+		database:               _system
+		collection:             airports
+		create:                 yes
+		create database:        no
+		source filename:        /Users/syeedode/Downloads/GraphCourse_DemoData_ArangoDB-2/airports.csv
+		file type:              csv
+		quote:                  "
+		separator:              
+		threads:                2
+		connect timeout:        5
+		request timeout:        1200
+		----------------------------------------
+		Starting CSV import...
+		2019-03-26T02:38:48Z [46626] INFO processed 32768 bytes (3%) of input file
+		2019-03-26T02:38:48Z [46626] INFO processed 65536 bytes (15%) of input file
+		2019-03-26T02:38:48Z [46626] INFO processed 98304 bytes (27%) of input file
+		2019-03-26T02:38:48Z [46626] INFO processed 131072 bytes (40%) of input file
+		2019-03-26T02:38:48Z [46626] INFO processed 163840 bytes (52%) of input file
+		2019-03-26T02:38:48Z [46626] INFO processed 196608 bytes (64%) of input file
+		2019-03-26T02:38:48Z [46626] INFO processed 229376 bytes (77%) of input file
+		2019-03-26T02:38:48Z [46626] INFO processed 262144 bytes (89%) of input file
+
+		created:          3375
+		warnings/errors:  0
+		updated/replaced: 0
+		ignored:          0
+		lines read:       3377
+$ arangoimport --file ~/Downloads/GraphCourse_DemoData_ArangoDB-2/flights.csv --collection flights --create-collection true --type csv --create-collection-type edge
+		Please specify a password: 
+		Connected to ArangoDB 'http+tcp://127.0.0.1:8529', version 3.4.4, database: '_system', username: 'root'
+		----------------------------------------
+		database:               _system
+		collection:             flights
+		create:                 yes
+		create database:        no
+		source filename:        /Users/syeedode/Downloads/GraphCourse_DemoData_ArangoDB-2/flights.csv
+		file type:              csv
+		quote:                  "
+		separator:              
+		threads:                2
+		connect timeout:        5
+		request timeout:        1200
+		----------------------------------------
+		Starting CSV import...
+		2019-03-26T03:00:24Z [46793] INFO processed 1114112 bytes (3%) of input file
+		2019-03-26T03:00:25Z [46793] INFO processed 2195456 bytes (6%) of input file
+		2019-03-26T03:00:25Z [46793] INFO processed 3309568 bytes (9%) of input file
+		2019-03-26T03:00:26Z [46793] INFO processed 4390912 bytes (12%) of input file
+		2019-03-26T03:00:26Z [46793] INFO processed 5505024 bytes (15%) of input file
+		2019-03-26T03:00:26Z [46793] INFO processed 6586368 bytes (18%) of input file
+		2019-03-26T03:00:27Z [46793] INFO processed 7700480 bytes (21%) of input file
+		2019-03-26T03:00:27Z [46793] INFO processed 8781824 bytes (24%) of input file
+		2019-03-26T03:00:27Z [46793] INFO processed 9895936 bytes (27%) of input file
+		2019-03-26T03:00:28Z [46793] INFO processed 10977280 bytes (30%) of input file
+		2019-03-26T03:00:28Z [46793] INFO processed 12091392 bytes (33%) of input file
+		2019-03-26T03:00:29Z [46793] INFO processed 13172736 bytes (36%) of input file
+		2019-03-26T03:00:29Z [46793] INFO processed 14286848 bytes (39%) of input file
+		2019-03-26T03:00:30Z [46793] INFO processed 15368192 bytes (42%) of input file
+		2019-03-26T03:00:30Z [46793] INFO processed 16482304 bytes (45%) of input file
+		2019-03-26T03:00:30Z [46793] INFO processed 17563648 bytes (48%) of input file
+		2019-03-26T03:00:31Z [46793] INFO processed 18677760 bytes (51%) of input file
+		2019-03-26T03:00:31Z [46793] INFO processed 19759104 bytes (54%) of input file
+		2019-03-26T03:00:32Z [46793] INFO processed 20873216 bytes (57%) of input file
+		2019-03-26T03:00:32Z [46793] INFO processed 21954560 bytes (60%) of input file
+		2019-03-26T03:00:32Z [46793] INFO processed 23068672 bytes (63%) of input file
+		2019-03-26T03:00:33Z [46793] INFO processed 24150016 bytes (66%) of input file
+		2019-03-26T03:00:33Z [46793] INFO processed 25264128 bytes (69%) of input file
+		2019-03-26T03:00:33Z [46793] INFO processed 26345472 bytes (72%) of input file
+		2019-03-26T03:00:34Z [46793] INFO processed 27459584 bytes (75%) of input file
+		2019-03-26T03:00:34Z [46793] INFO processed 28540928 bytes (78%) of input file
+		2019-03-26T03:00:35Z [46793] INFO processed 29655040 bytes (81%) of input file
+		2019-03-26T03:00:35Z [46793] INFO processed 30736384 bytes (84%) of input file
+		2019-03-26T03:00:35Z [46793] INFO processed 31850496 bytes (87%) of input file
+		2019-03-26T03:00:35Z [46793] INFO processed 32931840 bytes (90%) of input file
+		2019-03-26T03:00:36Z [46793] INFO processed 34045952 bytes (93%) of input file
+		2019-03-26T03:00:36Z [46793] INFO processed 35127296 bytes (96%) of input file
+		2019-03-26T03:00:36Z [46793] INFO processed 36241408 bytes (99%) of input file
+
+		created:          286463
+		warnings/errors:  0
+		updated/replaced: 0
+		ignored:          0
+		lines read:       286465

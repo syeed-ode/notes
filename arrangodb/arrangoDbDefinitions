@@ -1,0 +1,228 @@
+oriented graph - edge has a single direction, it can't point both ways at once.
+
+INBOUND - follow edges in reverse direction
+OUTBOUND - going in the direction the edges actually point to
+
+
+Graph Traversal Syntax
+		FOR vertex[, edge[, path]]
+			IN [min[..max]]
+			OUTBOUND|INBOUND|ANY startVertex
+			edgeCollection[, more…]	
+
+	FOR - emits up to three variables		
+	vertex - the current vertex in a traversal 
+					FOR v, e, p IN 1..2 OUTBOUND 'airports/BIS' flights
+					    OPTIONS {
+					        bfs: true,
+					        uniqueVertices: 'global',
+					        uniqueEdges: 'path'
+					    }
+					    RETURN CONCAT_SEPARATOR('->', v)
+								{
+								    "_id": "airports/MSP",
+								    "_key": "MSP",
+								    "_rev": "_YZdbSqq-_o",
+								    "city": "Minneapolis",
+								    "country": "USA",
+								    "lat": 44.88054694,
+								    "long": -93.2169225,
+								    "name": "Minneapolis-St Paul Intl",
+								    "state": "MN",
+								    "vip": false
+								}
+
+	edge - the current edge in a traversal
+					FOR v, e, p IN 1..2 OUTBOUND 'airports/BIS' flights
+					    OPTIONS {
+					        bfs: true,
+					        uniqueVertices: 'global',
+					        uniqueEdges: 'path'
+					    }
+					    RETURN CONCAT_SEPARATOR('->', e)
+								{
+								    "ArrTime": 706,
+								    "ArrTimeUTC": "2008-01-01T14:06:00.000Z",
+								    "Day": 1,
+								    "DayOfWeek": 2,
+								    "DepTime": 632,
+								    "DepTimeUTC": "2008-01-01T12:32:00.000Z",
+								    "Distance": 517,
+								    "FlightNum": 6635,
+								    "Month": 1,
+								    "TailNum": "N955SW",
+								    "UniqueCarrier": "OO",
+								    "Year": 2008,
+								    "_from": "airports/BIS",
+								    "_id": "flights/2602",
+								    "_key": "2602",
+								    "_rev": "_YZdvEHe--Q",
+								    "_to": "airports/DEN"
+								}
+
+	path - representation of the current path with two members: 'vertices': an array of all vertices on this path && 'edges': an array of all edges on this path
+					FOR v, e, p IN 1..2 OUTBOUND 'airports/BIS' flights
+					    OPTIONS {
+					        bfs: true,
+					        uniqueVertices: 'global',
+					        uniqueEdges: 'path'
+					    }
+					    RETURN CONCAT_SEPARATOR('->', p)
+								{
+								    "edges": [
+								        {
+								            "ArrTime": 706,
+								            "ArrTimeUTC": "2008-01-01T14:06:00.000Z",
+								            "Day": 1,
+								            "DayOfWeek": 2,
+								            "DepTime": 632,
+								            "DepTimeUTC": "2008-01-01T12:32:00.000Z",
+								            "Distance": 517,
+								            "FlightNum": 6635,
+								            "Month": 1,
+								            "TailNum": "N955SW",
+								            "UniqueCarrier": "OO",
+								            "Year": 2008,
+								            "_from": "airports/BIS",
+								            "_id": "flights/2602",
+								            "_key": "2602",
+								            "_rev": "_YZdvEHe--Q",
+								            "_to": "airports/DEN"
+								        }
+								    ],
+								    "vertices": [
+								        {
+								            "_id": "airports/BIS",
+								            "_key": "BIS",
+								            "_rev": "_YZdbSp6--o",
+								            "city": "Bismarck",
+								            "country": "USA",
+								            "lat": 46.77411111,
+								            "long": -100.7467222,
+								            "name": "Bismarck Municipal",
+								            "state": "ND",
+								            "vip": false
+								        },
+								        {
+								            "_id": "airports/DEN",
+								            "_key": "DEN",
+								            "_rev": "_YZdbSqG--a",
+								            "city": "Denver",
+								            "country": "USA",
+								            "lat": 39.85840806,
+								            "long": -104.6670019,
+								            "name": "Denver Intl",
+								            "state": "CO",
+								            "vip": false
+								        }
+								    ]
+								}
+	FOR v, e, p IN 1..2 OUTBOUND 'airports/BIS' flights
+	    OPTIONS {
+	        bfs: true,
+	        uniqueVertices: 'global',
+	        uniqueEdges: 'path'
+	    }
+	    RETURN CONCAT_SEPARATOR('->', p.vertices[*]._key)
+
+Uniqueness Options
+	FOR v, e, p IN 1..5 OUTBOUND 'verts/S' edges
+	 OPTIONS {
+	 uniqueVertices: 'none',
+	 uniqueEdges: 'path'
+	 }
+	 RETURN CONCAT_SEPARATOR('->', p.vertices[*]._key)
+
+	uniqueEdges - 
+		'none' - would make the traverser follow the edge from S to B to C to S, and from S to B to C again. It would only stop there, because the maximum depth of 5.
+	
+	To stop the start vertex (or other vertices) from being visited more than once
+			we can enable uniqueness for vertices in two ways: 
+					uniqueVertices - It requires bfs: true (breadth-first search).
+							'path' - ensures no duplicate vertices on each individual path. 
+
+							'global' - ensures every reachable vertex to be visited once for the entire traversal. 
+
+
+
+
+
+
+
+
+
+
+
+Alex Reed
+Alex.Reed@CyberCoders.com
+
+
+Willie.LacyIV@cognizant.com
+,
+Bowrna.Chandrasekaran@cognizant.com
+,
+SriRamen.S@cognizant.com
+,
+Sony.Patnaik@cognizant.com
+,
+LaChon.Gordon@cognizant.com
+
+
+Apr 2 at 1:43 PM
+
+
+
+
+
+
+Department:CDE-Cognizant Digital Engg
+Company:Cognizant Technology Solutions
+Office:Bridgeton - NJ USA CLT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
