@@ -1,0 +1,193 @@
+When we 
+		change a property inside the object 
+				we are actually altering the value (the object), 
+
+				but the binding between the variable and the object will not change, 
+						so this code will not raise an error. 
+
+Conversely, if we 
+		reassign the full variable, 
+				this will change the binding between the variable and its value and 
+						x = null; // This will fail
+
+				it will raise an error:
+
+If you want to create an immutable object, const is not enough, so you should use ES5's method Object.freeze().
+		https://developer.mozilla.org/it/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze
+
+		https://www.npmjs.com/package/deep-freeze
+
+The arrow function
+	The arrow function is a more concise syntax for defining functions, especially useful when defining a callback. 
+
+	To better understand the advantages of this syntax, let's first see an example of classic filtering on an array:
+			const numbers = [2, 6, 7, 8, 1];
+			const even = numbers.filter(function(x) {
+			 return x%2 === 0;
+			});
+
+	The preceding code can be rewritten as follows using the arrow function syntax:
+			const numbers = [2, 6, 7, 8, 1];
+			const even = numbers.filter(x => x%2 === 0);	
+
+	The filter function can be defined inline, and the keyword function is removed, leaving only the list of parameters, which is followed by => (the arrow), which in turn is followed by the body of the function.
+			When the list of arguments contains more than one argument, you must surround them with parentheses and separate the argument with commas.
+
+			Also, when there is no argument you must provide a set of empty parentheses before the arrow:
+					() => {...}
+
+			 If we need to add more lines of code to the body of the function, we can wrap them in curly brackets, 
+
+			 But beware that in this case return is not automatically implied, so it needs to be stated explicitly, as in the following example:
+
+	But there is another important feature to know about arrow functions: arrow functions are bound to their lexical scope. 
+
+	This means that inside an arrow function the value of this is the same as in the parent 
+	block. Let's clarify this concept with an example:			 
+				function DelayedGreeter(name) {
+				    this.name = name;
+				}
+										// greet function
+				DelayedGreeter.prototype.greet = function() {
+					// This begins the scope of the greet fucntion
+				    			// time out call back function
+				    setTimeout( function cb() {
+				    	// this is the scope of the function.
+				    	// It is different than the scope of 
+				    	// the greet method
+				        console.log('Hello ' + this.name);
+				    }, 500);
+				};
+				const greeter = new DelayedGreeter('World');
+				greeter.greet(); // will print "Hello undefined"
+
+	In this code, we are defining a simple 'greeter' prototype that accepts a name as an argument.
+			Then we are adding the 'greet' method to the prototype.
+					This function is supposed to print 'Hello' and the name defined in the current instance 500 milliseconds after it has been called.
+
+					But this function is broken, 
+							because inside the timeout callback function (cb), 
+
+							the scope of the function is different from the scope of greet method and 
+
+							The value of 'this' is undefined.
+
+							Compare that to this: 
+									DelayedGreeter.prototype.greet = function() {
+									    console.log("I should be inside greet scope: " + this.name);
+									    setTimeout( function cb() {
+									        console.log('Inside setTime function says: Hello ' + "this.name");
+									    }, 500);
+									};
+									const greeter2 = new DelayedGreeter('Greeter2');
+									greeter2.greet(); // will print "Hello undefined"
+
+							This prints out: // I should be inside greet scope: Greeter2
+
+	Before Node.js introduced support for arrow functions, to fix this we needed to change the 'greet' function using 'bind', as follows:
+					DelayedGreeter.prototype.greet = function() {
+					    setTimeout( (function cb() {
+					        console.log('Hello ' + this.name);
+					        // This part binds greeter object
+					        // to the cb callback function
+					    }).bind(this), 500);
+					};
+					const greeter3 = new DelayedGreeter('Greeter3');
+					greeter3.greet(); // Hello Greeter3
+
+	But since we have now arrow functions and since they are bound to their lexical scope, we can just use an arrow function as a callback to solve the issue:
+			DelayedGreeter.prototype.greet = function() {
+			    setTimeout( () => console.log('Hello' + this.name), 500);
+			};
+			const greeterArrowFunction = new DelayedGreeter('. Arrow functions are bound to their lexical scope');
+			greeterArrowFunction.greet(); // will print "Hello. Arrow functions are bound to their lexical scope"
+
+	This is a very handy feature; most of the time it makes our code more concise and straightforward.
+
+Class syntax
+	This new syntax does not change the way objects are managed internally by the JavaScript runtime; they still inherit properties and functions through prototypes and not through classes.
+
+	While this new alternative syntax can be very handy and readable, as a developer, it is important to understand that it is just syntactic sugar.
+
+	Classic prototype approach
+		Let's see how it works with a trivial example. First of all, let's describe a Person function using the classic prototype-based approach:
+				// Let's see now how we can implement the same example using 
+				// the new handy ES2015 class syntax
+				// This syntax is more readable and straightforward to understand.
+				class Person2 {
+				    // We are explicitly stating
+				    // what the constructor is for the class
+				    constructor (name, surname, age) {
+				        this.name = name;
+				        this.surname = surname;
+				        this.age = age;
+				    }
+				    getFullName () {
+				        return this.name + ' ' + this.surname;
+				    }
+
+				    // We are declaring the function older as a static
+				    // method.
+				    static older (person1, person2) {
+				        return (person1.age >= person2.age) ? person1 : person2;
+				    }
+				}
+
+
+pg. 56 [35]
+continuation-passing style (CPS)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

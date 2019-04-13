@@ -1,0 +1,10 @@
+Pattern
+Prefer the direct style for purely synchronous functions. pg 62 [41] <There is no reason for a function to have a continuation-passing style if it is synchronous. >
+
+
+We guarantee that a callback is invoked asynchronously by deferring its execution using process.nextTick(). pg 64 [43]
+		setImmediate()
+				the execution is queued behind any I/O event that is already in the queue.
+
+		process.nextTick() 
+				run before any other I/O event is fired, it might cause I/O starvation under certain circumstances, for example, a recursive invocation; this can never happen with setImmediate().
