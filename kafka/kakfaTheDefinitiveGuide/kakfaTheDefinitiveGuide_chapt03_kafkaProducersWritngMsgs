@@ -124,29 +124,135 @@ Constructing a Kafka Producer - 44 (67 of 322)
 					The types of the key and value must match our serializer and producer objects.
 
 			// 2
-					We  use  the  producer  object  send()  method  to  send  the  ProducerRecord. The  message  will be  placed  in  a  buffer  and  
+					We use the producer object send() method to send the ProducerRecord. The message will be placed in a buffer and 
 
-					The message will  be  sent  to  the  broker  in  a  separate  thread. 
+					The message will be sent to the broker in a separate thread. 
 
-					The send()  method  returns  a  Java  Future  object  with  RecordMetadata,  but  since  
+					The send() method returns a Java Future object with RecordMetadata, but since 
 							we simply ignore the returned value, 
-									we have no way of knowing whether the message  was  sent  successfully  or  not.
+									we have no way of knowing whether the message was sent successfully or not.
 
-							This  method  of  sending  messages  can  be  used when  dropping  a  message  silently  is  acceptable.  
-									This  is  not  typically  the  case  inproduction applications.
+							This method of sending messages can be used when dropping a message silently is acceptable. 
+									This is not typically the case inproduction applications.
 
 			// 3
-					While we ignore errors that may occur while sending messages to Kafka brokersor  in  the  brokers  themselves,  
-							we  may  still  get  an  exception  if  the  producer encountered   errors   before   sending   the   message   to   Kafka.  
-									SerializationException  when  it  fails  to  serialize  the  message,  a  
+					While we ignore errors that may occur while sending messages to Kafka brokersor in the brokers themselves, 
+							we may still get an exception if the producer encountered errors before sending the message to Kafka. 
+									SerializationException when it fails to serialize the message, a 
 
 									BufferExhaustedException or TimeoutException if the buffer is full, or an 
 
 									InterruptExceptionif the sending thread was interrupted.
 
-Sending a Message Synchronously
-	The simplest way to send a message synchronously is as follows:
-					
+	Sending a Message Synchronously - 47 (70 of 322) 
+			The simplest way to send a message synchronously is as follows:
+						ProducerRecord<String, String> record = 
+							new ProducerRecord<>("CustomerCountry"							
+								, "Precision Products"
+								, "France");
+
+						try {
+							producer.send(record).get();									// 1
+						} catch (Exception e) {
+							e.printStackTrace();											// 2
+						}
+
+			// 1
+					Here, we are using Future.get() to wait for a reply from Kafka. 
+							 This  methodwill  throw  an  exception  if  the  record  is  not  sent  successfully  to  Kafka.
+
+							 If  there were  no  errors,  we  will  get  a  RecordMetadata  object  
+							 		we  can  use  to retrieve the offset the message was written to.
+
+	 		// 2 
+	 				If there were any errorswe  will  encounter  an  exception 
+	 						before sending data to Kafka, 
+
+	 						while sending, 
+	 								if the Kafka brokers  returned  a  nonretriable  exceptions  or  
+
+	 								if  we  exhausted  the  availableretries, 
+
+							In  this  case,  we  just  print  any  exceptionwe ran into.
+
+			KafkaProducer has two types of errors.
+					Retriable errors are those that can be resolvedby  sending  the  message  again.
+							For  example,  a  connection  error  can  be  resolvedbecause  the  connection  may  get  reestablished. 
+
+							A  “no  leader”  error  can  be  resolvedwhen  a  new  leader  is  elected  for  the  partition. 
+									KafkaProducer  can  be  configured  toretry  those  errors  automatically, 
+
+							The  application  code  will  get  retriable  exceptions only when the number of retries was exhausted and the error was not resolved. 
+
+					Some errors will not be resolved by retrying.
+							“message size too large.” In those cases, 
+
+							KafkaProducer will not attempt a retry and will return the exception immediately.
+
+	Sending a Message Asynchronously
+			If  we  just  send  all  our  messages  and  notwait  for  any  replies,  then  sending  100  messages  will  barely  take  any  time  at  all.
+
+			In most  cases,  we  really  don’t  need  a  reply—
+					Kafka  sends  back  the  
+							topic,  
+
+							partition,  and
+
+							offset 
+
+					of the record after it was written, which is usually not required by the sending app.
+
+			On the other hand, we do need to know when we failed to send a message completely 
+					so we can throw an exception, log an error, or perhaps write the message to an“errors” file for later analysis.
+
+			In  order  to  send  messages  asynchronously  and  still  handle  error  scenarios,  the  pro‐ducer supports adding a callback when sending a record. Here is an example of howwe use a callback:
+							private class DemoProducerCallback implements Callback { 			// 1
+								@Override
+								public void onCompletion(RecordMetadata recordMetadata, Exception e) {
+									if (e != null) {         
+										e.printStackTrace();									// 2
+									}    
+								}
+							}
+
+							ProducerRecord<String, String> record =
+									new ProducerRecord<>("CustomerCountry" 						// 3
+											, "Biomedical Materials"
+											, "USA"); 
+
+							producer.send(record, new DemoProducerCallback());					// 4 
+
+					// 1
+							To  use  callbacks,  you  need  a  class  that  implements  the  org.apache.kafka.clients.producer.Callback  interface which  has  a  single  function—onCompletion().
+
+					// 2 
+							If Kafka returned an error, onCompletion() will have a nonnull exception. Herewe  “handle”  it  by  printing,  
+									but  production  code  will  probably  have  more  robust error handling functions.
+
+					// 3
+							The records are the same as before.
+
+					// 4
+							And we pass a Callback object along when sending the record.
+
+Configuring Producers
+	So  far  we’ve  seen  very  few  configuration  parameters  for  the  producers—just  the mandatory bootstrap.servers URI and serializers.
+
+	The producer has a large number of configuration parameters; most are documentedin  Apache  Kafka  documentation: 
+			http://kafka.apache.org/documentation.html#producerconfigs
+
+			many  have  reasonable  defaults  so  there  is  no reason to tinker with every single parameter. 
+
+			However, some of the parameters have asignificant impact on memory use, performance, and reliability of the producers.
+
+	acks
+			The  acks  parameter  controls  how  many  partition  replicas  must  receive  the  recordbefore  the  producer  can  consider  the  write  successful.
+
+			
+
+
+
+
 
 
 
