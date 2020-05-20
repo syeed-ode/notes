@@ -17,7 +17,7 @@ Producer Overview - 43 (66 of 322)
 			the first thing the producer will do is serialize the key and value objects to ByteArrays 
 
 	Next, the data is sent to a partitioner
-			If we specified a partition in theProducerRecord, the partitioner doesn’t do anything and simply returns the partitionwe specified
+			If we specified a partition in the ProducerRecord, the partitioner doesn’t do anything and simply returns the partitionwe specified
 
 			If we didn’t, the partitioner will choose a partition for us, usually basedon the ProducerRecord key
 					Once a partition is selected, the producer knows whichtopic and partition the record will go to.
@@ -159,30 +159,30 @@ Constructing a Kafka Producer - 44 (67 of 322)
 
 			// 1
 					Here, we are using Future.get() to wait for a reply from Kafka. 
-							 This  methodwill  throw  an  exception  if  the  record  is  not  sent  successfully  to  Kafka.
+							 This methodwill throw an exception if the record is not sent successfully to Kafka.
 
-							 If  there were  no  errors,  we  will  get  a  RecordMetadata  object  
-							 		we  can  use  to retrieve the offset the message was written to.
+							 If there were no errors, we will get a RecordMetadata object 
+							 		we can use to retrieve the offset the message was written to.
 
 	 		// 2 
-	 				If there were any errorswe  will  encounter  an  exception 
+	 				If there were any errorswe will encounter an exception 
 	 						before sending data to Kafka, 
 
 	 						while sending, 
-	 								if the Kafka brokers  returned  a  nonretriable  exceptions  or  
+	 								if the Kafka brokers returned a nonretriable exceptions or 
 
-	 								if  we  exhausted  the  availableretries, 
+	 								if we exhausted the availableretries, 
 
-							In  this  case,  we  just  print  any  exceptionwe ran into.
+							In this case, we just print any exceptionwe ran into.
 
 			KafkaProducer has two types of errors.
-					Retriable errors are those that can be resolvedby  sending  the  message  again.
-							For  example,  a  connection  error  can  be  resolvedbecause  the  connection  may  get  reestablished. 
+					Retriable errors are those that can be resolvedby sending the message again.
+							For example, a connection error can be resolvedbecause the connection may get reestablished. 
 
-							A  “no  leader”  error  can  be  resolvedwhen  a  new  leader  is  elected  for  the  partition. 
-									KafkaProducer  can  be  configured  toretry  those  errors  automatically, 
+							A “no leader” error can be resolvedwhen a new leader is elected for the partition. 
+									KafkaProducer can be configured toretry those errors automatically, 
 
-							The  application  code  will  get  retriable  exceptions only when the number of retries was exhausted and the error was not resolved. 
+							The application code will get retriable exceptions only when the number of retries was exhausted and the error was not resolved. 
 
 					Some errors will not be resolved by retrying.
 							“message size too large.” In those cases, 
@@ -190,13 +190,13 @@ Constructing a Kafka Producer - 44 (67 of 322)
 							KafkaProducer will not attempt a retry and will return the exception immediately.
 
 	Sending a Message Asynchronously
-			If  we  just  send  all  our  messages  and  notwait  for  any  replies,  then  sending  100  messages  will  barely  take  any  time  at  all.
+			If we just send all our messages and notwait for any replies, then sending 100 messages will barely take any time at all.
 
-			In most  cases,  we  really  don’t  need  a  reply—
-					Kafka  sends  back  the  
-							topic,  
+			In most cases, we really don’t need a reply—
+					Kafka sends back the 
+							topic, 
 
-							partition,  and
+							partition, and
 
 							offset 
 
@@ -205,13 +205,13 @@ Constructing a Kafka Producer - 44 (67 of 322)
 			On the other hand, we do need to know when we failed to send a message completely 
 					so we can throw an exception, log an error, or perhaps write the message to an“errors” file for later analysis.
 
-			In  order  to  send  messages  asynchronously  and  still  handle  error  scenarios,  the  pro‐ducer supports adding a callback when sending a record. Here is an example of howwe use a callback:
+			In order to send messages asynchronously and still handle error scenarios, the pro‐ducer supports adding a callback when sending a record. Here is an example of howwe use a callback:
 							private class DemoProducerCallback implements Callback { 			// 1
 								@Override
 								public void onCompletion(RecordMetadata recordMetadata, Exception e) {
-									if (e != null) {         
+									if (e != null) { 
 										e.printStackTrace();									// 2
-									}    
+									} 
 								}
 							}
 
@@ -223,11 +223,11 @@ Constructing a Kafka Producer - 44 (67 of 322)
 							producer.send(record, new DemoProducerCallback());					// 4 
 
 					// 1
-							To  use  callbacks,  you  need  a  class  that  implements  the  org.apache.kafka.clients.producer.Callback  interface which  has  a  single  function—onCompletion().
+							To use callbacks, you need a class that implements the org.apache.kafka.clients.producer.Callback interface which has a single function—onCompletion().
 
 					// 2 
-							If Kafka returned an error, onCompletion() will have a nonnull exception. Herewe  “handle”  it  by  printing,  
-									but  production  code  will  probably  have  more  robust error handling functions.
+							If Kafka returned an error, onCompletion() will have a nonnull exception. Herewe “handle” it by printing, 
+									but production code will probably have more robust error handling functions.
 
 					// 3
 							The records are the same as before.
@@ -236,29 +236,300 @@ Constructing a Kafka Producer - 44 (67 of 322)
 							And we pass a Callback object along when sending the record.
 
 Configuring Producers
-	So  far  we’ve  seen  very  few  configuration  parameters  for  the  producers—just  the mandatory bootstrap.servers URI and serializers.
+	So far we’ve seen very few configuration parameters for the producers—just the mandatory bootstrap.servers URI and serializers.
 
-	The producer has a large number of configuration parameters; most are documentedin  Apache  Kafka  documentation: 
+	The producer has a large number of configuration parameters; most are documentedin Apache Kafka documentation: 
 			http://kafka.apache.org/documentation.html#producerconfigs
 
-			many  have  reasonable  defaults  so  there  is  no reason to tinker with every single parameter. 
+			many have reasonable defaults so there is no reason to tinker with every single parameter. 
 
 			However, some of the parameters have asignificant impact on memory use, performance, and reliability of the producers.
 
 	acks
-			The  acks  parameter  controls  how  many  partition  replicas  must  receive  the  recordbefore  the  producer  can  consider  the  write  successful.
+			The acks parameter controls how many partition replicas must receive the recordbefore the producer can consider the write successful. There are three allowed values for the acks parameter:
 
-			
+			acks=0
+					the producer will not wait for a reply from the broker before assuming the message was sent successfully. 
 
+					This means that if the broker did not receive the message
+							the producer will not know about it and the message will be lost.
 
+					So this setting can be used to achieve very high throughput
+							because the producer is not waiting for any response from the server, it can send messages as fast as the network will support,
 
+			acks=1
+					the producer will receive a success response from the broker the moment the leader replica received the message. 
+							If the message can’t be written to the leader (e.g., if the leader crashed and a new leader was not elected yet)
+									the producer will receive an error response and can retry sending the message
 
+							the message can still get lost if the leader crashes
+									a replica without this message gets elected as the new leader
+											(via unclean leader election)
 
+					In this case, throughput depends on whether we send messages synchronously or asynchronously. 
+							Synchronosly - client waits for reply
+									by calling the get() method of the Future object returned when sendinga message
 
+									it will obviously increase latency significantly 
+											at least by a network roundtrip
 
+							Asynchronosly - reply is received in background
+									uses callbacks 
 
+									latency will be hidden
 
+									throughput will be limited by the number of in-flight messages 
+											how many messages the pro‐ducer will send before receiving replies from the server
 
+			acks=all
+					the producer will receive a success response from the broker once allin-sync replicas received the message.
+
+					This is the safest mode 
+							since you can make sure more than one broker has the message and 
+
+							that the message will survive even in the case of crash (more information on this in Chapter 5: Kafka Internals).
+
+					However, thelatency we discussed in the acks=1 case will be even higher, 
+							since we will be wait‐ing for more than just one broker to receive the message.
+
+			<skipping the rest listed>
+			buffer.memory - This sets the amount of memory the producer will use to buffer messages waiting tobe sent to brokers. 
+			compression.type - By default, messages are sent uncompressed. 
+			retries - 
+			batch.size - When multiple records are sent to the same partition, the producer will batch them together.
+			linger.ms - controls the amount of time to wait for additional messages before sending the current batch.
+			client.id - This can be any string, and will be used by the brokers to identify messages sent from the client. It is used in logging and metrics, and for quotas.
+			max.in.flight.requests.per.connection - This controls how many messages the producer will send to the server withoutreceiving responses. 
+			timeout.ms, request.timeout.ms, and metadata.fetch.timeout.ms - These parameters control how long the producer will wait for a reply from the server
+			max.block.ms - This parameter controls how long the producer will block when calling send() andwhen explicitly requesting metadata via partitionsFor()
+			max.request.size - This setting controls the size of a produce request sent by the producer. It caps boththe size of the largest message that can be sent and the number of messages that theproducer can send in one request.
+			receive.buffer.bytes and send.buffer.bytes - 
+
+	Ordering Guarantees
+			Apache Kafka preserves the order of messages within a partition.
+					Setting the retries parameter to nonzero
+
+					Setting the max.in.flights.requests.per.session to more than one
+							it is possible to write the first batch second, thereby reversing the order.
+
+			setting the number of retries to zero is not an option in areliable system
+
+			so if guaranteeing order is critical, we recommend setting in.flight.requests.per.session=1
+					this makes sure that while a batch of messages is retrying, additional messages will notbe sent
+
+					This will severely limit the throughput of the producer, so only usethis when order is important.
+
+Serializers
+	Kafka also includes serializers forintegers and ByteArray. Eventually, you willwant to be able to serialize more generic records.
+
+	We will start by showing how to write your own serializer and then introduce theAvro serializer as a recommended alternative.
+
+	Custom Serializers
+			When the object you need to send to Kafka is not a simple string or integer, you have a choice of either using a generic serialization library like 
+					  Avro
+
+					, Thrift
+
+					, or Protobuf to create records
+
+					, or creating a custom serialization for objects you are already using.
+
+			We highly  recommend  using  a  generic  serialization  library.  In  order  to  understand  how the  serializers  work  and  
+					why  it  is  a  good  idea  to  use  a  serialization  library,  let’s  seewhat it takes to write your own custom serializer.
+
+					Suppose that instead of recording just the customer name, you create a simple class torepresent customers:
+									public class Customer {
+									    private int customerID;
+									    private String customerName;
+
+									    public Customer(int ID, String name) {
+									        this.customerID = ID;
+									        this.customerName = name;
+									    }
+
+									    public int getID() {
+									        return customerID;
+									    }
+
+									    public String getName() {
+									        return customerName;
+									    }
+									}
+
+					Now  suppose  we  want  to  create  a  custom  serializer  for  this  class.  It  will  look  some‐thing like this:
+									import org.apache.kafka.common.errors.SerializationException;
+									import org.apache.kafka.common.serialization.Serializer;
+
+									import java.nio.ByteBuffer;
+									import java.util.Map;
+
+									public class CustomerSerializer implements Serializer<Customer> {
+									    @Override
+									    public void configure(Map configs, boolean isKey) {
+									    }
+
+									    @Override
+									    /**  We are serializing Customer as:
+									     *   4 byte int representing customerId
+									     *   4 byte int representing length of customerName in UTF-8 bytes
+									     *          (0 if name is Null)
+									     *   N bytes representing customerName in UTF-8  */
+									    public byte[] serialize(String topic, Customer data) {
+									        try {
+									            byte[] serializedName;
+									            int stringSize;
+									            if (data == null)
+									                return null;
+									            else {
+									                if (data.getName() != null) {
+									                    serializedName = data.getName().getBytes("UTF-8");
+									                    stringSize = serializedName.length;
+									                } else {
+									                    serializedName = new byte[0];
+									                    stringSize = 0;
+									                }
+									            }
+									            ByteBuffer buffer = ByteBuffer.allocate(4 + 4 + stringSize);
+									            buffer.putInt(data.getID());
+									            buffer.putInt(stringSize);
+									            buffer.put(serializedName);
+									            return buffer.array();
+									        } catch (Exception e) {
+									            throw new SerializationException("Error when serializing Customer to byte[] " + e);
+									        }
+									    }
+
+									    @Override
+									    public void close() {          
+									        // nothing to close
+									    }
+									}
+
+				Configuring  a  producer  with  this  CustomerSerializer  will  allow  you  to  
+						define ProducerRecord<String,  Customer>,  and  
+
+						send  Customer  data  and  
+
+						pass  Customer objects  directly  to  the  producer.  
+
+				You  can  see  how fragile  the  code  is in this pretty  simple example
+						If  we  ever  have  too  many  customers and need change  customerID  to  Long
+
+						if  we  ever  decide  to  add  a  startDate  field  to  Customer
+
+				We will have a serious issue in maintaining compatibility between old and new messages
+
+				For these reasons, we recommend using existing serializers and deserializers such asJSON,  Apache  Avro,  Thrift,  or  Protobuf. 
+
+	Serializing Using Apache Avro
+			Apache Avro is a language-neutral data serialization format. 
+
+			The  schema  is  usually described in JSON and the serialization is usually to binary files, although serializingto JSON is also supported.
+
+			One of the most interesting features of Avro is  that  when  the  application  that  is  writing  messagesswitches to a new schema, the applications reading the data can continue processingmessages without requiring any change or update.
+							{
+							    "fields": [
+							        {
+							            "name": "id",
+							            "type": "int"
+							        },
+							        {
+							            "name": "name",
+							            "type": "string"
+							        },
+							        {
+							            // 1
+							            "default": "null",
+							            "name": "faxNumber",
+							            "type": [
+							                "null",
+							                "string"
+							            ]
+							        }
+							    ],
+							    "name": "Customer",
+							    "namespace": "customerManagement.avro",
+							    "type": "record"
+							}
+
+					// 1 
+							id  and  name  fields  are  mandatory,  while  fax  number  is  optional  and  defaults  to null.
+
+			We  used  this  schema  for  a  few  months  and  generated  a  few  terabytes  of  data  in  this format.   Now  suppose  that  we  decide  that  in  the  new  version,  we  will  upgrade  to  thetwenty-first century and will no longer include a fax number field and will instead usean email field.
+							{
+							    "fields": [
+							        {
+							            "name": "id",
+							            "type": "int"
+							        },
+							        {
+							            "name": "name",
+							            "type": "string"
+							        },
+							        {
+							            "default": "null",
+							            "name": "email",
+							            "type": [
+							                "null",
+							                "string"
+							            ]
+							        }
+							    ],
+							    "name": "Customer",
+							    "namespace": "customerManagement.avro",
+							    "type": "record"
+							}
+					Now,  after  upgrading  to  the  new  version,  old  records  will  contain  “faxNumber”  andnew  records  will  contain  “email.” 
+							We need to consider how preupgrade applications that still use the fax numbers and 
+
+							postupgrade applications that use email will be able to handle all the events in Kafka.
+
+					The reading application will contain calls to methods similar to getName(), getId(),and  getFaxNumber. 
+							If  it  encounters  a  message  written  with  the  new  schema,  getName()   and   getId()   will   continue   working   with   no   modification,   
+									but   getFaxNumber() will return null because the message will not contain a fax number.
+
+							Now  suppose  we  upgrade  our  reading  application  and  it  no  longer  has  the  getFaxNumber() method but rather getEmail(). 
+									If it encounters a message written with theold  schema,  
+
+									getEmail()  will  return  null  because  the  older  messages  do  not  containan email address.
+
+							This  example  illustrates  the  benefit  of  using  Avro:  
+									even  though  we  changed  the schema in the messages without changing all the applications reading the data, 
+
+									there will be no exceptions or breaking errors and 
+
+									no need for expensive updates of existing data.
+
+					However, there are two caveats to this scenario:
+							The  schema  used  for  writing  the  data  and  the  schema  expected  by  the  reading application must be compatible. 
+									The Avro documentation includes compatibility rules.
+
+									https://avro.apache.org/docs/1.7.7/spec.html#Schema+Resolution
+
+							The  deserializer  will  need  access  to  the  schema  that  was  used  when  writing  thedata,  
+									even  when  it  is  different  than  the  schema  expected  by  the  application  thataccesses  the  data.
+
+									In  Avro  files,  the  writing  schema  is  included  in  the  file  itself,
+											but  there  is  a  better  way  to  handle  this  for  Kafka  messages.  We  will  look  at  that next.
+
+	Using Avro Records with Kafka
+			Unlike Avro files, where storing the entire schema in the data file is associated with afairly reasonable overhead
+					storing the entire schema in each record will usually morethan  double  the  record  size. 
+
+			However,  Avro  still  requires  the  entire  schema  to  be present when reading the record,
+					
+			So we need to locate the schema elsewhere.
+					To achieve  this,  we  follow  a  common  architecture  pattern  and  use  a  Schema  Registry.
+							The Schema  Registry  is  not  part  of  Apache  Kafka  but  there  are  several  open  sourceoptions  to  choose  from.  
+
+							We’ll  use  the  Confluent  Schema  Registry  for  this  example. 
+									You can find the Schema Registry code on GitHub, or 
+											https://github.com/confluentinc/schema-registry
+
+									You can install it as part of theConfluent  Platform.
+											https://docs.confluent.io/current/installation/installing_cp/index.html
+
+							
 
 
 
