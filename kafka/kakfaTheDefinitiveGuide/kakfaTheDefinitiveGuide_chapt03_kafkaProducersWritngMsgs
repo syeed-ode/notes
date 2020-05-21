@@ -529,12 +529,169 @@ Serializers
 									You can install it as part of theConfluent  Platform.
 											https://docs.confluent.io/current/installation/installing_cp/index.html
 
-							
+											If  you  decide  to  use  the  Schema  Registry,  then  we  recommendchecking the documentation.
+													https://docs.confluent.io/current/schema-registry/index.html
+
+					The  idea  is  to  store  all  the  schemas  used  to  write  data  to  Kafka  in  the  registry. 
+							 Then we simply store the identifier for the schema in the record we produce to Kafka. 
+
+							 The consumers  can  then  use  the  identifier  to  pull  the  record  out  of  the  schema  registry and deserialize the data. 
+
+							 The key is that all this work—storing the schema in the registry and pulling it up when required—is done in the serializers and deserializers.
+							 		The code that produces data to Kafka simply uses the Avro serializer just like it would anyother serializer.
+
+	 		Here is an example of how to produce generated Avro objects to Kafka.
+						    void createAvroSchemaDocs() {																	
+						        Properties props = new Properties();
+						        String schemaUrl = "location";
+						        props.put("bootstrap.servers", "localhost:9092");
+						        props.put("key.serializer",   "io.confluent.kafka.serializers.KafkaAvroSerializer");		// 1
+						        props.put("value.serializer",   "io.confluent.kafka.serializers.KafkaAvroSerializer");
+						        props.put("schema.registry.url", schemaUrl);												// 2
+						        String topic = "customerContacts";
+						        int wait = 500;
+						        Producer<String, Customer> producer = new KafkaProducer<String,   Customer>(props);			// 3 
+
+						        // We keep producing new events until someone ctrl-c
+						        while (true) {    
+						            Customer customer = CustomerGenerator.getNext();    
+						            System.out.println("Generated customer " +       customer.toString());    			
+						            ProducerRecord<String, Customer> record =                        
+						                    new ProducerRecord<String, Customer>(topic, customer); 							// 4 
+						            producer.send(record); 																	// 5 
+						        }
+						    }
+
+			    	// 1
+			    			We  use  the  KafkaAvroSerializer  to  serialize  our  objects  with  Avro.  
+			    					Note  that the  AvroSerializer  can  also  handle  primitives,  
+
+			    					which  is  why  we  can  later  use String as the record key and our Customer object as the value.
+
+					// 2 
+							schema.registry.url is a new parameter. This simply points to where we store the schemas
+
+					// 3 
+							Customer is our generated object. We tell the producer that our records will contain Customer as the value.
+
+					// 4
+							We also instantiate ProducerRecord with Customer as the value type, and pass aCustomer object when creating the new record.
+
+					// 5
+							That’s  it.  We  send  the  record  with  our  Customer  object  and  KafkaAvroSerializer will handle the rest.
+
+			What if you prefer to use generic Avro objects rather than the generated Avro objects? No worries. In this case, you just need to provide the schema:
+							String url = "";
+							Properties props = new Properties();
+							props.put("bootstrap.servers", "localhost:9092");
+							props.put("key.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer");				// 1
+							props.put("value.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer");
+							props.put("schema.registry.url", url);															// 2
+							String schemaString = "{\"namespace\": \"customerManagement.avro\"," 
+							        + "\"type\": \"record\", " 																// 3
+							        + "\"name\": \"Customer\","
+							        + "\"fields\": ["
+							        + "{\"name\": \"id\", \"type\": \"int\"},"
+							        + "{\"name\": \"name\", \"type\": \"string\"},"
+							        + "{\"name\": \"email\", \"type\": [\"null\",\"string\"], \"default\":\"null\" }"
+							        + "]}";
+							Producer<String, GenericRecord> producer = new KafkaProducer<String, GenericRecord>(props);		// 4
+
+							Schema.Parser parser = new Schema.Parser();
+							Schema schema = parser.parse(schemaString);
+
+							for (int nCustomers = 0; nCustomers < customers; nCustomers++) {
+							    String name = "exampleCustomer" + nCustomers;
+							    String email = "example " + nCustomers + "@example.com";
+							    
+							    
+							    
+							    
+							    GenericRecord customer = new GenericData.Record(schema);									// 5 
+							    
+							    customer.put("id", nCustomers);
+							    customer.put("name", name);
+							    customer.put("email", email);
+							    
+							    
+							    
+							    ProducerRecord<String, GenericRecord> data = 
+							            new ProducerRecord<String, GenericRecord>("customerContacts", name, customer);
+							    producer.send(data);
+							}
+
+					// 1 
+							We still use the same KafkaAvroSerializer.
+
+					// 2 
+							And we provide the URI of the same schema registry.
 
 
+					// 3 
+							But now we also need to provide the Avro schema, since it is not provided by the Avro-generated object.
 
+					// 4
+							Our  object  type  is  an  Avro  GenericRecord,  which  we  initialize  with  our  schemaand the data we want to write.
 
+					// 5
+							Then the value of the ProducerRecord is simply a GenericRecord that countainsour  schema  and  data.  
 
+							The  serializer  will  know  
+									how  to  get  the  schema  from  this record, 
+
+									store it in the schema registry, and 
+
+									serialize the object data.
+
+Partitions
+	In previous examples, the ProducerRecord objects we created included a topic name, key, and value.
+
+	Kafka messages are key-value pairs and while it is possible to create a ProducerRecord  with  
+			just  a  topic  and  a  value,  
+					with  the  key  set  to  null  by  default,
+
+			most  applications  produce  records  with  keys.  
+
+	Keys  serve  two  goals:  
+			they  are  additional information that gets stored with the message, and 
+
+			they are also used to decide which one of the topic partitions the message will be written to.
+
+	All messages with the same key will go to the same partition.
+			This means that if a process is reading only asubset  of  the  partitions  in  a  topic 
+					all  the  records  for  asingle key will be read by the same process.
+
+			To create a key-value record, you simply create a ProducerRecord as follows:
+							ProducerRecord<Integer, String> record = new ProducerRecord<>("CustomerCountry", "Laboratory Equipment", "USA");
+											// The above ^ line of code will never compile. When using three arguments in the constructor
+											// the first generic entry must match the type of the second constructor argument
+											// The below code passes the compiler test, who knows if it runs. 
+											ProducerRecord<String, String> backupRecord = null;
+											Object o = new ProducerRecord<>("CustomerCountry", "Laboratory Equipment", "USA");
+											backupRecord = (ProducerRecord<String, String>) o;
+
+					Here,  the  key  will  simply  be  set  to  null,  which  may  indicate  that  a  customername was missing on a form.
+							ProducerRecord<Integer, String> bacupRecord = new ProducerRecord<>("CustomerCountry", "USA");
+
+			When  the  key  is  null  and  the  default  partitioner  is  used,  
+					the  record  will  be  sent  to one  of  the  available  partitions  of  the  topic  at  random
+
+					A  round-robin  algorithm  willbe used to balance the messages among the partitions.
+
+					If  a  key  exists  and  the  default  partitioner  is  used,  
+							Kafka  will  hash  the  key  
+									(using  its own hash algorithm, so hash values will not change when Java is upgraded), and 
+
+							use the result to map the message to a specific partition. 
+
+							Since it is important that a key is always mapped to the same partition, 
+									we use all the partitions in the topic to calculate the mapping—not just the available partitions. 
+
+									This means that if a specific partition is unavailable when you write data to it, you might get an error. 
+
+									This is fairly rare, as you will see in Chapter 6 when we discuss Kafka’s replication and availability
+
+					
 
 ‐
 

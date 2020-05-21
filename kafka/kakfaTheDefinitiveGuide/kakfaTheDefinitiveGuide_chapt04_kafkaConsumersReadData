@@ -1,0 +1,160 @@
+Add 23 to the page to get the pdf location. A page references are in PDF pages.
+*************************************************************
+*							 *
+*							 *
+*							 *
+toc: 20
+pg43 - 
+*************************************************************
+*** Chapter 4 - Kafka Consumers: Reading Data from Kafka ****
+*************************************************************	
+Kafka Definitive Guide
+Kafka Consumer Concepts - 63 (86 of 322) 
+	Consumers and Consumer Groups
+			Suppose you have an application that needs to 
+					read messages from a Kafka topic, 
+
+					run some validations against them, and 
+
+					write the results to another data store. 
+
+			In this case your application will 
+					create a consumer object, 
+
+					subscribe to the appropriate topic, and 
+
+					start receiving messages, 
+
+					validating them and 
+
+					writing the results. 
+
+					This may work well for  a  while,  but  what  if  the  rate  at  which  producers  write  messages  to  the  topic exceeds  the  rate  at  which  your  application  can  validate  them?  
+
+					Obviously there  is  a  need  to  scale  consumption  from  topics.
+
+					Just  like  multiple  producers  can write to the same topic, 
+
+			We need to allow multiple consumers to read from the same topic, splitting the data between them.
+
+			Kafka consumers are typically part of a consumer group.
+					When multiple consumers are subscribed to a topic and belong to the same consumer group, 
+
+			Each consumer in the group will receive messages from a different subset of the partitions in the topic.
+					Let’s take topic T1 with four partitions. Now suppose we created a new consumer, C1,which  is  the  only  consumer  in  group  G1, 
+							Consumer C1 will get all messages from all four t1 partitions.
+
+					If we add another consumer, C2, to group G1, each consumer will only get messagesfrom two partitions. 
+
+					If  G1  has  four  consumers,  then  each  will  read  messages  from  a  single  partition.
+
+					If  we  add  more  consumers  to  a  single  group  with  a  single  topic  than  we  have  parti‐tions, some of the consumers will be idle and get no messages at all.
+
+			The main way we scale data consumption from a Kafka topic is by adding more consumers  to  a  consumer  group.
+					It  is  common  for  Kafka  consumers  to  do  
+							high-latency operations such as write to a database or a 
+
+							time-consuming computation on the data.
+
+			This  is  a good reason to create topics with a large number of partitions:
+					our  main  method  of  scaling is
+
+					adding more consumers that share the load by 
+
+					having each consumer own just  a  subset  of  the  partitions  and  messages
+
+					it allows adding moreconsumers  when  the  load  increases.
+
+			Keep  in  mind  that  there  is  no  point  in  adding more consumers than you have partitions in a topic
+					some of the consumers will just be idle
+
+					In addition to adding consumers in order to scale a single application, 
+			
+			It is very common to have multiple applications that need to read data from the same topic.
+					One of the main design goals in Kafka was to make the data produced to Kafka topics
+							available  for  many  use  cases  throughout  the  organization. In  those  cases,  
+
+							we  want each application to get all of the messages rather than just a subset
+
+			Ensure  the  application  has  its  own  consumer  group, 
+					to make sure anapplication  gets  all  the  messages  in  a  topic.
+
+					Kafka  scales  to  a  large number of consumers and consumer groups without reducing performance.
+
+					if we add a new consumer group G2 with a single consumer,
+							this consumer will get all the messages in topic T1 independent of what G1 is doing
+
+							G2 can have more than a single consumer, in which case they will each get a subset of partitions,
+
+							but G2 as a whole will still get all the messages regardless of other consumer groups.
+
+
+
+
+
+
+‐
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
