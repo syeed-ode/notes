@@ -88,9 +88,65 @@ Kafka Consumer Concepts - 63 (86 of 322)
 
 							but G2 as a whole will still get all the messages regardless of other consumer groups.
 
+			To  summarize,
+					you  create  a  new  consumer  group  for  each  application  that  needs  allthe  messages  from  one  or  more  topics
+
+					you  add  consumers  to  an  existing  consumergroup to scale the reading and processing of messages from the topics
+							so each addi‐tional consumer in a group will only get a subset of the messages.
+
+	Consumer Groups and Partition Rebalance
+			Consumers in a consumer group share ownershipof the partitions in the topics they subscribe to
+					When we add a new consumer to the group, it starts consuming messages from partitions previously consumed by another consumer. 
+
+					The same thing happens when a consumer shuts down or crashes; it leaves the  group,  and  
+
+			when a consumer shuts down the  partitions  it  used  to  consume  will  be  consumed  by  one  of  the remaining  consumers
+
+			Reassignment  of  partitions  to  consumers  also  happen  whenthe  topics  the  consumer  group  is  consuming  are  modified
+					if  an  administrator adds new partitions
+
+			Rebalancing
+					Moving  partition  ownership  from  one  consumer  to  another
+
+					Rebalances allowing us to easily and safely add and remove consumers
+							in  the  normal  course  of  events  they  are  fairly  undesirable.  
+									During  a  rebalance,  consumers can’t consume messages 
+
+					so a rebalance is basically a short window of unavailability  of  the  entire  consumer  group.
+							when  partitions  are  moved  from one  consumer  to  another,  the  consumer  loses  its  current  state;
+									if  it  was  caching  any data,  it  will  need  to  refresh  its  caches
+
+									slowing  down  the  application  until  the  consumer  sets  up  its  state  again.
+
+					Throughout  this  chapter  we  will  discuss  how  to  safely handle rebalances and how to avoid unnecessary ones
+
+			Heartbeats (skipping for right now) - pg 67 (90 of 322)
+
+			How Does the Process of Assigning Partitions to Brokers Work?
+					When  a  consumer  wants  to  join  a  group,  it  sends  a  JoinGroup request  to  the  group  coordinator.
+
+					The  first  consumer  to  join  the group  becomes  the  group  leader.
+							The  leader  receives  a  list  of  all consumers  in  the  group  from  the  group  coordinator  
+									(this  willinclude  all  consumers  that  sent  a  heartbeat  recently  and  
+
+									which  are therefore considered alive) and 
+
+							The  leader is responsible for assigning a subset of partitions to each consumer.
+									It uses an implementation of PartitionAssignor  to  decide  which  partitions  should  be  handled  by which consumer.
 
 
+							The  consumer  leader  sends  the  list  of assignments  to  the  GroupCoordinator
+									The  GroupCoordinator sends  this  information to all the consumers
 
+									the  leader  is  the  only  client  process  that  has  
+											the  full  list  of consumers   in   the   group   and   
+
+											their   assignments
+
+											Each consumer only sees his own assignment
+
+Creating a Kafka Consumer
+	(skipping the notes for now...need to expidite the process)
 
 
 ‐
