@@ -1,0 +1,22 @@
+Add 23 to the page to get the pdf location. A page references are in PDF pages.
+*************************************************************
+*							 *
+*							 *
+*							 *
+toc: 20
+pg43 - 
+*************************************************************
+*********          Chapter 1 - Quick Start         **********
+*************************************************************	
+Mastering Apache Cassandra 3.x, Third Edition
+
+
+Welcome to the world of 'Apache Cassandra'! In this chapter, we will cover the following topics:
+		- Introduction to Cassandra
+
+		- Installation and configuration
+
+		- Starting up and shutting down Cassandra
+
+		- Cassandra Cluster Manager (CCM)
+
