@@ -1,0 +1,8 @@
+20200526_19:36:17 cassandra ssode$ bin/nodetool status
+Datacenter: ClockworkAngels
+===========================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load       Tokens       Owns (effective)  Host ID                               Rack
+UN  127.0.0.1  65.81 KiB  24           100.0%            e6c2fcb8-b9ea-4048-a835-ef24d8cabf53  R40
+
