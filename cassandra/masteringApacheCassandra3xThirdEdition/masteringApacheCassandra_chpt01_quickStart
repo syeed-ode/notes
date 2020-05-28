@@ -144,8 +144,74 @@ Starting Cassandra
 					$ bin/cassandra -p cassandra.pid
 
 	The node issuccessfully running when you see this message:
-			Starting listening for CQL clients on localhost/192.168.0.101:9042(unencrypted). ## I did not get this message
+			Starting listening for CQL clients on localhost/192.168.0.101:9042(unencrypted). 	## I did not get this message
 
+	This can also be verified with the nodetool status command:
+					$ bin/nodetool status 														## see output in initialNodeTool_output
+
+Cassandra Cluster Manager
+	CCM installs Cassandra for you, with very minimal configuration. It also allows you to run multiple Cassandra nodes locally.
+
+	First, let's clone the CCM repository from GitHub, and cd into the directory:
+					$ git clone https://github.com/syeed-ode/ccm.git
+					$ cd ccm/
+					$ git remote add upstream https://github.com/riptano/ccm.git
+
+	Next, we'll run the setup program to install CCM:
+					$ sudo ./setup.py install
+
+	Using CCM actually changes many of the commands that we will followin this book. 
+			While it is a great tool for quickly spinning up a small clusterfor demonstration purposes, 
+
+	it can complicate the process of learning how to use Cassandra.
+
+A quick introduction to the data model
+	We will use 'cqlsh' as our primary means of working with the Cassandra data model.
+
+	Using Cassandra with cqlsh
+			The Cassandra Query Language (CQL) shell interface will allow us 
+					to execute CQL commands to 
+
+					  define
+
+					, query
+
+					, and modify our data.
+
+			As this is a new cluster and we have turned on authentication and authorization,
+
+			we will use the default 'cassandra' and 'cassandra' username and password, as follows:
+							$ bin/cqlsh 127.0.0.1 -u cassandra -p cassandra
+									Connected to PermanentWaves at 127.0.0.1:9042.
+									[cqlsh 5.0.1 | Cassandra 3.11.6 | CQL spec 3.4.4 | Native protocol v4]
+									Use HELP for help.
+
+			First, let's tighten up security. Let's start by creating a new superuser to work with.
+					New users can only be created if authentication and authorization are properly set in the 'cassandra.yaml' file:
+									cassandra@cqlsh> CREATE ROLE cassdba WITH PASSWORD='flynnLives' AND LOGIN=true and SUPERUSER=true;
+					
+					Now, set the default cassandra user to something long and indecipherable. You shouldn't need to use it ever again:
+									cassandra@cqlsh> ALTER ROLE cassandra WITH PASSWORD='6c36e0082f784ed586f4658b599187fa4a1451066e0f4722a6';
+									cassandra@cqlsh> ALTER ROLE cassandra WITH PASSWORD='dsfawesomethingdfhdfshdlongandindecipherabledfhdfh';
+
+					Then, exit cqlsh using the exit command and log back in as the new cassdba user:
+									cassandra@cqlsh> exit
+									$ bin/cqlsh 127.0.0.1 -u cassdba -p flynnLives
+											Connected to PermanentWaves at 127.0.0.1:9042.
+											[cqlsh 5.0.1 | Cassandra 3.11.6 | CQL spec 3.4.4 | Native protocol v4]
+											Use HELP for help.
+									cassdba@cqlsh> 
+ 
+					Now, let's create a new keyspace where we can put our tables, as follows: 
+									cassdba@cqlsh> CREATE KEYSPACE packt WITH replication = {'class': 'NetworkTopologyStrategy', 'ClockworkAngels': '1'} AND durable_writes = true;
+									cassdba@cqlsh> CREATE KEYSPACE packt WITH replication = {'class': 'NetworkTopologyStrategy', 'ClockworkAngels': '1'} AND durable_writes = true;
+
+							For those of you who have used Cassandra before, you might be temptedto build your local keyspaces with 'SimpleStrategy'.
+
+							'SimpleStrategy' is limited in that it cannot be used in a plural data center environment.
+
+					With the newly created keyspace, let's go ahead and use it:
+ 
 	
 
 
