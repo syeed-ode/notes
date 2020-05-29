@@ -93,7 +93,72 @@ Binary Search
 	This, in a nutshell, is binary search.
 			The major advantage of an ordered array over a standard array is that we have the option of performing a binary search rather than a linear search.
 
+Binary Search Vs. Linear Search
+	Linear Search: 100 steps. 
+
+	Binary Search: 7 steps.
 			
+	Let’s see what happens with larger arrays. With an array containing 100 values, the maximum number of steps it takes for search:			
+			With linear search, 
+					if the value we’re searching for is in the final cell, or 
+
+					is greater than the value in the final cell, 
+
+					we have to inspect each and every element. For an array which is the size of 100, 
+							this would take 100 steps.
+
+			When we use binary search, however, 
+					each guess we make eliminates half of the possible cells we’d have to search. 
+
+					In our very first guess, we get to eliminate a whopping 50 cells.
+
+			Let’s look at this another way, and we’ll see a pattern emerge:
+					With an array of size 3, the maximum number of steps it would take to find something using binary search is 2.
+
+					If we double the number of cells in the array (and add one more to keep the number odd for simplicity’s sake), there are 7 cells. For such an array, the maximum number of steps to find something using binary search is 3.
+
+					If we double it again (and add one) so that the ordered array contains 15 elements, the maximum number of steps to find something using binary search is 4.
+
+					The pattern that emerges is that 
+
+			For every time we double the number of items in the ordered array, the number of steps needed for binary search increases by just one.
+					Contrast this with linear search. If you had 3 items, you’d need up to 3 steps.
+
+					With linear search, there are as many steps as there are items.
+							For linear search, 
+									every time we double the number of elements in the array, 
+
+									we double the number of steps we need to find something. 
+
+							For binary search, 
+									every time we double the number of elements in the array, 
+
+									we only need to add one more step.
+
+					With an array of 10,000 elements, a linear search can take up to 10,000 steps, while 
+
+					binary search takes up to a maximum of just 13 steps.
+
+	By using an ordered array, 
+			you have somewhat slower insertion, 
+					Inserting into an ordered array always requires a search before the actual insertion to determine the correct spot for the insertion.
+							That is one key difference (in terms of efficiency) between a standard array and an ordered array.
+
+			but much faster search. 
+					Again, you must always analyze your application to see what is a better fit.
+
+Wrapping Up
+	Just because ordered arrays allow for binary search doesn’t mean you should always use ordered arrays. 
+
+	In situations where you don’t anticipate searching the data much, but only adding data, 
+			standard arrays may be a better choice because their insertion is faster.
+
+	The way to analyze competing algorithms is to count the number of steps each one takes.
+			We’re going to learn about a formalized way of expressing the time complexity of competing data structures and algorithms. 
+
+			Having this common language will give us clearer information that will allow us to make better decisions in which algorithms we choose.
+pg 40 [27]
+
 
 
 

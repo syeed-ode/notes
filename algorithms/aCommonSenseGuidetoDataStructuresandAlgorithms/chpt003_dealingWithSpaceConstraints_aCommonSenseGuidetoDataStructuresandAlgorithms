@@ -1,0 +1,260 @@
+	                                                                   |
+
+pg 41 [27]
+				Dealing With Space Constraints
+
+
+The number of steps that an algorithm takes is the primary factor in determining its efficiency.
+
+We can’t simply label one algorithm a “22-step algorithm” and another a “400-step algorithm”. The more accurate way to quantify efficiency of linear search is to say that linear search takes N steps for N elements in the array. 
+
+Big O Notation formalized expression around these concepts allows us to easily categorize the efficiency of a given algorithm and convey it to others.
+
+Once you understand Big O Notation, you’ll have the tools to analyze every algorithm going forward in a consistent and concise way - and it’s the way that the pros use.
+
+It’s not a difficult concept, but we’ll make it even easier by explaining it in chunks over multiple chapters.
+
+Big O: Count the Steps
+	Big O achieves consistency by focusing only on the number of steps that an algorithm takes.
+			In Why Data Structures Matter, we discovered that reading from an array takes just one step, no matter how large the array is.
+
+			The way to express this in Big O Notation is:
+					O(1)
+
+			O(1) simply means that the algorithm takes the same number of steps no matter how much data there is.
+					In this case, reading from an array always takes just one step no matter how much data the array contains.
+
+					Other operations that fall under the category of O(1) are the insertion and deletion of a value at the end of an array. 
+
+			Linear search can take up to a maximum of N steps, for N elements in the array.
+					O(N)
+
+Constant Time Vs. Linear Time
+	Big O Notation describes how many steps an algorithm takes 'based on the number of data elements that the algorithm is acting upon'.			
+			How does the number of steps change as the data increases? 
+					An algorithm that is O(N) will take as many steps as there are elements of data.
+
+					So when an array increases in size by one element, an O(N) algorithm will increase by one step. 
+
+					An algorithm that is O(1) will take the same number of steps no matter how large the array gets.
+
+					For the record, O(N) is also known as 'linear time'.
+
+					O(1) is also referred to as 'constant time'.
+
+	An algorithm can be described as O(1) even if it takes more than one step. 
+			Let’s say that a particular algorithm always takes three steps, rather than one - but it always takes these three steps no matter how much data there is.
+
+			Because the number of steps remains constant no matter how much data there is, 
+					This would also be considered constant time and be described by Big O Notation as O(1).
+
+					Even though the algorithm technically takes 3 steps rather than 1 step, Big O Notation considers that trivial.
+
+	O(1) is the way to describe any algorithm is that doesn’t change its number of steps even when the data increases.
+			If a 3-step algorithm is considered O(1) as long as it remains constant, 
+					it follows that even a constant 100-step algorithm would be expressed as O(1) as well. 
+
+			While a 100-step algorithm is less efficient than a 1-step algorithm, 
+
+			The fact that it is O(1) still makes it more efficient than any O(N) algorithm. pg 45 [33]
+
+			For an array of fewer than 100 elements, O(N) algorithm takes fewer steps than the O(1) 100-step algorithm.
+					At exactly 100 elements the two algorithms take the same number of steps (100). 
+
+					But here’s the key point: For all arrays greater than 100, 
+							the O(N) 'algorithm takes more steps'.
+
+					Because there will always be 'some' amount of data in which the tides turn, 
+							and O(N) takes more steps from that point until infinity, 
+
+							O(N) is considered to be, on the whole, less efficient than O(1).
+
+Same Algorithm, Different Scenarios
+	As we learned in the previous chapters, linear search isn’t always O(N).
+			It’s true that if the item we’re looking for is in the final cell of the array, it will take N steps to find it.
+					But where the item we’re searching for is found in the first cell of the array, linear search will find the item in just one step. 
+							Technically, this would be described as O(1). 
+
+					If we were to describe the efficiency of linear search in its totality, 
+							we’d say that linear search is O(1) in a best case scenario, and 
+
+							O(N) in a worst case scenario.
+
+	While Big O effectively describes both the best and worst case scenarios of a given algorithm, 
+			Big O Notation generally refers to worst case scenario unless specified otherwise. 
+					This is why most references will describe linear search as being O(N) even though it can be O(1) in a best case scenario.
+
+An Algorithm of the Third Kind
+	In the previous chapter, we learned that binary search on an ordered array is much faster than linear search on the same array.
+			Let’s learn how to describe binary search in terms of Big O Notation.
+
+			We can’t describe binary search as being O(1), 
+					because the number of steps increase as the data increases.
+
+					It also doesn’t fit into the category of O(N), since the number of steps are much fewer than the number of elements that it searches.
+
+					As we’ve seen, binary search takes only 7 steps for an array containing 100 elements.
+
+			Binary search seems to fall somewhere in between O(1) and O(N).
+					In Big O, we describe binary search as having a time complexity of: O(log N)
+
+					Log time: This type of algorithm is also known as having a time complexity of 'log time'.
+
+	O(log N) is the Big O way of describing an algorithm that increases one step each time the data is doubled.
+			Of the three types of algorithms we’ve learned about so far, they can be sorted from most efficient to least efficient as follows:
+					O(1)
+
+					O(log N)
+
+					O(N)
+
+			Note how O(log N) curves ever-so-slightly upwards, making it less efficient than O(1), but much more efficient than O(N). pg 47 [35]
+
+			To understand why this algorithm is called “O(log N)”, we need to first understand what 'logarithms' are.
+
+Logarithms
+	
+O(log N) Explained
+	Recall that O(N) means that for N data elements, the algorithm would take N steps. If there are 8 elements, the algorithm would take 8 steps.
+
+	O(log N) means that for N data elements, the algorithm would take 'log2 N steps'. If there are 8 elements, the algorithm would take 3 steps, since log2  8 = 3.
+			Said another way, if we keep dividing the 8 elements in half, it would take us 3 steps until we end up with one element.
+
+			This is exactly what happens with binary search. As we search for a particular item, we keep dividing the array’s cells in half until we narrow it down to the correct number.
+
+	Said simply: 'O(log N) means that the algorithm takes as many steps as it takes to keep halving the data elements until we remain with one'.
+
+	The following table demonstrates a striking difference between the efficiencies of O(N) and O(log N):
+			N 		Elements O(N) O(log N)
+			8 			 8 			3
+			16 			16 			4
+			32 			32 			5
+			64 			64 			6
+			128 	  	128 		7
+			256 		256 		8
+			512 		512 		9
+			1024 		1024 		10
+
+			While the O(N) algorithm takes as many steps as there are data elements, the O(log N) algorithm takes just one additional step every time the data elements are doubled.
+
+Practical Examples
+	Here’s some typical JavaScript code that prints out all the items from a list:
+			const things = ['apples', 'baboons', 'cribs', 'dulcimers'];
+			// O(N)
+			for(let i = 0; i < things.length; i++) {
+			    console.log("Here's a thing; " + things[i]);
+			}
+
+			The first thing to realize is that this is an example of an algorithm. 
+					While it may not be fancy, any code that does anything at all is 
+							technically an algorithm - 
+
+							it’s a particular process for solving a problem. 
+
+					In this case, the problem is that we want to print out all the items from a list. 
+							The algorithm we use to solve this problem is a for loop containing a console.log() statement.
+
+			To break this down, we need to analyze how many steps this algorithm takes. In this case, the main part of the algorithm - 
+					the for loop - takes 4 steps.
+
+					However, this process isn’t constant. If the list would contain 10 elements, the for loop would take 10 steps.
+
+					Since this for loop takes as many steps as there are elements, we’d say that 
+
+			this algorithm has an efficiency of O(N).
+
+	Let’s take another example. Here is one of the most basic code snippets known to mankind:
+			print 'Hello world!'
+
+			The time complexity of the above algorithm (printing “Hello world!”) is 
+					O(1), 
+
+			because it always takes one step.
+
+	The next example is a simple JavaScript-based algorithm for determining whether a number is prime: {didn't bother to write the code for this. It doesn't make sense. It has a big oh of N. pg 50 [38] for reference}
+
+Wrapping Up
+	Now that we understand Big O Notation, we have a consistent system that allows us to compare any two algorithms.
+
+	With it, we will be able to examine and choose between competing data structures and algorithms to make our code faster and able to handle heavier loads.
+
+	In the next chapter, we’ll encounter a real life example in which we use Big O Notation to speed up our code signifcantly.
+
+pg 51 [39]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

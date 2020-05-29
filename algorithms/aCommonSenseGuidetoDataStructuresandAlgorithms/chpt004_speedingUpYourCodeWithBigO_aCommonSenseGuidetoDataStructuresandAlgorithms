@@ -1,0 +1,156 @@
+	                                                                   |
+
+pg 41 [27]
+				Speeding Up Your Code with Big O
+
+
+Big O Notation is a great tool for comparing competing algorithms, as it gives an objective way to measure them.
+
+However, there may not always be two clear alternatives when writing everyday code.
+		With Big O, you have the opportunity to compare your algorithm to general algorithms out there in the world, and you can say to yourself, 
+				“Is this a fast or slow algorithm as far as algorithms generally go?”
+
+		This may not always be possible, of course, but it’s certainly worth thinking about before concluding that it’s not.
+
+		We’ll write some code we’ll then see if we might be able to modify the algorithm in order to give it a nice efficiency bump. (Spoiler: We will.)
+
+Bubble Sort
+	We need to first learn about a new category of algorithmic efficiency: sorting alogrithms. 
+			Sorting algorithms have been the subject of extensive research in computer science.
+
+			Given an array of unsorted numbers, how can we sort them so that they end up in ascending order?
+					Some of the first ones we’ll be learning about are known as “simple sorts”, in that they are easier to understand, but are not as efficient.
+
+	Bubble Sort is a very basic sorting algorithm, and follows these steps: see https://github.com/syeed-ode/node-js-algorithms.git : aCommonSenseGuidetoDataStructuresandAlgorithms/bubbleSort.js
+
+The Efficiency of Bubble Sort
+	The Bubble Sort algorithm contains two kinds of steps:
+			1. Comparisons
+					in which two numbers are compared with one another to determine which is greater.
+
+			2. Swaps
+					two numbers are swapped with one another in order to sort them.
+
+	Let’s start by determining how many comparisons take place in Bubble Sort.
+			Our example array has 5 elements. Looking back, you can see that 
+					in our first passthrough, 
+							we had to make 4 comparisons between sets of two numbers.
+
+					In our second passthrough, 
+							we had to make only 3 comparisons.
+
+							This is because we don’t have to compare the final two numbers, since we knew that the final number is in the correct spot.
+
+					In our third passthrough, we made 2 comparisons, and in our fourth= passthrough, we make just 1 comparison.
+
+			So, that’s:
+					4 + 3 + 2 + 1 = 10 comparisons.
+
+					(N - 1) + (N - 2) + (N - 3) … + 1 comparisons.
+
+	Let’s analyze the swaps.
+			In a worst case scenario, we’d actually need a swap for each comparison.
+
+			So we’d have 10 comparisons and 10 swaps in such a scenario for a grand total of 20 steps.
+
+			With an array containing 10 elements in reverse order, we’d have:
+					9 + 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1 = 45 comparisons, and another
+
+					45 swaps.
+
+			With an array containing 20 elements, we’d have: 190 comparisons, and approximately 190 swaps, for a total of 380 steps.
+
+			Notice the inefficiency here. 
+					As the number of elements increase, the number of steps grows exponentially. 
+
+					We can see this clearly with the following table:
+								N  					Max # of steps
+							data elements
+								5 						 20 (25)
+								10 						 90 (100)
+								20 						380 (400)
+								40 						1560 (1600)
+								80 						6320 (6400)
+
+			If you look precisely at the growth of steps as N increases, you’ll see that it’s growing by approximately N^2.
+
+	Therefore, in Big O Notation, we’d say that Bubble Sort has an efficiency of O(N^2).
+
+	Said more officially: In an O(N^2) algorithm, for N data elements, there are roughly N^2 steps.
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
