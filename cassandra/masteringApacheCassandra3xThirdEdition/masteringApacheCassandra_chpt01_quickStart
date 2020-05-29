@@ -1,0 +1,253 @@
+Add 23 to the page to get the pdf location. A page references are in PDF pages.
+*************************************************************
+*							 *
+*							 *
+*							 *
+toc: 20
+pg43 - 
+*************************************************************
+*********          Chapter 1 - Quick Start         **********
+*************************************************************	
+Mastering Apache Cassandra 3.x, Third Edition
+
+
+Welcome to the world of 'Apache Cassandra'! In this chapter, we will cover the following topics:
+		- Introduction to Cassandra
+
+		- Installation and configuration
+
+		- Starting up and shutting down Cassandra
+
+		- Cassandra Cluster Manager (CCM)
+
+By the end of this chapter, you will have built a single-node cluster of Apache Cassandra.
+		As this chapter progresses and the material gets more complex, 
+				you will start to connect the dots and 
+
+				understand exactly what is happening between 
+						installation
+
+						, operation
+
+						, and development.
+
+
+Introduction to Cassandra
+	High availability
+			Depending on the 'Replication Factor (RF)' and required consistency level, a Cassandra cluster is capable of sustaining operations with one or two nodes in a failure state.
+
+			Let's assume that a cluster with a single data center has 
+
+			a keyspace configured for a RF of three.
+					This means that the cluster contains three copies of each row of data.
+
+			With a consistency level of one for application queries
+					With one or two nodes in a down state, it can still function properly.
+
+	Distributed
+			Cassandra is known as a distributed database.
+
+			A Cassandra cluster is a collection of nodes all working together to serve the same dataset.
+					Nodes are individual instances running Cassandra
+
+					Nodes can also be grouped together into logical data centers.
+
+			Cassandra clusters can scale this means that each cluster becomes responsible for a smaller percentage of the total data size.
+
+			Assuming that the 
+					500 GB disks of a 
+
+					six node cluster - 3TB storage total 
+
+					(RF of three) - 
+							TotalNodes / RF ~ Balancing 
+								6 / 3 ~ 2
+
+								Balancing: 2 
+
+							Total Storage / Balancing ~ AmountStorage_perCluster 
+								3TB / 2 ~ 1.5TB
+
+								AmountStorage_perCluster: 1.5TB
+
+								1.5TB / 3TB == 50% per node
+
+
+
+					start to reach their maximum capacity
+
+					then adding three more nodes - 1.5TB storage - (for a total of nine) -- 9 node cluster
+							Brings the total disk available to the cluster up from 3TB to 4.5TB
+
+							The percentage of data that each node is responsible for drops from 50% down to33%
+									TotalNodes / RF ~ Balancing
+											9 / 3 ~ 3
+
+											Balancing: 3
+
+									Total Storage / Balancing ~ AmountStorage_perCluster 
+											4.5TB / 3 ~ 1.5TB 
+
+											1.5TB / 4.5TB == 33% per node
+
+			Let's assume that before the cluster was capable of supporting 5,000 operations per second.
+					Cassandra scales linearly. After increasing the cluster from six nodes to nine.
+
+					The cluster should then be expected to support 7,500 operations per second.
+							5000 / (1 - 1/3) ~ 7500
+
+	Partitioned row store
+			In Cassandra, rows of data are stored in tables based on the token
+					token is the hashed value of the partition key,
+
+			Each node in the cluster is assigned multiple token ranges, and 
+			 		rows are stored on nodes that are responsible for their tokens.
+
+	 		Each keyspace (collection of tables) can be assigned a RF. 
+	 				The RF designates how manycopies of each row should be stored in each data center.
+
+	 				If a keyspace has a RF of three,then each node is assigned primary, secondary, and tertiary token ranges.
+
+	 				As data iswritten, it is written to all of the nodes that are responsible for its token.
+
+Installation
+
+Configuration
+	At this point, you could start your node with no further configuration. 
+
+	cassandra.yaml
+			cluster_name: 'PermanentWaves'
+			num_tokens: 24
+			authenticator: PasswordAuthenticator
+			listen_address: 192.168.0.101
+			rpc_address: 192.168.0.101
+			seeds: 192.168.0.101
+			endpoint_snitch: GossipingPropertyFileSnitch
+
+	cassandra-rackdc.properties
+			In terms of NoSQL databases, Apache Cassandra handles multi-data center awareness better than any other. 
+
+			To configure this, each node must use 'GossipingPropertyFileSnitch' 
+					(as previously mentioned in the precedingcassandra.yaml configuration process)
+
+			And must have its local data center (and 'rack') settings defined.
+
+			Therefore, I will set the dc and rack properties in the 'conf/cassandra-rackdc.properties' file:
+							dc=ClockworkAngels
+							rack=R40
+
+Starting Cassandra
+	To start Cassandra locally, execute the Cassandra script. If no arguments are passed, it will run in the foreground.
+
+	To have it run in the background, send the -p flag with a destination file for the Process ID (PID):
+					$ cd cassandra
+					$ bin/cassandra -p cassandra.pid
+
+	The node issuccessfully running when you see this message:
+			Starting listening for CQL clients on localhost/192.168.0.101:9042(unencrypted). 	## I did not get this message
+
+	This can also be verified with the nodetool status command:
+					$ bin/nodetool status 														## see output in initialNodeTool_output
+
+Cassandra Cluster Manager
+	CCM installs Cassandra for you, with very minimal configuration. It also allows you to run multiple Cassandra nodes locally.
+
+	First, let's clone the CCM repository from GitHub, and cd into the directory:
+					$ git clone https://github.com/syeed-ode/ccm.git
+					$ cd ccm/
+					$ git remote add upstream https://github.com/riptano/ccm.git
+
+	Next, we'll run the setup program to install CCM:
+					$ sudo ./setup.py install
+
+	Using CCM actually changes many of the commands that we will followin this book. 
+			While it is a great tool for quickly spinning up a small clusterfor demonstration purposes, 
+
+	it can complicate the process of learning how to use Cassandra.
+
+A quick introduction to the data model
+	We will use 'cqlsh' as our primary means of working with the Cassandra data model.
+
+	Using Cassandra with cqlsh
+			The Cassandra Query Language (CQL) shell interface will allow us 
+					to execute CQL commands to 
+
+					  define
+
+					, query
+
+					, and modify our data.
+
+			As this is a new cluster and we have turned on authentication and authorization,
+
+			we will use the default 'cassandra' and 'cassandra' username and password, as follows:
+							$ bin/cqlsh 127.0.0.1 -u cassandra -p cassandra
+									Connected to PermanentWaves at 127.0.0.1:9042.
+									[cqlsh 5.0.1 | Cassandra 3.11.6 | CQL spec 3.4.4 | Native protocol v4]
+									Use HELP for help.
+
+			First, let's tighten up security. Let's start by creating a new superuser to work with.
+					New users can only be created if authentication and authorization are properly set in the 'cassandra.yaml' file:
+									cassandra@cqlsh> CREATE ROLE cassdba WITH PASSWORD='flynnLives' AND LOGIN=true and SUPERUSER=true;
+					
+					Now, set the default cassandra user to something long and indecipherable. You shouldn't need to use it ever again:
+									cassandra@cqlsh> ALTER ROLE cassandra WITH PASSWORD='6c36e0082f784ed586f4658b599187fa4a1451066e0f4722a6';
+									cassandra@cqlsh> ALTER ROLE cassandra WITH PASSWORD='dsfawesomethingdfhdfshdlongandindecipherabledfhdfh';
+
+					Then, exit cqlsh using the exit command and log back in as the new cassdba user:
+									cassandra@cqlsh> exit
+									$ bin/cqlsh 127.0.0.1 -u cassdba -p flynnLives
+											Connected to PermanentWaves at 127.0.0.1:9042.
+											[cqlsh 5.0.1 | Cassandra 3.11.6 | CQL spec 3.4.4 | Native protocol v4]
+											Use HELP for help.
+									cassdba@cqlsh> 
+ 
+					Now, let's create a new keyspace where we can put our tables, as follows: 
+									cassdba@cqlsh> CREATE KEYSPACE packt WITH replication = {'class': 'NetworkTopologyStrategy', 'ClockworkAngels': '1'} AND durable_writes = true;
+									cassdba@cqlsh> CREATE KEYSPACE packt WITH replication = {'class': 'NetworkTopologyStrategy', 'ClockworkAngels': '1'} AND durable_writes = true;
+
+							For those of you who have used Cassandra before, you might be temptedto build your local keyspaces with 'SimpleStrategy'.
+
+							'SimpleStrategy' is limited in that it cannot be used in a plural data center environment.
+
+					With the newly created keyspace, let's go ahead and use it:
+ 
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

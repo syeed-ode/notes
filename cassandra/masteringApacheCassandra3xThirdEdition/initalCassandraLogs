@@ -1,0 +1,133 @@
+20200526_19:07:13 cassandra ssode$ bin/cassandra -p cassadra.pid
+20200526_19:19:34 cassandra ssode$ Java HotSpot(TM) 64-Bit Server VM warning: Cannot open file bin/../logs/gc.log due to No such file or directory
+
+CompilerOracle: dontinline org/apache/cassandra/db/Columns$Serializer.deserializeLargeSubset (Lorg/apache/cassandra/io/util/DataInputPlus;Lorg/apache/cassandra/db/Columns;I)Lorg/apache/cassandra/db/Columns;
+CompilerOracle: dontinline org/apache/cassandra/db/Columns$Serializer.serializeLargeSubset (Ljava/util/Collection;ILorg/apache/cassandra/db/Columns;ILorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompilerOracle: dontinline org/apache/cassandra/db/Columns$Serializer.serializeLargeSubsetSize (Ljava/util/Collection;ILorg/apache/cassandra/db/Columns;I)I
+CompilerOracle: dontinline org/apache/cassandra/db/commitlog/AbstractCommitLogSegmentManager.advanceAllocatingFrom (Lorg/apache/cassandra/db/commitlog/CommitLogSegment;)V
+CompilerOracle: dontinline org/apache/cassandra/db/transform/BaseIterator.tryGetMoreContents ()Z
+CompilerOracle: dontinline org/apache/cassandra/db/transform/StoppingTransformation.stop ()V
+CompilerOracle: dontinline org/apache/cassandra/db/transform/StoppingTransformation.stopInPartition ()V
+CompilerOracle: dontinline org/apache/cassandra/io/util/BufferedDataOutputStreamPlus.doFlush (I)V
+CompilerOracle: dontinline org/apache/cassandra/io/util/BufferedDataOutputStreamPlus.writeExcessSlow ()V
+CompilerOracle: dontinline org/apache/cassandra/io/util/BufferedDataOutputStreamPlus.writeSlow (JI)V
+CompilerOracle: dontinline org/apache/cassandra/io/util/RebufferingInputStream.readPrimitiveSlowly (I)J
+CompilerOracle: inline org/apache/cassandra/db/rows/UnfilteredSerializer.serializeRowBody (Lorg/apache/cassandra/db/rows/Row;ILorg/apache/cassandra/db/SerializationHeader;Lorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompilerOracle: inline org/apache/cassandra/io/util/Memory.checkBounds (JJ)V
+CompilerOracle: inline org/apache/cassandra/io/util/SafeMemory.checkBounds (JJ)V
+CompilerOracle: inline org/apache/cassandra/utils/AsymmetricOrdering.selectBoundary (Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;II)I
+CompilerOracle: inline org/apache/cassandra/utils/AsymmetricOrdering.strictnessOfLessThan (Lorg/apache/cassandra/utils/AsymmetricOrdering/Op;)I
+CompilerOracle: inline org/apache/cassandra/utils/BloomFilter.indexes (Lorg/apache/cassandra/utils/IFilter/FilterKey;)[J
+CompilerOracle: inline org/apache/cassandra/utils/BloomFilter.setIndexes (JJIJ[J)V
+CompilerOracle: inline org/apache/cassandra/utils/ByteBufferUtil.compare (Ljava/nio/ByteBuffer;[B)I
+CompilerOracle: inline org/apache/cassandra/utils/ByteBufferUtil.compare ([BLjava/nio/ByteBuffer;)I
+CompilerOracle: inline org/apache/cassandra/utils/ByteBufferUtil.compareUnsigned (Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;)I
+CompilerOracle: inline org/apache/cassandra/utils/FastByteOperations$UnsafeOperations.compareTo (Ljava/lang/Object;JILjava/lang/Object;JI)I
+CompilerOracle: inline org/apache/cassandra/utils/FastByteOperations$UnsafeOperations.compareTo (Ljava/lang/Object;JILjava/nio/ByteBuffer;)I
+CompilerOracle: inline org/apache/cassandra/utils/FastByteOperations$UnsafeOperations.compareTo (Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;)I
+CompilerOracle: inline org/apache/cassandra/utils/vint/VIntCoding.encodeVInt (JI)[B
+INFO  [main] 2020-05-26 19:19:38,815 YamlConfigurationLoader.java:89 - Configuration location: file:/Users/ssode/Downloads/cassandra/conf/cassandra.yaml
+INFO  [main] 2020-05-26 19:19:39,206 Config.java:516 - Node configuration:[allocate_tokens_for_keyspace=null; authenticator=PasswordAuthenticator; authorizer=CassandraAuthorizer; auto_bootstrap=true; auto_snapshot=true; back_pressure_enabled=false; back_pressure_strategy=org.apache.cassandra.net.RateBasedBackPressure{high_ratio=0.9, factor=5, flow=FAST}; batch_size_fail_threshold_in_kb=50; batch_size_warn_threshold_in_kb=5; batchlog_replay_throttle_in_kb=1024; broadcast_address=null; broadcast_rpc_address=null; buffer_pool_use_heap_if_exhausted=true; cas_contention_timeout_in_ms=1000; cdc_enabled=false; cdc_free_space_check_interval_ms=250; cdc_raw_directory=null; cdc_total_space_in_mb=0; client_encryption_options=<REDACTED>; cluster_name=PermanentWaves; column_index_cache_size_in_kb=2; column_index_size_in_kb=64; commit_failure_policy=stop; commitlog_compression=null; commitlog_directory=null; commitlog_max_compression_buffers_in_pool=3; commitlog_periodic_queue_size=-1; commitlog_segment_size_in_mb=32; commitlog_sync=periodic; commitlog_sync_batch_window_in_ms=NaN; commitlog_sync_period_in_ms=10000; commitlog_total_space_in_mb=null; compaction_large_partition_warning_threshold_mb=100; compaction_throughput_mb_per_sec=16; concurrent_compactors=null; concurrent_counter_writes=32; concurrent_materialized_view_writes=32; concurrent_reads=32; concurrent_replicates=null; concurrent_writes=32; counter_cache_keys_to_save=2147483647; counter_cache_save_period=7200; counter_cache_size_in_mb=null; counter_write_request_timeout_in_ms=5000; credentials_cache_max_entries=1000; credentials_update_interval_in_ms=-1; credentials_validity_in_ms=2000; cross_node_timeout=false; data_file_directories=[Ljava.lang.String;@2133814f; disk_access_mode=auto; disk_failure_policy=stop; disk_optimization_estimate_percentile=0.95; disk_optimization_page_cross_chance=0.1; disk_optimization_strategy=ssd; dynamic_snitch=true; dynamic_snitch_badness_threshold=0.1; dynamic_snitch_reset_interval_in_ms=600000; dynamic_snitch_update_interval_in_ms=100; enable_materialized_views=true; enable_sasi_indexes=true; enable_scripted_user_defined_functions=false; enable_user_defined_functions=false; enable_user_defined_functions_threads=true; encryption_options=null; endpoint_snitch=GossipingPropertyFileSnitch; file_cache_round_up=null; file_cache_size_in_mb=null; gc_log_threshold_in_ms=200; gc_warn_threshold_in_ms=1000; hinted_handoff_disabled_datacenters=[]; hinted_handoff_enabled=true; hinted_handoff_throttle_in_kb=1024; hints_compression=null; hints_directory=null; hints_flush_period_in_ms=10000; incremental_backups=false; index_interval=null; index_summary_capacity_in_mb=null; index_summary_resize_interval_in_minutes=60; initial_token=null; inter_dc_stream_throughput_outbound_megabits_per_sec=200; inter_dc_tcp_nodelay=false; internode_authenticator=null; internode_compression=dc; internode_recv_buff_size_in_bytes=0; internode_send_buff_size_in_bytes=0; key_cache_keys_to_save=2147483647; key_cache_save_period=14400; key_cache_size_in_mb=null; listen_address=localhost; listen_interface=null; listen_interface_prefer_ipv6=false; listen_on_broadcast_address=false; max_hint_window_in_ms=10800000; max_hints_delivery_threads=2; max_hints_file_size_in_mb=128; max_mutation_size_in_kb=null; max_streaming_retries=3; max_value_size_in_mb=256; memtable_allocation_type=heap_buffers; memtable_cleanup_threshold=null; memtable_flush_writers=0; memtable_heap_space_in_mb=null; memtable_offheap_space_in_mb=null; min_free_space_per_drive_in_mb=50; native_transport_flush_in_batches_legacy=true; native_transport_max_concurrent_connections=-1; native_transport_max_concurrent_connections_per_ip=-1; native_transport_max_concurrent_requests_in_bytes=-1; native_transport_max_concurrent_requests_in_bytes_per_ip=-1; native_transport_max_frame_size_in_mb=256; native_transport_max_negotiable_protocol_version=-2147483648; native_transport_max_threads=128; native_transport_port=9042; native_transport_port_ssl=null; num_tokens=24; otc_backlog_expiration_interval_ms=200; otc_coalescing_enough_coalesced_messages=8; otc_coalescing_strategy=DISABLED; otc_coalescing_window_us=200; partitioner=org.apache.cassandra.dht.Murmur3Partitioner; permissions_cache_max_entries=1000; permissions_update_interval_in_ms=-1; permissions_validity_in_ms=2000; phi_convict_threshold=8.0; prepared_statements_cache_size_mb=null; range_request_timeout_in_ms=10000; read_request_timeout_in_ms=5000; repair_session_max_tree_depth=18; request_scheduler=org.apache.cassandra.scheduler.NoScheduler; request_scheduler_id=null; request_scheduler_options=null; request_timeout_in_ms=10000; role_manager=CassandraRoleManager; roles_cache_max_entries=1000; roles_update_interval_in_ms=-1; roles_validity_in_ms=2000; row_cache_class_name=org.apache.cassandra.cache.OHCProvider; row_cache_keys_to_save=2147483647; row_cache_save_period=0; row_cache_size_in_mb=0; rpc_address=localhost; rpc_interface=null; rpc_interface_prefer_ipv6=false; rpc_keepalive=true; rpc_listen_backlog=50; rpc_max_threads=2147483647; rpc_min_threads=16; rpc_port=9160; rpc_recv_buff_size_in_bytes=null; rpc_send_buff_size_in_bytes=null; rpc_server_type=sync; saved_caches_directory=null; seed_provider=org.apache.cassandra.locator.SimpleSeedProvider{seeds=127.0.0.1}; server_encryption_options=<REDACTED>; slow_query_log_timeout_in_ms=500; snapshot_before_compaction=false; ssl_storage_port=7001; sstable_preemptive_open_interval_in_mb=50; start_native_transport=true; start_rpc=false; storage_port=7000; stream_throughput_outbound_megabits_per_sec=200; streaming_keep_alive_period_in_secs=300; streaming_socket_timeout_in_ms=86400000; thrift_framed_transport_size_in_mb=15; thrift_max_message_length_in_mb=16; thrift_prepared_statements_cache_size_mb=null; tombstone_failure_threshold=100000; tombstone_warn_threshold=1000; tracetype_query_ttl=86400; tracetype_repair_ttl=604800; transparent_data_encryption_options=org.apache.cassandra.config.TransparentDataEncryptionOptions@4c15e7fd; trickle_fsync=false; trickle_fsync_interval_in_kb=10240; truncate_request_timeout_in_ms=60000; unlogged_batch_across_partitions_warn_threshold=10; user_defined_function_fail_timeout=1500; user_defined_function_warn_timeout=500; user_function_timeout_policy=die; windows_timer_interval=1; write_request_timeout_in_ms=2000]
+INFO  [main] 2020-05-26 19:19:39,208 DatabaseDescriptor.java:381 - DiskAccessMode 'auto' determined to be mmap, indexAccessMode is mmap
+INFO  [main] 2020-05-26 19:19:39,208 DatabaseDescriptor.java:439 - Global memtable on-heap threshold is enabled at 998MB
+INFO  [main] 2020-05-26 19:19:39,208 DatabaseDescriptor.java:443 - Global memtable off-heap threshold is enabled at 998MB
+INFO  [main] 2020-05-26 19:19:39,498 RateBasedBackPressure.java:123 - Initialized back-pressure with high ratio: 0.9, factor: 5, flow: FAST, window size: 2000.
+INFO  [main] 2020-05-26 19:19:39,498 DatabaseDescriptor.java:773 - Back-pressure is disabled with strategy org.apache.cassandra.net.RateBasedBackPressure{high_ratio=0.9, factor=5, flow=FAST}.
+INFO  [main] 2020-05-26 19:19:39,702 GossipingPropertyFileSnitch.java:64 - Loaded cassandra-topology.properties for compatibility
+INFO  [main] 2020-05-26 19:19:39,818 JMXServerUtils.java:246 - Configured JMX server at: service:jmx:rmi://127.0.0.1/jndi/rmi://127.0.0.1:7199/jmxrmi
+INFO  [main] 2020-05-26 19:19:39,827 CassandraDaemon.java:489 - Hostname: LAMU02Z83E9LVCG.uhc.com.
+INFO  [main] 2020-05-26 19:19:39,827 CassandraDaemon.java:496 - JVM vendor/version: Java HotSpot(TM) 64-Bit Server VM/1.8.0_251
+INFO  [main] 2020-05-26 19:19:39,829 CassandraDaemon.java:497 - Heap size: 3.900GiB/3.900GiB
+INFO  [main] 2020-05-26 19:19:39,830 CassandraDaemon.java:502 - Code Cache Non-heap memory: init = 2555904(2496K) used = 7395840(7222K) committed = 7471104(7296K) max = 251658240(245760K)
+INFO  [main] 2020-05-26 19:19:39,831 CassandraDaemon.java:502 - Metaspace Non-heap memory: init = 0(0K) used = 19597920(19138K) committed = 20185088(19712K) max = -1(-1K)
+INFO  [main] 2020-05-26 19:19:39,831 CassandraDaemon.java:502 - Compressed Class Space Non-heap memory: init = 0(0K) used = 2405344(2348K) committed = 2621440(2560K) max = 1073741824(1048576K)
+INFO  [main] 2020-05-26 19:19:39,831 CassandraDaemon.java:502 - Par Eden Space Heap memory: init = 859045888(838912K) used = 240535904(234898K) committed = 859045888(838912K) max = 859045888(838912K)
+INFO  [main] 2020-05-26 19:19:39,832 CassandraDaemon.java:502 - Par Survivor Space Heap memory: init = 107347968(104832K) used = 0(0K) committed = 107347968(104832K) max = 107347968(104832K)
+INFO  [main] 2020-05-26 19:19:39,832 CassandraDaemon.java:502 - CMS Old Gen Heap memory: init = 3221225472(3145728K) used = 0(0K) committed = 3221225472(3145728K) max = 3221225472(3145728K)
+INFO  [main] 2020-05-26 19:19:39,832 CassandraDaemon.java:504 - Classpath: bin/../conf:bin/../build/classes/main:bin/../build/classes/thrift:bin/../lib/HdrHistogram-2.1.9.jar:bin/../lib/ST4-4.0.8.jar:bin/../lib/airline-0.6.jar:bin/../lib/antlr-runtime-3.5.2.jar:bin/../lib/apache-cassandra-3.11.6.jar:bin/../lib/apache-cassandra-thrift-3.11.6.jar:bin/../lib/asm-5.0.4.jar:bin/../lib/caffeine-2.2.6.jar:bin/../lib/cassandra-driver-core-3.0.1-shaded.jar:bin/../lib/commons-cli-1.1.jar:bin/../lib/commons-codec-1.9.jar:bin/../lib/commons-lang3-3.1.jar:bin/../lib/commons-math3-3.2.jar:bin/../lib/compress-lzf-0.8.4.jar:bin/../lib/concurrent-trees-2.4.0.jar:bin/../lib/concurrentlinkedhashmap-lru-1.4.jar:bin/../lib/disruptor-3.0.1.jar:bin/../lib/ecj-4.4.2.jar:bin/../lib/guava-18.0.jar:bin/../lib/high-scale-lib-1.0.6.jar:bin/../lib/hppc-0.5.4.jar:bin/../lib/jackson-core-asl-1.9.13.jar:bin/../lib/jackson-mapper-asl-1.9.13.jar:bin/../lib/jamm-0.3.0.jar:bin/../lib/javax.inject.jar:bin/../lib/jbcrypt-0.3m.jar:bin/../lib/jcl-over-slf4j-1.7.7.jar:bin/../lib/jctools-core-1.2.1.jar:bin/../lib/jflex-1.6.0.jar:bin/../lib/jna-4.2.2.jar:bin/../lib/joda-time-2.4.jar:bin/../lib/json-simple-1.1.jar:bin/../lib/jstackjunit-0.0.1.jar:bin/../lib/libthrift-0.9.2.jar:bin/../lib/log4j-over-slf4j-1.7.7.jar:bin/../lib/logback-classic-1.1.3.jar:bin/../lib/logback-core-1.1.3.jar:bin/../lib/lz4-1.3.0.jar:bin/../lib/metrics-core-3.1.5.jar:bin/../lib/metrics-jvm-3.1.5.jar:bin/../lib/metrics-logback-3.1.5.jar:bin/../lib/netty-all-4.0.44.Final.jar:bin/../lib/ohc-core-0.4.4.jar:bin/../lib/ohc-core-j8-0.4.4.jar:bin/../lib/reporter-config-base-3.0.3.jar:bin/../lib/reporter-config3-3.0.3.jar:bin/../lib/sigar-1.6.4.jar:bin/../lib/slf4j-api-1.7.7.jar:bin/../lib/snakeyaml-1.11.jar:bin/../lib/snappy-java-1.1.1.7.jar:bin/../lib/snowball-stemmer-1.3.0.581.1.jar:bin/../lib/stream-2.5.2.jar:bin/../lib/thrift-server-0.3.7.jar:bin/../lib/jsr223/*/*.jar:bin/../lib/jamm-0.3.0.jar
+INFO  [main] 2020-05-26 19:19:39,834 CassandraDaemon.java:506 - JVM Arguments: [-Xloggc:bin/../logs/gc.log, -ea, -XX:+UseThreadPriorities, -XX:ThreadPriorityPolicy=42, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:StringTableSize=1000003, -XX:+AlwaysPreTouch, -XX:-UseBiasedLocking, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -XX:+UseParNewGC, -XX:+UseConcMarkSweepGC, -XX:+CMSParallelRemarkEnabled, -XX:SurvivorRatio=8, -XX:MaxTenuringThreshold=1, -XX:CMSInitiatingOccupancyFraction=75, -XX:+UseCMSInitiatingOccupancyOnly, -XX:CMSWaitDuration=10000, -XX:+CMSParallelInitialMarkEnabled, -XX:+CMSEdenChunksRecordAlways, -XX:+CMSClassUnloadingEnabled, -XX:+PrintGCDetails, -XX:+PrintGCDateStamps, -XX:+PrintHeapAtGC, -XX:+PrintTenuringDistribution, -XX:+PrintGCApplicationStoppedTime, -XX:+PrintPromotionFailure, -XX:+UseGCLogFileRotation, -XX:NumberOfGCLogFiles=10, -XX:GCLogFileSize=10M, -Xms4096M, -Xmx4096M, -Xmn1024M, -XX:+UseCondCardMark, -XX:CompileCommandFile=bin/../conf/hotspot_compiler, -javaagent:bin/../lib/jamm-0.3.0.jar, -Dcassandra.jmx.local.port=7199, -Dcom.sun.management.jmxremote.authenticate=false, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=bin/../lib/sigar-bin, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=bin/../logs, -Dcassandra.storagedir=bin/../data, -Dcassandra-pidfile=cassadra.pid]
+WARN  [main] 2020-05-26 19:19:39,901 StartupChecks.java:136 - jemalloc shared library could not be preloaded to speed up memory allocations
+WARN  [main] 2020-05-26 19:19:39,902 StartupChecks.java:169 - JMX is not enabled to receive remote connections. Please see cassandra-env.sh for more info.
+INFO  [main] 2020-05-26 19:19:39,904 SigarLibrary.java:44 - Initializing SIGAR library
+WARN  [main] 2020-05-26 19:19:39,923 SigarLibrary.java:174 - Cassandra server running in degraded mode. Is swap disabled? : false,  Address space adequate? : false,  nofile limit adequate? : true, nproc limit adequate? : false 
+WARN  [main] 2020-05-26 19:19:39,935 StartupChecks.java:332 - Directory bin/../data/data doesn't exist
+WARN  [main] 2020-05-26 19:19:39,941 StartupChecks.java:332 - Directory bin/../data/commitlog doesn't exist
+WARN  [main] 2020-05-26 19:19:39,942 StartupChecks.java:332 - Directory bin/../data/saved_caches doesn't exist
+WARN  [main] 2020-05-26 19:19:39,942 StartupChecks.java:332 - Directory /Users/ssode/Downloads/cassandra/bin/../data/hints doesn't exist
+INFO  [main] 2020-05-26 19:19:40,011 QueryProcessor.java:116 - Initialized prepared statement caches with 15 MB (native) and 15 MB (Thrift)
+INFO  [main] 2020-05-26 19:19:40,690 ColumnFamilyStore.java:427 - Initializing system.IndexInfo
+INFO  [main] 2020-05-26 19:19:41,675 ColumnFamilyStore.java:427 - Initializing system.batches
+INFO  [main] 2020-05-26 19:19:41,683 ColumnFamilyStore.java:427 - Initializing system.paxos
+INFO  [main] 2020-05-26 19:19:41,694 ColumnFamilyStore.java:427 - Initializing system.local
+INFO  [main] 2020-05-26 19:19:41,705 ColumnFamilyStore.java:427 - Initializing system.peers
+INFO  [main] 2020-05-26 19:19:41,714 ColumnFamilyStore.java:427 - Initializing system.peer_events
+INFO  [main] 2020-05-26 19:19:41,723 ColumnFamilyStore.java:427 - Initializing system.range_xfers
+INFO  [main] 2020-05-26 19:19:41,730 ColumnFamilyStore.java:427 - Initializing system.compaction_history
+INFO  [main] 2020-05-26 19:19:41,736 ColumnFamilyStore.java:427 - Initializing system.sstable_activity
+INFO  [main] 2020-05-26 19:19:41,749 ColumnFamilyStore.java:427 - Initializing system.size_estimates
+INFO  [main] 2020-05-26 19:19:41,755 ColumnFamilyStore.java:427 - Initializing system.available_ranges
+INFO  [main] 2020-05-26 19:19:41,768 ColumnFamilyStore.java:427 - Initializing system.transferred_ranges
+INFO  [main] 2020-05-26 19:19:41,777 ColumnFamilyStore.java:427 - Initializing system.views_builds_in_progress
+INFO  [main] 2020-05-26 19:19:41,785 ColumnFamilyStore.java:427 - Initializing system.built_views
+INFO  [main] 2020-05-26 19:19:41,795 ColumnFamilyStore.java:427 - Initializing system.hints
+INFO  [main] 2020-05-26 19:19:41,801 ColumnFamilyStore.java:427 - Initializing system.batchlog
+INFO  [main] 2020-05-26 19:19:41,807 ColumnFamilyStore.java:427 - Initializing system.prepared_statements
+INFO  [main] 2020-05-26 19:19:41,814 ColumnFamilyStore.java:427 - Initializing system.schema_keyspaces
+INFO  [main] 2020-05-26 19:19:41,822 ColumnFamilyStore.java:427 - Initializing system.schema_columnfamilies
+INFO  [main] 2020-05-26 19:19:41,836 ColumnFamilyStore.java:427 - Initializing system.schema_columns
+INFO  [main] 2020-05-26 19:19:41,842 ColumnFamilyStore.java:427 - Initializing system.schema_triggers
+INFO  [main] 2020-05-26 19:19:41,850 ColumnFamilyStore.java:427 - Initializing system.schema_usertypes
+INFO  [main] 2020-05-26 19:19:41,860 ColumnFamilyStore.java:427 - Initializing system.schema_functions
+INFO  [main] 2020-05-26 19:19:41,868 ColumnFamilyStore.java:427 - Initializing system.schema_aggregates
+INFO  [main] 2020-05-26 19:19:41,870 ViewManager.java:137 - Not submitting build tasks for views in keyspace system as storage service is not initialized
+INFO  [main] 2020-05-26 19:19:41,986 ApproximateTime.java:44 - Scheduling approximate time-check task with a precision of 10 milliseconds
+INFO  [main] 2020-05-26 19:19:42,020 ColumnFamilyStore.java:427 - Initializing system_schema.keyspaces
+INFO  [main] 2020-05-26 19:19:42,027 ColumnFamilyStore.java:427 - Initializing system_schema.tables
+INFO  [main] 2020-05-26 19:19:42,032 ColumnFamilyStore.java:427 - Initializing system_schema.columns
+INFO  [main] 2020-05-26 19:19:42,038 ColumnFamilyStore.java:427 - Initializing system_schema.triggers
+INFO  [main] 2020-05-26 19:19:42,045 ColumnFamilyStore.java:427 - Initializing system_schema.dropped_columns
+INFO  [main] 2020-05-26 19:19:42,050 ColumnFamilyStore.java:427 - Initializing system_schema.views
+INFO  [main] 2020-05-26 19:19:42,056 ColumnFamilyStore.java:427 - Initializing system_schema.types
+INFO  [main] 2020-05-26 19:19:42,064 ColumnFamilyStore.java:427 - Initializing system_schema.functions
+INFO  [main] 2020-05-26 19:19:42,073 ColumnFamilyStore.java:427 - Initializing system_schema.aggregates
+INFO  [main] 2020-05-26 19:19:42,079 ColumnFamilyStore.java:427 - Initializing system_schema.indexes
+INFO  [main] 2020-05-26 19:19:42,081 ViewManager.java:137 - Not submitting build tasks for views in keyspace system_schema as storage service is not initialized
+INFO  [MemtableFlushWriter:1] 2020-05-26 19:19:42,625 CacheService.java:100 - Initializing key cache with capacity of 100 MBs.
+INFO  [MemtableFlushWriter:1] 2020-05-26 19:19:42,638 CacheService.java:122 - Initializing row cache with capacity of 0 MBs
+INFO  [MemtableFlushWriter:1] 2020-05-26 19:19:42,640 CacheService.java:151 - Initializing counter cache with capacity of 50 MBs
+INFO  [MemtableFlushWriter:1] 2020-05-26 19:19:42,641 CacheService.java:162 - Scheduling counter cache save to every 7200 seconds (going to save all keys).
+INFO  [CompactionExecutor:2] 2020-05-26 19:19:42,845 BufferPool.java:234 - Global buffer pool is enabled, when pool is exhausted (max is 512.000MiB) it will allocate on heap
+INFO  [main] 2020-05-26 19:19:42,876 StorageService.java:639 - Populating token metadata from system tables
+INFO  [main] 2020-05-26 19:19:42,921 StorageService.java:646 - Token metadata: 
+INFO  [main] 2020-05-26 19:19:42,981 AutoSavingCache.java:174 - Completed loading (1 ms; 5 keys) KeyCache cache
+INFO  [main] 2020-05-26 19:19:43,006 CommitLog.java:142 - No commitlog files found; skipping replay
+INFO  [main] 2020-05-26 19:19:43,006 StorageService.java:639 - Populating token metadata from system tables
+INFO  [main] 2020-05-26 19:19:43,019 StorageService.java:646 - Token metadata: 
+INFO  [main] 2020-05-26 19:19:43,097 QueryProcessor.java:163 - Preloaded 0 prepared statements
+INFO  [main] 2020-05-26 19:19:43,098 StorageService.java:657 - Cassandra version: 3.11.6
+INFO  [main] 2020-05-26 19:19:43,098 StorageService.java:658 - Thrift API version: 20.1.0
+INFO  [main] 2020-05-26 19:19:43,098 StorageService.java:659 - CQL supported versions: 3.4.4 (default: 3.4.4)
+INFO  [main] 2020-05-26 19:19:43,098 StorageService.java:661 - Native protocol supported versions: 3/v3, 4/v4, 5/v5-beta (default: 4/v4)
+INFO  [main] 2020-05-26 19:19:43,140 IndexSummaryManager.java:87 - Initializing index summary manager with a memory pool size of 199 MB and a resize interval of 60 minutes
+INFO  [main] 2020-05-26 19:19:43,172 MessagingService.java:750 - Starting Messaging Service on localhost/127.0.0.1:7000 (lo0)
+WARN  [main] 2020-05-26 19:19:43,179 SystemKeyspace.java:1130 - No host ID found, created e6c2fcb8-b9ea-4048-a835-ef24d8cabf53 (Note: This should happen exactly once per node).
+INFO  [main] 2020-05-26 19:19:43,191 StorageService.java:589 - Unable to gossip with any peers but continuing anyway since node is in its own seed list
+INFO  [main] 2020-05-26 19:19:43,209 StorageService.java:743 - Loading persisted ring state
+INFO  [main] 2020-05-26 19:19:43,209 StorageService.java:871 - Starting up server gossip
+INFO  [main] 2020-05-26 19:19:43,263 StorageService.java:933 - This node will not auto bootstrap because it is configured to be a seed node.
+INFO  [main] 2020-05-26 19:19:43,272 BootStrapper.java:228 - Generated random tokens. tokens are [604089847631595430, -5456632856883691217, 8189588120225403214, -6555145199683224818, 6638601527496313606, 5916397254313004998, 8526265564444135995, 8726500299070869633, 2777995675068213567, -4891535187578496976, 5597841347300645238, -5266045661071521631, -4842975615110360379, -3859001927014931849, -4480756399603951803, -5780407449212578096, 4831015862973022755, -1013874831955514917, -6974611972592858795, -7319159685902724106, 4523997497720037131, 5350220880829689460, 7827535540476391446, 8420192609328381524]
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,526 ViewManager.java:137 - Not submitting build tasks for views in keyspace system_traces as storage service is not initialized
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,534 ColumnFamilyStore.java:427 - Initializing system_traces.events
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,549 ColumnFamilyStore.java:427 - Initializing system_traces.sessions
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,555 ViewManager.java:137 - Not submitting build tasks for views in keyspace system_distributed as storage service is not initialized
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,562 ColumnFamilyStore.java:427 - Initializing system_distributed.parent_repair_history
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,582 ColumnFamilyStore.java:427 - Initializing system_distributed.repair_history
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,592 ColumnFamilyStore.java:427 - Initializing system_distributed.view_build_status
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,602 ViewManager.java:137 - Not submitting build tasks for views in keyspace system_auth as storage service is not initialized
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,612 ColumnFamilyStore.java:427 - Initializing system_auth.resource_role_permissons_index
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,632 ColumnFamilyStore.java:427 - Initializing system_auth.role_members
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,642 ColumnFamilyStore.java:427 - Initializing system_auth.role_permissions
+INFO  [MigrationStage:1] 2020-05-26 19:19:43,658 ColumnFamilyStore.java:427 - Initializing system_auth.roles
+INFO  [main] 2020-05-26 19:19:43,702 StorageService.java:1478 - JOINING: Finish joining ring
+INFO  [main] 2020-05-26 19:19:43,805 AuthCache.java:177 - (Re)initializing CredentialsCache (validity period/update interval/max entries) (2000/2000/1000)
+
