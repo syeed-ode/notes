@@ -210,8 +210,108 @@ A quick introduction to the data model
 
 							'SimpleStrategy' is limited in that it cannot be used in a plural data center environment.
 
-					With the newly created keyspace, let's go ahead and use it:
+					With the newly created keyspace, let's go ahead and 'use' it:
+									cassdba@cqlsh> use packt;
+									cassdba@cqlsh:packt> 
+											// The cqlsh prompt changes depending on the user and keyspace currently being used.
+
+					Now, let's assume that we have a requirement to build a table for video game scores. We will want to keep track of the player by their name, as well as their score and game on which they achieved it.
+
+					A table to store this data would look something like this:
+									cassdba@cqlsh:packt> CREATE TABLE hi_score (name TEXT, game TEXT, score BIGINT, PRIMARY KEY (name,game));
+
+					Next, we will 'INSERT' data into the table, which will help us understand some of Cassandra's behaviors:
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, gamer, score) VALUES ( 'Dad', 'Pacman', 182330);
+											InvalidRequest: Error from server: code=2200 [Invalid query] message="Undefined column name gamer"
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Dad', 'Pacman', 182330);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Dad', 'Frogger', 15690);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Dad', 'Joust', 48150);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, gamer, score) VALUES ( 'Connor', 'Pacman', 182330);
+											InvalidRequest: Error from server: code=2200 [Invalid query] message="Undefined column name gamer"
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Connor', 'Pacman', 182330);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Connor', 'Frogger', 4220);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Connor', 'Donkey Kong', 15800);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Connor', 'Joust', 48850);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Avery', 'Joust', 19520);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Avery', 'Frogger', 1100);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Avery', 'Burgertime', 1200);
+									cassdba@cqlsh:packt> INSERT INTO hi_score (name, game, score) VALUES ( 'Avery', 'Galaga', 28880);
+									cassdba@cqlsh:packt> 
+
+					Now, let's execute a CQL query to retrieve the scores of the player named 'Connor':
+									cassdba@cqlsh:packt> SELECT * FROM hi_score WHERE name='Connor';
+													 name   | game        | score
+													--------+-------------+--------
+													 Connor | Donkey Kong |  15800
+													 Connor |     Frogger |   4220
+													 Connor |       Joust |  48850
+													 Connor |      Pacman | 182330
+
+													(4 rows)
  
+					That works pretty well. But what if we want to see how all of the players did while playing the Joust game, as follows:
+									cassdba@cqlsh:packt> select * from hi_score where game='Joust';
+													InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+
+					Evidently, Cassandra has some problems with that query. We'll discuss more about why that is the case later on. 
+
+					Let's build a table that specifically supports querying high scores by game:
+									cassdba@cqlsh:packt> CREATE TABLE hi_scores_by_game (name TEXT, game TEXT, score BIGINT, PRIMARY KEY (game,score)) WITH CLUSTERING ORDER BY (score DESC);
+
+					Now, we will duplicate our data into our new query table:
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Dad','Pacman',182330);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Dad','Burgertime',222000);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Dad','Frogger',15690);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Dad','Joust',48150);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Connor','Pacman',182330);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES ('Connor','MonkeyKong',15800);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Connor','Frogger',4220);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Connor','Joust',48850);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Avery','Galaga',28880);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Avery','Burgertime',1200);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Avery','Frogger',1100);
+									cassdba@cqlsh:packt> INSERT INTO hi_scores_by_game (name, game, score) VALUES('Avery','Joust',19520);
+									cassdba@cqlsh:packt> 
+
+					Now, let's try to query while filtering on game with our new table:
+									cassdba@cqlsh:packt> SELECT * FROM hi_scores_by_game WHERE game='Joust';
+													game  | score | name
+													-------+-------+--------
+													Joust | 48850 | Connor
+													Joust | 48150 |    Dad
+													Joust | 19520 |  Avery
+
+													(3 rows)
+
+					The following chapters will discuss why and when Cassandraonly allows certain PRIMARY KEY components to be used in the WHERE clause.
+
+					In Cassandra, tables and data structuresshould be modeled according to the queries that they are intended to serve.
+
+Shutting down Cassandra
+	Before shutting down your cluster instances, there are some additional commands that should be run.
+
+	First, we will disable gossip. This keeps other nodes from communicating with the node while we are trying to bring it down:
+					$ bin/nodetool disablegossip
+					$
+
+	Next, we will disable the native binary protocol to keep this node from serving client requests:
+					$ bin/nodetool disablebinary
+					$
+
+	Then, we will drain the node. This will prevent it from accepting writes, and force all in-memory data to be written to disk:
+					$ bin/nodetool drain
+					$
+
+	With the node drained, we can kill the PID:
+					$ kill 'cat cassandra.pid'
+					$
+
+Summary
+	In the next chapter, we will take an in-depth look at Cassandra's underlying architecture,and understand what is key to making good decisions about cluster deployment and datamodeling.
+
+	From there, we'll discuss various aspects to help fine-tune a production clusterand its deployment process.
+
+	That will bring us to monitoring and application development,and put you well on your way to mastering Cassandra!
 	
 
 
