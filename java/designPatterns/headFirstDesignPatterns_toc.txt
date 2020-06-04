@@ -1,0 +1,13 @@
+Chapter 2. Keeping your Objects in the know  :38 - Obsever pattern
+the decorator pattern :81
+Chapter 4. Baking with OO Goodness Page 1 :110 - Factory Pattern (Section 4.2. Identifying the aspects that vary..)
+Chapter 5. One of a Kind Objects Page 1 :171 - Singletons (double check initialization)
+Chapter 6. Encapsulating Invocation Page 1  :194 - Command Pattern
+Chapter 7. Being Adaptive Page 1  :238 - Adater pattern
+Chapter 8. Encapsulating Algorithms Page 2 :279 - Template Method Pattern
+Chapter 9. Well-Managed Collections Page 1 :319 - Iterater Pattern / Composite Pattern
+Chapter 10. The State of Things Page 1  :391 - 
+Chapter 11. Controlling Object Access Page 1 :436 - Proxy Pattern
+Chapter 12. Patterns of Patterns Page 1 :506 - Compound Patterns
+Chapter 13. Patterns in the Real World Page 1 :585 - 
+598
