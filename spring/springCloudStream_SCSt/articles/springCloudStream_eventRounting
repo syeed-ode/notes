@@ -1,0 +1,207 @@
+https://spring.io/blog/2019/10/31/spring-cloud-stream-event-routing
+
+https://stackoverflow.com/questions/59315202/migrate-spring-cloud-stream-application-chelsea-to-horsham
+
+Routing with functions.
+	Routing, in the context of SCSt, is the ability to eithe
+			a) route events to a particular event subscriber 
+
+			b) route an event produced by an event subscriber to a particular destination.
+
+	For routing TO an event subscriber, we used the condition attribute of the StreamListener annotation, as follows:
+					@StreamListener(target = Sink.INPUT, condition = "headers['type']=='order'")
+					public void receiveOrders(Order order) {...}
+
+			Reference guide for this approach: https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/2.1.3.RELEASE/single/spring-cloud-stream.html#_using_streamlistener_for_content_based_routing
+
+	And, for routing FROM an event subscriber, we used Dynamically Bound Destinations - 
+			the approach that allows framework to bind to a destination based on some instruction provided within the individual event.
+					https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/2.1.3.RELEASE/single/spring-cloud-stream.html#dynamicdestination
+
+	Event Routing with Functions
+			With the functional approach, we can do all of the above in a more clean and concise way with a few additional features.
+
+			Route TO:
+					Routing ‘TO’ functions can be achieved by relying on the routing function feature available in Spring Cloud Function (SCF).
+							https://spring.io/projects/spring-cloud-function
+
+							You can enable routing 
+									explicitly by setting the property 
+											spring.cloud.stream.function.routing.enabled [1A]
+
+									implicitly by setting the property
+											spring.cloud.function.routing-expression [2A]
+
+									providing routing instruction with Spring Expression Language (SpEL)
+											The routing instruction should result in the definition of the function to which to route, ‘TO’.
+
+							For the purposes of binding, 
+									the name of the routing destination is 
+											functionRouter-in-0 (see RoutingFunction.FUNCTION_NAME 
+													the binding naming convention described https://spring.io/blog/2019/10/17/spring-cloud-stream-functional-and-reactive
+
+					When a message is sent to this destination,
+							The routing function tries to determine which actual function needs to process such an event
+									It first tries to access the 
+									 		spring.cloud.function.routing-expression [2A] message header
+
+									 		determines the name of the actual function to invoke
+
+							 				This is the most dynamic approach.
+
+					 				The second most dynamic approach is to 
+					 						provide a spring.cloud.function.definition header
+
+					 						which should contain the definition of the function to which to route ‘TO’.
+
+			 						Both approaches require explicit enablement of routing function by setting the property 
+			 								spring.cloud.stream.function.routing.enabled [1A]
+
+					As for additional features that were not available in previous versions
+							spring.cloud.function.routing-expression can also be used as application property
+
+							consider the case when the expression is the same regardless of the incoming event
+									for example, spring.cloud.function.routing-expression=headers['type']=='order'
+
+							for this approach, you need not explicitly enable a routing function
+									spring.cloud.function.routing-expression as an application property has the same effect
+											@SpringBootApplication
+											public class SpringIntegrationExamplesApplication {
+
+											  public static void main(String[] args) {
+											      SpringApplication.run(RoutingStreamApplication.class,
+												  "--spring.cloud.function.routing-expression="
+												  + "T(java.lang.System).nanoTime() % 2 == 0 ? 'even' : 'odd'");
+											  }
+											  @Bean
+											  public Consumer<Integer> even() {
+											    return value -> System.out.println("EVEN: " + value);
+											  }
+
+											  @Bean
+											  public Consumer<Integer> odd() {
+											    return value -> System.out.println("ODD: " + value);
+											  }
+											}							
+
+											This receives the following runtime error:
+													org.springframework.context.ApplicationContextException: Failed to start bean 'outputBindingLifecycle'; nested exception is java.lang.IllegalArgumentException: A default binder has been requested, but there is no binder available
+
+							By sending a message to the functionRouter-in-0 destination
+									that is exposed by the binder
+											that is, rabbit or kafka 
+									
+									such a message will be routed to the appropriate (‘even’ or ‘odd’) Consumer bean
+											based on the value of nanoTime() at the time of message processing.
+
+			Route FROM:
+					Routing ‘FROM’ relies on the Dynamically Bound Destinations feature of SCSt
+							All you need is a reference to BinderAwareChannelResolver
+									@Autowired
+									private BinderAwareChannelResolver resolver;
+
+									public Consumer<String> send(Message message) {   
+									     MessageChannel destination = resolver
+									        .resolveDestination(message.getHeaders().get("type"))
+									     Message outgoingMessage = . . . // your code
+									     destination.send(outgoingMessage);
+									}
+
+							Then you can use some logic to determine the destination name
+									in our case, we use the value of the ‘type’ header
+
+							You can obtain a reference to the destination name by using the BinderAwareChannelResolver.resolveDestination(..)
+
+							Then send a message to it.
+
+					The downside of the above approach is that some framework-specific abstractions leak into your code.
+							Look at the fact that you need to be aware of 
+									BinderAwareChannelResolver and 
+
+									MessageChannel
+
+					A more dynamic and less leaky approach is to rely on spring.cloud.stream.sendto.destination property
+							which effectively does all of the above - but behind the scenes.
+
+							The following example shows how to use this approach:
+											@SpringBootApplication
+											public class RoutingStreamApplication {
+
+											  @Bean
+											  public Function<Message<String>, Message<String>> process() {
+											    return message -> {
+											      // some logic to process incoming message
+											      Message<String> outgoingMessage = MessageBuilder
+													.withPayload("Hello")
+													.setHeader("spring.cloud.stream.sendto.destination", "even")
+													.build();
+											       return outgoingMessage;
+											     };
+											  }
+											}
+
+							We no longer have to 
+									inject BinderAwareChannelResolver
+
+									perform resolution of MessageChannel
+
+							We simply create a new Message that 
+									specifies a header that is 
+
+									used by the framework to dynamically resolve destination.
+
+				Routing Sources
+						Last but not least, let’s look at another popular use case of a route ‘FROM’ where the source of data originates outside the context of SCSt but needs to be routed to the appropriate destination:
+						
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

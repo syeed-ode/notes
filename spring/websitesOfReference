@@ -1,0 +1,24 @@
+Spring Cloud Stream App starter
+	% https://github.com/spring-cloud/spring-cloud-stream-app-starters
+
+	Spring Integraton
+	% https://docs.spring.io/spring-integration/docs/current/reference/html/message-transformation.html#messaging-transformation-chapter
+	% https://docs.spring.io/spring-integration/docs/current/reference/html/
+	% 
+
+	Spring Cloud Stream Reference Guide
+	% https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/2.1.3.RELEASE/single/spring-cloud-stream.html#_using_streamlistener_for_content_based_routing
+	% https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html
+
+	Spring Cloud Stream Documentation
+	% https://github.com/spring-cloud/spring-cloud-stream/blob/master/docs/src/main/asciidoc/spring-cloud-stream.adoc#spring_cloud_function
+
+
+
+	Articles
+	% https://spring.io/blog/2019/10/17/spring-cloud-stream-functional-and-reactive 
+	% https://spring.io/blog/2019/10/14/spring-cloud-stream-demystified-and-simplified 
+	% https://spring.io/blog/2019/10/31/spring-cloud-stream-event-routing
+	% https://spring.io/blog/2019/10/25/spring-cloud-stream-and-spring-integration 
+	% 
+

@@ -1,0 +1,363 @@
+https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html
+https://spring.io/projects/spring-cloud-stream#learn
+
+
+Spring’s journey on Data Integration started with Spring Integration.
+
+it provided a to build applications that can embrace Enterprise Integration Patterns
+		to connect with external systems such as, databases, message brokers, and among others.
+
+Spring Boot handled Spring’s programming model and the runtime responsibilities
+
+Spring Cloud Stream put Spring Integration and Spring Boot together.
+
+
+Preface
+		Quick Start
+				Adding a Message Handler, Building, and Running
+						A lot of this (I think is based upon the packages below)
+										<dependency>
+											<groupId>org.springframework.cloud</groupId>
+											<artifactId>spring-cloud-stream-binder-kafka</artifactId>
+										</dependency>
+										<dependency>
+											<groupId>org.springframework.kafka</groupId>
+											<artifactId>spring-kafka</artifactId>
+										</dependency>
+
+						This is the associated code (which runs as is!!!)
+										@SpringBootApplication
+										public class SpringcsteaxmpleApplication {
+
+											public static void main(String[] args) {
+												SpringApplication.run(SpringcsteaxmpleApplication.class, args);
+											}
+
+											@Bean
+											public Consumer<Person> log() {
+												return person -> { System.out.println("Received: " + person);};
+											}
+
+											public static class Person {
+												private String name;
+												public String getName() {
+													return name;
+												}
+												public void setName(String name) {
+													this.name = name;
+												}
+												public String toString() {
+													return this.name;
+												}
+											}
+										}
+
+						Here is the functional breakdown:
+								We are using functional programming model
+										https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#spring_cloud_function
+
+										We define a single message handler as Consumer.
+
+								We rely on framework conventions
+										to bind the Consumer message handler 
+
+										to the input destination binding
+												the destination binding is exposed by the binder.
+
+								Framework convention tries to automatically convert incoming message payloads to type Person.
+										this is one of the core features of the framework
+
+						You now have a fully functional Spring Cloud Stream application that listens for messages.
+
+Introducing Spring Cloud Stream
+		Spring Cloud Stream is a framework for building message-driven microservice applications
+				It builds upon Spring Boot to 
+						create standalone, production-grade Spring applications 
+
+				It uses Spring Integration to provide connectivity to message brokers
+
+				It provides opinionated configuration of middleware from several vendors
+						It now introduces the concepts of persistent publish-subscribe semantics, consumer groups, and partitions.
+
+		By simply adding spring-cloud-stream dependencies to the classpath of your application
+				you’ll get immediate connectivity to a message broker
+						exposed via provided spring-cloud-stream binder
+
+				you can implement your functional requirement
+						that will be executed based on the incoming message
+
+				you only need to use 'java.util.function.Function'
+								@SpringBootApplication
+								public class SampleApplication {
+
+									public static void main(String[] args) {
+										SpringApplication.run(SampleApplication.class, args);
+									}
+
+								    @Bean
+									public Function<String, String> uppercase() {
+									    return value -> {
+									        System.out.println("Received: " + value);
+									        return value.toUpperCase()
+									    };
+									}
+								}
+				Testing (https://cloud.spring.io/spring-cloud-stream/reference/html/spring-cloud-stream.html#_testing)
+
+				Spring Integration Test Binder (https://cloud.spring.io/spring-cloud-stream/reference/html/spring-cloud-stream.html#spring_integration_test_binder)
+						The old test binder defined in 'spring-cloud-stream-test-support' module 
+								bypasses some of the core functionality of the binder API.
+										It was specifically designed to facilitate unit testing of the actual messaging components
+
+								It usually requires additional integration testing with real binders 
+										(e.g., Rabbit, Kafka etc). 
+
+								So we are effectively deprecating it.
+
+						To begin bridging the gap between unit and integration testing
+								we’ve developed a new test binder which uses Spring Integration framework 
+										https://spring.io/projects/spring-integration
+
+										https://docs.spring.io/spring-integration/docs/5.3.1.RELEASE/reference/html/testing.html#testing
+
+										https://docs.spring.io/spring-integration/docs/5.3.1.RELEASE/reference/html/testing.html#test-context
+
+										https://docs.spring.io/spring-integration/docs/5.3.1.RELEASE/reference/html/testing.html#testing-other-resources
+
+								as an in-JVM Message Broker essentially giving you the best of both worlds - a real binder without the networking.
+
+				Test Binder configuration (https://cloud.spring.io/spring-cloud-stream/reference/html/spring-cloud-stream.html#_test_binder_configuration)
+						To enable Spring Integration Test Binder all you need is:
+								Add required dependencies
+
+								Remove the dependency for 'spring-cloud-stream-test-support'
+
+						Add required dependencies
+								Below is the example of the required Maven POM entries which could be easily retrofitted into Gradle.
+												<dependency>
+												    <groupId>org.springframework.cloud</groupId>
+												    <artifactId>spring-cloud-stream</artifactId>
+												    <version>${spring.cloud.strea.version}</version>
+												    <type>test-jar</type>
+												    <scope>test</scope>
+												    <classifier>test-binder</classifier>
+												</dependency>
+												. . .
+												<build>
+													<plugins>
+													    <plugin>
+													        <groupId>org.apache.maven.plugins</groupId>
+													        <artifactId>maven-jar-plugin</artifactId>
+													        <executions>
+														    <execution>
+															<configuration>
+															    <includes>
+																 <include>**/integration/*</include>
+															    </includes>
+															    <classifier>test-binder</classifier>
+															</configuration>
+													                <goals>
+													                    <goal>test-jar</goal>
+													                </goals>
+													            </execution>
+													        </executions>
+													    </plugin>
+													</plugins>
+												</build>
+
+						Remove the dependency for 'spring-cloud-stream-test-support'
+								To avoid conflicts with the existing test binder you must remove the following entry
+												<dependency>
+													<!-- Removed to support InputDestination Classes in MessageChannel Testing-->
+													<groupId>org.springframework.cloud</groupId>
+													<artifactId>spring-cloud-stream-test-support</artifactId>
+													<scope>test</scope>
+												</dependency>
+
+								Ran across an error 'Failed to resolve org.junit.platform:junit-platform-launcher:1.6.2'
+								<><><><><><><>MUST PUT IN EXCEL<><><><><><><>
+								https://intellij-support.jetbrains.com/hc/en-us/community/posts/360003256319-Exception-intellij-failed-to-resolve-org-junit-platform-junit-platform-launcher-1-3-2
+												<dependency>
+													<!-- Resolves intelliJ testing error: 'Failed to resolve org.junit.platform:junit-platform-launcher:1.6.2' -->
+													<groupId>org.junit.platform</groupId>
+													<artifactId>junit-platform-launcher</artifactId>
+													<version>1.6.2</version>
+													<scope>test</scope>
+												</dependency>
+
+						Here is the test code
+												import org.junit.jupiter.api.Test;
+												import org.springframework.boot.builder.SpringApplicationBuilder;
+												import org.springframework.boot.test.context.SpringBootTest;
+												import org.springframework.cloud.stream.binder.test.InputDestination;
+												import org.springframework.cloud.stream.binder.test.OutputDestination;
+												import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+												import org.springframework.context.ConfigurableApplicationContext;
+												import org.springframework.messaging.support.GenericMessage;
+
+												import static org.assertj.core.api.Assertions.assertThat;
+
+												@SpringBootTest
+												class SpringCStEaxmpleApplicationTests {
+													@Test
+													public void sampleTest() {
+														try (ConfigurableApplicationContext context = new SpringApplicationBuilder(
+																TestChannelBinderConfiguration.getCompleteConfiguration(
+																		SpringCStEaxmpleApplication.class))
+																.run("--spring.cloud.function.definition=echo")) {
+															InputDestination source = context.getBean(InputDestination.class);
+															OutputDestination target = context.getBean(OutputDestination.class);
+															source.send(new GenericMessage<byte[]>("hello".getBytes()));
+															assertThat(target.receive().getPayload()).isEqualTo("hello".getBytes());
+														}
+													}
+												}
+
+						Here is the production code
+												import org.springframework.boot.SpringApplication;
+												import org.springframework.boot.autoconfigure.SpringBootApplication;
+												import org.springframework.context.annotation.Bean;
+
+												import java.util.function.Consumer;
+												import java.util.function.Function;
+
+												@SpringBootApplication
+												public class SpringCStEaxmpleApplication {
+
+													public static void main(String[] args) {
+														SpringApplication.run(SpringCStEaxmpleApplication.class, args);
+													}
+
+													@Bean
+													public Function<String, String> echo() {
+														return value -> value;
+													}
+												}
+
+						Try multiple functions: Here is the test code
+												@SpringBootTest
+												class SpringCStEaxmpleApplicationTests {
+													public static final int FIRST_MSG_BINDING_NAME = 0;
+													public static final int SECOND_MSG_BINDING_NAME = 1;
+
+													@Test
+													public void testMultipleFunctions() {
+														try (ConfigurableApplicationContext context
+																	 = new SpringApplicationBuilder(
+																TestChannelBinderConfiguration.getCompleteConfiguration(SpringCStEaxmpleApplication.class)
+														).run("--spring.cloud.function.definition=upperCase;reverse")) {
+
+															InputDestination inputDestination = context.getBean(InputDestination.class);
+															OutputDestination outputDestination = context.getBean(OutputDestination.class);
+
+															Message<byte[]> inputMessage = MessageBuilder.withPayload("Hello".getBytes()).build();
+															inputDestination.send(inputMessage, FIRST_MSG_BINDING_NAME);
+															inputDestination.send(inputMessage, SECOND_MSG_BINDING_NAME);
+
+															Message<byte[]> outputMessage = outputDestination.receive(0, FIRST_MSG_BINDING_NAME);
+															assertThat(outputMessage.getPayload()).isEqualTo("HELLO".getBytes());
+
+															outputMessage = outputDestination.receive(0, SECOND_MSG_BINDING_NAME);
+															assertThat(outputMessage.getPayload()).isEqualTo("olleH".getBytes());
+														}
+													}
+												}
+
+						Here is the production code
+												@SpringBootApplication
+												public class SpringCStEaxmpleApplication {
+
+													public static void main(String[] args) {
+														SpringApplication.run(SpringCStEaxmpleApplication.class, args);
+													}
+
+													@Bean
+													public Function<String, String> upperCase() {
+														return value -> {
+															System.out.println("Received: " + value);
+															return value.toUpperCase();
+														};
+													}
+
+													@Bean
+													public Function<String, String> reverse() {
+														return value -> {
+															System.out.println("Received: " + value);
+															return new StringBuilder(value).reverse().toString();
+														};
+													}
+												}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
