@@ -1,0 +1,261 @@
+/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/bin/java "-javaagent:/Users/lqz800/Library/Application Support/JetBrains/Toolbox/apps/IDEA-C/ch-0/193.6494.35/IntelliJ IDEA CE.app/Contents/lib/idea_rt.jar=53869:/Users/lqz800/Library/Application Support/JetBrains/Toolbox/apps/IDEA-C/ch-0/193.6494.35/IntelliJ IDEA CE.app/Contents/bin" -Dfile.encoding=UTF-8 -classpath /Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/deploy.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/cldrdata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/dnsns.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/jaccess.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/jfxrt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/localedata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/nashorn.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/sunec.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/sunjce_provider.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/sunpkcs11.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/zipfs.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/javaws.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/jfxswt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/management-agent.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/plugin.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/ant-javafx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/dt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/javafx-mx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/jconsole.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/packager.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/sa-jdi.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/tools.jar:/Users/lqz800/java_projects/springcsteaxmple/target/classes:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-stream/3.0.6.RELEASE/spring-cloud-stream-3.0.6.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot-starter-validation/2.3.1.RELEASE/spring-boot-starter-validation-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/glassfish/jakarta.el/3.0.3/jakarta.el-3.0.3.jar:/Users/lqz800/.m2/repository/org/hibernate/validator/hibernate-validator/6.1.5.Final/hibernate-validator-6.1.5.Final.jar:/Users/lqz800/.m2/repository/jakarta/validation/jakarta.validation-api/2.0.2/jakarta.validation-api-2.0.2.jar:/Users/lqz800/.m2/repository/org/jboss/logging/jboss-logging/3.4.1.Final/jboss-logging-3.4.1.Final.jar:/Users/lqz800/.m2/repository/com/fasterxml/classmate/1.5.1/classmate-1.5.1.jar:/Users/lqz800/.m2/repository/org/springframework/spring-messaging/5.2.7.RELEASE/spring-messaging-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-beans/5.2.7.RELEASE/spring-beans-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/integration/spring-integration-core/5.3.1.RELEASE/spring-integration-core-5.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-aop/5.2.7.RELEASE/spring-aop-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/io/projectreactor/reactor-core/3.3.6.RELEASE/reactor-core-3.3.6.RELEASE.jar:/Users/lqz800/.m2/repository/org/reactivestreams/reactive-streams/1.0.3/reactive-streams-1.0.3.jar:/Users/lqz800/.m2/repository/org/springframework/integration/spring-integration-jmx/5.3.1.RELEASE/spring-integration-jmx-5.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/retry/spring-retry/1.2.5.RELEASE/spring-retry-1.2.5.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-function-context/3.0.8.RELEASE/spring-cloud-function-context-3.0.8.RELEASE.jar:/Users/lqz800/.m2/repository/net/jodah/typetools/0.6.2/typetools-0.6.2.jar:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-function-core/3.0.8.RELEASE/spring-cloud-function-core-3.0.8.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-stream-binder-kafka/3.0.6.RELEASE/spring-cloud-stream-binder-kafka-3.0.6.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-stream-binder-kafka-core/3.0.6.RELEASE/spring-cloud-stream-binder-kafka-core-3.0.6.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/integration/spring-integration-kafka/3.2.1.RELEASE/spring-integration-kafka-3.2.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/apache/kafka/kafka-clients/2.5.0/kafka-clients-2.5.0.jar:/Users/lqz800/.m2/repository/com/github/luben/zstd-jni/1.4.4-7/zstd-jni-1.4.4-7.jar:/Users/lqz800/.m2/repository/org/lz4/lz4-java/1.7.1/lz4-java-1.7.1.jar:/Users/lqz800/.m2/repository/org/xerial/snappy/snappy-java/1.1.7.3/snappy-java-1.1.7.3.jar:/Users/lqz800/.m2/repository/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar:/Users/lqz800/.m2/repository/org/springframework/kafka/spring-kafka/2.5.2.RELEASE/spring-kafka-2.5.2.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-context/5.2.7.RELEASE/spring-context-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-expression/5.2.7.RELEASE/spring-expression-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-tx/5.2.7.RELEASE/spring-tx-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot-starter/2.3.1.RELEASE/spring-boot-starter-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot/2.3.1.RELEASE/spring-boot-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot-starter-logging/2.3.1.RELEASE/spring-boot-starter-logging-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.jar:/Users/lqz800/.m2/repository/ch/qos/logback/logback-core/1.2.3/logback-core-1.2.3.jar:/Users/lqz800/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.13.3/log4j-to-slf4j-2.13.3.jar:/Users/lqz800/.m2/repository/org/apache/logging/log4j/log4j-api/2.13.3/log4j-api-2.13.3.jar:/Users/lqz800/.m2/repository/org/slf4j/jul-to-slf4j/1.7.30/jul-to-slf4j-1.7.30.jar:/Users/lqz800/.m2/repository/jakarta/annotation/jakarta.annotation-api/1.3.5/jakarta.annotation-api-1.3.5.jar:/Users/lqz800/.m2/repository/org/yaml/snakeyaml/1.26/snakeyaml-1.26.jar:/Users/lqz800/.m2/repository/org/springframework/spring-core/5.2.7.RELEASE/spring-core-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-jcl/5.2.7.RELEASE/spring-jcl-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/2.3.1.RELEASE/spring-boot-autoconfigure-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.11.0/jackson-databind-2.11.0.jar:/Users/lqz800/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.11.0/jackson-annotations-2.11.0.jar:/Users/lqz800/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.11.0/jackson-core-2.11.0.jar com.capitalone.springcsteaxmple.SpringcsteaxmpleApplication
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.3.1.RELEASE)
+
+2020-07-08 16:02:10.357  INFO 22613 --- [           main] c.c.s.SpringcsteaxmpleApplication        : Starting SpringcsteaxmpleApplication on f8ffc2074ada with PID 22613 (/Users/lqz800/java_projects/springcsteaxmple/target/classes started by lqz800 in /Users/lqz800/java_projects/springcsteaxmple)
+2020-07-08 16:02:10.359  INFO 22613 --- [           main] c.c.s.SpringcsteaxmpleApplication        : No active profile set, falling back to default profiles: default
+2020-07-08 16:02:10.868  INFO 22613 --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'errorChannel' has been explicitly defined. Therefore, a default PublishSubscribeChannel will be created.
+2020-07-08 16:02:10.872  INFO 22613 --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'taskScheduler' has been explicitly defined. Therefore, a default ThreadPoolTaskScheduler will be created.
+2020-07-08 16:02:10.875  INFO 22613 --- [           main] faultConfiguringBeanFactoryPostProcessor : No bean named 'integrationHeaderChannelRegistry' has been explicitly defined. Therefore, a default DefaultHeaderChannelRegistry will be created.
+2020-07-08 16:02:10.915  INFO 22613 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.integration.config.IntegrationManagementConfiguration' of type [org.springframework.integration.config.IntegrationManagementConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-07-08 16:02:10.924  INFO 22613 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'integrationChannelResolver' of type [org.springframework.integration.support.channel.BeanFactoryChannelResolver] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-07-08 16:02:10.925  INFO 22613 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'integrationDisposableAutoCreatedBeans' of type [org.springframework.integration.config.annotation.Disposables] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-07-08 16:02:11.407  INFO 22613 --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2020-07-08 16:02:11.419  INFO 22613 --- [           main] o.s.c.f.c.c.SimpleFunctionRegistry       : Looking up function '' with acceptedOutputTypes: []
+2020-07-08 16:02:11.441  INFO 22613 --- [           main] o.s.c.f.c.c.SimpleFunctionRegistry       : Looking up function 'log' with acceptedOutputTypes: []
+2020-07-08 16:02:11.477  INFO 22613 --- [           main] o.s.c.f.c.c.SimpleFunctionRegistry       : Looking up function 'log' with acceptedOutputTypes: []
+2020-07-08 16:02:11.478  INFO 22613 --- [           main] o.s.c.f.c.c.SimpleFunctionRegistry       : Looking up function 'log' with acceptedOutputTypes: []
+2020-07-08 16:02:11.508  INFO 22613 --- [           main] o.s.c.s.m.DirectWithAttributesChannel    : Channel 'application.log-in-0' has 1 subscriber(s).
+2020-07-08 16:02:11.513  INFO 22613 --- [           main] o.s.c.f.c.c.SimpleFunctionRegistry       : Looking up function 'log' with acceptedOutputTypes: []
+2020-07-08 16:02:11.599  INFO 22613 --- [           main] o.s.i.endpoint.EventDrivenConsumer       : Adding {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2020-07-08 16:02:11.599  INFO 22613 --- [           main] o.s.i.channel.PublishSubscribeChannel    : Channel 'application.errorChannel' has 1 subscriber(s).
+2020-07-08 16:02:11.599  INFO 22613 --- [           main] o.s.i.endpoint.EventDrivenConsumer       : started bean '_org.springframework.integration.errorLogger'
+2020-07-08 16:02:11.600  INFO 22613 --- [           main] o.s.c.s.binder.DefaultBinderFactory      : Creating binder: kafka
+2020-07-08 16:02:11.755  INFO 22613 --- [           main] o.s.c.s.binder.DefaultBinderFactory      : Caching the binder: kafka
+2020-07-08 16:02:11.755  INFO 22613 --- [           main] o.s.c.s.binder.DefaultBinderFactory      : Retrieving cached binder: kafka
+2020-07-08 16:02:11.828  INFO 22613 --- [           main] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values: 
+	bootstrap.servers = [localhost:9092]
+	client.dns.lookup = default
+	client.id = 
+	connections.max.idle.ms = 300000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.mechanism = GSSAPI
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2]
+	ssl.endpoint.identification.algorithm = https
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.2
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2020-07-08 16:02:11.917  INFO 22613 --- [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 2.5.0
+2020-07-08 16:02:11.919  INFO 22613 --- [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 66563e712b0b9f84
+2020-07-08 16:02:11.919  INFO 22613 --- [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1594242131916
+2020-07-08 16:02:12.463  INFO 22613 --- [           main] o.a.k.clients.consumer.ConsumerConfig    : ConsumerConfig values: 
+	allow.auto.create.topics = true
+	auto.commit.interval.ms = 100
+	auto.offset.reset = latest
+	bootstrap.servers = [localhost:9092]
+	check.crcs = true
+	client.dns.lookup = default
+	client.id = 
+	client.rack = 
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	enable.auto.commit = false
+	exclude.internal.topics = true
+	fetch.max.bytes = 52428800
+	fetch.max.wait.ms = 500
+	fetch.min.bytes = 1
+	group.id = anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e
+	group.instance.id = null
+	heartbeat.interval.ms = 3000
+	interceptor.classes = []
+	internal.leave.group.on.close = true
+	isolation.level = read_uncommitted
+	key.deserializer = class org.apache.kafka.common.serialization.ByteArrayDeserializer
+	max.partition.fetch.bytes = 1048576
+	max.poll.interval.ms = 300000
+	max.poll.records = 500
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	partition.assignment.strategy = [class org.apache.kafka.clients.consumer.RangeAssignor]
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.mechanism = GSSAPI
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	session.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2]
+	ssl.endpoint.identification.algorithm = https
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.2
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+	value.deserializer = class org.apache.kafka.common.serialization.ByteArrayDeserializer
+
+2020-07-08 16:02:12.497  INFO 22613 --- [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 2.5.0
+2020-07-08 16:02:12.497  INFO 22613 --- [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 66563e712b0b9f84
+2020-07-08 16:02:12.497  INFO 22613 --- [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1594242132497
+2020-07-08 16:02:12.505  INFO 22613 --- [           main] org.apache.kafka.clients.Metadata        : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-1, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Cluster ID: IVXVa_5mRxuiZQaA4NCHPA
+2020-07-08 16:02:12.527  INFO 22613 --- [           main] o.s.c.stream.binder.BinderErrorChannel   : Channel 'log-in-0.anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e.errors' has 1 subscriber(s).
+2020-07-08 16:02:12.527  INFO 22613 --- [           main] o.s.c.stream.binder.BinderErrorChannel   : Channel 'log-in-0.anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e.errors' has 0 subscriber(s).
+2020-07-08 16:02:12.527  INFO 22613 --- [           main] o.s.c.stream.binder.BinderErrorChannel   : Channel 'log-in-0.anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e.errors' has 1 subscriber(s).
+2020-07-08 16:02:12.527  INFO 22613 --- [           main] o.s.c.stream.binder.BinderErrorChannel   : Channel 'log-in-0.anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e.errors' has 2 subscriber(s).
+2020-07-08 16:02:12.539  INFO 22613 --- [           main] o.a.k.clients.consumer.ConsumerConfig    : ConsumerConfig values: 
+	allow.auto.create.topics = true
+	auto.commit.interval.ms = 100
+	auto.offset.reset = latest
+	bootstrap.servers = [localhost:9092]
+	check.crcs = true
+	client.dns.lookup = default
+	client.id = 
+	client.rack = 
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	enable.auto.commit = false
+	exclude.internal.topics = true
+	fetch.max.bytes = 52428800
+	fetch.max.wait.ms = 500
+	fetch.min.bytes = 1
+	group.id = anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e
+	group.instance.id = null
+	heartbeat.interval.ms = 3000
+	interceptor.classes = []
+	internal.leave.group.on.close = true
+	isolation.level = read_uncommitted
+	key.deserializer = class org.apache.kafka.common.serialization.ByteArrayDeserializer
+	max.partition.fetch.bytes = 1048576
+	max.poll.interval.ms = 300000
+	max.poll.records = 500
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	partition.assignment.strategy = [class org.apache.kafka.clients.consumer.RangeAssignor]
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.mechanism = GSSAPI
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	session.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2]
+	ssl.endpoint.identification.algorithm = https
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.2
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+	value.deserializer = class org.apache.kafka.common.serialization.ByteArrayDeserializer
+
+2020-07-08 16:02:12.543  INFO 22613 --- [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 2.5.0
+2020-07-08 16:02:12.543  INFO 22613 --- [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 66563e712b0b9f84
+2020-07-08 16:02:12.543  INFO 22613 --- [           main] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1594242132543
+2020-07-08 16:02:12.545  INFO 22613 --- [           main] o.a.k.clients.consumer.KafkaConsumer     : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Subscribed to topic(s): log-in-0
+2020-07-08 16:02:12.546  INFO 22613 --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService
+2020-07-08 16:02:12.550  INFO 22613 --- [           main] s.i.k.i.KafkaMessageDrivenChannelAdapter : started org.springframework.integration.kafka.inbound.KafkaMessageDrivenChannelAdapter@43a51d00
+2020-07-08 16:02:12.560  INFO 22613 --- [container-0-C-1] org.apache.kafka.clients.Metadata        : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Cluster ID: IVXVa_5mRxuiZQaA4NCHPA
+2020-07-08 16:02:12.563  INFO 22613 --- [           main] c.c.s.SpringcsteaxmpleApplication        : Started SpringcsteaxmpleApplication in 3.395 seconds (JVM running for 3.753)
+2020-07-08 16:02:13.088  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Discovered group coordinator 192.168.1.71:9092 (id: 2147483647 rack: null)
+2020-07-08 16:02:13.090  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] (Re-)joining group
+2020-07-08 16:02:13.110  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Join group failed with org.apache.kafka.common.errors.MemberIdRequiredException: The group member needs to have a valid member id before actually entering a consumer group
+2020-07-08 16:02:13.110  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] (Re-)joining group
+2020-07-08 16:02:13.131  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Finished assignment for group at generation 1: {consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2-d9821751-b1c1-4edf-900d-c0008c6e0b79=Assignment(partitions=[log-in-0-0])}
+2020-07-08 16:02:13.185  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Successfully joined group with generation 1
+2020-07-08 16:02:13.188  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Adding newly assigned partitions: log-in-0-0
+2020-07-08 16:02:13.194  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Found no committed offset for partition log-in-0-0
+2020-07-08 16:02:13.199  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Found no committed offset for partition log-in-0-0
+2020-07-08 16:02:13.207  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.SubscriptionState    : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Resetting offset for partition log-in-0-0 to offset 0.
+2020-07-08 16:02:13.219  INFO 22613 --- [container-0-C-1] o.s.c.s.b.k.KafkaMessageChannelBinder$1  : anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e: partitions assigned: [log-in-0-0]
+2020-07-08 17:29:57.521  INFO 22613 --- [88-a18f8adb6e4e] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Group coordinator 192.168.1.71:9092 (id: 2147483647 rack: null) is unavailable or invalid, will attempt rediscovery
+2020-07-08 17:29:57.571  INFO 22613 --- [container-0-C-1] o.a.kafka.clients.FetchSessionHandler    : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Error sending fetch request (sessionId=1957809100, epoch=2241) to node 0: {}.
+
+org.apache.kafka.common.errors.DisconnectException: null
+
+2020-07-08 17:29:57.574  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Discovered group coordinator 192.168.1.71:9092 (id: 2147483647 rack: null)
