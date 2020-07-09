@@ -1,0 +1,180 @@
+https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#_programming_model
+https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html
+https://spring.io/projects/spring-cloud-stream#learn
+
+
+Spring’s journey on Data Integration started with Spring Integration.
+
+it provided a to build applications that can embrace Enterprise Integration Patterns
+		to connect with external systems such as, databases, message brokers, and among others.
+
+Spring Boot handled Spring’s programming model and the runtime responsibilities
+
+Spring Cloud Stream put Spring Integration and Spring Boot together.
+
+
+Programming Model
+		To understand the programming model, you should be familiar with the following core concepts:
+
+		Destination Binders: 
+				Components responsible to provide integration with the external messaging systems.
+
+		Bindings: 
+				Bridge between the external messaging systems and application provided Producers and Consumers of messages (created by the Destination Binders).
+
+		Message: 
+				The canonical data structure used by producers and consumers to communicate with Destination Binders 
+
+				And thus other applications via external messaging systems.
+
+		Destination Binders
+				Destination Binders are responsible for providing the configuration and integration with external messaging systems.
+
+				This integration is responsible for
+						routing of messages to and from producers and consumers
+
+						data type conversion
+
+						invocation of the user code
+
+						connectivity and more
+
+				Binders handle a lot of the boiler plate responsibilities however the binder still needs some help in the form of minimalistic set of instructions from the user
+						which typically come in the form of binding configuration.
+
+						Binding as a concept, does require special attention. The next section discusses it in detail
+
+		Bindings
+				Bindings provide a bridge between the external messaging system (e.g., queue, topic etc.) and application-provided Producers and Consumers.
+
+				The following example shows a fully configured and functioning Spring Cloud Stream application 
+						it receives the payload of the message as a String type 
+								(see Content Type Negotiation section), 
+
+								https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#content-type-management
+
+						logs it to the console and 
+
+						sends it down stream after converting it to upper case.
+										@SpringBootApplication
+										public class SampleApplication {
+
+											public static void main(String[] args) {
+												SpringApplication.run(SampleApplication.class, args);
+											}
+
+											@Bean
+											public Function<String, String> uppercase() {
+											    return value -> {
+											        System.out.println("Received: " + value);
+											        return value.toUpperCase()
+											    };
+											}
+										}
+
+				Unlike previous versions of spring-cloud-stream which relied on @EnableBinding and @StreamListener annotations
+						It defines a single bean of type Function and that it is
+
+				So, how does it became spring-cloud-stream application?
+
+				It becomes spring-cloud-stream application simply based on 
+						the presence of spring-cloud-stream and binder dependencies and 
+
+						auto-configuration classes on the classpath effectively 
+
+						setting the context for your boot application as spring-cloud-stream application.
+
+				And in this context beans of type are treated as defacto message handlers
+								Supplier, 
+
+								Function or 
+
+								Consumer 
+
+						triggering binding of to destinations exposed by the provided binder 
+
+						following certain naming conventions and rules to avoid extra configuration.
+
+		Binding and Binding names
+				Binding is an abstraction that represents a bridge between sources and targets exposed by the binder and user code
+
+				This abstraction has a name being aware of such name(s) is necessary for cases where additional per-binding configuration is required.
+
+				Throughout this manual you will see examples of configuration properties such as spring.cloud.stream.bindings.input.destination=myQueue. 
+						The input segment in this property name is what we refer to as binding name 
+
+						it could derive via several mechanisms.
+
+						The following sub-sections will describe the naming conventions 
+
+						And the configuration elements used by spring-cloud-stream to control binding names.
+
+				
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -15,6 +15,142 @@ Spring Cloud Stream put Spring Integration and Spring Boot together.
 
 Main Concepts
 
+		Spring Cloud Stream provides a number of abstractions and primitives that simplify the writing of message-driven microservice applications.
+			    Spring Cloud Stream’s application model
+
+			    The Binder Abstraction
+
+			    Persistent publish-subscribe support
+
+			    Consumer group support
+
+			    Partitioning support
+
+			    A pluggable Binder SPI
+
+	    Application Model
+	    		A Spring Cloud Stream application consists of a middleware-neutral core.
+
+	    		The application communicates with the outside world through input and output channels
+	    				injected into it by Spring Cloud Stream.
+
+	    				Channels are connected to external brokers 
+	    						through middleware-specific Binder implementations.
+
+		The Binder Abstraction
+				Spring Cloud Stream provides Binder implementations for Kafka and Rabbit MQ.
+
+				Spring Cloud Stream also includes a test binder
+						for integration testing of your applications as spring-cloud-stream application. 
+
+
+				The Binder abstraction makes it possible for a Spring Cloud Stream application to be flexible in how it connects to middleware.
+
+				Deployers can dynamically choose, at runtime, the destinations to which channels connect
+						such as the Kafka topics or RabbitMQ exchanges
+
+						configuration can be provided through
+								external configuration properties
+
+								application arguments
+
+								environment variables, and 
+
+								application.yml or 
+
+								application.properties
+
+				Spring Cloud Stream automatically detects and uses a binder found on the classpath.
+						You can use different types of middleware with the same code.
+
+						To do so, include a different binder at build time.
+
+		Persistent Publish-Subscribe Support
+				Communication between applications follows a publish-subscribe model, where data is broadcast through shared topics.
+
+				In order to process the data, both applications declare the topic as their input at runtime.
+
+		Consumer Groups
+				Different instances of an application are placed in a competing consumer relationship, where only one of the instances is expected to handle a given message.
+
+				Spring Cloud Stream models this behavior through the concept of a consumer group.
+
+				Spring Cloud Stream consumer groups are similar to and inspired by Kafka consumer groups.
+
+				spring.cloud.stream.bindings.<channelName>.group property
+						Each consumer binding can use the property to specify a group name
+								For example
+										spring.cloud.stream.bindings.<channelName>.group=hdfsWrite
+												or
+										spring.cloud.stream.bindings.<channelName>.group=average.
+
+				All groups that subscribe to a given destination receive a copy of published data, but only one member of each group receives a given message from that destination.
+
+		Consumer Types
+				Message-driven (sometimes referred to as Asynchronous)
+
+				Polled (sometimes referred to as Synchronous)
+
+				******Prior to version 2.0, only asynchronous consumers were supported. A message is delivered as soon as it is available and a thread is available to process it.******
+
+				When you wish to control the rate at which messages are processed, you might want to use a synchronous consumer.
+
+				Durability
+						Consumer group subscriptions are durable.
+								consistent with the opinionated application model of Spring Cloud Stream
+
+						A binder implementation ensures that group subscriptions are persistent
+
+						Once at least one subscription for a group has been created, the group receives messages
+								even if they are sent while all applications in the group are stopped.
+
+						Anonymous subscriptions
+								Anonymous subscriptions are non-durable by nature
+
+								For some binder implementations (such as RabbitMQ), it is possible to have non-durable group subscriptions.
+
+				When binding an application to a given destination it is preferable to always specify a consumer group
+						You must specify a consumer group for each of its input bindings.
+								when scaling up a Spring Cloud Stream application
+
+						Doing so prevents the application’s instances from receiving duplicate messages 
+								(unless that behavior is desired, which is unusual).
+
+		Partitioning Support
+				Spring Cloud Stream provides support for partitioning data between multiple instances of a given application.
+
+				The broker topic (i.e. the physical communication medium) is viewed as being structured into multiple partitions.
+						One or more producer application instances 
+								send data to multiple consumer application instances and 
+
+								ensure that data identified by common characteristics are processed by the same consumer instance.
+
+				Partitioning can be used whether the broker itself is naturally partitioned (for example, Kafka) or not (for example, RabbitMQ).
+						Spring Cloud Stream provides a common abstraction for implementing partitioned processing
+
+				Partitioning is a critical concept to ensure that all related data is processed together.
+						This is used in stateful processing for either performance or consistency reasons
+
+						in the time-windowed average calculation example, 
+								it is important that all measurements from any given sensor are processed by the same application instance.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
