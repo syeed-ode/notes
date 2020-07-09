@@ -1,3 +1,49 @@
+				Adding a Message Handler, Building, and Running
+						A lot of this (I think is based upon the packages below)
+										<dependency>
+											<groupId>org.springframework.cloud</groupId>
+											<artifactId>spring-cloud-stream-binder-kafka</artifactId>
+										</dependency>
+										<dependency>
+											<groupId>org.springframework.kafka</groupId>
+											<artifactId>spring-kafka</artifactId>
+										</dependency>
+
+						This is the associated code (which runs as is!!!)
+										@SpringBootApplication
+										public class SpringcsteaxmpleApplication {
+
+											public static void main(String[] args) {
+												SpringApplication.run(SpringcsteaxmpleApplication.class, args);
+											}
+
+											@Bean
+											public Consumer<Person> log() {
+												return person -> { System.out.println("Received: " + person);};
+											}
+
+											public static class Person {
+												private String name;
+												public String getName() {
+													return name;
+												}
+												public void setName(String name) {
+													this.name = name;
+												}
+												public String toString() {
+													return this.name;
+												}
+											}
+										}
+
+<><><><><><><>SEE MORE BELOW PRINTOUT<><><><><><><>
+When run produces:
+
+
+
+
+
+
 /Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/bin/java "-javaagent:/Users/lqz800/Library/Application Support/JetBrains/Toolbox/apps/IDEA-C/ch-0/193.6494.35/IntelliJ IDEA CE.app/Contents/lib/idea_rt.jar=53869:/Users/lqz800/Library/Application Support/JetBrains/Toolbox/apps/IDEA-C/ch-0/193.6494.35/IntelliJ IDEA CE.app/Contents/bin" -Dfile.encoding=UTF-8 -classpath /Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/deploy.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/cldrdata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/dnsns.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/jaccess.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/jfxrt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/localedata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/nashorn.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/sunec.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/sunjce_provider.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/sunpkcs11.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/ext/zipfs.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/javaws.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/jfxswt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/management-agent.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/plugin.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/ant-javafx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/dt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/javafx-mx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/jconsole.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/packager.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/sa-jdi.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_241.jdk/Contents/Home/lib/tools.jar:/Users/lqz800/java_projects/springcsteaxmple/target/classes:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-stream/3.0.6.RELEASE/spring-cloud-stream-3.0.6.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot-starter-validation/2.3.1.RELEASE/spring-boot-starter-validation-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/glassfish/jakarta.el/3.0.3/jakarta.el-3.0.3.jar:/Users/lqz800/.m2/repository/org/hibernate/validator/hibernate-validator/6.1.5.Final/hibernate-validator-6.1.5.Final.jar:/Users/lqz800/.m2/repository/jakarta/validation/jakarta.validation-api/2.0.2/jakarta.validation-api-2.0.2.jar:/Users/lqz800/.m2/repository/org/jboss/logging/jboss-logging/3.4.1.Final/jboss-logging-3.4.1.Final.jar:/Users/lqz800/.m2/repository/com/fasterxml/classmate/1.5.1/classmate-1.5.1.jar:/Users/lqz800/.m2/repository/org/springframework/spring-messaging/5.2.7.RELEASE/spring-messaging-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-beans/5.2.7.RELEASE/spring-beans-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/integration/spring-integration-core/5.3.1.RELEASE/spring-integration-core-5.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-aop/5.2.7.RELEASE/spring-aop-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/io/projectreactor/reactor-core/3.3.6.RELEASE/reactor-core-3.3.6.RELEASE.jar:/Users/lqz800/.m2/repository/org/reactivestreams/reactive-streams/1.0.3/reactive-streams-1.0.3.jar:/Users/lqz800/.m2/repository/org/springframework/integration/spring-integration-jmx/5.3.1.RELEASE/spring-integration-jmx-5.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/retry/spring-retry/1.2.5.RELEASE/spring-retry-1.2.5.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-function-context/3.0.8.RELEASE/spring-cloud-function-context-3.0.8.RELEASE.jar:/Users/lqz800/.m2/repository/net/jodah/typetools/0.6.2/typetools-0.6.2.jar:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-function-core/3.0.8.RELEASE/spring-cloud-function-core-3.0.8.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-stream-binder-kafka/3.0.6.RELEASE/spring-cloud-stream-binder-kafka-3.0.6.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/cloud/spring-cloud-stream-binder-kafka-core/3.0.6.RELEASE/spring-cloud-stream-binder-kafka-core-3.0.6.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/integration/spring-integration-kafka/3.2.1.RELEASE/spring-integration-kafka-3.2.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/apache/kafka/kafka-clients/2.5.0/kafka-clients-2.5.0.jar:/Users/lqz800/.m2/repository/com/github/luben/zstd-jni/1.4.4-7/zstd-jni-1.4.4-7.jar:/Users/lqz800/.m2/repository/org/lz4/lz4-java/1.7.1/lz4-java-1.7.1.jar:/Users/lqz800/.m2/repository/org/xerial/snappy/snappy-java/1.1.7.3/snappy-java-1.1.7.3.jar:/Users/lqz800/.m2/repository/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar:/Users/lqz800/.m2/repository/org/springframework/kafka/spring-kafka/2.5.2.RELEASE/spring-kafka-2.5.2.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-context/5.2.7.RELEASE/spring-context-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-expression/5.2.7.RELEASE/spring-expression-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-tx/5.2.7.RELEASE/spring-tx-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot-starter/2.3.1.RELEASE/spring-boot-starter-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot/2.3.1.RELEASE/spring-boot-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot-starter-logging/2.3.1.RELEASE/spring-boot-starter-logging-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.jar:/Users/lqz800/.m2/repository/ch/qos/logback/logback-core/1.2.3/logback-core-1.2.3.jar:/Users/lqz800/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.13.3/log4j-to-slf4j-2.13.3.jar:/Users/lqz800/.m2/repository/org/apache/logging/log4j/log4j-api/2.13.3/log4j-api-2.13.3.jar:/Users/lqz800/.m2/repository/org/slf4j/jul-to-slf4j/1.7.30/jul-to-slf4j-1.7.30.jar:/Users/lqz800/.m2/repository/jakarta/annotation/jakarta.annotation-api/1.3.5/jakarta.annotation-api-1.3.5.jar:/Users/lqz800/.m2/repository/org/yaml/snakeyaml/1.26/snakeyaml-1.26.jar:/Users/lqz800/.m2/repository/org/springframework/spring-core/5.2.7.RELEASE/spring-core-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/spring-jcl/5.2.7.RELEASE/spring-jcl-5.2.7.RELEASE.jar:/Users/lqz800/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/2.3.1.RELEASE/spring-boot-autoconfigure-2.3.1.RELEASE.jar:/Users/lqz800/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.11.0/jackson-databind-2.11.0.jar:/Users/lqz800/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.11.0/jackson-annotations-2.11.0.jar:/Users/lqz800/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.11.0/jackson-core-2.11.0.jar com.capitalone.springcsteaxmple.SpringcsteaxmpleApplication
 
   .   ____          _            __ _ _
@@ -252,10 +298,60 @@
 2020-07-08 16:02:13.194  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Found no committed offset for partition log-in-0-0
 2020-07-08 16:02:13.199  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.ConsumerCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Found no committed offset for partition log-in-0-0
 2020-07-08 16:02:13.207  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.SubscriptionState    : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Resetting offset for partition log-in-0-0 to offset 0.
+<><><><><><><>KEY MESSAGE FROM LOG<><><><><><><>
 2020-07-08 16:02:13.219  INFO 22613 --- [container-0-C-1] o.s.c.s.b.k.KafkaMessageChannelBinder$1  : anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e: partitions assigned: [log-in-0-0]
+<><><><><><><>KEY MESSAGE FROM LOG<><><><><><><>
 2020-07-08 17:29:57.521  INFO 22613 --- [88-a18f8adb6e4e] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Group coordinator 192.168.1.71:9092 (id: 2147483647 rack: null) is unavailable or invalid, will attempt rediscovery
 2020-07-08 17:29:57.571  INFO 22613 --- [container-0-C-1] o.a.kafka.clients.FetchSessionHandler    : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Error sending fetch request (sessionId=1957809100, epoch=2241) to node 0: {}.
 
 org.apache.kafka.common.errors.DisconnectException: null
 
 2020-07-08 17:29:57.574  INFO 22613 --- [container-0-C-1] o.a.k.c.c.internals.AbstractCoordinator  : [Consumer clientId=consumer-anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e-2, groupId=anonymous.bf3524a3-6bb2-49d1-9888-a18f8adb6e4e] Discovered group coordinator 192.168.1.71:9092 (id: 2147483647 rack: null)
+
+
+
+<><><><><><><>SEE MORE BELOW PRINTOUT<><><><><><><>
+Executing the command line 
+% kafka-console-producer --bootstrap-server localhost:9092 --topic log-in-0 
+	>{"name":"Sam Spade"}
+	>
+
+
+<><><><><><><>SEE MORE BELOW PRINTOUT<><><><><><><>
+Produces the printout
+2020-07-08 17:51:57.677  INFO 24557 --- [container-0-C-1] o.s.i.h.s.MessagingMethodInvokerHelper   : Overriding default instance of MessageHandlerMethodFactory with provided one.
+Received: Sam Spade
+
+
+<><><><><><><>RESETTING COMMAND LINE AND TRYING AGAIN (NOTE THE TIMES)<><><><><><><>
+Produces the printout
+2020-07-08 17:51:57.677  INFO 24557 --- [container-0-C-1] o.s.i.h.s.MessagingMethodInvokerHelper   : Overriding default instance of MessageHandlerMethodFactory with provided one.
+Received: Sam Spade
+20200708_17:53:25 private-auto-loan-credit-bureau-reports % kafka-console-producer --bootstrap-server localhost:9092 --topic log-in-0
+>{"name":"Actually sending anew message that will be printed out"}    
+>
+Received: Actually sending anew message that will be printed out
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
