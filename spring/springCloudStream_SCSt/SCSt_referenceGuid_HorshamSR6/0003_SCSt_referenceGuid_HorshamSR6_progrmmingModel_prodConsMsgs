@@ -1,0 +1,220 @@
+https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#_programming_model
+https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html
+https://spring.io/projects/spring-cloud-stream#learn
+
+
+Spring’s journey on Data Integration started with Spring Integration.
+
+it provided a to build applications that can embrace Enterprise Integration Patterns
+		to connect with external systems such as, databases, message brokers, and among others.
+
+Spring Boot handled Spring’s programming model and the runtime responsibilities
+
+Spring Cloud Stream put Spring Integration and Spring Boot together.
+
+
+										Programming Model
+
+Producing and Consuming Messages
+		You can write a Spring Cloud Stream application by simply writing functions and exposing them as `@Bean`s. 
+
+		You can also use Spring Integration annotations based configuration or 
+
+		Spring Cloud Stream annotation based configuration, 
+				although starting with spring-cloud-stream 3.x we recommend using functional implementations.
+
+		Spring Cloud Function support
+				Overview
+								Since Spring Cloud Stream v2.1, another alternative for defining stream handlers and sources is to use build-in support for 
+
+								Spring Cloud Function where 
+										https://cloud.spring.io/spring-cloud-function/reference/html/
+
+								they can be expressed as beans of type java.util.function.[Supplier/Function/Consumer].
+
+						To specify which functional bean to bind to the external destination(s) exposed by the bindings, 
+
+						You must provide <><>spring.cloud.function.definition<><> property.
+								Here is the example of the application exposing message handler as java.util.function.Function 
+
+								Effectively supporting pass-thru semantics by acting as consumer and producer of data.
+												@SpringBootApplication
+												public class MyFunctionBootApp {
+
+													public static void main(String[] args) {
+														SpringApplication.run(MyFunctionBootApp.class);
+													}
+
+													@Bean
+													public Function<String, String> toUpperCase() {
+														return s -> s.toUpperCase();
+													}
+												}
+
+								In the above you we simply define a bean of type java.util.function.Function called toUpperCase and 
+
+								We identify it as a bean to be used as message handler 
+										whose 'input' and 'output' must be bound 
+
+										to the external destinations exposed by the provided destination binder.
+
+						Here is the example of a source semantics exposed as java.util.function.Supplier
+										@SpringBootApplication
+										public static class SourceFromSupplier {
+
+											@Bean
+											public Supplier<Date> date() {
+												return () -> new Date(12345L);
+											}
+										}
+
+						Here is the example of a sink semantics exposed as java.util.function.Consumer
+										@SpringBootApplication
+										public static class SinkFromConsumer {
+
+											@Bean
+											public Consumer<String> sink() {
+												return System.out::println;
+											}
+										}
+
+						We are using <><>--spring.cloud.function.definition<><> property to 
+								explicitly declare which function bean we want to be bound to binding destinations. 
+
+								For cases when you only have single such bean it is not required but for 
+
+						All other cases <><>--spring.cloud.function.definition<><> is required.
+
+			Suppliers (Sources)
+					Function and Consumer are event-driven components 
+							pretty straightforward when it comes to how their invocation is triggered. 
+
+							They are triggered based on data (events) sent to the destination they are bound to.
+
+					Supplier is in its own category when it comes to triggering.
+							Since it is the source (the origin) of the data
+
+							It does not subscribe to any in-bound destination
+
+							It has to be triggered by some other mechanism(s).
+									'imperative' or 'reactive' Supplier implementation 
+
+									directly relates to the triggering of such suppliers.
+
+					Consider the following sample.
+											@SpringBootApplication
+											public static class SupplierConfiguration {
+
+												@Bean
+												public Supplier<String> stringSupplier() {
+													return () -> "Hello from Supplier";
+												}
+											}
+
+							The preceding Supplier bean produces a string whenever its get() method is invoked.
+
+							However, who invokes this method and how often? 
+									answering the question of "Who?"
+											The framework provides a default polling mechanism that will trigger the invocation 
+
+									answering the question of "How often?"
+											by default it will will trigger the invocation of the supplier every second
+
+											To learn how to customize the polling mechanism, see Polling Configuration Properties section.
+													https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#_polling_configuration_properties
+
+							The above configuration produces a single message every second and 
+
+							each message is sent to an 'output' destination that is exposed by the binder
+
+					Consider the different sample.
+											@SpringBootApplication
+											public static class SupplierConfiguration {
+
+												@Bean
+												public Supplier<Flux<String>> stringSupplier() {
+													return () -> Flux.from(emitter -> {
+														while (true) {
+															try {
+																emitter.onNext("Hello from Supplier");
+																Thread.sleep(1000);
+															} catch (Exception e) {
+																// ignore
+															}
+														}
+													});
+												}
+											}
+
+							The preceding Supplier bean adopts the reactive programming style.
+
+							Unlike the imperative supplier, it should be triggered only once, 
+									given that the invocation of its get() method produces (supplies) the continuous stream of messages and 
+
+									not an individual message.
+
+					Polling Configuration Properties (--spring.cloud.stream.poller.fixed-delay=2000) sets the poller interval to poll every two seconds
+							https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#_reactive_functions_support
+
+			Functional Composition
+					Using functional programming model you can also benefit from functional composition where you can dynamically compose complex handlers from a set of simple functions. 
+							As an example let’s add the following function bean to the application defined above
+											@Bean
+											public Function<String, String> wrapInQuotes() {
+												return s -> "\"" + s + "\"";
+											}
+
+							and modify the spring.cloud.function.definition property to reflect your intention to compose a new function from both ‘toUpperCase’ and ‘wrapInQuotes’
+
+							To do so Spring Cloud Function relies on | (pipe) symbol. So, to finish our example our property will now look like this:
+											--spring.cloud.function.definition=toUpperCase|wrapInQuotes
+
+							One of the great benefits of functional composition support provided by Spring Cloud Function is the fact that you can compose reactive and imperative functions.
+
+							The result of a composition is a single function which could have a very long and rather cryptic name (e.g., foo|bar|baz|xyz. . .) 
+									This a great deal of inconvenience when it comes to other configuration properties
+
+									This is where descriptive binding names feature described in Functional binding names section can help.
+											https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#_functional_binding_names
+
+									For example, if we want to give our toUpperCase|wrapInQuotes a more descriptive name
+											we can do so with the following property 
+
+											spring.cloud.stream.function.bindings.toUpperCase|wrapInQuotes=quotedUpperCase
+
+									Allowing other configuration properties to refer to that binding name 
+											(e.g., spring.cloud.stream.bindings.quotedUpperCase.destination=myDestination).
+
+			Functions with multiple input and output arguments
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+
+
+
+
+Applying the communication patterns: 
+		Remote procedure invocation, 
+
+		3.2.3 [107] Circuit breaker, 
+
+		3.2.4 [110] <113> Client-side discovery, 
+
+		Self registration, 
+
+		<115> Server-side discovery, 
+
+		Third party registration, 
+
+		3.3 [115] Asynchronous messaging, 
+
+		Transactional outbox, 
+
+		Transaction log tailing, 
+
+		Polling publisher
+
+The importance of interprocess communication in a microservice architecture
+
+Defining and evolving APIs
+
+The various interprocess communication options and their trade-offs
+
+The benefits of services that communicate using asynchronous messaging
+
+Reliably sending messages as part of a database transaction
+
+
+
+
+Circuit Breaker
+		An RPI proxy that immediately rejects invocations for a timeout period after the number of consecutive failures exceeds a specified threshold. 
+
+		See http://microservices.io/patterns/reliability/circuit-breaker.html.

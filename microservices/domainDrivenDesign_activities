@@ -1,0 +1,25 @@
+How would you rate your expertise in architecting or building microservices?
+*3 - experienced leading an organization through domain driven design (DDD) activities requisite for mature microservice ecosystems. Fluent in common design patterns (Circuit Breaker, CQRS, Saga, etc). Has familiarity or experience with state machines, both distributed and local, and state authorities. Paxos, Raft, State Machine Replication.
+*2 - deploying cloud-native applications, leading enteprises in breaking monoliths into microservices
+*1 - cloud-native design concepts, microservice patterns, deploying cloud-native applications
+
+
+domain driven design (DDD) activities requisite for mature microservice ecosystems. 
+
+
+
+Fluent in common design patterns (Circuit Breaker, CQRS, Saga, etc). 
+
+
+Has familiarity or experience with state machines, both distributed and local, and state authorities. 
+
+Paxos, Raft, State Machine Replication.
+
+saga - a  message driven sequence of local tranactions, to maintain data
+		saga are atomic, consistent, durable
+
+		saga lack isolation so they must implement 'countermeasures'
+
+
+
+

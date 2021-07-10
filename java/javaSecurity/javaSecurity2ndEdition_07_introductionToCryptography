@@ -1,0 +1,284 @@
+Chapter 7. Introduction to Cryptography
+
+****************************************<info>
+** The cryptographic algorithm itself **
+**    -- this is called the Engine    **
+****************************************
+****************************************<info>
+** Keys can either come alone (secret)** 
+**    or in pairs (public, private).  **
+**                                    **
+** When an algorithm requires a secret**
+** key, both parties use the same key.**
+**                                    **
+** Secret keys are symmetrice, paired **
+**         keys are asymmetric.       **
+****************************************
+
+7.1 The Need for Authentication
+	The security package primary goal is to be assured of two things:
+			The identity of the site from which the class was loaded can be verified 
+					(author authentication).
+
+					This authentication comes from a digital signature that comes with the class data 
+							an electronic verification that the class did indeed come from www.xyz.com.
+
+			The class was not modified in transit over the network 
+					(data authentication).
+
+	7.1.2 Data Authentication
+		The second problem introduced by author authentication is the possibility of snooping
+				which means that the hacker can modify the data.
+
+		This is one reason you want data over the network to be encrypted
+
+		However encrypting the data is not strictly necessary. All that is necessary is assurance that the data has not been modified
+				This can be achieved by various cryptographic algorithms even though the data itself is not encrypted.
+
+				The simpler path instead of encrypting the data is to use such a cryptographic algorithm 
+						known as a message digest algorithm or 
+
+						a digital fingerprint.
+
+		Authenticated data is not encrypted data. Authentication does not prevent a snooper from reading the data in your transmission.
+
+		Data authentication prevents writing of data but not reading of data.
+
+	7.1.3 Java's Role in Authentication
+		Java security package allows you to deploy and use trusted (i.e., authenticated) classes, 
+				but their use is not mandated in case you prefer to employ a broader solution to this problem.
+
+7.2 The Role of Authentication
+	The role of authentication of Java classes is not to validate that those classes are trusted or 
+			To automatically give those classes special permissions. 
+
+	The role of authentication is to give the user more information on which to base a security policy.
+			A reasonable policy might be that classes that are known to come from www.SpellChecker.com can read the user's personal dictionary file −− but that doesn't mean they should necessarily be able to read anything else. 
+
+			A reasonable policy would also grant this type of exception to the general rule about permissions given to network classes only in very specific cases to a few well−known sites, and consider unknown but authenticated sites as still untrusted.
+
+	The moral of the story is that authentication does not magically solve any problem; 
+
+	It is merely a tool that can be used in the pursuit of solutions.
+
+7.3 Cryptographic Engines
+	Essentially, all cryptographic operations are structured like so:
+			The cryptographic algorithm itself
+					This is called the Engine
+
+					The term "algorithm" is reserved to refer to particular implementations of the cryptographic operation.
+
+			The engine 
+					takes 
+							some set of input data and (optionally) 
+									"April is the coolest month"
+
+							some sort of key and 
+									<$KEY>
+
+					produces 
+							a set of output data.
+									"Ncevy vf gur pehryrfg zbagu"
+
+			A couple of points here
+					1. There are engines that do not require a key
+
+					2. Not all cryptographic engines produce symmetric output
+							that is, the original text cann't be reconstructed from the output data.
+
+					3. Also, the size of the output is typically not the same as the size of the input. 
+							Message digests and digital signatures, 
+									the output size is a small, fixed−size number of bytes
+
+****************************************<info>
+** The cryptographic algorithm itself **
+**    -- this is called the Engine    **
+****************************************
+****************************************<info>
+** Keys can either come alone (secret)** 
+**    or in pairs (public, private).  **
+**                                    **
+** When an algorithm requires a secret**
+** key, both parties use the same key.**
+**                                    **
+** Secret keys are symmetrice, paired **
+**         keys are asymmetric.       **
+****************************************
+	In the Java security package, there are two standard cryptographic engines: 
+			a message digest engine and a
+
+			a digital signature engine.
+
+			an optional engine is available to perform encryption.
+
+			Because keys are central to the use of most of these engines, 
+					there is a wide set of classes that operate on keys, 
+
+					including engines that can be used to generate certain types of keys.
+
+	7.3.1 Cryptographic Keys
+		The first engines we'll look at generate cryptographic keys.
+				Keys are the basis for many cryptographic operations. 
+						there's an abstract (logical) set of properties all keys must have.
+
+		Keys can either come 
+				alone (symmetric)
+						secret keys 
+
+				in pairs (asymmetric) A key pair has two keys, 
+						a public key and a 
+
+						private key.
+
+		So there are three secret, public, private
+
+****************************************<info>
+** Keys can either come alone (secret)** 
+**    or in pairs (public, private).  **
+**                                    **
+** When an algorithm requires a secret**
+** key, both parties use the same key.**
+**                                    **
+** Secret keys are symmetrice, paired **
+**         keys are asymmetric.       **
+****************************************
+		When an algorithm requires a secret key, 
+				both parties using the algorithm will use the same key.
+
+				The secret key approach suffers from two problems. 
+						First, it requires a separate key 
+								for every pair of parties that need to send encrypted data.
+
+								if you operated an Internet store and had millions of customers, 
+										you would need literally millions of keys
+
+						Second is coming up with a method for sharing the keys
+
+						There are engines that perform secure secret key exchange, however; 
+								these key exchanges are the basis of many operations, including SSL.
+
+		<<Asymmetric Keys(key pairs): public/private>>
+		Public and private keys can provide asymmetric operation. 
+				The public key can be used by one party 
+						participating in the algorithm, and 
+
+				the private key can be used by the other party.
+
+
+				The usefulness of this type of key pair is that one key can be published to the world.
+
+		Then, when someone wants to send you some sensitive information, 
+				they can use your public key to encrypt the data
+
+				as long as you have kept your private key private, 
+
+				you'll be the only one who is actually able to decrypt the data
+
+		Similarly, when you want to send sensitive data to someone, 
+				all you need is their public key; 
+						when the data has been encrypted with the public key, 
+
+				only the holder of the private key 
+						will be able to read what you've sent her.
+
+		<<Digitql Signatures>>
+		In the area of digital signatures, 
+				this key ordering is reversed: 
+
+				you sign a document with your private key, and 
+
+				the recipient of the document needs your public key in order to verify the digital signature.
+
+****************************************<info>
+** The cryptographic algorithm itself **
+**    -- this is called the Engine    **
+****************************************
+	7.3.2 Message Digests
+		The second engines deal with message digests, the digital fingerprint.
+
+		A message digest engine does not always require a key to operate; some do, and some do not.
+				A message digest engine takes a single stream of data as its input and 
+
+				produces a single output. 
+
+				We call the output 
+						a message digest 
+								(or simply a digest, or 
+
+						a hash), 
+
+				and we say that the digest represents the input data.
+
+		there is no way to tell from a digest how much data it represents or what the data actually was.
+
+	7.3.3 Digital Signatures
+		The primary engine in the security package (at least as far as authentication goes) 
+				is the digital signature engine.
+
+		A digital signature is presumed to provide a unique identification of an entity (that is, an individual or an organization).
+				Forging a digital signature requires access to the private key of the entity whose signature is being forged
+
+				this is yet another reason why it is important to keep your private keys private
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
