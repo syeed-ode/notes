@@ -1,0 +1,357 @@
+*******************************************************************
+*                                                           *
+*                                                           *
+*                                                           *
+*******************************************************************
+****                         Chapter 07                        ****
+****    Implementing Queries in a Microservice Architecture    ****
+*******************************************************************
+
+****************************************<info>
+**    Command query responsibility    **
+**             segregation            ** 
+****************************************
+
+****************************************<info>
+**       API Composition Pattern      **
+****************************************
+
+This chapter covers
+		The challenges of querying data in a microservicevarchitecture
+		
+		When and how to implement queries using the API composition pattern
+		
+		When and how to implement queries using the Command query responsibility segregation (CQRS) pattern
+
+		Transaction management isn't the only distributed data-related challenge  to worry about when migrating applications to microservices
+
+		You also have to figure out how= to implement queries.
+
+		There are two different patterns for implementing query operations in a microservice architecture:
+				The API composition pattern—
+						This is the simplest approach and should be used whenever possible. 
+
+						It works by making clients of the services that own the data responsible for invoking the services and combining the results
+
+				The Command query responsibility segregation (CQRS) pattern—
+						This is more powerful than the API composition pattern, but 
+
+						it’s also more complex. 
+
+						It maintains one or more view databases 
+								whose sole purpose is to support queries.
+
+7.1 Querying using the API composition pattern
+	In this section, I describe an example of a query that retrieves data from multiple services.
+
+	I explain the challenges that often crop up when implementing this type of query in a microservice architecture.
+
+	I then describe the API composition pattern and show how you can use it to implement queries such as findOrder().
+
+	7.1.1 The findOrder() query operation 
+		The findOrder() operation retrieves an order by its primary key. 
+
+	****************************************<info>
+	**    Command query responsibility    **
+	**             segregation            ** 
+	****************************************
+
+	****************************************<info>
+	**       API Composition Pattern      **
+	****************************************
+	7.1.2 Overview of the API composition pattern
+		The API Composition Pattern implements a query operation by invoking the services that own the data and combining the results.
+
+		An API composer
+				This implements the query operation by querying the provider services.
+
+		A provider service
+				This is a service that owns some of the data that the query returns.
+
+		Pattern: API composition
+			Implement a query that retrieves data from several services by querying each service via its API and combining the results. 
+					See http://microservices.io/patterns/data/api-composition.html.
+
+	7.1.3 Implementing the findOrder() query operation using the API composition pattern
+
+	7.1.4 API composition design issues
+		Deciding which component in your architecture is the query operation’s API composer		
+
+		How to write efficient aggregation logic
+
+
+		WHO PLAYS THE ROLE OF THE API COMPOSER?
+			You have three options. 
+
+			The first option is for a client of the services to be the API composer.
+
+	7.1.5 The benefits and drawbacks of the API composition pattern
+			 Increased overhead
+			 Risk of reduced availability
+			 Lack of transactional data consistency		
+
+		INCREASED OVERHEAD
+		RISK OF REDUCED AVAILABILITY
+				An API composer sometimes caches the data returned by a Provider service in order to improve performance. 
+
+				It can also use this cache to improve availability.
+
+				Another strategy for improving availability is for the API composer to return incomplete data.
+
+		LACK OF TRANSACTIONAL DATA CONSISTENCY
+				For example, an Order retrieved from Order Service might be in the CANCELLED state, whereas the corresponding Ticket retrieved from Kitchen Service might not yet have been cancelled.
+
+		But there are some query operations that can’t be efficiently implemented using this pattern. 
+				A query operation might, for example, require the API composer to perform an in-memory join of large datasets.
+
+	****************************************<info>
+	**    Command query responsibility    **
+	**             segregation            ** 
+	****************************************
+
+	****************************************<info>
+	**       API Composition Pattern      **
+	****************************************
+
+7.2 Using the CQRS pattern 
+	Pattern: Command query responsibility segregation
+			Implement a query that needs data from several services by using events to maintain a read-only view that replicates data from the services. See http://microservices.io/patterns/data/cqrs.html.
+
+	Many enterprise applications use an RDBMS as the transactional system of record and a text search database (Elasticsearch) for text search queries.
+
+	Applications with this architecture leverage the strengths of multiple databases: 
+			the transactional properties of the RDBMS and 
+
+			the querying capabilities of the text database.
+
+	CQRS (Command Query Responsibility Segregation) pattern is a generalization of this kind of architecture.
+
+	It maintains one or more view databases—not just text search databases—that implement one or more of the application’s queries
+
+	7.2.1 Motivations for using CQRS
+			There are multiple service queries the API composition pattern can’t implement efficiently.
+
+			It sometimes makes sense for a service to implement a query that retrieves data owned by a different service.
+
+		IMPLEMENTING THE findOrderHistory() QUERY OPERATION
+				The findOrderHistory() operation has several parameters:
+						 consumerId—Identifies the consumer
+
+						 pagination—Page of results to return
+
+						 filter—Filter criteria, including the max age of the orders to return, an optional order status, and optional keywords that match the restaurant name and menu items
+
+				It’s called by the module that implements the Order History view. This view displays a summary of each order, which includes the order number, order status, order total, and estimated delivery 
+				time.
+
+	****************************************<info>
+	**    Command query responsibility    **
+	**             segregation            ** 
+	****************************************
+				It may appear that the API composer only has to execute the same query against each Provider service and combine the results. 
+						Unfortunately, it’s not that simple.
+
+						That’s because not all services store the attributes that are used for filtering or sorting.
+
+				Only two of the services, Order Service and Kitchen Service, store an Order’s menu items. 
+						Neither Delivery Service nor Accounting Service stores the menu items, so can’t filter their data using this keyword.
+
+						Similarly, neither Kitchen Service nor Delivery Service can sort by the orderCreationDate attribute.
+
+				One solution is for the API composer to do an in-memory join.
+						Delivery Service and Kitchen Service services don’t store the data needed for a keyword search, so will return all of a consumer’s orders.
+
+						The drawback of this approach is that it potentially requires the API composer to retrieve and join large datasets, 
+								which is inefficient.
+
+				The other solution is for the API composer to retrieve matching orders from Order Service and Kitchen Service and then request orders from the other services by ID.
+						But this is only practical if those services have a bulk fetch API.
+
+				On one hand, this potentially moves work from the less scalable database to the more scalable application. On the other hand, it’s less efficient. Also, developers should be writing business functionality, not a query execution engine.
+
+				But first, let’s look at an example of a query operation that’s challenging to implement, despite being local to a single service.
+						Next I show you how to apply the CQRS pattern and use a separate datastore, which is designed to efficiently implement the findOrderHistory() query operation. 
+
+		A CHALLENGING SINGLE SERVICE QUERY: findAvailableRestaurants()
+				Even queries that are local to a single service can be difficult to implement.
+						First because it’s not appropriate for the service that owns the data to implement the query.
+
+						The other reason is that sometimes a service’s database (or data model) doesn’t efficiently support the query.
+								Consider, for example, the findAvailableRestaurants() query operation.
+
+								The key challenge when implementing this query operation is performing an efficient geospatial query.
+
+								How you implement the findAvailableRestaurants() query depends on the capabilities of the database that stores the restaurants.
+										For example, it’s straightforward to implement the findAvailableRestaurants() query using either MongoDB or the Postgres and MySQL geospatial extensions.
+
+										These databases support geospatial datatypes, indexes, and queries.
+
+										WWhen using one of these databases, Restaurant Service persists a Restaurant as a database record that has a location optimized by a geospatial index on the location attribute.
+
+				If the FTGO application stores restaurants in some other kind of database, implementing the findAvailableRestaurant() query is more challenging.
+						The application could, for example, use the Geospatial Indexing Library for DynamoDB (https://github.com/awslabs/dynamodb-geo) that uses a table as a geospatial index.
+
+				The challenge with using replicas is keeping them up-to-date whenever the original data changes. 
+
+				As you’ll learn below, CQRS solves the problem of synchronizing replicas.
+
+		THE NEED TO SEPARATE CONCERNS
+
+	7.2.2 Overview of CQRS
+		The examples described in section 7.2.1 highlighted three problems that are commonly
+		encountered when implementing queries in a microservice architecture:
+				 Using the API composition pattern to retrieve data scattered across multiple services results in expensive, inefficient in-memory joins.
+
+				 The service that owns the data stores the data in a form or in a database that doesn’t efficiently support the required query.
+
+				 The need to separate concerns means that the service that owns the data isn’t the service that should implement the query operation.	
+
+		CQRS SEPARATES COMMANDS FROM QUERIES
+				Command Query Responsibility Segregation, as the name suggests splits a persistent data model and the modules that use it into two parts: the command side and the query side.
+
+				The query side uses whatever kind of database makes sense for the queries that it must support.
+						The query side has event handlers that subscribe to domain events and update the database or databases. There may even be multiple query models, one for each type of query.
+
+		CQRS AND QUERY-ONLY SERVICES
+				A query service has an API consisting of only query operations—no command operations.
+
+				This kind of view doesn’t belong to any particular service, so it makes sense to implement it as a standalone service. 
+						A good example of such a service is Order History Service, which is a query service that implements the findOrderHistory() query operation.
+
+	7.2.3 The benefits of CQRS
+		CQRS has both benefits and drawbacks. The benefits are as follows:
+				 Enables the efficient implementation of queries in a microservice architecture
+				 Enables the efficient implementation of diverse queries
+				 Makes querying possible in an event sourcing-based application
+				 Improves separation of concerns		
+
+	7.2.4 The drawbacks of CQRS
+			 More complex architecture
+			 Dealing with the replication lag
+			MORE COMPLEX ARCHITECTURE
+			DEALING WITH THE REPLICATION LAG
+					One solution is for the command-side and query-side APIs to supply the client with version information that enables it to tell that the query side is out-of-date. A client can poll the query-side view until it’s up-to-date. Shortly I’ll discuss how the service APIs can enable a client to do this.
+
+7.3 Designing CQRS views
+	You must make some important design decisions when developing a view module:
+			 You must choose a database and design the schema.
+
+			 When designing the data access module, you must address various issues, including ensuring that updates are idempotent (denoting an element of a set which is unchanged in value when multiplied or otherwise operated on by itself) and handling concurrent updates.
+			
+			 When implementing a new view in an existing application or changing the schema of an existing application, you must implement a mechanism to efficiently build or rebuild the view.
+			
+			 You must decide how to enable a client of the view to cope with the replication lag, described earlier.
+
+	7.3.1 Choosing a view datastore
+		A key design decision is the choice of database and the design of the schema. 
+
+		AThe primary purpose of the database and the data model is to efficiently implement the view module’s query operations. It’s the characteristics of those queries that are the primary consideration when selecting a database
+
+		SQL VS. NOSQL DATABASES
+			For certain use cases, these dNoSQL databases have certain advantages over SQL databases, including a more flexible data model and better performance and scalability.
+
+			A NoSQL database is often a good choice for a CQRS view, which can leverage its strengths and ignore its weaknesses.
+
+			A CQRS view benefits from the richer data model, 
+					and performance of a NoSQL database. It’s unaffected by the limitations of a NoSQL database, because it only uses simple transactions and executes a fixed set of queries.
+
+		SUPPORTING UPDATE OPERATIONS
+			Usually, an event handler will update or delete a record in the view database using its primary key.
+
+	7.3.2 Data access module design
+	****************************************<info>
+	**    Command query responsibility    **
+	**             segregation            ** 
+	****************************************
+
+7.4 Implementing a CQRS view with AWS DynamoDB
+	7.4.1 The OrderHistoryEventHandlers module
+	7.4.2 Data modeling and query design with DynamoDB
+		DynamoDB has data access operations that are much less powerful than those that are provided by an RDBMS. 
+				Like many NoSQL databases
+
+		Consequently, you must carefully design how the data is stored. 
+
+		The queries often dictate the design of the schema. 
+
+		We need to address several design issues:
+				 Designing the ftgo-order-history table
+
+				 Defining an index for the findOrderHistory query
+
+				 Implementing the findOrderHistory query
+
+				 Paginating the query results
+
+				 Updating orders
+
+				 Detecting duplicate events
+
+		DESIGNING THE FTGO-ORDER-HISTORY TABLE
+			A DynamoDB application inserts, updates, and retrieves a table’s items by primary key. 
+
+			It would seem to make sense for the primary key to be orderId. 
+					This enables Order History Service to insert, update, and retrieve an order by orderId. 
+
+					But before finalizing this decision, 
+
+			Let’s first explore how a table’s primary key impacts the kinds of data access operations it supports. 
+
+		DEFINING AN INDEX FOR THE FINDORDERHISTORY QUERY 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,624 @@
+
+
+20210711_11:22:22 junk syeedode$  mongo
+20210706_15:52:04 junk syeedode$  mongo
+
+
+
+
+
+
+dPossible conflicting files are:
+/usr/local/bin/bsondump -> /usr/local/Cellar/mongodb/4.0.3_1/bin/bsondump
+/usr/local/bin/mongodump -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongodump
+/usr/local/bin/mongoexport -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongoexport
+/usr/local/bin/mongofiles -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongofiles
+/usr/local/bin/mongoimport -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongoimport
+/usr/local/bin/mongorestore -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongorestore
+/usr/local/bin/mongostat -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongostat
+/usr/local/bin/mongotop -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongotop
+==> Summary
+🍺  /usr/local/Cellar/mongodb-database-tools/100.3.1: 13 files, 150.9MB, built in 5 seconds
+==> Installing mongodb/brew/mongodb-community dependency: icu4c
+==> Pouring icu4c--69.1.catalina.bottle.tar.gz
+🍺  /usr/local/Cellar/icu4c/69.1: 259 files, 72.8MB
+==> Installing mongodb/brew/mongodb-community dependency: node@14
+==> Pouring node@14--14.17.3.catalina.bottle.tar.gz
+🍺  /usr/local/Cellar/node@14/14.17.3: 4,377 files, 62.1MB
+==> Installing mongodb/brew/mongodb-community dependency: mongosh
+==> Pouring mongosh--0.15.5.catalina.bottle.tar.gz
+🍺  /usr/local/Cellar/mongosh/0.15.5: 5,245 files, 28.7MB
+==> Installing mongodb/brew/mongodb-community
+Error: The `brew link` step did not complete successfully
+The formula built, but is not symlinked into /usr/local
+Could not symlink bin/install_compass
+Target /usr/local/bin/install_compass
+is a symlink belonging to mongodb. You can unlink it:
+  brew unlink mongodb
+
+To force the link and overwrite all conflicting files:
+  brew link --overwrite mongodb-community
+
+To list all files that would be deleted:
+  brew link --overwrite --dry-run mongodb-community
+
+Possible conflicting files are:
+/usr/local/bin/install_compass -> /usr/local/Cellar/mongodb/4.0.3_1/bin/install_compass
+/usr/local/bin/mongo -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongo
+/usr/local/bin/mongod -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongod
+/usr/local/bin/mongos -> /usr/local/Cellar/mongodb/4.0.3_1/bin/mongos
+==> Caveats
+To have launchd start mongodb/brew/mongodb-community now and restart at login:
+  brew services start mongodb/brew/mongodb-community
+Or, if you don't want/need a background service you can just run:
+  mongod --config /usr/local/etc/mongod.conf
+==> Summary
+🍺  /usr/local/Cellar/mongodb-community/4.4.5: 11 files, 157.3MB, built in 5 seconds
+==> `brew cleanup` has not been run in 30 days, running now...
+Removing: /Users/syeedode/Library/Caches/Homebrew/gnu-sed--4.8.catalina.bottle.tar.gz... (203.5KB)
+Removing: /Users/syeedode/Library/Caches/Homebrew/kafka--2.5.0.catalina.bottle.tar.gz... (55.5MB)
+Removing: /Users/syeedode/Library/Caches/Homebrew/zookeeper--3.5.8.catalina.bottle.tar.gz... (8.8MB)
+Removing: /Users/syeedode/Library/Logs/Homebrew/zookeeper... (64B)
+Removing: /Users/syeedode/Library/Logs/Homebrew/kafka... (64B)
+Pruned 2 symbolic links from /usr/local
+==> Caveats
+==> mongodb-community
+To have launchd start mongodb/brew/mongodb-community now and restart at login:
+  brew services start mongodb/brew/mongodb-community
+Or, if you don't want/need a background service you can just run:
+  mongod --config /usr/local/etc/mongod.conf
+20210706_15:34:54 junk syeedode$ 
+20210706_15:34:54 junk syeedode$ brew -prefix
+Error: Unknown command: -prefix
+20210706_15:43:46 junk syeedode$ brew --prefix
+/usr/local
+20210706_15:43:53 junk syeedode$ brew services start mongodb-community@4.4
+xxxxxxxxxxxxxxxxxxxxxxxsssssssssssssssssssssCloning into '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-services'...
+remote: Enumerating objects: 1315, done.
+remote: Counting objects: 100% (194/194), done.
+remote: Compressing objects: 100% (137/137), done.
+remote: Total 1315 (delta 75), reused 164 (delta 54), pack-reused 1121
+Receiving objects: 100% (1315/1315), 387.81 KiB | 1.78 MiB/s, done.
+Resolving deltas: 100% (551/551), done.
+Tapped 1 command (28 files, 469.5KB).
+==> Successfully started `mongodb-community` (label: homebrew.mxcl.mongodb-community)
+20210706_15:45:37 junk syeedode$ brew services list
+Name              Status  User     Plist
+arangodb          stopped          
+kafka             stopped          
+mongodb-community started syeedode /Users/syeedode/Library/LaunchAgents/homebrew.mxcl.mongodb-community.plist
+redis             started syeedode /Users/syeedode/Library/LaunchAgents/homebrew.mxcl.redis.plist
+zookeeper         stopped          
+20210706_15:50:12 junk syeedode$ ps aux | grep -v grep | grep mongod
+syeedode         22342   0.0  0.1  5582880  23948   ??  S     3:45PM   0:01.15 /usr/local/opt/mongodb-community/bin/mongod --config /usr/local/etc/mongod.conf
+20210706_15:51:45 junk syeedode$ ps aux | grep mongod
+syeedode         22544   0.0  0.0  4268324    712 s004  S+    3:52PM   0:00.00 grep mongod
+syeedode         22342   0.0  0.1  5582160  23960   ??  S     3:45PM   0:01.17 /usr/local/opt/mongodb-community/bin/mongod --config /usr/local/etc/mongod.conf
+
+
+20210711_11:22:22 junk syeedode$  mongo
+20210706_15:52:04 junk syeedode$  mongo
+
+
+MongoDB shell version v4.0.3
+connecting to: mongodb://127.0.0.1:27017
+Implicit session: session { "id" : UUID("db1e2a2d-8106-4900-aa0a-d4c4b3ec788d") }
+MongoDB server version: 4.4.5
+WARNING: shell and server versions do not match
+Welcome to the MongoDB shell.
+For interactive help, type "help".
+For more comprehensive documentation, see
+	http://docs.mongodb.org/
+Questions? Try the support group
+	http://groups.google.com/group/mongodb-user
+Server has startup warnings: 
+{"t":{"$date":"2021-07-06T15:45:38.710-05:00"},"s":"W",  "c":"CONTROL",  "id":22120,   "ctx":"initandlisten","msg":"Access control is not enabled for the database. Read and write access to data and configuration is unrestricted","tags":["startupWarnings"]}
+{"t":{"$date":"2021-07-06T15:45:38.710-05:00"},"s":"W",  "c":"CONTROL",  "id":22184,   "ctx":"initandlisten","msg":"Soft rlimits too low","attr":{"currentValue":256,"recommendedMinimum":64000},"tags":["startupWarnings"]}
+---
+Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+and anyone you share the URL with. MongoDB may use this information to make product
+improvements and to suggest MongoDB products and deployment options to you.
+
+To enable free monitoring, run the following command: db.enableFreeMonitoring()
+To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+
+> db.help() 
+DB methods:
+	db.adminCommand(nameOrDocument) - switches to 'admin' db, and runs command [just calls db.runCommand(...)]
+	db.aggregate([pipeline], {options}) - performs a collectionless aggregation on this database; returns a cursor
+	db.auth(username, password)
+	db.cloneDatabase(fromhost) - deprecated
+	db.commandHelp(name) returns the help for the command
+	db.copyDatabase(fromdb, todb, fromhost) - deprecated
+	db.createCollection(name, {size: ..., capped: ..., max: ...})
+	db.createView(name, viewOn, [{$operator: {...}}, ...], {viewOptions})
+	db.createUser(userDocument)
+	db.currentOp() displays currently executing operations in the db
+	db.dropDatabase()
+	db.eval() - deprecated
+	db.fsyncLock() flush data to disk and lock server for backups
+	db.fsyncUnlock() unlocks server following a db.fsyncLock()
+	db.getCollection(cname) same as db['cname'] or db.cname
+	db.getCollectionInfos([filter]) - returns a list that contains the names and options of the db's collections
+	db.getCollectionNames()
+	db.getLastError() - just returns the err msg string
+	db.getLastErrorObj() - return full status object
+	db.getLogComponents()
+	db.getMongo() get the server connection object
+	db.getMongo().setSlaveOk() allow queries on a replication slave server
+	db.getName()
+	db.getPrevError()
+	db.getProfilingLevel() - deprecated
+	db.getProfilingStatus() - returns if profiling is on and slow threshold
+	db.getReplicationInfo()
+	db.getSiblingDB(name) get the db at the same server as this one
+	db.getWriteConcern() - returns the write concern used for any operations on this db, inherited from server object if set
+	db.hostInfo() get details about the server's host
+	db.isMaster() check replica primary status
+	db.killOp(opid) kills the current operation in the db
+	db.listCommands() lists all the db commands
+	db.loadServerScripts() loads all the scripts in db.system.js
+	db.logout()
+	db.printCollectionStats()
+	db.printReplicationInfo()
+	db.printShardingStatus()
+	db.printSlaveReplicationInfo()
+	db.dropUser(username)
+	db.repairDatabase()
+	db.resetError()
+	db.runCommand(cmdObj) run a database command.  if cmdObj is a string, turns it into {cmdObj: 1}
+	db.serverStatus()
+	db.setLogLevel(level,<component>)
+	db.setProfilingLevel(level,slowms) 0=off 1=slow 2=all
+	db.setWriteConcern(<write concern doc>) - sets the write concern for writes to the db
+	db.unsetWriteConcern(<write concern doc>) - unsets the write concern for writes to the db
+	db.setVerboseShell(flag) display extra information in shell output
+	db.shutdownServer()
+	db.stats()
+	db.version() current version of the server
+> db.stats
+function (scale) {
+        return this.runCommand({dbstats: 1, scale: scale});
+    }
+> db.stats()
+{
+	"db" : "test",
+	"collections" : 0,
+	"views" : 0,
+	"objects" : 0,
+	"avgObjSize" : 0,
+	"dataSize" : 0,
+	"storageSize" : 0,
+	"totalSize" : 0,
+	"indexes" : 0,
+	"indexSize" : 0,
+	"scaleFactor" : 1,
+	"fileSize" : 0,
+	"fsUsedSize" : 0,
+	"fsTotalSize" : 0,
+	"ok" : 1
+}
+> use mydb
+switched to db mydb
+> db
+mydb
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+> db.movie.insert({"name":"tutorials point"})
+WriteResult({ "nInserted" : 1 })
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+mydb    0.000GB
+> db.dropDatabase()
+{ "dropped" : "mydb", "ok" : 1 }
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> use mydb
+switched to db mydb
+> db.createCollection("mycollection")
+{ "ok" : 1 }
+> show collections
+mycollection
+> db.create
+db.createCollection(  db.createUser(
+db.createRole(        db.createView(
+> db.createCollection("mycollect", {capped:true, size:6142800, max:1000})
+{ "ok" : 1 }
+> db.createCollection("mycol", { capped : true, autoIndexID : true, size : 6142800, max : 10000}) 
+{
+	"ok" : 0,
+	"errmsg" : "BSON field 'create.autoIndexID' is an unknown field.",
+	"code" : 40415,
+	"codeName" : "Location40415"
+}
+> db.tutorialspoint.insert({"name":"tutorialspoint"})
+WriteResult({ "nInserted" : 1 })
+> show collections
+mycollect
+mycollection
+tutorialspoint
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+mydb    0.000GB
+> use mydb
+switched to db mydb
+> show collections
+mycollect
+mycollection
+tutorialspoint
+> db.mycollection.drop()
+true
+> show collections
+mycollect
+tutorialspoint
+> db.users.insert({..._id:ObjectId("507f191e810c19729de860ea"), ... title: "MongoDB Overview"})
+2021-07-06T18:37:56.259-0500 E QUERY    [js] SyntaxError: invalid property id @(shell):1:17
+> db.users.insert({... _id:ObjectId("507f191e810c19729de860ea"), ... title: "MongoDB Overview"})
+2021-07-06T18:38:13.789-0500 E QUERY    [js] SyntaxError: invalid property id @(shell):1:17
+> db.users.insert({... _id:ObjectId("507f191e810c19729de860ea"), ... title: "MongoDB Overview"})
+2021-07-06T18:38:41.959-0500 E QUERY    [js] SyntaxError: invalid property id @(shell):1:17
+> db.users.insert({
+... _id:ObjectId("507f191e810c19729de860ea"),
+... title: "MongoDB Overview",
+... description: "MongoDB is no sql database",
+... by: "tutorials point",
+... url: "http://www.tutorialspoint.com",
+... tags: ['mongodb', 'database', 'NoSQL'],
+... likes: 100
+... })
+WriteResult({ "nInserted" : 1 })
+> show collections
+mycollect
+tutorialspoint
+users
+> db.createCollection("post")
+{ "ok" : 1 }
+> db.p
+db.post                        db.printSlaveReplicationInfo(
+db.printCollectionStats(       db.propertyIsEnumerable
+db.printReplicationInfo(       db.prototype
+db.printShardingStatus(
+> db.post.insert([{
+... title: "MongoDB Overview",
+... description: "MongoDB is no SQL database",
+... by: "tutorials point",
+... url: "http://www.tutorialspoint.com",
+... tags: ["mongodb", "database", "NoSQL"],
+... likes: 100
+... },
+... {
+... title: "NoSQL Database",
+... description: "NoSQL database doesn't have tables",
+... by: "tutorials point",
+... url: "http://www.tutorialspoint.com",
+... tags: ["mongodb", "database", "NoSQL"],
+... likes: 20,
+... comments: [
+... {
+... user:"user1",
+... message: "My first comment",
+... dateCreated: new Date(2013,11,10,2,35),
+... like: 0
+... }
+... ]
+... }])
+BulkWriteResult({
+	"writeErrors" : [ ],
+	"writeConcernErrors" : [ ],
+	"nInserted" : 2,
+	"nUpserted" : 0,
+	"nMatched" : 0,
+	"nModified" : 0,
+	"nRemoved" : 0,
+	"upserted" : [ ]
+})
+> db.createCollection("empDetails")
+{ "ok" : 1 }
+> db.empDetails.insertOne({
+... First_Name: "Radhika",
+... Last_Name: "Sharma",
+... Date_Of_Birth: "1995-09-26",
+... e_mail: "radhika_sharma.123@gmail.com",
+... phone: "9848022338"
+... })
+{
+	"acknowledged" : true,
+	"insertedId" : ObjectId("60e4eb1b24891f6de74c4676")
+}
+> db.empDetails.insertMany([
+... {
+... First_Name: "Radhika",
+... Last_Name: "Sharma",
+... Date_Of_Birth: "1995-09-26",
+... e_mail: "radhika_sharma.123@gmail.com",
+... phone: "9000012345"
+... },
+... {
+... First_Name: "Rachel",
+... Last_Name: "Christopher",
+... Date_Of_Birth: "1990-02-16",
+... e_mail: "Rachel_Christopher.123@gmail.com",
+... phone: "9000054321"
+... },
+... {
+... First_Name: "Fathima",
+... Last_Name: "Sheik",
+... Date_Of_Birth: "1990-02-16",
+... e_mail: "Fathima_Sheik.123@gmail.com",
+... phone: "9000054321"
+... }
+... ])
+{
+	"acknowledged" : true,
+	"insertedIds" : [
+		ObjectId("60e4eb5124891f6de74c4677"),
+		ObjectId("60e4eb5124891f6de74c4678"),
+		ObjectId("60e4eb5124891f6de74c4679")
+	]
+}
+> db.empDetails.find()
+{ "_id" : ObjectId("60e4eb1b24891f6de74c4676"), "First_Name" : "Radhika", "Last_Name" : "Sharma", "Date_Of_Birth" : "1995-09-26", "e_mail" : "radhika_sharma.123@gmail.com", "phone" : "9848022338" }
+{ "_id" : ObjectId("60e4eb5124891f6de74c4677"), "First_Name" : "Radhika", "Last_Name" : "Sharma", "Date_Of_Birth" : "1995-09-26", "e_mail" : "radhika_sharma.123@gmail.com", "phone" : "9000012345" }
+{ "_id" : ObjectId("60e4eb5124891f6de74c4678"), "First_Name" : "Rachel", "Last_Name" : "Christopher", "Date_Of_Birth" : "1990-02-16", "e_mail" : "Rachel_Christopher.123@gmail.com", "phone" : "9000054321" }
+{ "_id" : ObjectId("60e4eb5124891f6de74c4679"), "First_Name" : "Fathima", "Last_Name" : "Sheik", "Date_Of_Birth" : "1990-02-16", "e_mail" : "Fathima_Sheik.123@gmail.com", "phone" : "9000054321" }
+> db.empDetails.find().pretty()
+{
+	"_id" : ObjectId("60e4eb1b24891f6de74c4676"),
+	"First_Name" : "Radhika",
+	"Last_Name" : "Sharma",
+	"Date_Of_Birth" : "1995-09-26",
+	"e_mail" : "radhika_sharma.123@gmail.com",
+	"phone" : "9848022338"
+}
+{
+	"_id" : ObjectId("60e4eb5124891f6de74c4677"),
+	"First_Name" : "Radhika",
+	"Last_Name" : "Sharma",
+	"Date_Of_Birth" : "1995-09-26",
+	"e_mail" : "radhika_sharma.123@gmail.com",
+	"phone" : "9000012345"
+}
+{
+	"_id" : ObjectId("60e4eb5124891f6de74c4678"),
+	"First_Name" : "Rachel",
+	"Last_Name" : "Christopher",
+	"Date_Of_Birth" : "1990-02-16",
+	"e_mail" : "Rachel_Christopher.123@gmail.com",
+	"phone" : "9000054321"
+}
+{
+	"_id" : ObjectId("60e4eb5124891f6de74c4679"),
+	"First_Name" : "Fathima",
+	"Last_Name" : "Sheik",
+	"Date_Of_Birth" : "1990-02-16",
+	"e_mail" : "Fathima_Sheik.123@gmail.com",
+	"phone" : "9000054321"
+}
+> db.post().pretty()
+2021-07-06T18:48:35.726-0500 E QUERY    [js] TypeError: db.post is not a function :
+@(shell):1:1
+> db.post().find().pretty
+2021-07-06T18:48:46.752-0500 E QUERY    [js] TypeError: db.post is not a function :
+@(shell):1:1
+> db.post().find().pretty()
+2021-07-06T18:48:50.025-0500 E QUERY    [js] TypeError: db.post is not a function :
+@(shell):1:1
+> db.post
+db.post
+> db.post().find()
+2021-07-06T18:49:55.533-0500 E QUERY    [js] TypeError: db.post is not a function :
+@(shell):1:1
+> db.post.find().pretty()
+{
+	"_id" : ObjectId("60e4eab524891f6de74c4674"),
+	"title" : "MongoDB Overview",
+	"description" : "MongoDB is no SQL database",
+	"by" : "tutorials point",
+	"url" : "http://www.tutorialspoint.com",
+	"tags" : [
+		"mongodb",
+		"database",
+		"NoSQL"
+	],
+	"likes" : 100
+}
+{
+	"_id" : ObjectId("60e4eab524891f6de74c4675"),
+	"title" : "NoSQL Database",
+	"description" : "NoSQL database doesn't have tables",
+	"by" : "tutorials point",
+	"url" : "http://www.tutorialspoint.com",
+	"tags" : [
+		"mongodb",
+		"database",
+		"NoSQL"
+	],
+	"likes" : 20,
+	"comments" : [
+		{
+			"user" : "user1",
+			"message" : "My first comment",
+			"dateCreated" : ISODate("2013-12-10T08:35:00Z"),
+			"like" : 0
+		}
+	]
+}
+> db.mycol.find({"by":"tutorials point"})
+> db.post.find({"by":"tutorials point"})
+{ "_id" : ObjectId("60e4eab524891f6de74c4674"), "title" : "MongoDB Overview", "description" : "MongoDB is no SQL database", "by" : "tutorials point", "url" : "http://www.tutorialspoint.com", "tags" : [ "mongodb", "database", "NoSQL" ], "likes" : 100 }
+{ "_id" : ObjectId("60e4eab524891f6de74c4675"), "title" : "NoSQL Database", "description" : "NoSQL database doesn't have tables", "by" : "tutorials point", "url" : "http://www.tutorialspoint.com", "tags" : [ "mongodb", "database", "NoSQL" ], "likes" : 20, "comments" : [ { "user" : "user1", "message" : "My first comment", "dateCreated" : ISODate("2013-12-10T08:35:00Z"), "like" : 0 } ] }
+> db.post.find({"by":"tutorials point"}).pretty()
+{
+	"_id" : ObjectId("60e4eab524891f6de74c4674"),
+	"title" : "MongoDB Overview",
+	"description" : "MongoDB is no SQL database",
+	"by" : "tutorials point",
+	"url" : "http://www.tutorialspoint.com",
+	"tags" : [
+		"mongodb",
+		"database",
+		"NoSQL"
+	],
+	"likes" : 100
+}
+{
+	"_id" : ObjectId("60e4eab524891f6de74c4675"),
+	"title" : "NoSQL Database",
+	"description" : "NoSQL database doesn't have tables",
+	"by" : "tutorials point",
+	"url" : "http://www.tutorialspoint.com",
+	"tags" : [
+		"mongodb",
+		"database",
+		"NoSQL"
+	],
+	"likes" : 20,
+	"comments" : [
+		{
+			"user" : "user1",
+			"message" : "My first comment",
+			"dateCreated" : ISODate("2013-12-10T08:35:00Z"),
+			"like" : 0
+		}
+	]
+}
+> db.post.find({"likes":{$lte:50}}).pretty()
+{
+	"_id" : ObjectId("60e4eab524891f6de74c4675"),
+	"title" : "NoSQL Database",
+	"description" : "NoSQL database doesn't have tables",
+	"by" : "tutorials point",
+	"url" : "http://www.tutorialspoint.com",
+	"tags" : [
+		"mongodb",
+		"database",
+		"NoSQL"
+	],
+	"likes" : 20,
+	"comments" : [
+		{
+			"user" : "user1",
+			"message" : "My first comment",
+			"dateCreated" : ISODate("2013-12-10T08:35:00Z"),
+			"like" : 0
+		}
+	]
+}
+> db.post.find({"name":{$in:["Raj", "Ram", "Raghu"]}}).pretty()
+> db.post.find({"name":{$nin:["Raj", "Ram", "Raghu"]}}).pretty()
+{
+	"_id" : ObjectId("60e4eab524891f6de74c4674"),
+	"title" : "MongoDB Overview",
+	"description" : "MongoDB is no SQL database",
+	"by" : "tutorials point",
+	"url" : "http://www.tutorialspoint.com",
+	"tags" : [
+		"mongodb",
+		"database",
+		"NoSQL"
+	],
+	"likes" : 100
+}
+{
+	"_id" : ObjectId("60e4eab524891f6de74c4675"),
+	"title" : "NoSQL Database",
+	"description" : "NoSQL database doesn't have tables",
+	"by" : "tutorials point",
+	"url" : "http://www.tutorialspoint.com",
+	"tags" : [
+		"mongodb",
+		"database",
+		"NoSQL"
+	],
+	"likes" : 20,
+	"comments" : [
+		{
+			"user" : "user1",
+			"message" : "My first comment",
+			"dateCreated" : ISODate("2013-12-10T08:35:00Z"),
+			"like" : 0
+		}
+	]
+}
+> db.post.find({"name":{$and: ["by":"tutorials point"},{"likes":{$gte:0}}]}).pretty()
+2021-07-06T19:08:56.075-0500 E QUERY    [js] SyntaxError: missing ] after element list @(shell):1:33
+> db.post.find({"name":{$and: ["by":"tutorials point"},{"likes":{$gt:0}}]}).pretty()
+2021-07-06T19:09:26.031-0500 E QUERY    [js] SyntaxError: missing ] after element list @(shell):1:33
+> db.post.find({"name":{$and: [{"by":"tutorials point"},{"likes":{$gt:0}}]}}).pretty()
+Error: error: {
+	"ok" : 0,
+	"errmsg" : "unknown operator: $and",
+	"code" : 2,
+	"codeName" : "BadValue"
+}
+> db.post.find({$and: [{"by":"tutorials point"},{"likes":{$gt:0}}]}).pretty()
+{
+	"_id" : ObjectId("60e4eab524891f6de74c4674"),
+	"title" : "MongoDB Overview",
+	"description" : "MongoDB is no SQL database",
+	"by" : "tutorials point",
+	"url" : "http://www.tutorialspoint.com",
+	"tags" : [
+		"mongodb",
+		"database",
+		"NoSQL"
+	],
+	"likes" : 100
+}
+{
+	"_id" : ObjectId("60e4eab524891f6de74c4675"),
+	"title" : "NoSQL Database",
+	"description" : "NoSQL database doesn't have tables",
+	"by" : "tutorials point",
+	"url" : "http://www.tutorialspoint.com",
+	"tags" : [
+		"mongodb",
+		"database",
+		"NoSQL"
+	],
+	"likes" : 20,
+	"comments" : [
+		{
+			"user" : "user1",
+			"message" : "My first comment",
+			"dateCreated" : ISODate("2013-12-10T08:35:00Z"),
+			"like" : 0
+		}
+	]
+}
+> 
