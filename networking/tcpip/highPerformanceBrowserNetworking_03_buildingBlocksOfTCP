@@ -1,0 +1,331 @@
+https://hpbn.co/building-blocks-of-tcp/
+
+					7.  Application layer
+							(AMQP, FTP, SSH, DNS, IMAP, LDAP, RDP,
+							NTP, Telnet, HTTP, SNMP)
+					6.  Presentation layer 
+							(Data Conversaion, Character code translation,
+							Compression, Encryption & Decryption,
+							Serialization) 
+					5.  Session layer
+							(RPC, SOCKS)
+					4.  Transport layer
+							(TCP, UDP)
+					3.  Network layer 
+							(IP [IPv4, IPv6], ICMP, IPsec)
+					2.  Data link layer 
+							(device drivers, ARP)
+							MAC (Ethernet,Wi-Fi,DSL,ISDN,FDDI)
+					1.  Physical layer  (Copper, radio waves)
+
+Three-Way Handshake
+	All TCP connections begin with a three-way handshake (Figure 2-1). 
+
+	Before the client or the server can exchange any application data, 
+			they must agree on 
+					starting packet sequence numbers, as well as a number of 
+							The sequence numbers are picked randomly 
+									for security reasons.
+
+					other connection specific variables, from both sides. 
+
+			SYN
+					SENDER --> RECEIVER
+
+					Client picks a random sequence number x 
+							sends a SYN packet						
+
+			SYN ACK
+					RECEIVER --> SENDER
+
+					Server increments x by one
+							picks own random sequence number y
+
+			ACK
+					SENDER --> RECEIVER
+
+					Client increments both x and y by one
+							completes the handshake by 
+
+							dispatching the last ACK packet in the handshake.
+
+	Once the three-way handshake is complete, 
+			the application data can begin to flow between the client and the server.						
+
+			The client can send a data packet immediately after the ACK packet,
+					the server must wait for the ACK before it can dispatch any data.
+
+	Using TCP: each new connection will have a full roundtrip of latency 
+			before any application data can be transferred.
+
+	The delay imposed by the three-way handshake makes new TCP connections 
+			expensive to create, and is one of the big reasons why 
+
+	Connection reuse is a critical optimization for any application running over TCP.
+
+	TCP Fast Open
+		Loading a webpage often requires fetching hundreds of resources 
+				from dozens of different hosts.	
+
+				this might require the browser to establish dozens of new TCP connections,
+
+		TCP Fast Open (TFO) is a mechanism that aims to eliminate the latency penalty 
+
+		Allowing data transfer within the SYN packet.
+
+		It does have its own set of limitations: there are 
+				limits on the maximum size of the data payload within the SYN packet, 
+
+				only certain types of HTTP requests can be sent, and 
+
+				it for repeat connections due to a requirement for a cryptographic cookie.
+
+
+***********************************************<info>
+**           Receive window (rwnd)           **
+** Receive window (rwnd), which communicates **
+** the size of the available buffer space to **
+**          hold the incoming data.          **
+***********************************************
+Congestion Avoidance and Control
+	Flow Control []
+		Flow control is a mechanism to prevent the sender from overwhelming the receiver
+
+		Each side of the TCP connection advertises its own receive window (rwnd)
+				which communicates the size of the available buffer space to hold the incoming data.
+
+		Both sides initiate their rwnd values by using their system default settings.
+				When the connection is first established
+
+				The server receive window may become the limiting factor.
+						if a client is streaming large amounts of data to the server
+								such as in the case of an image or a video upload
+
+		If, for any reason, one of the sides is not able to keep up,
+				then it can advertise a smaller window to the sender.
+
+				If the window reaches zero then no more data should be sent
+
+				This workflow continues throughout the lifetime of every TCP connection: 
+
+		each ACK packet carries the latest rwnd value for each side, 
+				allowing both sides to dynamically adjust the data flow rate 
+
+				to the capacity and processing speed of the sender and receiver.
+
+					7.  Application layer
+							(AMQP, FTP, SSH, DNS, IMAP, LDAP, RDP,
+							NTP, Telnet, HTTP, SNMP)
+					6.  Presentation layer 
+							(Data Conversaion, Character code translation,
+							Compression, Encryption & Decryption,
+							Serialization) 
+					5.  Session layer
+							(RPC, SOCKS, TLS)
+					4.  Transport layer
+							(TCP, UDP)
+					3.  Network layer 
+							(IP [IPv4, IPv6], ICMP, IPsec)
+					2.  Data link layer 
+							(device drivers, ARP)
+							MAC (Ethernet,Wi-Fi,DSL,ISDN,FDDI)
+					1.  Physical layer  (Copper, radio waves)
+***********************************************<info>
+**           Receive window (rwnd)           **
+** Receive window (rwnd), which communicates **
+** the size of the available buffer space to **
+**          hold the incoming data.          **
+***********************************************
+************************************************<info>
+**        Congestion window (cwnd)            **
+** Congestion window size (cwnd), sender size **
+** limit the sender can have in flight before **
+** receiving an acknowledgment (ACK) from the **
+**                  client.                   **
+**                                            **
+**Addresses the available bandwidth limitations*
+**        of the physical connection.         **
+************************************************
+	Slow-Start 
+	Slow-Start (and grow the window as packets are acknowledged)
+		The cwnd variable is not advertised or exchanged between the sender and receiver
+				It will be a private variable maintained by the server in London.
+
+				The maximum amount of data in flight (not ACKed) 
+						between the client and the server is 
+
+						the minimum of the rwnd and cwnd variables.
+
+		How do the server and the client determine optimal values 
+				for their congestion window (cwnd) sizes?
+
+				After all, network conditions vary all the time, even between the same 
+						two network nodes, as we saw in the earlier example, and 
+
+						it would be great if we could use the algorithm without 
+								having to hand-tune the window sizes 
+
+								for each connection.
+
+		The solution is to start slow and to grow the window size 
+				as the packets are acknowledged
+
+		The maximum amount of data in flight for a new TCP connection 
+				is the minimum of the rwnd and cwnd values; hence a modern server 
+						can send up to ten network segments to the client, 
+
+						at which point it must stop and wait for an acknowledgment.
+
+		Two new packets can be sent. 
+				Then, for every received ACK, the slow-start algorithm 
+						indicates that the server can increment its cwnd window size 
+
+						by one segment — for every ACKed packet
+
+				This phase of the TCP connection is commonly known as 
+						the "exponential growth" algorithm 
+
+				As the client and the server are trying to quickly converge 
+						on the available bandwidth on the network path between them.
+
+		****
+		So why is slow-start an important factor to keep in mind 
+				when we are building applications for the browser?
+
+		Because, no matter the available bandwidth, every TCP connection 
+				must go through the slow-start phase
+
+		Because, we cannot use the full capacity of the link immediately!
+				Instead, we start with a small congestion window and 
+
+				double it for every roundtrip
+		****
+
+		Slow-start is not as big of an issue for large, streaming downloads, 
+				as the client and the server will arrive at their 
+						maximum window sizes after a few hundred milliseconds and 
+
+						continue to transmit at near maximum speeds — 
+
+				the cost of the slow-start phase is amortized over the 
+						lifetime of the larger transfer.
+
+		The performance of many web applications is often limited 
+				because many HTTP connections, which are often short and bursty
+
+				the data transfer to finish before the maximum window size is reached
+						the roundtrip time between server and client 
+
+						limits the available bandwidth throughput
+
+						which has an adverse effect on the performance of small transfers.
+
+
+	Congestion Avoidance
+		The implicit assumption in congestion avoidance is that 
+				packet loss is indicative of network congestion: 
+
+				we have encountered a congested link or a router, 
+						which was forced to drop the packet, and hence 
+
+				we need to adjust our window to avoid inducing more packet loss 
+						to avoid overwhelming the network.
+
+		If you have ever looked at a throughput trace of a TCP connection and 
+				observed a sawtooth pattern within it, now you know why 
+
+				it is the congestion control and avoidance algorithms adjusting 
+						the congestion window size to account for packet loss 
+
+						in the network.
+
+Bandwidth-Delay Product (BDP)
+	The optimal sender and receiver window sizes must vary based on the 
+			roundtrip time and the target data rate between them.
+
+			the maximum amount of unacknowledged, in-flight data between 
+					the sender and receiver is defined as 
+							the minimum of the receive (rwnd) and 
+
+							congestion (cwnd) window sizes:
+									the current receive windows are communicated 
+											in every ACK, and 
+
+										the congestion window is dynamically adjusted 
+												by the sender based on 
+														the congestion control and 
+
+														avoidance algorithms.
+			If either the sender or receiver exceeds the maximum 
+					amount of unacknowledged data, 
+
+			then it must stop and wait for the other end to ACK 
+					some of the packets before proceeding.
+
+			How long would it have to wait? 
+
+			That’s dictated by the roundtrip time between the two!
+
+	Bandwidth-delay product (BDP)
+			Product of data link’s capacity and its end-to-end delay. 
+
+			The result is the maximum amount of unacknowledged data 
+
+			that can be in flight at any point in time.
+
+	The window sizes should be made just big enough, such that 
+			either side can continue sending data until an ACK arrives back 
+					from the client for an earlier packet — 
+
+					no gaps, 
+
+					maximum throughput.	
+					
+	The optimal window size depends on the roundtrip time! 
+			Pick a low window size, and you will limit your connection throughput, 
+					regardless of the available or 
+
+					advertised bandwidth between the peers.	
+
+	The good news is that the window size negotiation and tuning is 
+			managed automatically by the network stack and should adjust accordingly.
+
+
+Head-of-Line Blocking 
+		all subsequent packets must be held in the receiver’s TCP buffer 
+
+		until the lost packet is retransmitted and arrives at the receiver.
+
+		This effect is known as TCP head-of-line (HOL) blocking.
+
+Optimizing for TCP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

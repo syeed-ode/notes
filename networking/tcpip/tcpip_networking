@@ -41,21 +41,56 @@ TCP/IP and its relationship to the Internet
 
 		The technical documents are known as Requests for Comments or RFCs. Protocol standards, proposed changes, and informational bulletins usually end up as RFCs. Updates are new RFCs with their own reference numbers.
 
+13.2 Networking basics
+	TCP/IP is a protocol “suite,” a set of network protocols designed to work smoothly together
+			IP
+					the Internet Protocol, which routes data packets from one machine to another
+
+			ICMP 
+					the Internet Control Message Protocol, which defines several kinds of low-level support for IP, including error messages, routing assistance, and debugging help (RFC792)
+
+
+
 
 Networking road map pg499
-	TCP/IP is a protocol “suite,” a set of network protocols designed to work smoothly together. It includes several components, each defined by a standards track RFC or series of RFCs:
-			IP, the Internet Protocol, which routes data packets from one machine to another (RFC791)
+	TCP/IP is a protocol “suite,” a set of network protocols designed to work smoothly together. 
 
-			ICMP, the Internet Control Message Protocol, which provides support for IP, including error messages, routing assistance, and debugging help (RFC792)
+	It includes several components, each defined by a standards track RFC or series of RFCs:
+			IP
+					the Internet Protocol, 
+							which routes data packets from one 
+							machine to another (RFC791)
 
-			ARP, the Address Resolution Protocol, which translates IP addresses to hardware addresses (RFC826).
-					This is actually a little white lie. ARP is not really part of TCP/IP. 
+			ICMP
+					the Internet Control Message Protocol, 
+							which provides support for IP, 
+									including error messages, 
+									routing assistance, and 
+									debugging help (RFC792)
 
-					It can be used with other protocol suites. However, it’s an integral part of the way TCP/IP works on most LAN media.
+			ARP
+					the Address Resolution Protocol, 
+							which translates IP addresses to hardware addresses (RFC826).
+					
+					This is actually a little white lie. 
+							ARP is not really part of TCP/IP. 
 
-			UDP, the User Datagram Protocol, which provides unverified, one-way data delivery (RFC768)
+							It can be used with other protocol suites. 
 
-			TCP, the Transmission Control Protocol, which implements reliable, full duplex, flow-controlled, error-corrected conversations (RFC793)
+							It’s an integral part of the way TCP/IP works 
+								on most LAN media.
+
+			UDP
+					the User Datagram Protocol, 
+							which provides unverified, one-way data delivery (RFC768)
+
+			TCP 
+					the Transmission Control Protocol, 
+							which implements 
+									reliable, 
+									full duplex, 
+									flow-controlled, 
+									error-corrected conversations (RFC793)
 
 			These protocols are arranged in a hierarchy or “stack”, with the higher-level protocols making use of the protocols beneath them.
 
@@ -74,59 +109,81 @@ Networking road map pg499
 							optical fiber, 
 							radio waves
 					7.  Application layer
-					6.  Presentation layer
+							(AMQP, FTP, SSH, DNS, IMAP, LDAP, RDP,
+							NTP, Telnet, HTTP, SNMP)
+					6.  Presentation layer 
+							(Data Conversaion, Character code translation,
+							Compression, Encryption & Decryption,
+							Serialization) 
 					5.  Session layer
+							(RPC, SOCKS)
 					4.  Transport layer
-					3.  Network layer
-					2.  Data link layer
-					1.  Physical layer
+							(TCP, UDP)
+					3.  Network layer 
+							(IP [IPv4, IPv6], ICMP, IPsec)
+					2.  Data link layer 
+							(device drivers, ARP)
+							MAC (Ethernet,Wi-Fi,DSL,ISDN,FDDI)
+					1.  Physical layer  (Copper, radio waves)
 
-			The actual TCP/IP protocols inhabit only three of these layers: transport, network and physical.
+			The actual TCP/IP protocols inhabit only three of these layers: 
+					transport, 
+					network, and 
+					physical.
 
 	IPv4 and IPv6 pg500
-		The version of TCP/IP in use is revision 4. It uses four-byte IP addresses. IPv6 uses 16 bytes and incorporates several other lessons learned from the use of IPv4.
-
-		IPv6 also integrates security and authentication into the basic protocol. The development of IPv6 was motivated by the fact that we are runnin gout of 4-byte IPV4 address space.
-
-		If you understand IPv4, you already know most of what you need to know about IPv6, the main difference between lies in their addressing schemes. IPv6 introduces additional addressing concepts and some new notation. But that’s about it. 
+		The version of TCP/IP in use is revision 4. It uses four-byte IP addresses. 
+			IPv6 uses 16 bytes and incorporates several other lessons 
+			learned from the use of IPv4.
+		IPv6 also integrates security and authentication into the basic protocol. 
+			The development of IPv6 was motivated by the fact that we are running
+			out of 4-byte IPV4 address space.
+		If you understand IPv4, you already know most of what you need to know about IPv6, 
+			the main difference between lies in their addressing schemes. IPv6 introduces 
+			additional addressing concepts and some new notation. But that’s about it.
 
 	Packets and encapsulation pg501
 		TCP/IP supports a variety of physical networks and transport systems, including: 
 				wireless Ethernet 		Ethernet		
 				token ring 			MPLS (Multiprotocol Label Switching)
 				serial-line-based systems
-
-		Hardware is managed within the link layer of the TCP/IP architecture. Higher-level protocols do not know or care about the specific hardware being used.
-
-		Data travels on a network in the form of packets, bursts of data with a maximum length imposed by the link layer.
-				Each packet consists of a header and a payload. The header tells where the packet came from and where it’s going. It can also include checksums, protocol-specific information, or other handling instructions.
-
-				The payload is the data to be transferred.
-
+		Hardware is managed within the link layer of the TCP/IP architecture. 
+			Higher-level protocols do not know or care about the specific hardware 
+			being used.
+		Data travels on a network in the form of packets, bursts of data with a maximum 
+			length imposed by the link layer.
+				Each packet consists of a header and a payload. 
+						The header tells where the packet came from and where it’s  
+							going. It can also include checksums, protocol-
+							specific information, or other handling 
+							instructions.
+						The payload is the data to be transferred.
 				The layer of the protocol determins the data unit:
 						TCP Layer:  		Segment
 						IP Layer:  		Packet
 						Link Layer:  		Frame
-
-		As a packet travels down the protocol stack (from TCP or UDP transport to IP to Ethernet to the physical wire) each protocol adds its own header information.
-
-		Encapsulation is when each protocol’s finished packet becomes the payload part of the packet generated by the next protocol
-
-		On the receiving machine, the encapsulation is reversed as the packet travels back up the protocol stack.
-
-		UDP packet being transmitted over Ethernet contains three different wrappers or envelopes:
+		As a packet travels down the protocol stack 
+			(from TCP or UDP transport to IP to Ethernet to the physical wire) 
+			each protocol adds its own header information.
+		Encapsulation is when each protocol’s finished packet becomes the 
+			payload part of the packet generated by the next protocol
+		On the receiving machine, the encapsulation is reversed as the 
+			packet travels back up the protocol stack.
+		UDP packet being transmitted over Ethernet contains three different 
+			wrappers or envelopes:
 				Ethernet Header 
-					The source and next-hop desitination hardware address
-
-					The length of the frame
-
-					The frames checksum (CRC)
-
-					The payload is the IP packet
-
-				IP packet payload is the UDP segment
-
-				UDP segement's payload is the data being transmitted
+					The source and next-hop desitination 
+						hardware address
+					The length of the 
+						frame
+					The frames 
+						checksum (CRC)
+					The payload is the 
+						IP packet
+				IP packet payload is 
+					the UDP segment
+				UDP segement's payload is the 
+					data being transmitted
 
 		|                 |             |            |                  |              |
 		| Ethernet header | IPv4 header | UDP header | Application data | Ethernet CRC |
@@ -137,31 +194,37 @@ Networking road map pg499
 		>>>>>>>>>>>>>>>>>>>>>>>>>Ethernet frame (146 bytes)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		
 	Ethernet framing pg502
-		The link layer adds headers to packets and to put separators between them. The headers contain each packet’s link-layer addressing information and checksums.
-
-		The separators ensure that receivers can tell where one packet stops and the next one begins. The process of adding these extra bits is known generically as framing.
-
+		The link layer adds headers to packets and to put separators between them. 
+			The headers contain each packet’s link-layer addressing information 
+			and checksums.
+		The separators ensure that receivers can tell where one packet stops and 
+			the next one begins. The process of adding these extra bits 
+			is known generically as framing.
 		The link layer is actually divided into two parts:
-				Media Access Control (MAC) sublayer - The MAC layer deals with the media and transmits packets onto the wire.
-
-				Link Layer Control (LLC) sublayer - The LLC layer handles the framing.
-
+				Media Access Control (MAC) sublayer - 
+					The MAC layer deals with the media and 
+					transmits packets onto the wire.
+				Link Layer Control (LLC) sublayer - 
+					The LLC layer handles the framing.
 		A single standard for Ethernet framing is in common use: DIX Ethernet II.
 
 	Maximum transfer unit - Link Layer
-		The size of packets on a network may be limited both by hardware and by protocol. A standard Ethernet frame is traditionally 1,500 bytes.
-
-		The size limit is associated with the link-layer protocol and is called the maximum transfer unit or MTU.
-			ZEthernet 	- 1,500 bytes
-			FDDI  		- 4,470 bytes
-			Token 		- Configurable
-			PPP modem 	- Configurable, 512 or 576
-			PPP (T1,T3)	- 1,500 or 4,500 bytes
-
-		The IP layer splits packets to conform to the MTU of a particular network link. If a packet is routed through several networks, an IPv4 router subdivides the packet in a process called fragmentation.
-
-		Fragmentation of in-flight packets is an unwelcome chore for a busy router so IPv6 largely removes this feature. Packets can still be fragmented, but the **originating host** must do the work itself.
-
+		The size of packets on a network may be limited both by 
+			hardware and by protocol. A standard Ethernet frame is traditionally 
+			1,500 bytes.
+		The size limit is associated with the link-layer protocol and is called the 
+			maximum transfer unit or MTU.
+				Ethernet 	- 1,500 bytes
+				FDDI  		- 4,470 bytes
+				Token 		- Configurable
+				PPP modem 	- Configurable, 512 or 576
+				PPP (T1,T3)	- 1,500 or 4,500 bytes
+		The IP layer splits packets to conform to the MTU of a particular network link. 
+			If a packet is routed through several networks, an IPv4 router subdivides 
+			the packet in a process called fragmentation.
+		Fragmentation of in-flight packets is an unwelcome chore for a busy router so 
+			IPv6 largely removes this feature. Packets can still be fragmented, 
+			but the **originating host** must do the work itself.
 		Senders can discover the lowest-MTU link through which a packet must pass by setting the packet’s “do not fragment” flag.
 				If a router cannot forward the packet without fragmenting it returns an ICMP error message to the sender.
 
@@ -169,18 +232,20 @@ Networking road map pg499
 
 		The TCP protocol does path MTU discovery automatically, even in IPv4. UDP is not so nice and is happy to shunt extra work to the IP layer.
 
-		ZFragmentation problems can be insidious. Although path MTU discovery should automatically resolve MTU conflicts, an administrator must occasionally intervene.
+		Fragmentation problems can be insidious. Although path MTU discovery should automatically resolve MTU conflicts, an administrator must occasionally intervene.
 				If you are using a tunneled architecture for a virtual private network, the tunneling header is added, they become 1,540 bytes or so and must be fragmented.
 
 				Consult the 'ifconfig' man page to see how to set an interface’s MTU.
-
+13.3 PACKET ADDRESSING pg431
 14.3 PACKET ADDRESSING pg503
-	Network packets must be properly addressed in order to reach their destinations several addressing schemes are used in combination:
-			MAC (media access control) addresses for use by hardware
-
-			IPv4 and IPv6 network addresses for use by software
-
-			Hostnames for use by people
+	Network packets must be properly addressed in order to reach their destinations 
+		several addressing schemes are used in combination:
+			MAC (media access control) addresses 
+				for use by hardware
+			IPv4 and IPv6 network addresses 
+				for use by software
+			Hostnames 
+				for use by people
 
 	Hardware (MAC) media access control addressing
 		Each of a host’s network interfaces usually has one link-layer MAC address that distinguishes it from other machines on the physical network, plus one or more IP addresses that identify the interface on the global Internet.
@@ -208,6 +273,7 @@ Networking road map pg499
 
 								Spoofable MAC addresses are also helpful if you need to infiltrate a wireless network that uses MAC-based access control.
 
+	IP addressing pg432
 	IP addressing pg504
 		At the next level up from the hardware, Internet addressing (more commonly known as IP addressing) is used. IP addresses are globally unique and hardware independent.
 				In general, an IP address identifies a specific and unique destination.

@@ -298,11 +298,71 @@ This chapter covers
 			Let’s first explore how a table’s primary key impacts the kinds of data access operations it supports. 
 
 		DEFINING AN INDEX FOR THE FINDORDERHISTORY QUERY 
+			DynamoDB query() operation requires a table to have a composite primary key consisting of two scalar attributes
+					The first attribute is a partition key
+							The partition key is so called because DynamoDB’s Z-axis scaling (described in chapter 1) uses it to select an item’s storage partition
 
+					The second attribute is the sort key.
 
+			A query() operation returns those items that 
+					have the specified partition key, 
 
+					have a sort key in the specified range, and 
 
+					match the optional filter expression.
 
+			Unlike a typical RDBMS index, a DynamoDB index can have non-key attributes. 
+
+			Non-key attributes improve performance because they’re returned by the query, 
+					so the application doesn’t have to fetch them from the table.
+
+					also they can be used for filtering
+
+		IMPLEMENTING THE findOrderHistory QUERY
+		PAGINATING THE QUERY RESULTS 
+			The DynamoDB Query operation has an operation pageSize parameter
+
+			If there are more items, the result of the query has a non-null LastEvaluatedKey attribute.
+
+			A DAO can retrieve the next page of items by invoking the query with the exclusiveStartKey parameter set to LastEvaluatedKey.
+
+			DynamoDB doesn’t support position-based pagination. 
+					Consequently, Order History Service returns an opaque pagination token to its client. 
+
+					The client uses this pagination token to request the next page of results.
+
+		UPDATING ORDERS
+			DynamoDB supports two operations for adding and updating items: PutItem() and UpdateItem(). 
+					The PutItem() operation creates or replaces an entire item by its primary key.
+							In theory, OrderHistoryDaoDynamoDb could use this operation to insert and update orders. 
+
+							One challenge, however, with using PutItem() is ensuring that simultaneous updates to the same item are handled correctly.
+
+			Consider, for example, the scenario where two event handlers simultaneously attempt to update the same item.
+			
+			A more efficient approach is to use the UpdateItem() operation.		
+					The UpdateItem() operation updates individual attributes of the item, creating the item if necessary. 
+
+					Since different event handlers update different attributes of the Order item, using UpdateItem makes sense. 
+
+					This operation is also more efficient because there’s no need to first retrieve the order from the table.
+
+		DETECTING DUPLICATE EVENTS
+			The UpdateItem() operation’s conditional update mechanism only updates an item if an event isn’t a duplicate.
+
+			A conditional update is only performed if a condition expression is true. 
+					A condition expression tests whether an attribute exists or has a particular value.
+
+		An event is a duplicate if the attribute exists and its value is less than or equal to the event ID. 
+				The OrderHistoryDaoDynamoDb DAO can track events received from each aggregate instance using an attribute called «aggregateType»«aggregateId» whose value is the highest received event ID.
+
+				The OrderHistoryDaoDynamoDb DAO uses this condition expression:
+						attribute_not_exists(«aggregateType»«aggregateId») OR «aggregateType»«aggregateId» < :eventId					
+		The condition expression only allows the update if the attribute doesn’t exist or the eventId is greater than the last processed event ID.
+
+	7.4.3 The OrderHistoryDaoDynamoDb class
+		THE addOrder() METHOD
+			
 
 
 
