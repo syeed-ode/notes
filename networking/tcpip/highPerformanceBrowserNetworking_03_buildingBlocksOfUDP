@@ -1,0 +1,171 @@
+					7.  Application layer
+							(AMQP, FTP, SSH, DNS, IMAP, LDAP, RDP,
+							NTP, Telnet, HTTP, SNMP)
+					6.  Presentation layer 
+							(Data Conversaion, Character code translation,
+							Compression, Encryption & Decryption,
+							Serialization) 
+					5.  Session layer
+							(RPC, SOCKS)
+					4.  Transport layer
+							(TCP, UDP)
+					3.  Network layer 
+							(IP [IPv4, IPv6], ICMP, IPsec)
+					2.  Data link layer 
+							(device drivers, ARP)
+							MAC (Ethernet,Wi-Fi,DSL,ISDN,FDDI)
+					1.  Physical layer  (Copper, radio waves)
+
+With WebRTC, UDP is now a first-class browser transport with a client-side API!
+
+Null Protocol Services
+	We first need to look at the Internet Protocol (IP)
+			To understand UDP and why it is commonly referred to as a "null protocol," 
+
+	The IP layer has the primary task of delivering datagrams 
+			from the source to the destination host 
+
+			based on their addresses.
+
+	the IP layer provides no guarantees about message delivery or 
+			notifications of failure
+
+	The UDP protocol encapsulates user messages into its own packet structure 
+			which adds only four additional fields: 
+					source port, 
+
+					destination port, 
+
+					length of packet, and 
+
+					checksum. 
+
+			Thus, when IP delivers the packet to the destination host, 
+					the host is able to unwrap the UDP packet, 
+
+					identify the target application by the destination port, and 
+
+					deliver the message. Nothing more, nothing less.
+
+			At its core, UDP simply provides "application multiplexing" 
+					on top of IP by embedding the source and the target application ports
+							of the communicating hosts. With that in mind, 
+
+					we can now summarize all the UDP non-services:
+							No guarantee of message delivery
+									No acknowledgments, retransmissions, or timeouts
+
+							No guarantee of order of delivery
+									No packet sequence numbers, no reordering, no head-of-line blocking
+
+							No connection state tracking
+									No connection establishment or teardown state machines
+
+							No congestion control
+									No built-in client or network feedback mechanisms
+
+	UDP datagrams have definitive boundaries: 
+			each datagram is carried in a single IP packet, and 
+
+			each application read yields the full message; 
+
+			datagrams cannot be fragmented.
+
+	Before you run away to implement your own protocol to replace TCP, 
+			you should think carefully about complications with UDP		
+
+UDP and Network Address Translators
+ 	The IP Network Address Translator (NAT) specification was introduced to be responsible
+ 			for maintaining a table mapping of local IP and port tuples to 
+ 			one or more globally unique (public) IP and port tuples
+
+	Reserved Private Network Ranges
+		Internet Assigned Numbers Authority (IANA), 
+				which is an entity that oversees global IP address allocation, 
+
+				reserved three well-known ranges (Table 3-1) for private networks
+
+IP address range 			Number of addresses  	IPCALC Definition
+10.0.0.0 – 10.255.255.255		16,777,216  		ipcalc 10.0.0.0/8 [class A]
+172.16.0.0 – 172.31.255.255 		1,048,576 		ipcalc 172.16.0.0/12 [class B]
+192.168.0.0 – 192.168.255.255 		65,536 			ipcalc 192.168.0.0/16 [class C]
+
+	NAT middleboxes rely on connection state, whereas UDP has none.
+			This is a fundamental mismatch and a source of many problems for delivering UDP datagrams. 
+
+	Consequently, one of the de facto best practices for long-running sessions over UDP 
+			is to introduce bidirectional keepalive packets
+			to periodically reset the timers for the translation records 
+			in all the NAT devices along the path.
+
+NAT Traversal
+	A large problem for many applications is the inability to establish a UDP connection at all.
+			This is especially true for P2P applications, such as VoIP, games, and file sharing, which often need to act as both client and server to enable two-way direct communication between the peers.
+
+	knowing the public IP is also not sufficient to successfully transmit with UDP.
+			the packet is simply dropped 
+				If this entry does have a destination port and
+
+				an entry in the NAT table that can translate it to 
+						an internal destination host IP and 
+
+						port tuple.
+
+	The NAT device acts as a simple packet filter since 
+			it has no way to automatically determine the internal route
+
+			unless explicitly configured by the user through a port-forwarding or similar mechanism
+
+	This is not an issue for client applications which begin their interaction from the internal network and in the process establish the necessary translation records along the path.
+
+	However acting as a server (handling inbound connections) in the presence of a NAT, is where we will immediately run into this problem.
+
+	To work around this mismatch in UDP and NATs, various traversal techniques (TURN, STUN, ICE) have to be used to establish end-to-end connectivity between the UDP peers on both sides.
+
+STUN, TURN, and ICE - work around between NATs and UDP
+	
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

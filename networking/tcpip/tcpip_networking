@@ -236,6 +236,7 @@ Networking road map pg499
 				If you are using a tunneled architecture for a virtual private network, the tunneling header is added, they become 1,540 bytes or so and must be fragmented.
 
 				Consult the 'ifconfig' man page to see how to set an interface’s MTU.
+COME BACK TO ME - JANET JACKSON HERE
 13.3 PACKET ADDRESSING pg431
 14.3 PACKET ADDRESSING pg503
 	Network packets must be properly addressed in order to reach their destinations 
@@ -340,7 +341,7 @@ Networking road map pg499
 	IPv4 addresses are written as decimal numbers, one for each byte; for example, 209.85.171.147. The leftmost byte is the most significant and is always part of the network portion.
 			When 127 is the first byte of an address, it denotes the “loopback network,” a fictitious network that has no real hardware interface and only one host.
 
-			ZThe loopback address 127.0.0.1 always refers to the current host.
+			The loopback address 127.0.0.1 always refers to the current host.
 
 	Historically, IP addresses had an inherent “class” that depended on the first bits of the leftmost byte.
 			The class determined which bytes of the address were in the network portion and which were in the host portion.
@@ -511,52 +512,69 @@ Networking road map pg499
 		ICANN (the Internet Corporation for Assigned Names and Numbers) has delegated blocks of addresses to five regional Internet registries, and these regional authorities are responsible for doling out subblocks to ISPs within their regions.
 
 	Private addresses and network address translation (NAT)
-		Another factor that has helped decelerate the rate at which IPv4 addresses are consumed is the use of private IP address spaces (RFC1918).
-
-		These addresses are used by your site internally but are never shown to the Internet. A border router translates between your private address space and the address space assigned by your ISP. 
-
-		RFC1918 sets aside 1 class A network, 16 class B networks, and 256 class C networks that will never be globally allocated and can be used internally by any site. The “CIDR range” column shows each range in the more compact CIDR notation; it does not add additional information.
-				IP Class     	From          	To                	CIDR Range
-				Class A 		10.0.0.0 		10.255.255.255 		10.0.0.0/8
-				------------------------------------------------------------------
-				$ ipcalc 10.0.0.0/8
-				Address:   10.0.0.0             00001010. 00000000.00000000.00000000
-				Netmask:   255.0.0.0 = 8        11111111. 00000000.00000000.00000000
-				Wildcard:  0.255.255.255        00000000. 11111111.11111111.11111111
-				=>
-				Network:   10.0.0.0/8           00001010. 00000000.00000000.00000000
-				HostMin:   10.0.0.1             00001010. 00000000.00000000.00000001
-				HostMax:   10.255.255.254       00001010. 11111111.11111111.11111110
-				Broadcast: 10.255.255.255       00001010. 11111111.11111111.11111111
-				Hosts/Net: 16777214              Class A, Private Internet
+		Another factor that has helped decelerate the rate 
+			at which IPv4 addresses are consumed is 
+			the use of private IP address spaces (RFC1918).
+		These addresses are used by your site internally 
+			but are never shown to the Internet. 
+		A border router translates between your private address space 
+			and the address space assigned by your ISP. 
+		RFC1918 sets aside 1 class A network, 16 class B networks, 
+			and 256 class C networks that will never be globally allocated 
+			and can be used internally by any site. 
+		The “CIDR range” column shows each range in the more compact CIDR notation; 
+			it does not add additional information.
 
 
-				Class B 		172.16.0.0 		172.31.255.255 		172.16.0.0/12 
-				------------------------------------------------------------------
-				$ ipcalc 172.16.0.0/12
-				Address:   172.16.0.0           10101100.0001 0000.00000000.00000000
-				Netmask:   255.240.0.0 = 12     11111111.1111 0000.00000000.00000000
-				Wildcard:  0.15.255.255         00000000.0000 1111.11111111.11111111
-				=>
-				Network:   172.16.0.0/12        10101100.0001 0000.00000000.00000000
-				HostMin:   172.16.0.1           10101100.0001 0000.00000000.00000001
-				HostMax:   172.31.255.254       10101100.0001 1111.11111111.11111110
-				Broadcast: 172.31.255.255       10101100.0001 1111.11111111.11111111
-				Hosts/Net: 1048574               Class B, Private Internet
+
+	IP address range 		Number of addresses  	IPCALC Definition
+	10.0.0.0 – 10.255.255.255	16,777,216  		ipcalc 10.0.0.0/8 [class A]
+	172.16.0.0 – 172.31.255.255 	1,048,576 		ipcalc 172.16.0.0/12 [class B]
+	192.168.0.0 – 192.168.255.255 	65,536 			ipcalc 192.168.0.0/16 [class C]
 
 
-				Class C 		192.168.0.0 	192.168.255.255 	192.168.0.0/16
-				------------------------------------------------------------------
-				$ ipcalc 192.168.0.0/16
-				Address:   192.168.0.0          11000000.10101000. 00000000.00000000
-				Netmask:   255.255.0.0 = 16     11111111.11111111. 00000000.00000000
-				Wildcard:  0.0.255.255          00000000.00000000. 11111111.11111111
-				=>
-				Network:   192.168.0.0/16       11000000.10101000. 00000000.00000000
-				HostMin:   192.168.0.1          11000000.10101000. 00000000.00000001
-				HostMax:   192.168.255.254      11000000.10101000. 11111111.11111110
-				Broadcast: 192.168.255.255      11000000.10101000. 11111111.11111111
-				Hosts/Net: 65534                 Class C, Private Internet
+
+		IP Class     	From          	To                	CIDR Range
+		Class A 	10.0.0.0 	10.255.255.255 		10.0.0.0/8
+		------------------------------------------------------------------
+		$ ipcalc 10.0.0.0/8
+		Address:   10.0.0.0             00001010. 00000000.00000000.00000000
+		Netmask:   255.0.0.0 = 8        11111111. 00000000.00000000.00000000
+		Wildcard:  0.255.255.255        00000000. 11111111.11111111.11111111
+		=>
+		Network:   10.0.0.0/8           00001010. 00000000.00000000.00000000
+		HostMin:   10.0.0.1             00001010. 00000000.00000000.00000001
+		HostMax:   10.255.255.254       00001010. 11111111.11111111.11111110
+		Broadcast: 10.255.255.255       00001010. 11111111.11111111.11111111
+		Hosts/Net: 16777214              Class A, Private Internet
+
+
+		Class B 	172.16.0.0 	172.31.255.255 		172.16.0.0/12 
+		------------------------------------------------------------------
+		$ ipcalc 172.16.0.0/12
+		Address:   172.16.0.0           10101100.0001 0000.00000000.00000000
+		Netmask:   255.240.0.0 = 12     11111111.1111 0000.00000000.00000000
+		Wildcard:  0.15.255.255         00000000.0000 1111.11111111.11111111
+		=>
+		Network:   172.16.0.0/12        10101100.0001 0000.00000000.00000000
+		HostMin:   172.16.0.1           10101100.0001 0000.00000000.00000001
+		HostMax:   172.31.255.254       10101100.0001 1111.11111111.11111110
+		Broadcast: 172.31.255.255       10101100.0001 1111.11111111.11111111
+		Hosts/Net: 1048574               Class B, Private Internet
+
+
+		Class C 	192.168.0.0 	192.168.255.255 	192.168.0.0/16
+		------------------------------------------------------------------
+		$ ipcalc 192.168.0.0/16
+		Address:   192.168.0.0          11000000.10101000. 00000000.00000000
+		Netmask:   255.255.0.0 = 16     11111111.11111111. 00000000.00000000
+		Wildcard:  0.0.255.255          00000000.00000000. 11111111.11111111
+		=>
+		Network:   192.168.0.0/16       11000000.10101000. 00000000.00000000
+		HostMin:   192.168.0.1          11000000.10101000. 00000000.00000001
+		HostMax:   192.168.255.254      11000000.10101000. 11111111.11111110
+		Broadcast: 192.168.255.255      11000000.10101000. 11111111.11111111
+		Hosts/Net: 65534                 Class C, Private Internet
 
 		The original idea was that sites would choose an address class from among these options to fit the size of their organizations. 
 
