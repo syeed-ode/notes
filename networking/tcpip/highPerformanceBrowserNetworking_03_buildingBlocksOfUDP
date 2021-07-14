@@ -1,3 +1,15 @@
+				*****************************************<info>
+				**                 STUN                ** 
+				**                                     ** 
+				** Session Traversal Utilities for NAT **
+				**                                     ** 
+				*****************************************
+				*****************************************<info>
+				**                 TURN                ** 
+				**                                     ** 
+				**  Traversal Using Relays around NAT  **
+				**                                     ** 
+				*****************************************
 					7.  Application layer
 							(AMQP, FTP, SSH, DNS, IMAP, LDAP, RDP,
 							NTP, Telnet, HTTP, SNMP)
@@ -122,11 +134,44 @@ NAT Traversal
 
 	To work around this mismatch in UDP and NATs, various traversal techniques (TURN, STUN, ICE) have to be used to establish end-to-end connectivity between the UDP peers on both sides.
 
+*****************************************<info>
+**                 STUN                ** 
+**                                     ** 
+** Session Traversal Utilities for NAT **
+**                                     ** 
+*****************************************
 STUN, TURN, and ICE - work around between NATs and UDP
-	
+	Session Traversal Utilities for NAT (STUN) is a protocol (RFC 5389) that allows the host application to discover the presence of a network address translator on the network, and when present to obtain the allocated public IP and port tuple for the current connection.
 
+	To do so, the protocol requires assistance from a well-known, third-party STUN server that must reside on the public network.
 
+	Assuming the IP address of the STUN server is known (through DNS discovery, or through a manually specified address), the application first sends a binding request to the STUN server. In turn, the STUN server replies with a response that contains the public IP address and port of the client as seen from the public network. This simple workflow addresses several problems we encountered in our earlier discussion:
+			The application discovers its public IP and port tuple and is then able to use this information as part of its application data when communicating with its peers.
 
+			The outbound binding request to the STUN server establishes NAT routing entries along the path, such that the inbound packets arriving at the public IP and port tuple can now find their way back to the host application on the internal network.
+
+			The STUN protocol defines a simple mechanism for keepalive pings to keep the NAT routing entries from timing out.
+
+	However, in practice, STUN is not sufficient to deal with all NAT topologies and network configurations.
+			in some cases UDP may be blocked altogether by a firewall or some other network appliance—not an uncommon scenario for many enterprise networks.
+
+*****************************************<info>
+**                 TURN                ** 
+**                                     ** 
+**  Traversal Using Relays around NAT  **
+**                                     ** 
+*****************************************
+	whenever STUN fails, we can use the Traversal Using Relays around NAT (TURN) protocol (RFC 5766) as a fallback
+
+	The protocol relies on the presence and availability of a public relay (Figure 3-6) to shuttle the data between the peers.
+			Both clients begin their connections by sending an allocate request to the same TURN server, followed by permissions negotiation.
+
+			Once the negotiation is complete, both peers communicate by sending their data to the TURN server, which then relays it to the other peer.	
+
+	Of course, the obvious downside in this exchange is that it is no longer peer-to-peer! 
+			it carries a very high cost of operating the TURN server—at the very least, the relay must have enough capacity to service all the data flows
+
+	Google’s libjingle is an open-source C++ library for building peer-to-peer applications, which takes care of STUN, TURN, and ICE negotiations under the hood.		
 
 
 	
