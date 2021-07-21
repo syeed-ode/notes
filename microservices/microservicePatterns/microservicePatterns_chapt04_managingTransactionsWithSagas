@@ -1,0 +1,649 @@
+*******************************************************************
+*                                                           *
+*                                                           *
+*                                                           *
+*******************************************************************
+****                         Chapter 04                        ****
+****              Managing transactions with sagas             ****
+*******************************************************************
+
+******************************************<info>
+**                                      ** 
+**                  SAGA                **
+**                                      ** 
+**   A sequence of local transactions   **
+** that are coordinated using messaging **
+**                                      ** 
+******************************************
+
+
+pg141
+Why distributed transactions (2PC) aren’t a good fit for modern applications
+		From page 88
+		MAINTAINING DATA CONSISTENCY ACROSS SERVICES
+			Another challenge is maintaining data consistency across services. Some system operations need to update data in multiple services.
+					For example, when a restaurant accepts an order, updates must occur in both the Kitchen Service and the Delivery Service.
+
+					Both of these updates must be done atomically.
+							The Kitchen Service changes the status of the Ticket. 
+
+							The Delivery Service schedules delivery of the order. 
+
+			The traditional solution is to use a two-phase, commit-based, distributed transaction management mechanism.
+
+			Instead of an ACID transactions, an operation that spans services must use what’s known as a saga, a message-driven sequence of local transactions, to maintain data consistency.
+
+			One limitation of sagas is that they are eventually consistent. 
+					If you need to update some data atomically, 
+					then it must reside within a single service, 
+					which can be an obstacle to decomposition
+
+		pg141
+		They lack the isolation feature of traditional ACID transactions. 
+
+		As a result, an application must use what are known as countermeasures, 
+				design techniques that prevent or reduce the impact of concurrency anomalies caused by the lack of isolation.
+
+	countermeasures
+		Design techniques that prevent or reduce the impact of concurrency anomalies caused by the lack of isolation.
+	choreography
+		Where participants exchange events without a centralized point of control,
+
+	orchestration
+		where a centralized controller tells the saga participants what operation to perform
+
+
+Transaction management in a microservice architecture
+	In a microservice architecture, transactions span multiple services, each of which has its own database. In this situation, the application must use a more elaborate mechanism to manage transactions. 
+
+	The need for distributed transactions in a microservice architecture
+		 Because each service has its own database, you need to use a mechanism to maintain data consistency across those databases.
+
+The trouble with distributed transactions
+	Distributed transactions is the traditional approach to maintaining data consistency across multiple services, databases, or message brokers
+			The de facto standard is X/Open Distributed Transaction Processing (DTP) Model (XA) 
+
+			XA uses two-phase commit (2PC) to ensure that all participants in a transaction either commit or rollback.
+
+			Java EE applications can, for example, use JTA to perform distributed transactions.
+
+	There are a variety of problems with distributed transactions. 
+			One problem is many modern technologies don’t support them including 
+					NoSQL databases such as MongoDB and Cassandra,  
+
+					Also, distributed transactions aren’t supported by modern message brokers such as RabbitMQ and Apache Kafka.
+
+			Another problem is they are a form of synchronous IPC, which reduces availability.
+					The availability is the product of the availability of all of the participants in the transaction.
+
+					If a distributed transaction involves two services that are 99.5% available, then the overall availability is 99%, which is significantly less. 
+
+	To solve the more complex problem of maintaining data consistency in a microservice architecture, an application must use a different mechanism that 
+			builds on the concept of loosely coupled, asynchronous services. 
+
+	This is where sagas come in. 
+
+
+Using the Saga pattern to maintain data consistency in a microservice architecture
+	Sagas are mechanisms to maintain data consistency in a microservice architecture
+
+	The coordination of the steps is implemented using asynchronous messaging. 
+			An important benefit of asynchronous messaging is it ensures 
+					all the steps of a saga are executed
+
+					even if one or more of the saga’s participants is temporarily unavailable.
+
+	Sagas differ from ACID transactions in a couple of important ways
+			They lack the isolation property of ACID transactions.
+
+			A saga must be rolled back using compensating transactions
+					 because each local transaction commits its changes
+
+ 	AN EXAMPLE SAGA: THE CREATE ORDER SAGA
+		This saga consists of the following local transactions:
+				1 Order Service — Create an Order in an APPROVAL_PENDING state.
+				2 Consumer Service — Verify that the consumer can place an order.
+				3 Kitchen Service — Validate order details and create a Ticket in the CREATE
+				_PENDING.
+				4 Accounting Service — Authorize consumer’s credit card.
+				5 Kitchen Service — Change the state of the Ticket to AWAITING_ACCEPTANCE.
+				6 Order Service — Change the state of the Order to APPROVED. 		
+
+		Not only does using messaging ensure the saga participants are loosely coupled, it also guarantees that a saga completes.
+				That’s because if the recipient of a message is temporarily unavailable, the message broker buffers the message until it can be delivered.
+
+		SAGAS USE COMPENSATING TRANSACTIONS TO ROLL BACK CHANGES
+			A great feature of traditional ACID transactions is that the business logic can easily roll back a transaction if it detects the violation of a business rule.
+
+			You must write what are known as 'compensating transactions'.
+					Suppose that the (n + 1)th transaction of a saga fails. The effects of the previous n transactions must be undone.
+
+
+
+Step 			Service Transaction 		Compensating transaction
+1 Order Service 	createOrder() 			rejectOrder()
+2 Consumer Service 	verifyConsumerDetails() 	 — 
+3 Kitchen Service 	createTicket() 			rejectTicket()
+4 Accounting Service 	authorizeCreditCard() 		 — 
+5 Kitchen Service 	approveTicket()			 — 
+6 Order Service 	approveOrder() 			 — 
+
+
+
+***********************************************************************<info>
+**                                                                   ** 
+**                      compensatable transactions                   **
+**                                                                   ** 
+**   steps of the Saga that are followed by steps that can fail      **
+**                                                                   ** 
+**                        Must support roll back                     **
+**                                                                   ** 
+***********************************************************************
+
+***********************************************************************<info>
+**                                                                   ** 
+**                         pivot transaction                         **
+**                                                                   ** 
+**   steps of the Saga that are followed by steps that never fail    **
+**                                                                   ** 
+**  The saga’s go/no-go transaction. If it succeeds, then the saga   **
+**                     runs to completion.                           ** 
+**                                                                   ** 
+***********************************************************************
+
+************************************************************************<info>
+**                                                                    ** 
+**                          retriable transactions                    **
+**                                                                    ** 
+**  steps of the Saga that are followed by steps that always succeed  **
+**                                                                    ** 
+**                          Guaranteed to complete                    ** 
+**                                                                    ** 
+************************************************************************
+
+			The first three steps of the Create Order Saga are termed 'compensatable transactions' because they’re followed by steps that can fail
+
+			However the fourth step is termed the saga’s 'pivot transaction' because it’s followed by steps that never fail
+
+			And the last two steps are termed 'retriable transactions' because they always succeed.
+
+		To see how compensating transactions are used, imagine a scenario where the authorization of the consumer’s credit card fails. In this scenario, the saga executes the following local transactions:
+				1 Order Service — Create an Order in an APPROVAL_PENDING state.
+				2 Consumer Service — Verify that the consumer can place an order.
+				3 Kitchen Service — Validate order details and create a Ticket in the CREATE
+				_PENDING state.
+				4 Accounting Service — Authorize consumer’s credit card, which fails.
+				5 Kitchen Service — Change the state of the Ticket to CREATE_REJECTED.
+				6 Order Service — Change the state of the Order to REJECTED.
+
+		The fifth and sixth steps are compensating transactions that undo the updates made by Kitchen Service and Order Service, respectively. 
+
+4.2 Coordinating sagas
+	A saga’s implementation consists of logic that coordinates the steps of the saga When a saga is initiated by system command, the coordination logic must select and tell the first saga participant to execute a local transaction. Once that transaction completes, the saga’s sequencing coordination selects and invokes the next saga participant. This process continues until the saga has executed all the steps. 
+
+	There are a couple of different ways to structure a saga’s coordination logic:
+			 'Choreography' — Distribute the decision making and sequencing among the saga participants. They primarily communicate by exchanging events.
+
+			 'Orchestration' — Centralize a saga’s coordination logic in a saga orchestrator class. A saga orchestrator sends command messages to saga participants telling them which operations to perform.
+
+	4.2.1 Choreography-based sagas
+		When using choreography, there’s no central coordinator telling the saga participants what to do.
+
+	IMPLEMENTING THE CREATE ORDER SAGA USING CHOREOGRAPHY
+		The participants communicate by exchanging events.
+
+		The Create Order Saga must also handle the scenario where a saga participant rejects the Order and publishes some kind of failure event. For example, the authorization of the consumer’s credit card might fail. 
+				1 Order Service creates an Order in the APPROVAL_PENDING state and publishes an OrderCreated event.
+				2 Consumer Service consumes the OrderCreated event, verifies that the consumer can place the order, and publishes a ConsumerVerified event.
+				3 Kitchen Service consumes the OrderCreated event, validates the Order, creates a Ticket in a CREATE_PENDING state, and publishes the TicketCreated event.
+				4 Accounting Service consumes the OrderCreated event and creates a CreditCardAuthorization in a PENDING state.
+				5 Accounting Service consumes the TicketCreated and ConsumerVerified events, charges the consumer’s credit card, and publishes a Credit Card Authorization Failed event.
+				6 Kitchen Service consumes the Credit Card Authorization Failed event and changes the state of the Ticket to REJECTED.
+				7 Order Service consumes the Credit Card Authorization Failed event and changes the state of the Order to REJECTED
+
+		Let's take a look at some issues you’ll need to consider when implementing publish/subscribe-based communication for your sagas. 
+
+	RELIABLE EVENT-BASED COMMUNICATION for choreography-based sagas
+		The first issue is ensuring that a saga participant updates its database and publishes an event as part of a database transaction.
+
+		The second issue you need to consider is ensuring that a saga participant must be able to map each event that it receives to its own data.
+
+		BENEFITS AND DRAWBACKS OF CHOREOGRAPHY-BASED SAGAS
+				Choreography-based sagas have several benefits:
+						 Simplicity—Services publish events when they create, update, or delete business objects.
+						 Loose coupling —The participants subscribe to events and don’t have direct knowledge of each other.	
+
+				Choreography-based sagas have some drawbacks:
+						 More difficult to understand—Unlike with orchestration, there isn’t a single place in the code that defines the saga. Instead, choreography distributes the implementation of the saga among the services. Consequently, it’s sometimes difficult for a developer to understand how a given saga works.
+						 Cyclic dependencies between the services—The saga participants subscribe to each other’s events, which often creates cyclic dependencies. For example, if you carefully examine figure 4.4, you’ll see that there are cyclic dependencies, such as Order Service ==> Accounting Service ==> Order Service. Although this isn’t necessarily a problem, cyclic dependencies are considered a design smell.
+						 Risk of tight coupling—Each saga participant needs to subscribe to all events that affect them. For example, Accounting Service must subscribe to all events that cause the consumer’s credit card to be charged or refunded. As a result, there’s a risk that it would need to be updated in lockstep with the order lifecycle implemented by Order Service.
+
+	4.2.2 Orchestration-based sagas
+		When using orchestration, you define an orchestrator class whose sole responsibility is to tell the saga participants what to do. 
+				The saga orchestrator communicates with the participants using command/async reply-style interaction.
+
+				To show how orchestration-based sagas work, I’ll first describe an example. 
+						Then I’ll describe how to model orchestration-based sagas as state machines. 
+
+						I’ll discuss how to make use of transactional messaging to ensure reliable communication between the saga orchestrator and the saga participants. 
+
+						I’ll then describe the benefits and drawbacks of using orchestration-based sagas.
+
+	IMPLEMENTING THE CREATE ORDER SAGA USING ORCHESTRATION
+		The saga is orchestrated by the CreateOrderSaga class, which invokes the saga participants using asynchronous request/response.
+				The CreateOrderSaga class reads reply messages from its reply channel and then determines the next step, if any, in the saga.
+
+				Note that in final step, the saga orchestrator sends a command message to Order Service, even though it’s a component of Order Service. In principle, the Create Order Saga could approve the Order by updating it directly. But in order to be consistent, the saga treats Order Service as just another participant.
+
+	MODELING SAGA ORCHESTRATORS AS STATE MACHINES
+		A good way to model a saga orchestrator is as a state machine.
+
+		A state machine consists of a set of states and a set of transitions between states that are triggered by events.
+
+		Each transition can have an action, which for a saga is the invocation of a saga participant.
+
+		This state machine consists of numerous states, including the following:
+				 Verifying Consumer—The initial state. When in this state, the saga is waiting for the Consumer Service to verify that the consumer can place the order.
+				 Creating Ticket—The saga is waiting for a reply to the Create Ticket command.
+				 Authorizing Card—Waiting for Accounting Service to authorize the consumer’s credit card.
+				 Order Approved—A final state indicating that the saga completed successfully.
+				 Order Rejected—A final state indicating that the Order was rejected by one of the participants.
+		
+		The state machine also defines numerous state transitions. 
+				For example, the state machine transitions from the Creating Ticket state to either the Authorizing Card or the Rejected Order state. 
+						It transitions to the Authorizing Card state when it receives a successful reply to the Create Ticket command. 
+
+				Alternatively, if Kitchen Service couldn’t create the Ticket, 
+						the state machine transitions to the Rejected Order state.
+
+	SAGA ORCHESTRATION AND TRANSACTIONAL MESSAGING
+		Each step of an orchestration-based saga consists of a service updating a database and publishing a message.
+		
+	BENEFITS AND DRAWBACKS OF ORCHESTRATION-BASED SAGAS
+		BENEFITS
+		Simpler dependencies—
+				One benefit of orchestration is that it doesn’t introduce cyclic dependencies. 
+						The saga orchestrator invokes the saga participants, but the participants don’t invoke the orchestrator. 
+
+						As a result, the orchestratorv depends on the participants but not vice versa, and so there are no cyclic dependencies.
+
+		Less coupling
+				Each service implements an API that is invoked by the orchestrator, so it does not need to know about the events published by the saga participants.
+	
+		Improves separation of concerns and simplifies the business logic
+				The saga coordination logic is localized in the saga orchestrator. 
+
+				The domain objects are simpler and have no knowledge of the sagas that they participate in. 
+						For example, when using orchestration, the Order class has no knowledge of any of the sagas, so it has a simpler state machine model. 
+
+						During the execution of the Create Order Saga, it transitions directly from the APPROVAL_PENDING state to the APPROVED state. 
+
+						The Order class doesn’t have any intermediate states corresponding to the steps of the saga. As a result, the business is much simpler.
+
+		DRAWBACKS 
+		Business logic centralization
+				Orchestration also has a drawback: the risk of centralizing too much business logic in the orchestrator. 
+						This results in a design where the smart orchestrator tells the dumb services what operations to do. 
+
+				Fortunately, you can avoid this problem by designing orchestrators that are solely responsible for sequencing and don’t contain any other business logic.
+
+
+
+4.3 Handling the lack of isolation
+	Using countermeasures to deal with the lack of isolation
+
+	The I in ACID stands for isolation.
+			The isolation property of ACID transactions ensures that the outcome of executing multiple transactions concurrently is the same as if they were executed in some serial order
+
+			The database provides the illusion that each ACID  transaction has exclusive access to the data. Isolation makes it a lot easier to write business logic that executes concurrently.
+
+	The challenge with using sagas is that they lack the isolation property of ACID transactions.
+			That’s because the updates made by each of a saga’s local transactions are immediately visible to other sagas once that transaction commits. This behavior can cause two problems
+
+	First, other sagas can change the data accessed by the saga while it’s executing.
+
+	And other sagas can read its data before the saga has completed its updates, and consequently can be exposed to inconsistent data.
+			You can, in fact, consider a saga to be ACD:
+					 Atomicity
+							The saga implementation ensures that all transactions are executed or all changes are undone.
+					 Consistency
+							Referential integrity within a service is handled by local databases. Referential integrity across services is handled by the services.
+					 Durability
+							Handled by local databases.
+
+	'Anomalies' 
+	An anomaly is when a transaction reads or writes data in a way that it wouldn’t if transactions were executed one at time. 
+			This lack of isolation potentially causes what the database literature calls anomalies.
+
+			When an anomaly occurs, the outcome of executing sagas concurrently is different than if they were executed serially.
+
+	'Countermeasures'
+	Countermeasures are a set of saga design strategies that deal with the lack of isolation.
+
+	4.3.1 Overview of anomalies
+		The lack of isolation can cause the following three anomalies:
+				 Lost updates
+						One saga overwrites without reading changes made by another saga.
+				 Dirty reads
+						A transaction or a saga reads the updates made by a saga that has  not yet completed those updates.
+				 Fuzzy/nonrepeatable reads
+						Two different steps of a saga read the same data and get different results because another saga has made updates.		
+
+		All three anomalies can occur, but the first two are the most common and the most challenging. Let’s take a look at those two types of anomaly, starting with lost updates.
+
+		LOST UPDATES (Phantom reads?)
+		A lost update anomaly occurs when one saga overwrites an update made by another saga. Consider, for example, the following scenario:
+				1 The first step of the Create Order Saga creates an Order.
+				2 While that saga is executing, the Cancel Order Saga cancels the Order.
+				3 The final step of the Create Order Saga approves the Order.
+
+		In this scenario, the Create Order Saga ignores the update made by the Cancel Order Saga and overwrites it. As a result, the FTGO application will ship an order that the customer had cancelled. Later in this section, I’ll show how to prevent lost  updates.
+
+
+		DIRTY READS
+		A dirty read occurs when one saga reads data that’s in the middle of being updated by another saga. 
+				Consider, for example, a version of the FTGO application store  where consumers have a credit limit. In this application, a saga that cancels an order consists of the following transactions:
+						 Consumer Service—Increase the available credit.
+						 Order Service—Change the state of the Order to cancelled.
+						 Delivery Service—Cancel the delivery.
+
+				Let’s imagine a scenario that interleaves the execution of the Cancel Order and Createv Order Sagas, 
+						and the Cancel Order Saga is rolled back because it’s too late to cancel the delivery. 
+
+						It’s possible that the sequence of transactions that invoke the Consumer Service is as follows:
+								1 Cancel Order Saga—Increase the available credit.
+								2 Create Order Saga—Reduce the available credit.
+								3 Cancel Order Saga—A compensating transaction that reduces the available credit.
+
+				In this scenario, the Create Order Saga does a dirty read of the available credit that enables 
+
+				The consumer to place an order that exceeds their credit limit. 
+						It’s likely that this is an unacceptable risk to the business.
+
+	4.3.2 Countermeasures for handling the lack of isolation
+		An Order’s use of *_PENDING states, such as APPROVAL_PENDING, is an example of one such strategy. 
+				Sagas that update Orders, such as the Create Order Saga, begin by setting the state of an Order to *_PENDING. 
+
+				The *_PENDING state tells other transactions that the Order is being updated by a saga and to  act accordingly.
+
+		 An Order’s use of *_PENDING states is an example of a semantic 'lock countermeasure'.
+		 		Many of its ideas are useful when designing sagas.
+
+
+ 		The countermeasures described by this paper are as follows:
+				 Semantic lock
+						An application-level lock.
+				 Commutative updates
+						Design update operations to be executable in any order.
+				 Pessimistic view
+						Reorder the steps of a saga to minimize business risk.
+				 Reread value
+						Prevent dirty writes by rereading data to verify that it’s unchanged before overwriting it.
+				 Version file
+						Record the updates to a record so that they can be reordered.
+				 By value
+						Use each request’s business risk to dynamically select the concurrency mechanism. 		
+
+		THE STRUCTURE OF A SAGA
+		The 'lock countermeasure' paper mentioned in the last section defines a useful model for the structure of a saga. In this model, shown in figure 4.8, a saga consists of three types of transactions:
+				 Compensatable transactions
+						Transactions that can potentially be rolled back using a compensating transaction.
+				 Pivot transaction
+						The go/no-go point in a saga. If the pivot transaction commits, the saga will run until completion. A pivot transaction can be a transaction that’s neither compensatable nor retriable. Alternatively, it can be the last compensatable transaction or the first retriable transaction.
+				 Retriable transactions
+						Transactions that follow the pivot transaction and are guaranteed to succeed.
+
+***********************************************************************<info>
+**                                                                   ** 
+**                      compensatable transactions                   **
+**                                                                   ** 
+**   steps of the Saga that are followed by steps that can fail      **
+**                                                                   ** 
+**                        Must support roll back                     **
+**                                                                   ** 
+***********************************************************************
+
+***********************************************************************<info>
+**                                                                   ** 
+**                         pivot transaction                         **
+**                                                                   ** 
+**   steps of the Saga that are followed by steps that never fail    **
+**                                                                   ** 
+**  The saga’s go/no-go transaction. If it succeeds, then the saga   **
+**                     runs to completion.                           ** 
+**                                                                   ** 
+***********************************************************************
+
+************************************************************************<info>
+**                                                                    ** 
+**                          retriable transactions                    **
+**                                                                    ** 
+**  steps of the Saga that are followed by steps that always succeed  **
+**                                                                    ** 
+**                          Guaranteed to complete                    ** 
+**                                                                    ** 
+************************************************************************
+
+Step 	Service 	 	Transaction 			Compensation Transaction
+1.  	Order Service 		createOrder() 			rejectOrder()
+2. 	Consumer Service 	verifyConsumerDetails() 	- 
+3. 	Kitchen Service 	createTicket() 			rejectTicket() 
+4. 	Accounting Service 	authorizeCreditCard() 		- 
+5. 	Order Service 		approveOrder() 			-
+
+compensatable transaction:  1, 2, 3
+pivot transaction: 4
+retriable transaction: 5 
+
+		In the Create Order Saga, the createOrder(), verifyConsumerDetails(), and createTicket() steps are compensatable transactions.
+				The createOrder() and createTicket() transactions have compensating transactions that undo their updates.
+
+				The verifyConsumerDetails() transaction is read-only, so doesn’t need a compensating transaction.
+
+		The authorizeCreditCard() transaction is this saga’s pivot transaction. If the consumer’s credit card can be authorized, this saga is guaranteed to complete.
+
+		The approveTicket() and approveOrder() steps are retriable transactions that follow the pivot transaction. 
+
+		COUNTERMEASURE: SEMANTIC LOCK
+			When using the semantic lock countermeasure, a saga’s compensatable transaction sets a flag in any record that it creates or updates.
+					The flag indicates that the record isn’t committed and could potentially change.
+
+					The flag can either be a lock that prevents other transactions from accessing the record or 
+
+					a warning that indicates that other transactions should treat that record with suspicion. 
+
+					It’s cleared by either a retriable transaction—saga is completing successfully—or by 
+
+					a compensating transaction: the saga is rolling back.
+
+							The Order.state field is a great example of a semantic lock. 
+
+							The *_PENDING states, such as APPROVAL_PENDING and REVISION_PENDING, implement a semantic lock. 
+									They tell other sagas that access an Order that a saga is in the process of updating the Order.
+
+									The first step of the Create Order Saga, 
+											which is a compensatable transaction, 
+											
+											creates an Order in an APPROVAL_PENDING state. 
+
+									The final step of the Create Order Saga, 
+											which is a retriable transaction, 
+											
+											changes the field to APPROVED. 
+											
+									A compensating transaction 
+
+											changes the field to REJECTED.
+
+			Managing the lock is only half the problem. 
+					You also need to decide on a case-bycase basis how a saga should deal with a record that has been locked. 
+
+			Consider, for example, the cancelOrder() system command. 
+							
+					A client might invoke this operation to cancel an Order that’s in the APPROVAL_PENDING state.
+
+			There are a few different ways to handle this scenario. 
+					One option is for the cancelOrder() system command to fail and tell the client to try again later. 
+							The main benefit of this approach is that it’s simple to implement. 
+
+							The drawback, however, is that it makes the client more complex because it has to implement retry logic.
+
+			Another option is for cancelOrder() to block until the lock is released. 
+					A benefit of using semantic locks is that they essentially recreate the isolation provided by ACID transactions. 
+							
+					Sagas that update the same record are serialized, 
+							which significantly reduces the programming effort. 
+
+					Another benefit is that they remove the burden of retries from the client. 
+
+					The drawback is that the application must manage locks. 
+							It must also implement a deadlock detection algorithm that performs a rollback of a saga to break a deadlock and re-execute it.
+
+		COUNTERMEASURE: COMMUTATIVE UPDATES
+			One straightforward countermeasure is to design the update operations to be commutative. 
+
+			Operations are commutative if they can be executed in any order. 
+					An Account’s debit() and credit() operations are commutative (if you ignore overdraft checks). 
+
+			This (communative updates) countermeasure is useful because it eliminates lost updates.
+					Consider, for example, a scenario where a saga needs to be rolled back after a compensatable transaction has debited (or credited) an account. The compensating transaction can simply credit (or debit) the account to undo the update. There’s no possibility of overwriting updates made by other sagas. 
+
+		COUNTERMEASURE: PESSIMISTIC VIEW
+			Another way to deal with the lack of isolation is the 'pessimistic view' countermeasure.
+					It reorders the steps of a saga to minimize business risk due to a dirty read. Consider, for example, the scenario earlier used to describe the dirty read anomaly. In that scenario, the Create Order Saga performed a dirty read of the available credit and created an order that exceeded the consumer credit limit. To reduce the risk of that happening, this countermeasure would reorder the Cancel Order Saga:
+
+					In this reordered version of the saga, the available credit is increased in a retriable transaction, which eliminates the possibility of a dirty read. 
+							1 Order Service
+									Change the state of the Order to cancelled.
+							2 Delivery Service
+									Cancel the delivery.
+							3 Customer Service
+									Increase the available credit.					
+
+		COUNTERMEASURE: REREAD VALUE
+			The reread value countermeasure prevents lost updates. 
+					A saga that uses this countermeasure rereads a record before updating it, verifies that it’s unchanged, and then updates the record. 
+
+			If the record has changed, the saga aborts and possibly restarts. 
+
+			This countermeasure is a form of the Optimistic Offline Lock pattern 
+					https://martinfowler.com/eaaCatalog/optimisticOfflineLock.html.
+
+		COUNTERMEASURE: VERSION FILE - feels messy to me
+			The version file countermeasure is so named because it records the operations that are performed on a record so that it can reorder them.
+
+			It’s a way to turn noncommutative operations into commutative operations.
+					Consider a scenario where 
+							the Create Order Saga executes concurrently 
+
+							with a Cancel Order Saga. 
+
+					Unless the sagas use the semantic lock countermeasure, 
+							it’s possible that the Cancel Order Saga cancels 
+
+							the authorization of the consumer’s credit card before 
+
+							the Create Order Saga authorizes the card
+
+					One way for the Accounting Service to handle these out-of-order requests is for 
+							it to record the operations as they arrive and then 
+
+							execute them in the correct order. 
+
+							In this scenario, it would first record 
+									the Cancel Authorization request. Then, when 
+
+									the Accounting Service receives the subsequent Authorize Card request, 
+
+									it would notice that it had already received the Cancel Authorization request and 
+
+									skip authorizing the credit card.
+
+		COUNTERMEASURE: BY VALUE
+			The final countermeasure is the by value countermeasure. 
+
+			It’s a strategy for selecting concurrency mechanisms based on business risk. 
+					An application that uses this countermeasure uses 
+							the properties of each request to 
+									decide between using sagas and 
+
+									distributed transactions. 
+
+							It executes low-risk requests using sagas, 
+									perhaps applying the countermeasures described in the preceding section. 
+
+							But it executes high-risk requests involving, for example, 
+									large amounts of money, 
+
+									using distributed transactions.
+
+			This strategy enables an application to dynamically make trade-offs about business risk, availability, and scalability
+			
+***********************************************************************<info>
+**                                                                   ** 
+**                      compensatable transactions                   **
+**                                                                   ** 
+**   steps of the Saga that are followed by steps that can fail      **
+**                                                                   ** 
+**                        Must support roll back                     **
+**                                                                   ** 
+***********************************************************************
+
+***********************************************************************<info>
+**                                                                   ** 
+**                         pivot transaction                         **
+**                                                                   ** 
+**   steps of the Saga that are followed by steps that never fail    **
+**                                                                   ** 
+**  The saga’s go/no-go transaction. If it succeeds, then the saga   **
+**                     runs to completion.                           ** 
+**                                                                   ** 
+***********************************************************************
+
+************************************************************************<info>
+**                                                                    ** 
+**                          retriable transactions                    **
+**                                                                    ** 
+**  steps of the Saga that are followed by steps that always succeed  **
+**                                                                    ** 
+**                          Guaranteed to complete                    ** 
+**                                                                    ** 
+************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

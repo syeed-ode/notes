@@ -28,12 +28,12 @@ This chapter covers
 		You also have to figure out how= to implement queries.
 
 		There are two different patterns for implementing query operations in a microservice architecture:
-				The API composition pattern—
+				The API composition pattern — 
 						This is the simplest approach and should be used whenever possible. 
 
 						It works by making clients of the services that own the data responsible for invoking the services and combining the results
 
-				The Command query responsibility segregation (CQRS) pattern—
+				The Command query responsibility segregation (CQRS) pattern — 
 						This is more powerful than the API composition pattern, but 
 
 						it’s also more complex. 
@@ -126,7 +126,7 @@ This chapter covers
 
 	CQRS (Command Query Responsibility Segregation) pattern is a generalization of this kind of architecture.
 
-	It maintains one or more view databases—not just text search databases—that implement one or more of the application’s queries
+	It maintains one or more view databases — not just text search databases — that implement one or more of the application’s queries
 
 	7.2.1 Motivations for using CQRS
 			There are multiple service queries the API composition pattern can’t implement efficiently.
@@ -135,11 +135,11 @@ This chapter covers
 
 		IMPLEMENTING THE findOrderHistory() QUERY OPERATION
 				The findOrderHistory() operation has several parameters:
-						 consumerId—Identifies the consumer
+						 consumerId — Identifies the consumer
 
-						 pagination—Page of results to return
+						 pagination — Page of results to return
 
-						 filter—Filter criteria, including the max age of the orders to return, an optional order status, and optional keywords that match the restaurant name and menu items
+						 filter — Filter criteria, including the max age of the orders to return, an optional order status, and optional keywords that match the restaurant name and menu items
 
 				It’s called by the module that implements the Order History view. This view displays a summary of each order, which includes the order number, order status, order total, and estimated delivery 
 				time.
@@ -213,7 +213,7 @@ This chapter covers
 						The query side has event handlers that subscribe to domain events and update the database or databases. There may even be multiple query models, one for each type of query.
 
 		CQRS AND QUERY-ONLY SERVICES
-				A query service has an API consisting of only query operations—no command operations.
+				A query service has an API consisting of only query operations — no command operations.
 
 				This kind of view doesn’t belong to any particular service, so it makes sense to implement it as a standalone service. 
 						A good example of such a service is Order History Service, which is a query service that implements the findOrderHistory() query operation.
