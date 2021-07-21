@@ -1,0 +1,351 @@
+*******************************************************************
+*                                                           *
+*                                                           *
+*                                                           *
+*******************************************************************
+****                         Chapter 09                        ****
+****                   Consistency and Consensus               ****
+*******************************************************************
+
+
+
+pg371/349
+Ordering Guarantees
+	linearizable register - 
+	We said previously that a linearizable register behaves as if there is only a single copy of the data, and that every operation appears to take effect atomically at one point in time.
+			linearizable register
+			This definition implies that operations are executed in some well-defined order.
+
+	Ordering has been a recurring theme in this book, which suggests that it might be an important fundamental idea. Let’s briefly recap some of the other contexts in which we have discussed ordering:
+
+	In Chapter 5 we saw that the main purpose of the leader in single-leader replication is to determine the order of writes in the replication log.
+
+	Serializability, which we discussed in Chapter 7, is about ensuring that transactions behave as if they were executed in some 'sequential order'.
+
+	Total Order Broadcast
+		In a distributed system, getting all nodes to agree on the same total ordering of operations is tricky.
+
+		In the last section we discussed ordering by timestamps or sequence numbers, but found that it is not as powerful as single-leader replication
+				if you use timestamp ordering to implement a uniqueness constraint, you cannot tolerate any faults
+
+		As discussed, single-leader replication determines a total order of operations by choosing one node as the leader and sequencing all operations on a single CPU core on the leader.
+
+		The challenge then is how to scale the system if the throughput is greater than a single leader can handle, and also how to handle failover if the leader fails (see “Handling Node Outages” on page 156).
+
+
+		'Total order broadcast' or 'atomic broadcast' is the problem where you can scale the system if the throughput is greater than a single leader can handle, and also how to handle failover if the leader fails.
+
+
+		Scope of ordering guarantee
+			Partitioned databases with a single leader per partition often maintain ordering only per partition,
+
+			which means they cannot offer consistency guarantees (e.g., consistent snapshots, foreign key references) across partitions.
+
+			Total ordering across all partitions is possible, but requires additional coordination.
+
+			Total order broadcast is usually described as a protocol for exchanging messages between nodes. Informally, it requires that two safety properties always be satisfied:
+					'Reliable delivery'
+							No messages are lost: if a message is delivered to one node, it is delivered to all nodes.
+					'Totally ordered delivery'
+							Messages are delivered to every node in the same order					
+			A correct algorithm for total order broadcast must ensure that the reliability and ordering properties are always satisfied, even if a node or the network is faulty.
+
+********************************************************
+**                                                    **
+**            Total order broadcast                   **
+**                                                    **
+**   Reliable delivery and Totally ordered delivery   **
+**                                                    **
+********************************************************
+*************************************************
+**                                             **
+**               Reliable delivery             **
+**                                             **
+**    No messages are lost: if a message is    **
+**  delivered to one node, it is delivered to  **
+**                  all nodes                  **
+**                                             **
+*************************************************
+*************************************************
+**                                             **
+**          Totally ordered delivery           **
+**                                             **
+**   Messages are delivered to every node in   **
+**                the same order               **
+**                                             **
+*************************************************
+		Using total order broadcast
+			Consensus services such as ZooKeeper and etc actually implement total order broadcast.
+					This fact is a hint that there is a strong connection between total order broadcast and consensus, which we will explore later in this chapter.
+
+			pg371/349
+			Total order broadcast is exactly what you need for database replication: 
+
+			This is 'state machine replication' (we will return to it in Chapter 11)
+					IF Every message represents a write to the database, 
+
+					AND every replica processes the writes in the same order
+
+					THEN the replicas will remain consistent with each other
+							aside from any temporary replication 
+
+			Similarly, total order broadcast can be used to implement serializable transactions: as discussed in “Actual Serial Execution” on page 252, if every message represents a deterministic transaction to be executed as a stored procedure, and if every node processes those messages in the same order, then the partitions and replicas of the database are kept consistent with each other [61].
+
+			An important aspect of total order broadcast is that the order is fixed at the time the messages are delivered: a node is not allowed to retroactively insert a message into an earlier position in the order if subsequent messages have already been delivered. 
+
+			This fact makes total order broadcast stronger than timestamp ordering.
+
+			Another way of looking at total order broadcast is that it is a way of creating a log (as in a replication log, transaction log, or write-ahead log): delivering a message is like appending to the log. Since all nodes must deliver the same messages in the same order, all nodes can read the log and see the same sequence of messages.
+
+
+
+
+pg386/364
+Distributed Transactions and Consensus
+	Fault-Tolerant Consensus
+		The consensus problem is normally formalized as follows: one or more nodes may propose values, and the consensus algorithm decides on one of those values
+
+		In this formalism, a consensus algorithm must satisfy the following properties [25]:
+				****************************************************
+				**        Consensus Algorithm Must Satisfy        **
+				**                                                **
+				** Uniform agreement                              **
+				**		No two nodes decide differently.          **
+				** Integrity                                      **
+				**		No node decides twice.                    **
+				** Validity                                       **
+				**		If a node decides value v, then v was     **
+				**			proposed by some node.                **
+				** Termination                                    **
+				**		Every node that does not crash eventually **
+				**			decides some value                    **
+				**                                                **
+				****************************************************
+				Uniform agreement
+					No two nodes decide differently.
+				Integrity
+					No node decides twice.
+				Validity
+					If a node decides value v, then v was proposed by some node.
+				Termination
+					Every node that does not crash eventually decides some value
+
+		The uniform agreement and integrity properties define the core idea of consensus: 
+				everyone decides on the same outcome, and once you have decided, you cannot change your mind.
+
+		If you don’t care about fault tolerance, then satisfying the first three properties is easy: 
+				you can just hardcode one node to be the “dictator,” and let that node make all of the decisions. 
+
+				However, if that one node fails, then the system can no longer make any decisions. 
+						This is, in fact, what we saw in the case of 
+
+				two-phase commit: if the coordinator fails, in-doubt participants cannot decide whether to commit or abort.
+
+
+*************************************************
+**                                             **
+**      Termination is a liveness property     **
+**                                             **
+**Every node that eventually decides some value**
+**                                             **
+*************************************************
+
+
+************************************************
+**                                            **
+** Uniform agreement, Integrity, and Validity **
+**          are safety properties             **
+**                                            **
+**                                            **
+**    see “Safety and liveness” on page 308   **
+**                                            **
+************************************************
+		The termination property formalizes the idea of fault tolerance. It essentially says that a consensus algorithm cannot simply sit around and do nothing forever—in other words, it must make progress.
+
+		Consensus algorithms and total order broadcast
+			The best-known fault-tolerant consensus algorithms are 
+					Viewstamped Replication (VSR) [94, 95], 
+
+					Paxos [96, 97, 98, 99], 
+
+					Raft [22, 100, 101], and 
+
+					Zab
+
+			Most of these algorithms actually don’t directly propose and decide on a single value, while satisfying the agreement, integrity, validity, and termination properties
+					Instead, they decide on a sequence of values, which makes them total order broadcast algorithms
+
+			Remember that total order broadcast requires messages to be delivered exactly once, in the same order, to all nodes
+
+			So, total order broadcast is equivalent to repeated rounds of consensus (each consensus decision corresponding to one message delivery):
+					• Due to the agreement property of consensus, all nodes decide to deliver the same messages in the same order.
+					• Due to the integrity property, messages are not duplicated.
+					• Due to the validity property, messages are not corrupted and not fabricated out of thin air.
+					• Due to the termination property, messages are not lost.	
+
+
+			Viewstamped Replication, Raft, and Zab implement total order broadcast directly, 
+					because that is more efficient than doing repeated rounds of one-value-at-a-time consensus. 
+
+			In the case of Paxos, this optimization is known as Multi-Paxos.
+
+		Single-leader replication and consensus
+			In Chapter 5 we discussed single-leader replication (see “Leaders and Followers” on page 152), which takes all the writes to the leader and applies them to the followers in the same order, thus keeping replicas up to date. 
+
+			Isn’t this essentially total order broadcast? 
+
+			How come we didn’t have to worry about consensus in Chapter 5?
+					The answer comes down to how the leader is chosen. If the leader is manually chosen and configured by the humans in your operations team, you essentially have a “consensus algorithm” of the dictatorial variety:		
+
+					Some databases perform automatic leader election and failover, promoting a follower to be the new leader if the old leader fails (see “Handling Node Outages” on page 156). This brings us closer to fault-tolerant total order broadcast, and thus to solving consensus.
+
+			It seems that in order to elect a leader, we first need a leader. In order to solve consensus, we must first solve consensus. How do we break out of this conundrum?
+
+*************************************************
+**                                             **
+**      Termination is a liveness property     **
+**                                             **
+**Every node that eventually decides some value**
+**                                             **
+*************************************************
+
+
+************************************************
+**                                            **
+** Uniform agreement, Integrity, and Validity **
+**          are safety properties             **
+**                                            **
+**                                            **
+**    see “Safety and liveness” on page 308   **
+**                                            **
+************************************************
+****************************************************
+**        Consensus Algorithm Must Satisfy        **
+**                                                **
+** Uniform agreement                              **
+**		No two nodes decide differently.          **
+** Integrity                                      **
+**		No node decides twice.                    **
+** Validity                                       **
+**		If a node decides value v, then v was     **
+**			proposed by some node.                **
+** Termination                                    **
+**		Every node that does not crash eventually **
+**			decides some value                    **
+**                                                **
+****************************************************
+		Epoch numbering and quorums
+			All of the consensus protocols discussed so far don’t guarantee that the leader is unique.
+
+			The protocols define an 'epoch number'
+					Paxos - ballot number
+
+					Viewstamped - view number
+
+					Raft - term number
+
+			They guarantee that within each epoch, the leader is unique.
+					Every time the current leader is thought to be dead, a vote is started among the nodes to elect a new leader. This election is given an incremented epoch number, and thus epoch numbers are totally ordered and monotonically increasing. If there is a conflict between two different leaders in two different epochs (perhaps because the previous leader actually wasn’t dead after all), then the leader with the higher epoch number prevails.
+
+			Before a leader is allowed to decide anything, it must first check that there isn’t some other leader with a higher epoch number which might take a conflicting decision.
+
+			Instead, it must collect votes from a quorum of nodes (see “Quorums for reading and writing” on page 179).
+					Thus, we have two rounds of voting: once to choose a leader, and a second time to vote on a leader’s proposal.
+
+			This voting process looks superficially similar to two-phase commit. The biggest differences are that in 2PC the coordinator is not elected, and that fault-tolerant consensus algorithms only require votes from a majority of nodes, whereas 2PC requires a “yes” vote from every participant.
+
+			Moreover, consensus algorithms define a recovery process by which nodes can get into a consistent state after a new leader is elected,
+
+****************************************************
+**        Consensus Algorithm Must Satisfy        **
+**                                                **
+** Uniform agreement                              **
+**		No two nodes decide differently.          **
+** Integrity                                      **
+**		No node decides twice.                    **
+** Validity                                       **
+**		If a node decides value v, then v was     **
+**			proposed by some node.                **
+** Termination                                    **
+**		Every node that does not crash eventually **
+**			decides some value                    **
+**                                                **
+****************************************************
+		Limitations of consensus
+			They provide total order broadcast, and therefore they can also implement linearizable atomic operations in a fault-tolerant way (see “Implementing linearizable storage using total order broadcast” on page 350).
+
+			Nevertheless, they are not used everywhere, because the benefits come at a cost.
+
+			pg391/369
+			pg175/153
+			As discussed in “Synchronous Versus Asynchronous Replication” on page 153, databases are often configured to use asynchronous replication. 
+					In this configuration, some committed data can potentially be lost on failover—but many people choose to accept this risk for the sake of better performance.
+
+					CConsensus systems always require a strict majority to operate. This means you need a minimum of three nodes in order to tolerate one failure (the remaining two out of three form a majority), or a minimum of five nodes to tolerate two failures (the vremaining three out of five form a majority). If a network failure cuts off some nodes from the rest, only the majority portion of the network can make progress, and the rest is blocked (see also “The Cost of Linearizability” on page 335).
+
+			Frequent leader elections result in terrible performance because the system can end up spending more time choosing a leader than doing any useful work.
+					Consensus systems generally rely on timeouts to detect failed nodes.
+
+			Consensus algorithms are particularly sensitive to network problems.
+
+
+
+							
+							
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

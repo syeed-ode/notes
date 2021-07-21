@@ -1,0 +1,124 @@
+How would you rate your expertise in architecting or building microservices?
+*3 - experienced leading an organization through domain driven design (DDD) activities requisite for mature microservice ecosystems. Fluent in common design patterns (Circuit Breaker, CQRS, Saga, etc). 
+
+Has familiarity or experience with state machines, both distributed and local, and state authorities. 
+
+Paxos, Raft, State Machine Replication.
+
+
+*2 - deploying cloud-native applications, leading enteprises in breaking monoliths into microservices
+*1 - cloud-native design concepts, microservice patterns, deploying cloud-native applications
+
+
+
+
+363
+
+584
+
+
+
+batch processing, 28, 389-431, 553 combining with stream processing lambda architecture, 497 unifying technologies, 498
+
+MapReduce and distributed filesystems, 397-413 (see also MapReduce)
+
+causal dependencies, 186-191
+
+causal ordering, 339-343
+
+clocks, 287-299
+
+***concurrency in replicated systems, 161-191, 324-338***
+
+
+****data models, 27-64****
+	graph-like models, 49-63
+		Datalog language, 60-63
+		property graphs, 50
+		RDF and triple-stores, 55-59
+
+
+
+credit rating agencies, 535
+	future of, 489-544
+		correctness, constraints, and integrity 515-533
+
+
+
+databases
+	unbundling, 499-515 
+		composing data storage technologies, 499-504
+		designing applications around dataflow, 504-509		
+
+
+***distributed systems, 273-312, 554***
+
+
+leaderless replication, 177-191 
+	detecting concurrent writes, 184-191
+	quorums, 179-182
+
+
+600
+ordering, 339-352	
+
+
+**partitioning, 199-218, 556**
+
+
+Paxos (consensus algorithm), 366 ballot number, 368, Multi-Paxos (total order broadcast), 367
+
+*****replication, 151-193, 556*****
+		=, 452
+
+streams, 440-451
+
+
+***storage engines, 69-104***
+
+
+
+
+pg481
+State, Streams, and Immutability, 459 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
