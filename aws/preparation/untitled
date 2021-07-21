@@ -1,0 +1,63 @@
+
+
+How would you rate your experience with API Design, Security, and Versioning?
+*3 - can demonstrate a thorough understanding of much of the topics covered in Ilya Grigork's High Performance Browser Networking book.
+*2 - APIs in production, versioning via CI/CD, OAuth2 or OIDC flows and implementation
+*1 - API design, security patterns and knows OAuth2, JWT, etc.
+
+How would you rate your experience in data design?
+*3 - Possesses a thorough comprehension of Martin Kleppmann's Designing Data-Intensive Applications, or similar.
+*2 - Microservice data ownership and associated access patterns, performance profiling, data warehouse, ETL 
+*1 - Both relational and NoSQL databases, data access patterns
+
+How would you rate your experience in deployment or CI/CD?
+*3 - Common patterns for observability at scale and how mechanisms, like distributed tracing, experience with large scale microservice ecosystems.  Able to influence culture of DevOps by evangelizing patterns at scale for large microservice ecosystems.
+*2 - Designing and implementing automated deployment tooling, operating applications and microservice architectures at scale
+*1 - Deployment tools, CI/CD, knows operational considerations
+
+
+container-based deployments - containers
+
+Ilya Grigork's High Performance Browser Networking - API Design, Security, and Versioning
+
+Martin Kleppmann's Designing Data-Intensive Applications - data design
+
+Common patterns for observability at scale - deployment or CI/CD
+
+
+https://drive.google.com/drive/u/0/folders/1Kjv89Mos6i5hUR668-jJym-mfRoRRHZf
+
+
+
+
+
+How would you rate your expertise in architecting or building microservices?
+*3 - experienced leading an organization through domain driven design (DDD) activities requisite for mature microservice ecosystems. Fluent in common design patterns (Circuit Breaker, CQRS, Saga, etc). Has familiarity or experience with state machines, both distributed and local, and state authorities. Paxos, Raft, State Machine Replication.
+*2 - deploying cloud-native applications, leading enteprises in breaking monoliths into microservices
+*1 - cloud-native design concepts, microservice patterns, deploying cloud-native applications
+
+How would you rate your experience with containers?
+*3 - experienced in operating and architecting container-based deployments at scale
+*2 - know orchestration frameworks and a variety of tools
+*1 - decent hands-on experience.
+
+How would you rate your experience with API Design, Security, and Versioning?
+*3 - can demonstrate a thorough understanding of much of the topics covered in Ilya Grigork's High Performance Browser Networking book.
+*2 - APIs in production, versioning via CI/CD, OAuth2 or OIDC flows and implementation
+*1 - API design, security patterns and knows OAuth2, JWT, etc.
+
+How would you rate your experience in data design?
+*3 - Possesses a thorough comprehension of Martin Kleppmann's Designing Data-Intensive Applications, or similar.
+*2 - Microservice data ownership and associated access patterns, performance profiling, data warehouse, ETL 
+*1 - Both relational and NoSQL databases, data access patterns
+
+How would you rate your experience in deployment or CI/CD?
+*3 - Common patterns for observability at scale and how mechanisms, like distributed tracing, experience with large scale microservice ecosystems.  Able to influence culture of DevOps by evangelizing patterns at scale for large microservice ecosystems.
+*2 - Designing and implementing automated deployment tooling, operating applications and microservice architectures at scale
+*1 - Deployment tools, CI/CD, knows operational considerations
+
+
+
+
+
+
